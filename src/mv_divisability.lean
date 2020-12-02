@@ -190,7 +190,7 @@ or.resolve_left (nat.eq_zero_or_pos n)
 
 -- Frankly, this function should be generalized to all mv_polynomials
 -- Not just nv_polynomials over vars
-def div_X_v2 (p : mv_polynomial vars F) (s : vars) (h : (∀ m : vars →₀ ℕ, m s = 0 -> coeff m p = 0)) : (mv_polynomial vars F) :=
+def div_X_v2 (p : mv_polynomial vars F) (s : vars) (h : (∀ m : vars →₀ ℕ, m s = 0 -> p.coeff m = 0)) : (mv_polynomial vars F) :=
 { to_fun := λ m, p.coeff (increment m s),
   support := p.support.image (λ m, decrement m s), 
   mem_support_to_fun := begin
@@ -203,7 +203,7 @@ def div_X_v2 (p : mv_polynomial vars F) (s : vars) (h : (∀ m : vars →₀ ℕ
     rw eq.symm h3,
     clear h3,
     clear h1,
-    have h4 : coeff a_1 p ≠ 0,
+    have h4 : p.coeff a_1 ≠ 0,
       from (p.mem_support_to_fun a_1).1 H,
     clear H,
     -- by the contrapositive of h and h4, a_1 s is not zero
@@ -234,7 +234,7 @@ def div_X_v2 (p : mv_polynomial vars F) (s : vars) (h : (∀ m : vars →₀ ℕ
 -- a * b = c
 -- then for all monomials with no X component, the coefficient of a is zero
 lemma mul_no_constant_no_constant (a b c : mv_polynomial vars F) : 
-(∀ m : vars →₀ ℕ, m vars.X = 0 -> coeff m a = 0) -> (a * b = c) -> (∀ m : vars →₀ ℕ, m vars.X = 0 -> coeff m c = 0) 
+(∀ m : vars →₀ ℕ, m vars.X = 0 -> a.coeff m = 0) -> (a * b = c) -> (∀ m : vars →₀ ℕ, m vars.X = 0 -> c.coeff m = 0) 
 :=
 begin
   intros ha heq m hc,
@@ -244,12 +244,12 @@ begin
   intro,
   rw coeff_mul_X',
   by_cases vars.X ∈ m_1.support,
-  have h2 : coeff (m_1 - finsupp.single vars.X 1) a_div_X = coeff m_1 a,
-  have h3 : coeff (m_1 - finsupp.single vars.X 1) a_div_X = a.coeff (increment (m_1 - finsupp.single vars.X 1) vars.X),
+  have h2 : a_div_X.coeff (m_1 - finsupp.single vars.X 1)  = a.coeff m_1,
+  have h3 : a_div_X.coeff (m_1 - finsupp.single vars.X 1)  = a.coeff (increment (m_1 - finsupp.single vars.X 1) vars.X),
   refl,
   rw h3,
   clear h3,
-  have h4: coeff (increment (m_1 - finsupp.single vars.X 1) vars.X) a = coeff (increment (decrement m_1 vars.X) vars.X) a,
+  have h4: a.coeff (increment (m_1 - finsupp.single vars.X 1) vars.X) = a.coeff (increment (decrement m_1 vars.X) vars.X),
   refl,
   rw h4,
   clear h4,
@@ -262,7 +262,7 @@ begin
   clear h2,
   apply if_pos,
   exact h,
-  have h7: coeff m_1 a = 0,
+  have h7: a.coeff m_1 = 0,
   apply ha,
   by_contradiction a_1,
   apply h ((m_1.mem_support_to_fun vars.X).2 a_1),
@@ -296,33 +296,6 @@ begin
   exact ((m.mem_support_to_fun vars.X).1 a_1) hc,
   apply if_neg,
   exact h14,
-
-  
-  
-
-
-  -- if_pos h (coeff (m_1 - finsupp.single vars.X 1) a_div_X) 0,
-
-
--- have h0 : coeff m a = 0,
---     from ha m hc,
--- have h1 : a.div_X * X + C 0 = a, 
---     from (eq.subst ha a.div_X_mul_X_add),
--- have h2 : a.div_X * X + (0 : polynomial F) = a, 
---     from (eq.subst (C_0 : C (0 : F) = 0) h1),
--- have h3 : a.div_X * X = a, 
---     from (eq.trans (eq.symm (add_zero (a.div_X * X))) h2),
-
--- have h5 : a.div_X * b * X = a.div_X * X * b,
---     by ring, -- TODO replace with associativity logic and commute_X to generalize from F to all rings
--- have h6 : a.div_X * b * X = a * b,
---     from eq.trans h5 h4,
--- have h7 : a.div_X * b * X = c,
---     from eq.trans h6 heq,
--- have h8 : (a.div_X * b * X).coeff 0 = 0,
---     from coeff_mul_X_zero (a.div_X * b),
--- show c.coeff 0 = 0,
---     from eq.subst h7 h8
 
 end
 
