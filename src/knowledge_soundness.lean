@@ -4,13 +4,15 @@ import data.mv_polynomial.basic
 import data.polynomial.div
 
 
+section
+
 noncomputable theory
 
 
 universes u
 
-variables {F : Type u}
-variables [field F]
+parameter {F : Type u}
+parameter [field F]
 
 
 inductive vars : Type
@@ -24,11 +26,11 @@ def Y_poly : mv_polynomial vars F := mv_polynomial.X vars.Y
 def Z_poly : mv_polynomial vars F := mv_polynomial.X vars.Z
 
 -- NOTE: In the paper, n_stmt is l and n_wit is n-l
-constants m n_stmt n_wit : ℕ
+parameters {m n_stmt n_wit : ℕ}
 -- NOTE: u is usually a universe variable in lean
 -- here, u is a vector of polynomials
-constant u_stmt : vector (polynomial F) n_stmt
-constant u_wit : vector (polynomial F) n_wit
+parameter {u_stmt : vector (polynomial F) n_stmt}
+parameter {u_wit : vector (polynomial F) n_wit}
 
 -- toxic waste elements
 -- constants τ β γ : F
@@ -45,23 +47,23 @@ def crs_γ : mv_polynomial vars F := Z_poly
 def crs_γβ : mv_polynomial vars F := Z_poly * Y_poly
 def crs_β_ssps : vector (mv_polynomial vars F) n_wit := vector.map (λ p : polynomial F, (Y_poly) * p.eval₂ mv_polynomial.C X_poly) u_wit
 
--- def r : vector F m := sorry
 def r : vector F m := (vector_range m).map (λ i, (i : F))
-def t : polynomial F := (r.map (λ i : F, polynomial.X - polynomial.C i)).to_list.prod -- Should be (X - r1) ... (X - rm)
+def t : polynomial F := (r.map (λ i : F, polynomial.X - polynomial.C i)).to_list.prod -- (X - r_1) ... (X - r_m)
 
-
+#check crs_β_ssps
+#check t
 
 def V_stmt (a_stmt : vector F n_stmt) : polynomial F 
 := (vector.map₂ has_scalar.smul a_stmt u_stmt).to_list.sum
 
 
 -- The coefficients of the CRS elements in the algebraic adversary's representation
-variables b v h : vector F m
-variables b_γ v_γ h_γ b_γβ v_γβ h_γβ : F
-variables b' v' h' : vector F n_wit
+parameters {b v h : vector F m}
+parameters {b_γ v_γ h_γ b_γβ v_γβ h_γβ : F}
+parameters {b' v' h' : vector F n_wit}
 
 -- Polynomial forms of the adversary's proof representation
-def B_wit : mv_polynomial vars F := 
+def B_wit  : mv_polynomial vars F := 
   (vector.map₂ has_scalar.smul b crs_powers_of_τ).to_list.sum
   +
   b_γ • crs_γ
@@ -69,6 +71,7 @@ def B_wit : mv_polynomial vars F :=
   b_γβ • crs_γβ
   +
   (vector.map₂ has_scalar.smul b' crs_β_ssps).to_list.sum
+
 
 def V_wit : mv_polynomial vars F := 
   (vector.map₂ has_scalar.smul v crs_powers_of_τ).to_list.sum
@@ -88,13 +91,19 @@ def H : mv_polynomial vars F :=
   +
   (vector.map₂ has_scalar.smul h' crs_β_ssps).to_list.sum
 
+#check V_wit
+
+
 def satisfying_wit (a_stmt : vector F n_stmt) (a_wit : vector F n_wit) := 
 polynomial.mod_by_monic (((vector.map₂ has_scalar.smul a_wit u_wit).to_list.sum + (vector.map₂ has_scalar.smul a_stmt (u_stmt : vector (polynomial F) n_stmt)).to_list.sum)^2) t = 1
 
 -- Show that if the adversary polynomials obey the equations, then
-lemma case_1 (a_stmt : vector F n_stmt) : ((B_wit b b_γ b_γβ b') = Y_poly * (V_wit v v_γ v_γβ v')) -> ((H h h_γ h_γβ h') * (t.eval₂ mv_polynomial.C X_poly) + mv_polynomial.C 1 = (V_wit v v_γ v_γβ v' + (V_stmt a_stmt).eval₂ mv_polynomial.C X_poly)^2) -> (satisfying_wit a_stmt b')
+lemma case_1 (a_stmt : vector F n_stmt) : (B_wit = Y_poly * V_wit) -> (H * (t.eval₂ mv_polynomial.C X_poly) + mv_polynomial.C 1 = (V_wit + (V_stmt a_stmt).eval₂ mv_polynomial.C X_poly)^2) -> (satisfying_wit a_stmt b')
 :=
 begin
+  intros eqnI eqnII,
+  have h1 : (∀ m : vars →₀ ℕ, m vars.Y = 0 -> B_wit.coeff m = 0),
+  have h2 : b = vector.repeat 0 m,
 
 end
 
@@ -113,3 +122,5 @@ end
 -- -- The set of all polynomials of the form of 
 -- #check crs_polynomials.to_set
 
+
+end
