@@ -189,7 +189,7 @@ lemma pos_of_ne_zero {n : nat} : n ≠ 0 → n > 0 :=
 or.resolve_left (nat.eq_zero_or_pos n)
 
 -- Frankly, this function should be generalized to all mv_polynomials
--- Not just nv_polynomials over vars
+-- Not just mv_polynomials over vars
 def div_X_v2 (p : mv_polynomial vars F) (s : vars) (h : (∀ m : vars →₀ ℕ, m s = 0 -> p.coeff m = 0)) : (mv_polynomial vars F) :=
 { to_fun := λ m, p.coeff (increment m s),
   support := p.support.image (λ m, decrement m s), 
@@ -230,6 +230,22 @@ def div_X_v2 (p : mv_polynomial vars F) (s : vars) (h : (∀ m : vars →₀ ℕ
   end
 }
 
+/-- In the product of a polynomial with a variable, the coefficients of terms without that variable are zero -/
+lemma mul_var_no_constant (a : mv_polynomial vars F) (s : vars) :
+(∀ m : vars →₀ ℕ, m s = 0 -> (a * X s).coeff m = 0)
+:=
+begin
+  intros m hc,
+  have h13 := coeff_mul_X' m s a,
+  rw h13,
+  clear h13,
+  have h14 : s ∉ m.support,
+  by_contradiction a_1,
+  exact ((m.mem_support_to_fun s).1 a_1) hc,
+  apply if_neg,
+  exact h14
+end
+
 -- For all monomials with no X component, the coefficient of a is zero
 -- a * b = c
 -- then for all monomials with no X component, the coefficient of a is zero
@@ -237,7 +253,8 @@ lemma mul_no_constant_no_constant (a b c : mv_polynomial vars F) (s : vars) :
 (∀ m : vars →₀ ℕ, m s = 0 -> a.coeff m = 0) -> (a * b = c) -> (∀ m : vars →₀ ℕ, m s = 0 -> c.coeff m = 0) 
 :=
 begin
-  intros ha heq m hc,
+  intros ha heq,
+  intros m hc,
   let a_div_X : mv_polynomial vars F := div_X_v2 a s ha,
   have h1 : a_div_X * (X s) = a,
   apply (ext_iff (a_div_X * (X s)) a).2,
@@ -288,14 +305,12 @@ begin
 
   rw eq.symm h4,
   rw h12,
-  have h13 := coeff_mul_X' m s (a_div_X * b),
-  rw h13,
-  clear h13 h12,
-  have h14 : s ∉ m.support,
-  by_contradiction a_1,
-  exact ((m.mem_support_to_fun s).1 a_1) hc,
-  apply if_neg,
-  exact h14,
+
+  apply mul_var_no_constant,
+  exact hc,
+
+
+
 
 end
 
