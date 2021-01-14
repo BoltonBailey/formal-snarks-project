@@ -3,6 +3,7 @@ Author: Bolton Bailey
 -/
 import data.mv_polynomial.basic
 import data.polynomial.div
+import data.polynomial.field_division
 import .mv_divisability
 import .vars
 
@@ -88,12 +89,12 @@ def t : polynomial F := finset.prod (finset.fin_range m) (λ i, polynomial.X - p
 def mv_t : mv_polynomial vars F := t.eval₂ mv_polynomial.C X_poly
 
 -- /-- Checks whether a witness satisfies the SSP -/
--- def satisfying_wit (a_stmt : vector F n_stmt) (a_wit : vector F n_wit) := 
--- polynomial.mod_by_monic (((vector.map₂ has_scalar.smul (vector.append a_stmt a_wit) u).to_list.sum)^2) t = 1
+-- def satisfying_wit (a_stmt : fin n_stmt → F ) (a_wit : fin n_wit → F) := 
+-- polynomial.mod_by_monic ((finset.sum (finset.fin_range n_stmt) (λ i, a_stmt i • u_stmt i))^2) t = 1
 
 /-- Checks whether a witness satisfies the SSP -/
 def satisfying_wit (a_stmt : fin n_stmt → F ) (a_wit : fin n_wit → F) := 
-polynomial.mod_by_monic ((finset.sum (finset.fin_range n_stmt) (λ i, a_stmt i • u_stmt i))^2) t = 1
+((finset.sum (finset.fin_range n_stmt) (λ i, a_stmt i • u_stmt i))^2) % t = 1
 
 -- TODO rewrite without lambdas
 /-- The crs elements as multivariate polynomials of the toxic waste samples -/
