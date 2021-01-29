@@ -21,6 +21,8 @@ TODO: Many of the lemmas are poorly named, this file should be given a once-over
 
 -/
 
+open_locale big_operators
+
 section
 
 noncomputable theory
@@ -142,7 +144,7 @@ def crs_β_ssps : fin n_wit → (mv_polynomial vars F) := (λ i, (Y_poly) * (u_w
 
 /-- The statement polynomial that the verifier computes from the statement bits, as a single variable polynomial -/
 def V_stmt_sv (a_stmt : fin n_stmt → F) : polynomial F 
-:= finset.sum (finset.fin_range n_stmt) (λ i, a_stmt i • u_stmt i)
+:= ∑ i in (finset.fin_range n_stmt), a_stmt i • u_stmt i
 
 
 /-- V_stmt as a multivariable polynomial of vars.X -/
@@ -153,48 +155,48 @@ def V_stmt (a_stmt : fin n_stmt → F) : mv_polynomial vars F
 /-- Checks whether a witness satisfies the SSP -/
 def satisfying_wit (a_stmt : fin n_stmt → F ) (a_wit : fin n_wit → F) := 
 (V_stmt_sv a_stmt
-  + (finset.sum (finset.fin_range n_wit) (λ i, a_wit i • u_wit i)))^2 %ₘ t = 1
+  + (∑ i in (finset.fin_range n_wit), a_wit i • u_wit i))^2 %ₘ t = 1
 
 /-- The coefficients of the CRS elements in the algebraic adversary's representation -/
 parameters {b v h : fin m → F}
 parameters {b_γ v_γ h_γ b_γβ v_γβ h_γβ : F}
 parameters {b' v' h' : fin n_wit → F}
 
--- TODO use unicode for finset.sum
 
 /-- Polynomial forms of the adversary's proof representation -/
 def B_wit  : mv_polynomial vars F := 
-  finset.sum (finset.fin_range m) (λ i, (b i) • (crs_powers_of_τ i))
+  ∑ i in (finset.fin_range m), (b i) • (crs_powers_of_τ i)
   +
   b_γ • crs_γ
   +
   b_γβ • crs_γβ
   +
-  finset.sum (finset.fin_range n_wit) (λ i, (b' i) • (crs_β_ssps i))
+  ∑ i in (finset.fin_range n_wit),  (b' i) • (crs_β_ssps i)
+
 
 def V_wit : mv_polynomial vars F := 
-  finset.sum (finset.fin_range m) (λ i, (v i) • (crs_powers_of_τ i))
+  ∑ i in (finset.fin_range m), (v i) • (crs_powers_of_τ i)
   +
   v_γ • crs_γ
   +
   v_γβ • crs_γβ
   +
-  finset.sum (finset.fin_range n_wit) (λ i, (v' i) • (crs_β_ssps i))
+  ∑ i in (finset.fin_range n_wit), (v' i) • (crs_β_ssps i)
 
 def H : mv_polynomial vars F := 
-  finset.sum (finset.fin_range m) (λ i, (h i) • (crs_powers_of_τ i))
+  ∑ i in (finset.fin_range m), (h i) • (crs_powers_of_τ i)
   +
   h_γ • crs_γ
   +
   h_γβ • crs_γβ
   +
-  finset.sum (finset.fin_range n_wit) (λ i, (h' i) • (crs_β_ssps i))
+  ∑ i in (finset.fin_range n_wit), (h' i) • (crs_β_ssps i)
 
 
 
 -- Single variable form ov V_wit
 def V_wit_sv : polynomial F 
-:= (finset.fin_range n_wit).sum (λ (i : fin n_wit), b' i • u_wit i)
+:= ∑ i in finset.fin_range n_wit, b' i • u_wit i
 
 -- TODO move helper lemmas to another file?
 
@@ -672,7 +674,7 @@ begin
 end
 
 lemma h6_3_2 : mv_polynomial.coeff (finsupp.single vars.Z 2)
-  ((finset.fin_range n_wit).sum (λ (i : fin n_wit), b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i))) = 0
+  (∑ i in (finset.fin_range n_wit), b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i)) = 0
 :=
 begin
   rw mv_polynomial.coeff_sum,
@@ -737,7 +739,7 @@ begin
   simp,
 end
 
-lemma h6_3_5 : mv_polynomial.coeff (finsupp.single vars.Z 1) ((finset.fin_range n_wit).sum (λ (i : fin n_wit), b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i))) = 0
+lemma h6_3_5 : mv_polynomial.coeff (finsupp.single vars.Z 1) (∑ i in(finset.fin_range n_wit), b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i)) = 0
 :=
 begin
   rw mv_polynomial.coeff_sum,
@@ -770,7 +772,7 @@ begin
 end
 
 
-lemma h6_3 (a_stmt) : ((V_stmt a_stmt + b_γβ • Z_poly + (finset.fin_range n_wit).sum (λ (i : fin n_wit), b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i)) ) ^ 2).coeff (finsupp.single vars.Z 2) = b_γβ ^ 2
+lemma h6_3 (a_stmt) : ((V_stmt a_stmt + b_γβ • Z_poly + ∑ i in (finset.fin_range n_wit), b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i)) ^ 2).coeff (finsupp.single vars.Z 2) = b_γβ ^ 2
 :=
 begin
   rw pow_succ,
@@ -812,7 +814,7 @@ begin
   exact dec_trivial,
 end
 
-lemma h11 (a_stmt) (V_wit_eq : V_wit = polynomial.eval₂ mv_polynomial.C X_poly ((finset.fin_range n_wit).sum (λ (i : fin n_wit), b' i • u_wit i))) : (V_stmt_sv a_stmt + V_wit_sv) ^ 2 = mv_polynomial.eval₂ polynomial.C singlify ((V_stmt a_stmt + V_wit) ^ 2)
+lemma h11 (a_stmt) (V_wit_eq : V_wit = polynomial.eval₂ mv_polynomial.C X_poly (∑ i in (finset.fin_range n_wit), b' i • u_wit i)) : (V_stmt_sv a_stmt + V_wit_sv) ^ 2 = mv_polynomial.eval₂ polynomial.C singlify ((V_stmt a_stmt + V_wit) ^ 2)
 :=
 begin
   have h11_1 : (V_stmt a_stmt + V_wit) ^ 2 = polynomial.eval₂ mv_polynomial.C X_poly ((V_stmt_sv a_stmt + V_wit_sv) ^ 2),
@@ -922,14 +924,14 @@ begin
   rw if_neg,
   simp,
   -- h3 done
-  have h4 : B_wit = b_γβ • crs_γβ + finset.sum (finset.fin_range n_wit) (λ i, (b' i) • (crs_β_ssps i)),
+  have h4 : B_wit = b_γβ • crs_γβ + ∑ i in (finset.fin_range n_wit), (b' i) • (crs_β_ssps i),
   rw B_wit,
   rw helper_5 h2,
   rw h3,
   simp,
   -- h4 done
-  have h5 : V_wit = b_γβ • Z_poly + finset.sum (finset.fin_range n_wit) (λ i, (b' i) • ((u_wit i).eval₂ mv_polynomial.C X_poly)),
-  have h5_1 : B_wit = Y_poly * (b_γβ • Z_poly + finset.sum (finset.fin_range n_wit) (λ i, (b' i) • ((u_wit i).eval₂ mv_polynomial.C X_poly))),
+  have h5 : V_wit = b_γβ • Z_poly + ∑ i in (finset.fin_range n_wit), (b' i) • ((u_wit i).eval₂ mv_polynomial.C X_poly),
+  have h5_1 : B_wit = Y_poly * (b_γβ • Z_poly + ∑ i in (finset.fin_range n_wit), (b' i) • ((u_wit i).eval₂ mv_polynomial.C X_poly)),
   rw h4,
   rw crs_γβ,
   rw crs_β_ssps,
@@ -951,7 +953,7 @@ begin
   have h6 : b_γβ = 0,
   let eqnII' := eqnII,
   rw h5 at eqnII',
-  have h6_1 : (H * mv_t + mv_polynomial.C 1).coeff (finsupp.single vars.Z 2) = (( V_stmt a_stmt + b_γβ • Z_poly + (finset.fin_range n_wit).sum (λ (i : fin n_wit), b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i)) ) ^ 2).coeff (finsupp.single vars.Z 2),
+  have h6_1 : (H * mv_t + mv_polynomial.C 1).coeff (finsupp.single vars.Z 2) = (( V_stmt a_stmt + b_γβ • Z_poly + ∑ i in (finset.fin_range n_wit), b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i)) ^ 2).coeff (finsupp.single vars.Z 2),
   rw eqnII',
   rw add_assoc,
   -- h6_1 done
