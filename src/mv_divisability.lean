@@ -6,7 +6,8 @@ open classical
 local attribute [instance] prop_decidable
 
 
-namespace mv_polynomial
+open mv_polynomial
+section
 
 
 universes u
@@ -19,10 +20,12 @@ noncomputable theory
 
 -- for multivariate define a type with X, Y, Z
 
-inductive vars : Type
-| X : vars
-| Y : vars
-| Z : vars
+-- inductive vars : Type
+-- | X : vars
+-- | Y : vars
+-- | Z : vars
+
+parameter {vars : Type}
 
 -- TODO can I use a syntax like this to prove decidable eq
 -- instance : decidable_eq ℕ
@@ -246,6 +249,23 @@ begin
   exact h14
 end
 
+-- TODO: the converse of the above statement
+
+lemma left_cancel_X_mul {a b : mv_polynomial vars F} (s : vars) :
+X s * a = X s * b -> a = b
+:=
+begin
+  intro h,
+  rw ext_iff,
+  intro m,
+  rw ← coeff_mul_X m s a,
+  rw ← coeff_mul_X m s b,
+  rw mul_comm,
+  rw h,
+  rw mul_comm,  
+end
+
+
 -- For all monomials with no X component, the coefficient of a is zero
 -- a * b = c
 -- then for all monomials with no X component, the coefficient of a is zero
@@ -315,4 +335,8 @@ begin
 end
 
 
-end mv_polynomial
+-- End section
+end
+
+
+-- end mv_polynomial

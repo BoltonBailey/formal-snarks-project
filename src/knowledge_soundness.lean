@@ -35,6 +35,19 @@ universes u
 parameter {F : Type u}
 parameter [field F]
 
+-- /-- Helper for converting mv_polynomial to single -/
+-- def singlify : vars -> polynomial F
+-- | x := ite (x = vars.X) polynomial.X 1
+-- -- | vars.Y := 1
+-- -- | vars.Z := 1
+
+/-- Helper for converting mv_polynomial to single -/
+@[simp]
+def singlify : vars -> polynomial F
+| vars.X := polynomial.X 
+| vars.Y := 1
+| vars.Z := 1
+
 
 /-- Helpers for representing X, Y, Z as 3-variable polynomials -/
 def X_poly : mv_polynomial vars F := mv_polynomial.X vars.X
@@ -72,6 +85,8 @@ end
 /-- The naturals representing the number of gates in the circuit, the statement size, and witness size repectively-/ 
 parameters {m n_stmt n_wit : ℕ}
 def n := n_stmt + n_wit
+
+parameter {hm : 0 < m}
 -- NOTE: In the paper, n_stmt is l and n_wit is n-l. Here, n is defined from these values.
 
 
@@ -86,15 +101,169 @@ def r : fin m → F := (λ i, (i : F))
 /-- (X - r_1) ... (X - r_m) -/
 def t : polynomial F := finset.prod (finset.fin_range m) (λ i, polynomial.X - polynomial.C (i.1 : F))
 
+lemma nat_degree_t : t.nat_degree = m
+:=
+begin
+  -- rw polynomial.nat_degree,
+  rw t,
+  rw polynomial.degree_of_prod,
+  -- rw polynomial.degree,
+  -- rw option.get_or_else,
+end
+
+lemma monic_t : t.monic
+:=
+begin
+  sorry
+end
+
+lemma degree_t_pos : 0 < t.degree 
+:=
+begin
+  sorry
+end
+
+/-- Multivariable version of t -/
 def mv_t : mv_polynomial vars F := t.eval₂ mv_polynomial.C X_poly
 
--- /-- Checks whether a witness satisfies the SSP -/
--- def satisfying_wit (a_stmt : fin n_stmt → F ) (a_wit : fin n_wit → F) := 
--- polynomial.mod_by_monic ((finset.sum (finset.fin_range n_stmt) (λ i, a_stmt i • u_stmt i))^2) t = 1
+lemma gdi_why_is_this_necessary_todo : (λ (e : ℕ) (a : F), mv_polynomial.C a * mv_polynomial.X vars.X ^ e) = (λ (e : ℕ) (a : F), mv_polynomial.monomial (finsupp.single vars.X e) a)
+:=
+begin
+  funext,
+  rw mv_polynomial.single_eq_C_mul_X,
+end
 
-/-- Checks whether a witness satisfies the SSP -/
-def satisfying_wit (a_stmt : fin n_stmt → F ) (a_wit : fin n_wit → F) := 
-((finset.sum (finset.fin_range n_stmt) (λ i, a_stmt i • u_stmt i))^2) % t = 1
+-- lemma gdi_again : (λ (n : vars) (e : ℕ), singlify n ^ e) = (λ (n : vars) (e : ℕ), ite (n = vars.X) ((polynomial.X : polynomial F) ^ (e)) 1)
+-- :=
+-- begin
+--   funext,
+--   intros,
+--   rw singlify,
+--   rw ite_pow,
+--   rw one_pow,
+-- end
+
+-- lemma gdi_again2 (a₁ : vars →₀ ℕ) : a₁.prod (λ (n : vars) (e : ℕ), singlify n ^ e) = ((polynomial.X : polynomial F) ^ (a₁ vars.X))
+-- :=
+-- begin
+--   rw gdi_again,
+--   rw finsupp.prod,
+--   rw finset.prod_ite,
+--   simp,
+--   rw finset.filter_eq',
+--   by_cases vars.X ∈ a₁.support,
+--   rw if_pos,
+--   rw finset.prod_singleton,
+--   exact h,
+--   rw if_neg,
+--   rw finset.prod_empty,
+--   have h1 : a₁ vars.X = 0,
+--   rw finsupp.not_mem_support_iff at h,
+--   exact h,
+--   rw h1,
+--   rw pow_zero,
+--   exact h,
+-- end
+
+
+lemma multivariable_to_single_variable (t : polynomial F) : ((t.eval₂ mv_polynomial.C X_poly).eval₂ polynomial.C singlify) = t 
+:=
+begin
+  rw X_poly,
+  rw polynomial.eval₂,
+  rw finsupp.sum,
+  -- rw mv_polynomial.eval₂_sum,
+  simp,
+  -- conv
+  -- begin
+  --   to_rhs,
+  --   rw polynomial.as_sum_support,
+  -- -- rw polynomial.as_sum_support_C_mul_X_pow,
+  -- end,
+  -- apply polynomial.ext,
+
+
+  -- intro n,
+  -- simp,
+  -- -- rw polynomial.coeff_mul,
+  conv
+  begin
+    to_lhs,
+    congr,
+    skip,
+    funext,
+    rw polynomial.X_pow_eq_monomial,
+    rw ←polynomial.monomial_zero_left,
+    rw polynomial.monomial_mul_monomial,
+    simp,  
+  end,
+  rw ←polynomial.coeff,
+  rw t.as_sum_support.symm,
+  
+  -- simp,
+  -- TODO
+  
+  
+  -- rw if_ctx_congr_prop
+  
+  -- conv
+  -- begin
+  --   to_lhs,
+  --   congr,
+  --   skip,
+  --   funext,
+  --   simp,
+  --   -- rw mv_polynomial.eval₂_mul,
+  --   -- rw mv_polynomial.eval₂_C,
+  --   -- rw mv_polynomial.eval₂_pow,
+  -- end,
+
+
+  -- rw X_poly,
+  -- rw gdi_why_is_this_necessary_todo,
+  -- rw mv_polynomial.eval₂,
+  -- rw finsupp.ext_iff,
+  -- intro a,
+  -- rw finsupp.sum_apply,
+  -- conv
+  -- begin
+  --   to_lhs,
+  --   congr,
+  --   skip,
+  --   funext,
+  --   rw gdi_again2,
+  --   rw polynomial.X_pow_eq_monomial,
+  --   rw ←polynomial.monomial_zero_left,
+  --   rw polynomial.monomial_mul_monomial,
+  --   simp,
+  --   rw ←polynomial.coeff,
+  --   rw polynomial.coeff_monomial,
+  -- end,
+  -- rw finsupp.sum,
+  -- rw finsupp.sum,
+  -- rw finset.sum_ite,
+  -- rw finset.sum_const_zero,
+  
+  -- -- rw gdi_again2,
+  -- -- rw gdi_again3,
+  -- -- rw finsupp.prod,
+  -- -- rw prod_ite,
+  -- -- rw finsupp.single_apply,
+
+end
+
+
+
+lemma t_multivariable_to_single_variable : (mv_t.eval₂ polynomial.C singlify) = t 
+:=
+begin
+  exact multivariable_to_single_variable t,
+end
+
+
+
+
+
 
 -- TODO rewrite without lambdas
 /-- The crs elements as multivariate polynomials of the toxic waste samples -/
@@ -110,6 +279,16 @@ def V_stmt_sv (a_stmt : fin n_stmt → F) : polynomial F
 /-- V_stmt as a multivariable polynomial of vars.X -/
 def V_stmt (a_stmt : fin n_stmt → F) : mv_polynomial vars F 
 := (V_stmt_sv a_stmt).eval₂ mv_polynomial.C X_poly
+
+
+-- /-- Checks whether a witness satisfies the SSP -/
+-- def satisfying_wit (a_stmt : fin n_stmt → F ) (a_wit : fin n_wit → F) := 
+-- polynomial.mod_by_monic ((finset.sum (finset.fin_range n_stmt) (λ i, a_stmt i • u_stmt i))^2) t = 1
+
+/-- Checks whether a witness satisfies the SSP -/
+def satisfying_wit (a_stmt : fin n_stmt → F ) (a_wit : fin n_wit → F) := 
+(V_stmt_sv a_stmt
+  + (finset.sum (finset.fin_range n_wit) (λ i, a_wit i • u_wit i)))^2 %ₘ t = 1
 
 /-- The coefficients of the CRS elements in the algebraic adversary's representation -/
 parameters {b v h : fin m → F}
@@ -146,6 +325,11 @@ def H : mv_polynomial vars F :=
   +
   finset.sum (finset.fin_range n_wit) (λ i, (h' i) • (crs_β_ssps i))
 
+
+
+-- Single variable form ov V_wit
+def V_wit_sv : polynomial F 
+:= (finset.fin_range n_wit).sum (λ (i : fin n_wit), b' i • u_wit i)
 
 -- TODO move helper lemmas to another file?
 
@@ -207,7 +391,7 @@ begin
   rw mul_comm,
   rw ← Y_poly_mon,
   rw Y_poly,
-  rw mv_polynomial.mul_var_no_constant,
+  rw mul_var_no_constant,
   rw finsupp.single_apply,
   rw if_neg,
   simp,
@@ -247,7 +431,7 @@ begin
   rw mul_comm,
   rw ← Y_poly_mon,
   rw Y_poly,
-  rw mv_polynomial.mul_var_no_constant,
+  rw mul_var_no_constant,
   rw finsupp.single_apply,
   rw if_neg,
   simp,
@@ -282,6 +466,28 @@ begin
   intro,
   exact two_ne_zero,
 end
+
+lemma helper_lemma_7 : (λ (x : fin n_wit), mv_polynomial.coeff (finsupp.single vars.Z 2) (h' x • crs_β_ssps x)) = λ x, 0
+:=
+begin
+  apply funext,
+  intro x,
+  rw crs_β_ssps,
+  rw X_poly,
+  rw mv_polynomial.smul_eq_C_mul,
+  rw mv_polynomial.coeff_C_mul,
+  simp,
+  right,
+  rw mul_comm,
+  rw Y_poly,
+  rw mul_var_no_constant,
+  rw finsupp.single_apply,
+  rw if_neg,
+  simp,
+end
+
+
+
 
 /-- The antidiagonal of Z^2 consists of three elements -/
 lemma square_antidiagonal : (finsupp.single vars.Z 2).antidiagonal.support = 
@@ -437,13 +643,344 @@ begin
 
 end
 
+/-- Lemmas that denote bigger steps in the proof -/
+
+lemma h6_2_1 : mv_polynomial.coeff (finsupp.single vars.Z 2) mv_t = 0
+:=
+begin
+  rw mv_t,
+  rw polynomial.eval₂,
+  rw finsupp.sum,
+  rw mv_polynomial.coeff_sum,
+  apply finset.sum_eq_zero,
+  intro x,
+  intro tmp,
+  simp,
+  right,
+  rw X_poly,
+  rw mv_polynomial.X_pow_eq_single,
+  rw mv_polynomial.coeff_monomial,
+  rw if_neg,
+  rw finsupp.single_eq_single_iff,
+  simp,
+  intro,       
+  exact dec_trivial,
+end
+
+
+lemma h6_2_2 :  mv_polynomial.coeff (finsupp.single vars.Z 1) mv_t = 0
+:=
+begin
+  rw mv_t,
+  rw polynomial.eval₂,
+  rw finsupp.sum,
+  rw mv_polynomial.coeff_sum,
+  apply finset.sum_eq_zero,
+  intro x,
+  intro tmp,
+  simp,
+  right,
+  rw X_poly,
+  rw mv_polynomial.X_pow_eq_single,
+  rw mv_polynomial.coeff_monomial,
+  rw if_neg,
+  rw finsupp.single_eq_single_iff,
+  simp,
+end
+
+lemma h6_2_3 : mv_polynomial.coeff (finsupp.single vars.Z 2) H = 0
+:=
+begin
+  rw H,
+  simp,
+  rw mv_polynomial.coeff_sum,
+  rw helper_lemma_6,
+  rw finset.sum_const_zero,
+  rw [crs_γ, crs_γβ],
+  repeat {rw mv_polynomial.smul_eq_C_mul},
+  repeat {rw mv_polynomial.coeff_C_mul},
+  repeat {rw mv_polynomial.coeff_sum},
+  rw Y_poly_mon,
+  rw Z_poly_mon,
+  rw mv_polynomial.monomial_mul,
+  repeat {rw mv_polynomial.coeff_monomial},
+  rw if_neg,
+  rw if_neg,
+  simp,
+  rw helper_lemma_7,
+  rw finset.sum_const_zero,
+  rw finsupp.ext_iff,
+  rw not_forall,
+  use vars.Y,
+  rw finsupp.add_apply,
+  repeat {rw finsupp.single_apply},
+  rw if_neg,
+  rw if_pos,
+  rw if_neg,
+  simp,
+  simp,
+  simp,
+  rw finsupp.single_eq_single_iff,
+  simp,
+  exact dec_trivial,
+end
+
+lemma h6_2 : (H * mv_t + mv_polynomial.C 1).coeff (finsupp.single vars.Z 2) = 0
+:=
+begin
+  rw mv_polynomial.coeff_add,
+  rw mv_polynomial.coeff_C,
+  rw if_neg,
+  rw mv_polynomial.coeff_mul,
+  rw square_antidiagonal,
+  rw finset.sum_insert,
+  rw finset.sum_insert,
+  rw finset.sum_singleton,
+  simp,
+
+  rw [h6_2_1, h6_2_2, h6_2_3],
+  simp,
+  -- Prove that {(Z^0, Z^2), (Z^1, Z^1), (Z^2, Z^0)} is actually a set of three distinct elements
+  rw finset.mem_singleton,
+  rw prod.ext_iff,
+  rw decidable.not_and_iff_or_not,
+  left,
+  rw finsupp.single_eq_single_iff,
+  simp,
+  exact dec_trivial,
+  rw finset.mem_insert,
+  rw decidable.not_or_iff_and_not,
+  split,
+  rw prod.ext_iff,
+  rw decidable.not_and_iff_or_not,
+  left,
+  rw finsupp.single_eq_single_iff,
+  simp,
+  rw finset.mem_singleton,
+  rw prod.ext_iff,
+  rw decidable.not_and_iff_or_not,
+  left,
+  rw finsupp.single_eq_single_iff,
+  simp,
+  exact dec_trivial,
+  rw finsupp.ext_iff,
+  rw not_forall,
+  use vars.Z,
+  simp,
+  exact dec_trivial,
+
+end
+
+lemma h6_3_1 : mv_polynomial.coeff (finsupp.single vars.Z 2) (b_γβ • Z_poly) = 0
+:=
+begin
+  rw Z_poly,
+  rw mv_polynomial.smul_eq_C_mul,
+  rw mv_polynomial.coeff_C_mul,
+  rw mv_polynomial.coeff_X',
+  rw if_neg,
+  simp,
+  rw finsupp.single_eq_single_iff,
+  simp,
+  exact dec_trivial,
+end
+
+lemma h6_3_2_1 : (λ (i : fin n_wit), mv_polynomial.coeff (finsupp.single vars.Z 2) (b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i))) = (λ i, 0)
+:=
+begin
+  funext,
+  rw polynomial.eval₂,
+  rw finsupp.sum,
+  rw mv_polynomial.smul_eq_C_mul,
+  rw mv_polynomial.coeff_C_mul,
+  rw mv_polynomial.coeff_sum,
+  simp,
+  right,
+  apply finset.sum_eq_zero,
+  intro x,
+  intro tmp,
+  simp,
+  right,
+  rw X_poly,
+  rw mv_polynomial.X_pow_eq_single,
+  rw mv_polynomial.coeff_monomial,
+  rw if_neg,
+  rw finsupp.single_eq_single_iff,
+  simp,
+  intro,
+  exact dec_trivial,
+end
+
+lemma h6_3_2 : mv_polynomial.coeff (finsupp.single vars.Z 2)
+  ((finset.fin_range n_wit).sum (λ (i : fin n_wit), b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i))) = 0
+:=
+begin
+  rw mv_polynomial.coeff_sum,
+  rw h6_3_2_1,
+  rw finset.sum_const_zero,
+end
+
+lemma h6_3_3 (a_stmt) : mv_polynomial.coeff (finsupp.single vars.Z 2) (V_stmt a_stmt) = 0
+:=
+begin
+  rw V_stmt,
+  rw polynomial.eval₂,
+  rw finsupp.sum,
+  -- rw mv_polynomial.smul_eq_C_mul,
+  -- rw mv_polynomial.coeff_C_mul,
+  rw mv_polynomial.coeff_sum,
+  simp,
+  -- right,
+  apply finset.sum_eq_zero,
+  intro x,
+  intro tmp,
+  simp,
+  right,
+  rw X_poly,
+  rw mv_polynomial.X_pow_eq_single,
+  rw mv_polynomial.coeff_monomial,
+  rw if_neg,
+  rw finsupp.single_eq_single_iff,
+  simp,
+  intro,
+  exact dec_trivial,  
+end
+
+lemma h6_3_4 : mv_polynomial.coeff (finsupp.single vars.Z 1) (b_γβ • Z_poly) = b_γβ
+:=
+begin
+  rw Z_poly,
+  rw mv_polynomial.smul_eq_C_mul,
+  rw mv_polynomial.coeff_C_mul,
+  rw mv_polynomial.coeff_X,
+  simp,
+end
+
+lemma h6_3_5_1 : (λ (i : fin n_wit), mv_polynomial.coeff (finsupp.single vars.Z 1) (b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i))) = (λ i, 0)
+:=
+begin
+  funext,
+  rw polynomial.eval₂,
+  rw finsupp.sum,
+  rw mv_polynomial.smul_eq_C_mul,
+  rw mv_polynomial.coeff_C_mul,
+  rw mv_polynomial.coeff_sum,
+  simp,
+  right,
+  apply finset.sum_eq_zero,
+  intro x,
+  intro tmp,
+  simp,
+  right,
+  rw X_poly,
+  rw mv_polynomial.X_pow_eq_single,
+  rw mv_polynomial.coeff_monomial,
+  rw if_neg,
+  rw finsupp.single_eq_single_iff,
+  simp,
+end
+
+lemma h6_3_5 : mv_polynomial.coeff (finsupp.single vars.Z 1) ((finset.fin_range n_wit).sum (λ (i : fin n_wit), b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i))) = 0
+:=
+begin
+  rw mv_polynomial.coeff_sum,
+  rw h6_3_5_1,
+  rw finset.sum_const_zero,
+end
+
+lemma h6_3_6 (a_stmt) : mv_polynomial.coeff (finsupp.single vars.Z 1) (V_stmt a_stmt) = 0 
+:=
+begin
+  rw V_stmt,
+  rw polynomial.eval₂,
+  rw finsupp.sum,
+  -- rw mv_polynomial.smul_eq_C_mul,
+  -- rw mv_polynomial.coeff_C_mul,
+  rw mv_polynomial.coeff_sum,
+  simp,
+  -- right,
+  apply finset.sum_eq_zero,
+  intro x,
+  intro tmp,
+  simp,
+  right,
+  rw X_poly,
+  rw mv_polynomial.X_pow_eq_single,
+  rw mv_polynomial.coeff_monomial,
+  rw if_neg,
+  rw finsupp.single_eq_single_iff,
+  simp,
+end
+
+
+lemma h6_3 (a_stmt) : ((V_stmt a_stmt + b_γβ • Z_poly + (finset.fin_range n_wit).sum (λ (i : fin n_wit), b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i)) ) ^ 2).coeff (finsupp.single vars.Z 2) = b_γβ ^ 2
+:=
+begin
+  rw pow_succ,
+  rw pow_one,
+  rw mv_polynomial.coeff_mul,
+  rw square_antidiagonal,
+
+  rw finset.sum_insert,
+  rw finset.sum_insert,
+  rw finset.sum_singleton,
+  simp,
+  rw [h6_3_1, h6_3_2, h6_3_3],
+  rw [h6_3_4, h6_3_5, h6_3_6],
+  simp,
+  rw pow_succ,
+  rw pow_one,
+  -- Prove that {(Z^0, Z^2), (Z^1, Z^1), (Z^2, Z^0)} is actually a set of three distinct elements
+  rw finset.mem_singleton,
+  rw prod.ext_iff,
+  rw decidable.not_and_iff_or_not,
+  left,
+  rw finsupp.single_eq_single_iff,
+  simp,
+  exact dec_trivial,
+  rw finset.mem_insert,
+  rw decidable.not_or_iff_and_not,
+  split,
+  rw prod.ext_iff,
+  rw decidable.not_and_iff_or_not,
+  left,
+  rw finsupp.single_eq_single_iff,
+  simp,
+  rw finset.mem_singleton,
+  rw prod.ext_iff,
+  rw decidable.not_and_iff_or_not,
+  left,
+  rw finsupp.single_eq_single_iff,
+  simp,
+  exact dec_trivial,
+end
+
+lemma h11 (a_stmt) (V_wit_eq : V_wit = polynomial.eval₂ mv_polynomial.C X_poly ((finset.fin_range n_wit).sum (λ (i : fin n_wit), b' i • u_wit i))) : (V_stmt_sv a_stmt + V_wit_sv) ^ 2 = mv_polynomial.eval₂ polynomial.C singlify ((V_stmt a_stmt + V_wit) ^ 2)
+:=
+begin
+  have h11_1 : (V_stmt a_stmt + V_wit) ^ 2 = polynomial.eval₂ mv_polynomial.C X_poly ((V_stmt_sv a_stmt + V_wit_sv) ^ 2),
+  rw polynomial.eval₂_pow,
+  rw polynomial.eval₂_add,
+  rw V_stmt,
+  rw V_wit_sv,
+  rw V_wit_eq,
+  -- h11_1 done
+  rw h11_1,
+  rw multivariable_to_single_variable,
+end
+
+-- lemma foo (a b n : polynomial F) : (a * n + b) % n = b % n
+-- :=
+-- begin
+--   hint,
+-- end
 
 -- TODO encapsulate all evals in their own multivariablification varaibles
 
 /-- Show that if the adversary polynomials obey the equations, then the coefficients give a satisfying witness -/
 lemma case_1 (a_stmt : fin n_stmt → F ) : 
   (B_wit = V_wit * Y_poly) 
-  -> (H * mv_t + mv_polynomial.C 1 = (V_wit + V_stmt a_stmt)^2) 
+  -> (H * mv_t + mv_polynomial.C 1 = (V_stmt a_stmt + V_wit)^2) 
   -> (satisfying_wit a_stmt b')
 :=
 begin
@@ -451,7 +988,7 @@ begin
   -- B_wit has no terms with no Y component
   have h1 : (∀ m : vars →₀ ℕ, m vars.Y = 0 -> B_wit.coeff m = 0),
   rw eqnI,
-  apply mv_polynomial.mul_var_no_constant V_wit vars.Y,
+  apply mul_var_no_constant V_wit vars.Y,
   have h2 : ∀ i : fin m, b i = 0,
   have h2_1 : (∀ (i : fin m), B_wit.coeff (finsupp.single vars.X i) = b i),
   intro j,
@@ -490,7 +1027,7 @@ begin
   have tmp := h2_1 i,
   rw ← tmp,
   rw eqnI,
-  apply mv_polynomial.mul_var_no_constant,
+  apply mul_var_no_constant,
   rw finsupp.single_apply,
   rw if_neg,
   simp,
@@ -523,7 +1060,7 @@ begin
   -- h3_1 done
   rw ← h3_1,
   rw eqnI,
-  apply mv_polynomial.mul_var_no_constant,
+  apply mul_var_no_constant,
   rw finsupp.single_apply,
   rw if_neg,
   simp,
@@ -552,76 +1089,128 @@ begin
   -- h5_1 done
   rw eqnI at h5_1,
   rw mul_comm at h5_1,
-  exact mv_polynomial.left_cancel_X_mul vars.Y h5_1,
+  exact left_cancel_X_mul vars.Y h5_1,
   -- h5 done
   have h6 : b_γβ = 0,
   let eqnII' := eqnII,
   rw h5 at eqnII',
-  have h6_1 : (H * mv_t + mv_polynomial.C 1).coeff (finsupp.single vars.Z 2) = ((b_γβ • Z_poly + (finset.fin_range n_wit).sum (λ (i : fin n_wit), b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i)) + V_stmt a_stmt) ^ 2).coeff (finsupp.single vars.Z 2),
+  have h6_1 : (H * mv_t + mv_polynomial.C 1).coeff (finsupp.single vars.Z 2) = (( V_stmt a_stmt + b_γβ • Z_poly + (finset.fin_range n_wit).sum (λ (i : fin n_wit), b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i)) ) ^ 2).coeff (finsupp.single vars.Z 2),
   rw eqnII',
+  rw add_assoc,
   -- h6_1 done
-  have h6_2 : (H * mv_t + mv_polynomial.C 1).coeff (finsupp.single vars.Z 2) = 0,
-  rw mv_polynomial.coeff_add,
-  rw mv_polynomial.coeff_C,
-  rw if_neg,
-  rw mv_polynomial.coeff_mul,
-  rw square_antidiagonal,
-  rw finset.sum_insert,
-  rw finset.sum_insert,
-  rw finset.sum_singleton,
-  simp,
-  have h6_2_1 : mv_polynomial.coeff (finsupp.single vars.Z 2) mv_t = 0,
-  rw mv_t,
-  rw polynomial.eval₂,
-  rw finsupp.sum,
-  rw mv_polynomial.coeff_sum,
-  apply finset.sum_eq_zero,
-  intro x,
-  intro tmp,
-  simp,
-  right,
-  rw X_poly,
-  rw mv_polynomial.X_pow_eq_single,
-  rw mv_polynomial.coeff_monomial,
-  rw if_neg,
-  rw finsupp.single_eq_single_iff,
-  simp,
-  intro,       
-  exact two_ne_zero,
-  have h6_2_2 : mv_polynomial.coeff (finsupp.single vars.Z 1) mv_t = 0,
-  rw mv_t,
-  rw polynomial.eval₂,
-  rw finsupp.sum,
-  rw mv_polynomial.coeff_sum,
-  apply finset.sum_eq_zero,
-  intro x,
-  intro tmp,
-  simp,
-  right,
-  rw X_poly,
-  rw mv_polynomial.X_pow_eq_single,
-  rw mv_polynomial.coeff_monomial,
-  rw if_neg,
-  rw finsupp.single_eq_single_iff,
-  simp,
-  have h6_2_3 : mv_polynomial.coeff (finsupp.single vars.Z 2) H = 0,
-  rw H,
-  simp,
-  rw mv_polynomial.coeff_sum,
-  rw helper_lemma_6,
-  rw finset.sum_const_zero,
-  rw [crs_γ, crs_γβ],
-  simp,
+  -- have h6_2 : (H * mv_t + mv_polynomial.C 1).coeff (finsupp.single vars.Z 2) = 0,
+  -- rw mv_polynomial.coeff_add,
+  -- rw mv_polynomial.coeff_C,
+  -- rw if_neg,
+  -- rw mv_polynomial.coeff_mul,
+  -- rw square_antidiagonal,
+  -- rw finset.sum_insert,
+  -- rw finset.sum_insert,
+  -- rw finset.sum_singleton,
+  -- simp,
 
-
+  -- rw [h6_2_1, h6_2_2, h6_2_3],
+  -- simp,
+  -- -- Prove that {(Z^0, Z^2), (Z^1, Z^1), (Z^2, Z^0)} is actually a set of three distinct elements
+  -- rw finset.mem_singleton,
+  -- rw prod.ext_iff,
+  -- rw decidable.not_and_iff_or_not,
+  -- left,
+  -- rw finsupp.single_eq_single_iff,
+  -- simp,
+  -- exact dec_trivial,
+  -- rw finset.mem_insert,
+  -- rw decidable.not_or_iff_and_not,
+  -- split,
+  -- rw prod.ext_iff,
+  -- rw decidable.not_and_iff_or_not,
+  -- left,
+  -- rw finsupp.single_eq_single_iff,
+  -- simp,
+  -- rw finset.mem_singleton,
+  -- rw prod.ext_iff,
+  -- rw decidable.not_and_iff_or_not,
+  -- left,
+  -- rw finsupp.single_eq_single_iff,
+  -- simp,
+  -- exact dec_trivial,
+  -- rw finsupp.single_eq_zero,
   
   -- todo
+  rw h6_2 at h6_1,
+  rw h6_3 at h6_1,
+  exact pow_eq_zero (eq.symm h6_1),
+  rw h6 at h5,
+  simp at h5,
+  -- Turn eqnII into a statement about 1variable polynomials 
+  -- by evaluation with vars.X -> X, vars.Y -> 1, vars.Z -> 1
+  -- TODO is there a more efficient way to simply say (evaluate f on both sides of this hypothesis)?
+  have h10 : ((H * mv_t + mv_polynomial.C 1).eval₂ polynomial.C singlify) %ₘ t = (((V_stmt a_stmt + V_wit)^2).eval₂ polynomial.C singlify) %ₘ t,
+  rw eqnII,
+  rw mv_polynomial.eval₂_add at h10,
+  rw mv_polynomial.eval₂_mul at h10,
+  -- rw t_multivariable_to_single_variable at h10,
 
-  have h6_3 : ((b_γβ • Z_poly + (finset.fin_range n_wit).sum (λ (i : fin n_wit), b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i)) + V_stmt a_stmt) ^ 2).coeff (finsupp.single vars.Z 2) = b_γβ ^ 2,
 
-  rw pow_succ,
-  rw pow_one,
-  rw mv_polynomial.coeff_mul,
+
+  -- rw h5 at eqnII,
+
+  rw satisfying_wit,
+  rw ←V_wit_sv,
+  -- conv at h5
+  -- begin
+  --   to_rhs,
+  --   congr,
+  --   skip,
+  --   funext,
+  --   rw ←polynomial.eval₂_smul,
+  -- end,
+  -- TODO h5 needs to be input to h11 somehow
+  rw h11,
+  rw ←h10,
+  rw t_multivariable_to_single_variable,
+  have h12: mv_polynomial.C 1 = (polynomial.C 1 : polynomial F).eval₂ mv_polynomial.C X_poly,
+  rw polynomial.eval₂_C,
+  rw h12,
+  rw multivariable_to_single_variable,
+  have h13 : (mv_polynomial.eval₂ polynomial.C singlify H * t + polynomial.C 1 : polynomial F) /ₘ t = (mv_polynomial.eval₂ polynomial.C singlify H : polynomial F) ∧ (mv_polynomial.eval₂ polynomial.C singlify H * t + polynomial.C 1 : polynomial F) %ₘ t = (polynomial.C 1 : polynomial F),
+  
+  apply polynomial.div_mod_by_monic_unique,
+  exact monic_t,
+  split,
+  rw [add_comm, mul_comm],
+  rw polynomial.degree_C,
+  exact degree_t_pos,
+  exact one_ne_zero,
+  rw h13.2,
+  simp,
+  rw h5,
+  rw polynomial.eval₂_finset_sum,
+  conv
+  begin
+    to_rhs,
+    congr,
+    skip,
+    funext,
+    simp,
+    -- rw polynomial.eval₂_smul,
+    -- rw mv_polynomial.smul_eq_C_mul,
+    -- rw ring_hom.has_coe_to_fun,
+  end,
+  -- have h15 : (∀ i : fin n_wit, ((@mv_polynomial.C vars F) (b' i) : F) = b' i),
+  conv
+  begin
+    to_lhs,
+    congr,
+    skip,
+    funext,
+    rw mv_polynomial.smul_eq_C_mul,
+  end,
+
+
+
+
+
 
 
     -- now put it all together
@@ -639,7 +1228,6 @@ begin
 
   
 
-  have h3 : b_γ = 0,
 
 
 end
