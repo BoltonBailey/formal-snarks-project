@@ -124,20 +124,13 @@ end
 
 
 /-- Converting a single variable polynomial to a multivariable polynomial and back yields the same polynomial -/
-lemma my_multivariable_to_single_variable (t : polynomial F) : ((t.eval₂ mv_polynomial.C X_poly).eval₂ polynomial.C singlify) = t 
+lemma my_multivariable_to_single_variable (p : polynomial F) : ((p.eval₂ mv_polynomial.C X_poly).eval₂ polynomial.C singlify) = p 
 :=
 begin
   apply multivariable_to_single_variable,
   simp,
 end
 -- TODO this function is general purpose enough that it might be generalized a bit further and submitted to mathlib
-
-lemma t_multivariable_to_single_variable : (mv_t.eval₂ polynomial.C singlify) = t 
-:=
-begin
-  apply multivariable_to_single_variable vars vars.X singlify _ t,
-  simp,
-end
 
 
 -- TODO rewrite without lambdas
@@ -448,9 +441,9 @@ begin
   rw h6 at h1_h_right_right,
   have h7 : a.snd = 0,
   rw h1_h_right_right,
-  have h8 : 2-2 = 0,
-  simp,
-  rw h8,
+  -- have h8 : 2-2 = 0,
+  -- simp,
+  -- rw h8,
   simp,
   exact prod.ext h1_h_left h7,
   have h6_2 : h1_w ≤ 1,
@@ -980,7 +973,8 @@ begin
   rw ←V_wit_sv,
   rw h11,
   rw ←h10,
-  rw t_multivariable_to_single_variable,
+  rw mv_t,
+  rw my_multivariable_to_single_variable,
   have h12: mv_polynomial.C 1 = (polynomial.C 1 : polynomial F).eval₂ mv_polynomial.C X_poly,
   rw polynomial.eval₂_C,
   rw h12,
