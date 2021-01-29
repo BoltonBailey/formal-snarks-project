@@ -122,54 +122,15 @@ begin
   rw mv_polynomial.single_eq_C_mul_X,
 end
 
+
 /-- Converting a single variable polynomial to a multivariable polynomial and back yields the same polynomial -/
 lemma my_multivariable_to_single_variable (t : polynomial F) : ((t.eval₂ mv_polynomial.C X_poly).eval₂ polynomial.C singlify) = t 
 :=
 begin
-  rw X_poly,
-  rw polynomial.eval₂,
-  rw finsupp.sum,
+  apply multivariable_to_single_variable,
   simp,
-  conv
-  begin
-    to_lhs,
-    congr,
-    skip,
-    funext,
-    rw polynomial.X_pow_eq_monomial,
-    rw ←polynomial.monomial_zero_left,
-    rw polynomial.monomial_mul_monomial,
-    simp,  
-  end,
-  rw ←polynomial.coeff,
-  rw t.as_sum_support.symm,
 end
 -- TODO this function is general purpose enough that it might be generalized a bit further and submitted to mathlib
-
--- /-- Converting a single variable polynomial to a multivariable polynomial and back yields the same polynomial -/
--- lemma my_multivariable_to_single_variable (t : polynomial F) := multivariable_to_single_variable vars vars.X singlify
--- :=
--- begin
---   rw X_poly,
---   rw polynomial.eval₂,
---   rw finsupp.sum,
---   simp,
---   conv
---   begin
---     to_lhs,
---     congr,
---     skip,
---     funext,
---     rw polynomial.X_pow_eq_monomial,
---     rw ←polynomial.monomial_zero_left,
---     rw polynomial.monomial_mul_monomial,
---     simp,  
---   end,
---   rw ←polynomial.coeff,
---   rw t.as_sum_support.symm,
--- end
--- -- TODO this function is general purpose enough that it might be generalized a bit further and submitted to mathlib
-
 
 lemma t_multivariable_to_single_variable : (mv_t.eval₂ polynomial.C singlify) = t 
 :=
@@ -1023,7 +984,7 @@ begin
   have h12: mv_polynomial.C 1 = (polynomial.C 1 : polynomial F).eval₂ mv_polynomial.C X_poly,
   rw polynomial.eval₂_C,
   rw h12,
-  rw multivariable_to_single_variable,
+  rw my_multivariable_to_single_variable,
   have h13 : (mv_polynomial.eval₂ polynomial.C singlify H * t + polynomial.C 1 : polynomial F) /ₘ t = (mv_polynomial.eval₂ polynomial.C singlify H : polynomial F) ∧ (mv_polynomial.eval₂ polynomial.C singlify H * t + polynomial.C 1 : polynomial F) %ₘ t = (polynomial.C 1 : polynomial F),
   
   apply polynomial.div_mod_by_monic_unique,
