@@ -99,6 +99,7 @@ begin
   -- rw polynomial.degree_of_prod,
   -- rw polynomial.degree,
   -- rw option.get_or_else,
+  -- TODO https://leanprover.zulipchat.com/#narrow/stream/217875-Is-there.20code.20for.20X.3F/topic/degree_prod/near/224438069
 end
 
 lemma monic_t : t.monic
