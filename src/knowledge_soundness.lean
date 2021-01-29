@@ -81,12 +81,11 @@ parameter {u_stmt : fin n_stmt → (polynomial F) }
 parameter {u_wit : fin n_wit → (polynomial F) }
 
 
-
+/-- The roots of the polynomial t -/
+parameter {r : fin m → F} 
 /-- The polynomial divisibility by which is used to verify satisfaction of the SSP -/
-def t : polynomial F := finset.prod (finset.fin_range m) (λ i, polynomial.X - polynomial.C (i.1 : F))
--- As it is, t is defined as (X - 0)(X - 1) ... (X - (m-1))
--- An alternative would be (X - r_1) ... (X - r_m) for some set indexed by fin m
-def r : fin m → F := (λ i, (i : F))
+def t : polynomial F := finset.prod (finset.fin_range m) (λ i, polynomial.X - polynomial.C (r i))
+
 
 /-- t has degree m -/
 lemma nat_degree_t : t.nat_degree = m
