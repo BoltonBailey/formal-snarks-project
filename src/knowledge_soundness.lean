@@ -145,6 +145,25 @@ def V_stmt_sv (a_stmt : fin n_stmt → F) : polynomial F
 def V_stmt (a_stmt : fin n_stmt → F) : mv_polynomial vars F 
 := (V_stmt_sv a_stmt).eval₂ mv_polynomial.C X_poly
 
+-- /-- V_stmt as a multivariable polynomial of vars.X in sum form -/
+-- lemma V_stmt_sum_form (a_stmt : fin n_stmt → F) : V_stmt a_stmt
+-- = ∑ i in (finset.fin_range n_stmt), (a_stmt i) • ((u_stmt i).eval₂ mv_polynomial.C X_poly)
+-- :=
+-- begin
+--   rw V_stmt,
+--   rw V_stmt_sv,
+--   rw polynomial.eval₂_finset_sum,
+--   simp,
+--   conv
+--   begin
+--     to_lhs,
+--     congr,
+--     skip,
+--     funext,
+--     rw mv_polynomial.smul_eq_C_mul,
+--   end,
+-- end
+
 
 /-- Checks whether a witness satisfies the SSP -/
 def satisfying_wit (a_stmt : fin n_stmt → F ) (a_wit : fin n_wit → F) := 
@@ -186,6 +205,10 @@ def H : mv_polynomial vars F :=
   +
   ∑ i in (finset.fin_range n_wit), (h' i) • (crs_β_ssps i)
 
+
+/-- V as a multivariable polynomial -/
+def V (a_stmt : fin n_stmt → F) : mv_polynomial vars F 
+:= V_stmt a_stmt + V_wit
 
 
 -- Single variable form ov V_wit
@@ -825,10 +848,82 @@ end
 -- TODO abstract more lemmas from this theorem
 -- TODO A nice goal would be to make it so that the main points in the proof from the paper appear as have statements, with a comment giving an english description of the statement
 
-/-- Show that if the adversary polynomials obey the equations, then the coefficients give a satisfying witness -/
+lemma h2_1 : (∀ (i : fin m), B_wit.coeff (finsupp.single vars.X i) = b i) :=
+begin
+  intro j,
+  rw B_wit,
+  simp,
+  rw [crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps],
+  simp,
+  repeat {rw mv_polynomial.smul_eq_C_mul},
+  repeat {rw mv_polynomial.coeff_C_mul},
+  repeat {rw mv_polynomial.coeff_sum},
+  rw Y_poly_mon,
+  rw Z_poly_mon,
+  rw mv_polynomial.monomial_mul,
+  repeat {rw mv_polynomial.coeff_monomial},
+  rw if_neg,
+  rw if_neg,
+  simp,
+  rw helper_1,
+  rw finset.sum_ite,
+  simp,
+  rw finset.filter_eq',
+  rw if_pos,
+  rw finset.sum_singleton,
+  rw helper_2,
+  simp,
+  simp,
+  rw finsupp.ext_iff,
+  simp,
+  refine ⟨vars.Y, _ ⟩,
+  repeat { rw finsupp.single_apply },
+  simp,
+  rw finsupp.single_eq_single_iff,
+  simp,
+end
+
+
+lemma h3_1 : B_wit.coeff (finsupp.single vars.Z 1) = b_γ
+:=
+begin
+  rw B_wit,
+  simp,
+  rw [crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps],
+  simp,
+  repeat {rw mv_polynomial.smul_eq_C_mul},
+  repeat {rw mv_polynomial.coeff_C_mul},
+  repeat {rw mv_polynomial.coeff_sum},
+  rw Y_poly_mon,
+  rw Z_poly_mon,
+  rw mv_polynomial.monomial_mul,
+  repeat {rw mv_polynomial.coeff_monomial},
+  rw if_pos,
+  rw if_neg,
+  rw helper_3,
+  rw helper_4,
+  simp,
+  rw finsupp.ext_iff,
+  simp,
+  refine ⟨vars.Y, _ ⟩,
+  repeat { rw finsupp.single_apply },
+  simp,
+end
+
+
+lemma h5_1_1 : b_γβ • (Z_poly * Y_poly) = Y_poly * b_γβ • Z_poly :=
+begin
+  rw mv_polynomial.smul_eq_C_mul,
+  rw mv_polynomial.smul_eq_C_mul,
+  rw mul_comm,
+  ring,
+end
+
+
+/-- Show that if the adversary polynomials obey the equations, then the coefficients give a satisfying witness. This theorem appears in the Baby SNARK paper as Theorem 1 case 1.-/
 theorem case_1 (a_stmt : fin n_stmt → F ) : 
   (B_wit = V_wit * Y_poly) 
-  -> (H * mv_t + mv_polynomial.C 1 = (V_stmt a_stmt + V_wit)^2) 
+  -> (H * mv_t + mv_polynomial.C 1 = (V a_stmt)^2) 
   -> (satisfying_wit a_stmt b')
 :=
 begin
@@ -837,41 +932,8 @@ begin
   have h1 : (∀ m : vars →₀ ℕ, m vars.Y = 0 -> B_wit.coeff m = 0),
     rw eqnI,
     apply mul_var_no_constant V_wit vars.Y,
-  -- "b_0 b_1, ..., b_m" are all zero
+  -- "b_0 b_1, ..., b_m, ... are all zero"
   have h2 : ∀ i : fin m, b i = 0,
-    have h2_1 : (∀ (i : fin m), B_wit.coeff (finsupp.single vars.X i) = b i),
-      intro j,
-      rw B_wit,
-      simp,
-      rw [crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps],
-      simp,
-      repeat {rw mv_polynomial.smul_eq_C_mul},
-      repeat {rw mv_polynomial.coeff_C_mul},
-      repeat {rw mv_polynomial.coeff_sum},
-      rw Y_poly_mon,
-      rw Z_poly_mon,
-      rw mv_polynomial.monomial_mul,
-      repeat {rw mv_polynomial.coeff_monomial},
-      rw if_neg,
-      rw if_neg,
-      simp,
-      rw helper_1,
-      rw finset.sum_ite,
-      simp,
-      rw finset.filter_eq',
-      rw if_pos,
-      rw finset.sum_singleton,
-      rw helper_2,
-      simp,
-      simp,
-      rw finsupp.ext_iff,
-      simp,
-      refine ⟨vars.Y, _ ⟩,
-      repeat { rw finsupp.single_apply },
-      simp,
-      rw finsupp.single_eq_single_iff,
-      simp,
-    -- h2_1 done
     intro i,
     have tmp := h2_1 i,
     rw ← tmp,
@@ -880,66 +942,44 @@ begin
     rw finsupp.single_apply,
     rw if_neg,
     simp,
-  -- h2 done
+  -- b_γ = 0
   have h3 : b_γ = 0,
-    have h3_1 : B_wit.coeff (finsupp.single vars.Z 1) = b_γ,
-      rw B_wit,
-      simp,
-      rw [crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps],
-      simp,
-      repeat {rw mv_polynomial.smul_eq_C_mul},
-      repeat {rw mv_polynomial.coeff_C_mul},
-      repeat {rw mv_polynomial.coeff_sum},
-      rw Y_poly_mon,
-      rw Z_poly_mon,
-      rw mv_polynomial.monomial_mul,
-      repeat {rw mv_polynomial.coeff_monomial},
-      rw if_pos,
-      rw if_neg,
-      rw helper_3,
-      rw helper_4,
-      simp,
-      rw finsupp.ext_iff,
-      simp,
-      refine ⟨vars.Y, _ ⟩,
-      repeat { rw finsupp.single_apply },
-      simp,
-    -- h3_1 done
     rw ← h3_1,
     rw eqnI,
     apply mul_var_no_constant,
     rw finsupp.single_apply,
     rw if_neg,
     simp,
-  -- h3 done
+  -- "We can write B_wit as ..."
   have h4 : B_wit = b_γβ • crs_γβ + ∑ i in (finset.fin_range n_wit), (b' i) • (crs_β_ssps i),
     rw B_wit,
     rw helper_5 h2,
     rw h3,
     simp,
-  -- h4 done
+  -- "... we also see that V_wit must not have any Y terms at all"
   have h5 : V_wit = b_γβ • Z_poly + ∑ i in (finset.fin_range n_wit), (b' i) • ((u_wit i).eval₂ mv_polynomial.C X_poly),
-    have h5_1 : B_wit = Y_poly * (b_γβ • Z_poly + ∑ i in (finset.fin_range n_wit), (b' i) • ((u_wit i).eval₂ mv_polynomial.C X_poly)),
-      rw h4,
-      rw crs_γβ,
-      rw crs_β_ssps,
-      rw mul_add,
-      have h5_1_1 : b_γβ • (Z_poly * Y_poly) = Y_poly * b_γβ • Z_poly,
-        rw mv_polynomial.smul_eq_C_mul,
-        rw mv_polynomial.smul_eq_C_mul,
-        rw mul_comm,
-        ring,
-      -- h5_1_1 done
-      rw h5_1_1,
-      rw finset.mul_sum,
-      simp,
-    -- h5_1 done
-    rw eqnI at h5_1,
-    rw mul_comm at h5_1,
-    exact left_cancel_X_mul vars.Y h5_1,
-  -- h5 done
-  have h6 : b_γβ = 0,
+    apply left_cancel_X_mul vars.Y,
+    rw ←Y_poly,
+    rw mul_comm,
+    rw ←eqnI,
+    rw h4,
+    rw crs_γβ,
+    rw crs_β_ssps,
+    rw mul_add,
+    rw h5_1_1,
+    rw finset.mul_sum,
+    simp,
+  -- -- "... write V(.) as follows ..."
+  -- have h6 : V a_stmt = b_γβ • Z_poly 
+  --     + ∑ i in (finset.fin_range n_stmt), (a_stmt i) • ((u_stmt i).eval₂ mv_polynomial.C X_poly)
+  --     + ∑ i in (finset.fin_range n_wit), (b' i) • ((u_wit i).eval₂ mv_polynomial.C X_poly),
+  --   rw V,
+  --   rw V_stmt,
+  --   rw h5,
+  -- -- How is this used? TODO
+  have h7 : b_γβ = 0,
     let eqnII' := eqnII,
+    rw V at eqnII',
     rw h5 at eqnII',
     have h6_1 : (H * mv_t + mv_polynomial.C 1).coeff (finsupp.single vars.Z 2) = (( V_stmt a_stmt + b_γβ • Z_poly + ∑ i in (finset.fin_range n_wit), b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i)) ^ 2).coeff (finsupp.single vars.Z 2),
       rw eqnII',
@@ -949,11 +989,12 @@ begin
     rw h6_3 at h6_1,
     exact pow_eq_zero (eq.symm h6_1),
   -- h6 done
-  rw h6 at h5,
+  rw h7 at h5,
   simp at h5,
   -- TODO is there a more efficient way to simply say (evaluate f on both sides of this hypothesis)? Yes the congr tactic does this
   have h10 : ((H * mv_t + mv_polynomial.C 1).eval₂ polynomial.C singlify) %ₘ t = (((V_stmt a_stmt + V_wit)^2).eval₂ polynomial.C singlify) %ₘ t,
     rw eqnII,
+    rw V,
   -- h10 done
   rw mv_polynomial.eval₂_add at h10,
   rw mv_polynomial.eval₂_mul at h10,
