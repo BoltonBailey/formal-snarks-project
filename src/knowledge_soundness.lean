@@ -117,13 +117,6 @@ end
 /-- Multivariable version of t -/
 def mv_t : mv_polynomial vars F := t.eval₂ mv_polynomial.C X_poly
 
-lemma gdi_why_is_this_necessary_todo : (λ (e : ℕ) (a : F), mv_polynomial.C a * mv_polynomial.X vars.X ^ e) = (λ (e : ℕ) (a : F), mv_polynomial.monomial (finsupp.single vars.X e) a)
-:=
-begin
-  funext,
-  rw mv_polynomial.single_eq_C_mul_X,
-end
-
 
 /-- Converting a single variable polynomial to a multivariable polynomial and back yields the same polynomial -/
 lemma my_multivariable_to_single_variable (p : polynomial F) : ((p.eval₂ mv_polynomial.C X_poly).eval₂ polynomial.C singlify) = p 
