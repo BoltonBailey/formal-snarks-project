@@ -4,6 +4,7 @@ Author: Bolton Bailey
 import data.mv_polynomial.basic
 import data.polynomial.div
 import data.polynomial.field_division
+import algebra.polynomial.big_operators
 import .general_lemmas.polynomial_mv_sv_cast
 import .general_lemmas.mv_divisability
 import .vars
@@ -74,8 +75,6 @@ end
 parameters {m n_stmt n_wit : ℕ}
 def n := n_stmt + n_wit
 
--- It is necessary that 0 < m for the later t to be monic
-parameter {hm : 0 < m}
 -- NOTE: In the paper, n_stmt is l and n_wit is n-l. Here, n is defined from these values.
 
 /-- u_stmt and u_wit are fin-indexed collections of polynomials from the square span program -/
@@ -93,26 +92,72 @@ def t : polynomial F := finset.prod (finset.fin_range m) (λ i, polynomial.X - p
 lemma nat_degree_t : t.nat_degree = m
 :=
 begin
-  sorry,
   -- rw polynomial.nat_degree,
-  -- rw t,
-  -- rw polynomial.degree_of_prod,
-  -- rw polynomial.degree,
-  -- rw option.get_or_else,
+  rw t,
+  rw polynomial.nat_degree_prod,
+  simp,
+  intros i hi,
+  exact polynomial.X_sub_C_ne_zero (r i),
   -- TODO https://leanprover.zulipchat.com/#narrow/stream/217875-Is-there.20code.20for.20X.3F/topic/degree_prod/near/224438069
 end
 
 lemma monic_t : t.monic
 :=
 begin
-  sorry
+  rw t,
+  rw polynomial.monic,
+  rw polynomial.leading_coeff_prod,
+  have h1 : ∀ i : fin m, (polynomial.C 1 * polynomial.X + polynomial.C (- r i)).leading_coeff = 1,
+    intro i,
+    apply polynomial.leading_coeff_X_add_C (1 : F) (-(r i)),
+    simp,
+  simp at h1,
+  have h2 : ∀ i,  polynomial.X + -polynomial.C (r i) = polynomial.X - polynomial.C (r i),
+    intro i,
+    ring,
+  -- rw add_sub
+  conv
+  begin
+    to_lhs,
+    congr,
+    skip,
+    funext,
+    rw ←h2,
+    rw h1,
+  end,
+  rw finset.prod_const_one,
+
 end
 
-lemma degree_t_pos : 0 < t.degree 
+lemma degree_t_pos : 0 < m → 0 < t.degree 
 :=
 begin
-  sorry
+  intro hm,
+  suffices h : t.degree = some m,
+  rw h,
+  apply with_bot.some_lt_some.2,
+  exact hm,
+
+  have h := nat_degree_t,
+  rw polynomial.nat_degree at h,
+
+  induction h1 : t.degree,
+
+  rw h1 at h,
+  rw option.get_or_else at h,
+  rw h at hm,
+  have h2 := has_lt.lt.false hm,
+  exfalso,
+  exact h2,
+
+  rw h1 at h,
+  rw option.get_or_else at h,
+  rw h,
+
+  -- -- rw option.get_or_else at h,
+  -- have h1: t.degree.is_some = tt,
 end
+
 
 /-- Multivariable version of t -/
 def mv_t : mv_polynomial vars F := t.eval₂ mv_polynomial.C X_poly
@@ -922,12 +967,13 @@ end
 
 /-- Show that if the adversary polynomials obey the equations, then the coefficients give a satisfying witness. This theorem appears in the Baby SNARK paper as Theorem 1 case 1.-/
 theorem case_1 (a_stmt : fin n_stmt → F ) : 
-  (B_wit = V_wit * Y_poly) 
+  (0 < m)
+  -> (B_wit = V_wit * Y_poly) 
   -> (H * mv_t + mv_polynomial.C 1 = (V a_stmt)^2) 
   -> (satisfying_wit a_stmt b')
 :=
 begin
-  intros eqnI eqnII,
+  intros hm eqnI eqnII,
   -- "B_wit only has terms with a Y component"
   have h1 : (∀ m : vars →₀ ℕ, m vars.Y = 0 -> B_wit.coeff m = 0),
     rw eqnI,
@@ -1015,7 +1061,7 @@ begin
     split,
     rw [add_comm, mul_comm],
     rw polynomial.degree_C,
-    exact degree_t_pos,
+    exact degree_t_pos hm,
     exact one_ne_zero,
   -- h13 done
   rw h13.2,
