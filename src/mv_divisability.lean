@@ -18,29 +18,12 @@ variables [field F]
 noncomputable theory
 
 
--- for multivariate define a type with X, Y, Z
-
--- inductive vars : Type
--- | X : vars
--- | Y : vars
--- | Z : vars
 
 parameter {vars : Type}
 
--- TODO can I use a syntax like this to prove decidable eq
--- instance : decidable_eq ℕ
--- | zero     zero     := is_true rfl
--- | (succ x) zero     := is_false (λ h, nat.no_confusion h)
--- | zero     (succ y) := is_false (λ h, nat.no_confusion h)
--- | (succ x) (succ y) :=
---     match decidable_eq x y with
---     | is_true xeqy := is_true (xeqy ▸ eq.refl (succ x))
---     | is_false xney := is_false (λ h, nat.no_confusion h (λ xeqy, absurd xeqy xney))
---     end
 
 
 -- One way to prove this might be to establish an isomorphism between F[X, Y, Z] and F Y, Z, over X then use the univariate polynomial theorem over the ring F[Y, Z]?
-
 
 
 
@@ -150,8 +133,9 @@ begin
   from rfl,
 end
 
--- ite
 
+lemma pos_of_ne_zero {n : nat} : n ≠ 0 → n > 0 :=
+or.resolve_left (nat.eq_zero_or_pos n)
 
 -- the div_X function in data.polynomial.div returns a polynomial in the form of a curly-brace enclosed support, to_fun, mem_support_to_fun
 -- This is because a polynomial is defined as an add_monoid_algebra, which is a finsupp function, which has these three fields
@@ -159,40 +143,9 @@ end
 --   support is the support of the function
 --   to_fun is the function itself
 --   mem_support_to_fun is the proof that the function is nonzero exacly on it's defined support
-
--- -- Frankly, this function should be generalized to all mv_polynomials
--- -- Not just nv_polynomials over vars
--- def div_X (p : mv_polynomial vars F) (s : vars) : (mv_polynomial vars F) :=
--- { to_fun := λ m, p.coeff (increment m s),
---   support := ⟨(p.support.filter (λ m: vars →₀ ℕ, m s > 0)).1.map (λ m, decrement m s),
---     multiset.nodup_map_on begin
---         simp only [finset.mem_def.symm, finset.mem_erase, finset.mem_filter],
---         assume x hx y hy hxy,
---         show x = y, from equal_dec_equal s x y hx.2 hy.2 hxy,
---       end
---       (p.support.filter (λ m: vars →₀ ℕ, m s > 0)).2⟩,
---   mem_support_to_fun := begin
---     intro n,
---     apply iff.intro,
---     intro h, 
---     have h1 : (n ∈ multiset.map (λ (m : vars →₀ ℕ), decrement m s) (finset.filter (λ (m : vars →₀ ℕ), m s > 0) p.support).val) := finset.mem_def.1 h,
---     have h2 := multiset.mem_map.1 h1,
---     sorry
---   -- λ (n : vars →₀ ℕ), 
---     -- suffices (∃ (a : vars →₀ ℕ), (¬coeff a (p : mv_polynomial vars F) = 0 ∧ a.to_fun s > 0) ∧ decrement a s = n) ↔
---     --   ¬coeff (increment n s) p = 0,
---     -- by 
---     -- simpa [finset.mem_def.symm],
---     -- ⟨λ ⟨a, ha⟩, by rw [← ha.2, nat.sub_add_cancel ha.1.2]; exact ha.1.1,
---     --   λ h, ⟨n + 1, ⟨h, nat.succ_pos _⟩, nat.succ_sub_one _⟩⟩ 
---   end
--- }
-
-lemma pos_of_ne_zero {n : nat} : n ≠ 0 → n > 0 :=
-or.resolve_left (nat.eq_zero_or_pos n)
-
 -- Frankly, this function should be generalized to all mv_polynomials
 -- Not just mv_polynomials over vars
+-- TODO generalize this method and add to mathlib candidates folder
 def div_X_v2 (p : mv_polynomial vars F) (s : vars) (h : (∀ m : vars →₀ ℕ, m s = 0 -> p.coeff m = 0)) : (mv_polynomial vars F) :=
 { to_fun := λ m, p.coeff (increment m s),
   support := p.support.image (λ m, decrement m s), 
@@ -233,12 +186,12 @@ def div_X_v2 (p : mv_polynomial vars F) (s : vars) (h : (∀ m : vars →₀ ℕ
   end
 }
 
-/-- In the product of a polynomial with a variable, the coefficients of terms without that variable are zero -/
-lemma mul_var_no_constant (a : mv_polynomial vars F) (s : vars) :
-(∀ m : vars →₀ ℕ, m s = 0 -> (a * X s).coeff m = 0)
+/-- In the product of a polynomial with a variable, the coefficients of all terms without that variable are zero -/
+lemma mul_var_no_constant (a : mv_polynomial vars F) (s : vars) (m : vars →₀ ℕ):
+m s = 0 -> (a * X s).coeff m = 0
 :=
 begin
-  intros m hc,
+  intro hc,
   have h13 := coeff_mul_X' m s a,
   rw h13,
   clear h13,
@@ -328,15 +281,7 @@ begin
 
   apply mul_var_no_constant,
   exact hc,
-
-
-
+end
 
 end
 
-
--- End section
-end
-
-
--- end mv_polynomial
