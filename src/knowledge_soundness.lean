@@ -200,7 +200,7 @@ def V_wit_sv : polynomial F
 -- TODO move helper lemmas to another file?
 
 /-- Helper lemma for main theorem -/
-lemma helper_lemma_1 (j : fin m) : (λ x : fin m, mv_polynomial.coeff (finsupp.single vars.X ↑j) (b x • X_poly ^ (x : ℕ))) 
+lemma helper_1 (j : fin m) : (λ x : fin m, mv_polynomial.coeff (finsupp.single vars.X ↑j) (b x • X_poly ^ (x : ℕ))) 
 = (λ x : fin m, ite (x = j) (b x) 0)
 :=
 begin
@@ -243,7 +243,7 @@ begin
 end
 
 /-- Helper lemma for main theorem -/
-lemma helper_lemma_2 (j : fin m) : (λ (x : fin n_wit), mv_polynomial.coeff (finsupp.single vars.X ↑j) (b' x • (mv_polynomial.monomial (finsupp.single vars.Y 1) 1 * polynomial.eval₂ mv_polynomial.C X_poly (u_wit x))))
+lemma helper_2 (j : fin m) : (λ (x : fin n_wit), mv_polynomial.coeff (finsupp.single vars.X ↑j) (b' x • (mv_polynomial.monomial (finsupp.single vars.Y 1) 1 * polynomial.eval₂ mv_polynomial.C X_poly (u_wit x))))
 = (λ x : fin n_wit, 0)
 :=
 begin
@@ -264,7 +264,7 @@ begin
 end
 
 /-- Helper lemma for main theorem -/
-lemma helper_lemma_3 : (λ x : fin m, mv_polynomial.coeff (finsupp.single vars.Z 1) (b x • X_poly ^ (x : ℕ))) 
+lemma helper_3 : (λ x : fin m, mv_polynomial.coeff (finsupp.single vars.Z 1) (b x • X_poly ^ (x : ℕ))) 
 = (λ x : fin m,  0)
 :=
 begin
@@ -283,7 +283,7 @@ begin
 end
 
 /-- Helper lemma for main theorem -/
-lemma helper_lemma_4 : (λ (x : fin n_wit), mv_polynomial.coeff (finsupp.single vars.Z 1) (b' x • (mv_polynomial.monomial (finsupp.single vars.Y 1) 1 * polynomial.eval₂ mv_polynomial.C X_poly (u_wit x))))
+lemma helper_4 : (λ (x : fin n_wit), mv_polynomial.coeff (finsupp.single vars.Z 1) (b' x • (mv_polynomial.monomial (finsupp.single vars.Y 1) 1 * polynomial.eval₂ mv_polynomial.C X_poly (u_wit x))))
 = (λ x : fin n_wit, 0)
 :=
 begin
@@ -303,7 +303,7 @@ begin
   simp,
 end
 
-lemma helper_lemma_5 : (∀ i, b i = 0) -> (λ (i : fin m), b i • crs_powers_of_τ i) = (λ (i : fin m), 0)
+lemma helper_5 : (∀ i, b i = 0) -> (λ (i : fin m), b i • crs_powers_of_τ i) = (λ (i : fin m), 0)
 :=
 begin
   intro tmp,
@@ -313,7 +313,7 @@ begin
   simp,
 end
 
-lemma helper_lemma_6 : (λ (x : fin m), mv_polynomial.coeff (finsupp.single vars.Z 2) (h x • crs_powers_of_τ x)) = λ x, 0
+lemma helper_6 : (λ (x : fin m), mv_polynomial.coeff (finsupp.single vars.Z 2) (h x • crs_powers_of_τ x)) = λ x, 0
 :=
 begin
   apply funext,
@@ -333,7 +333,7 @@ begin
   exact two_ne_zero,
 end
 
-lemma helper_lemma_7 : (λ (x : fin n_wit), mv_polynomial.coeff (finsupp.single vars.Z 2) (h' x • crs_β_ssps x)) = λ x, 0
+lemma helper_7 : (λ (x : fin n_wit), mv_polynomial.coeff (finsupp.single vars.Z 2) (h' x • crs_β_ssps x)) = λ x, 0
 :=
 begin
   apply funext,
@@ -555,7 +555,7 @@ begin
   rw H,
   simp,
   rw mv_polynomial.coeff_sum,
-  rw helper_lemma_6,
+  rw helper_6,
   rw finset.sum_const_zero,
   rw [crs_γ, crs_γβ],
   repeat {rw mv_polynomial.smul_eq_C_mul},
@@ -568,7 +568,7 @@ begin
   rw if_neg,
   rw if_neg,
   simp,
-  rw helper_lemma_7,
+  rw helper_7,
   rw finset.sum_const_zero,
   rw finsupp.ext_iff,
   rw not_forall,
@@ -831,6 +831,7 @@ end
 
 
 -- TODO abstract more lemmas from this theorem
+-- TODO A nice goal would be to make it so that the main points in the proof from the paper appear as have statements, with a comment giving an english description of the statement
 
 /-- Show that if the adversary polynomials obey the equations, then the coefficients give a satisfying witness -/
 theorem case_1 (a_stmt : fin n_stmt → F ) : 
@@ -840,10 +841,12 @@ theorem case_1 (a_stmt : fin n_stmt → F ) :
 :=
 begin
   intros eqnI eqnII,
-  -- B_wit has no terms with no Y component
+  -- "B_wit only has terms with a Y component"
   have h1 : (∀ m : vars →₀ ℕ, m vars.Y = 0 -> B_wit.coeff m = 0),
   rw eqnI,
   apply mul_var_no_constant V_wit vars.Y,
+  -- h1 done
+  -- "b_0 b_1, ..., b_m" are all zero
   have h2 : ∀ i : fin m, b i = 0,
   have h2_1 : (∀ (i : fin m), B_wit.coeff (finsupp.single vars.X i) = b i),
   intro j,
@@ -861,13 +864,13 @@ begin
   rw if_neg,
   rw if_neg,
   simp,
-  rw helper_lemma_1,
+  rw helper_1,
   rw finset.sum_ite,
   simp,
   rw finset.filter_eq',
   rw if_pos,
   rw finset.sum_singleton,
-  rw helper_lemma_2,
+  rw helper_2,
   simp,
   simp,
   rw finsupp.ext_iff,
@@ -903,9 +906,9 @@ begin
   rw if_pos,
   rw if_neg,
   -- simp,
-  rw helper_lemma_3,
+  rw helper_3,
   -- simp,
-  rw helper_lemma_4,
+  rw helper_4,
   simp,
   rw finsupp.ext_iff,
   simp,
@@ -922,7 +925,7 @@ begin
   -- h3 done
   have h4 : B_wit = b_γβ • crs_γβ + finset.sum (finset.fin_range n_wit) (λ i, (b' i) • (crs_β_ssps i)),
   rw B_wit,
-  rw helper_lemma_5 h2,
+  rw helper_5 h2,
   rw h3,
   simp,
   -- h4 done
