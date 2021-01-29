@@ -14,6 +14,9 @@ This file proves the knowledge-soundness property of the
 [Baby SNARK](https://github.com/initc3/babySNARK) system, 
 as described in section 5 of the paper.
 
+NOTE: Currently we are not "in the exponent", we just prove things ignoring an explicit formalization of the Algebraic Group Model. perhaps with more devlopment this can be done
+
+
 -/
 
 section
@@ -24,22 +27,10 @@ noncomputable theory
 universes u
 
 
--- /-- An inductive type from which to index the variables of the 3-variable polynomials the proof manages -/
--- @[derive decidable_eq]
--- inductive vars : Type
--- | X : vars
--- | Y : vars
--- | Z : vars
-
 /-- The finite field parameter of our SNARK -/
 parameter {F : Type u}
 parameter [field F]
 
--- /-- Helper for converting mv_polynomial to single -/
--- def singlify : vars -> polynomial F
--- | x := ite (x = vars.X) polynomial.X 1
--- -- | vars.Y := 1
--- -- | vars.Z := 1
 
 /-- Helper for converting mv_polynomial to single -/
 @[simp]
@@ -75,20 +66,13 @@ begin
 end
 
 
--- /-- Vector form of range function -/
--- def vector_range (k : ℕ) : vector ℕ k :=
--- ⟨list.range k, by simp⟩
--- /- TODO ask mathlib maintainers to add vector.range to mathlib -/
--- -- mathlib people suggest using fin n \to R instead of vectors
-
-
 /-- The naturals representing the number of gates in the circuit, the statement size, and witness size repectively-/ 
 parameters {m n_stmt n_wit : ℕ}
 def n := n_stmt + n_wit
 
+-- It is necessary that 0 < m for the later t to be monic
 parameter {hm : 0 < m}
 -- NOTE: In the paper, n_stmt is l and n_wit is n-l. Here, n is defined from these values.
-
 
 /-- u_stmt and u_wit are fin-indexed collections of polynomials from the square span program -/
 parameter {u_stmt : fin n_stmt → (polynomial F) }
@@ -97,10 +81,12 @@ parameter {u_wit : fin n_wit → (polynomial F) }
 
 
 /-- The polynomial divisibility by which is used to verify satisfaction of the SSP -/
-def r : fin m → F := (λ i, (i : F))
-/-- (X - r_1) ... (X - r_m) -/
 def t : polynomial F := finset.prod (finset.fin_range m) (λ i, polynomial.X - polynomial.C (i.1 : F))
+-- As it is, t is defined as (X - 0)(X - 1) ... (X - (m-1))
+-- An alternative would be (X - r_1) ... (X - r_m) for some set indexed by fin m
+def r : fin m → F := (λ i, (i : F))
 
+/-- t has degree m -/
 lemma nat_degree_t : t.nat_degree = m
 :=
 begin
@@ -133,59 +119,14 @@ begin
   rw mv_polynomial.single_eq_C_mul_X,
 end
 
--- lemma gdi_again : (λ (n : vars) (e : ℕ), singlify n ^ e) = (λ (n : vars) (e : ℕ), ite (n = vars.X) ((polynomial.X : polynomial F) ^ (e)) 1)
--- :=
--- begin
---   funext,
---   intros,
---   rw singlify,
---   rw ite_pow,
---   rw one_pow,
--- end
-
--- lemma gdi_again2 (a₁ : vars →₀ ℕ) : a₁.prod (λ (n : vars) (e : ℕ), singlify n ^ e) = ((polynomial.X : polynomial F) ^ (a₁ vars.X))
--- :=
--- begin
---   rw gdi_again,
---   rw finsupp.prod,
---   rw finset.prod_ite,
---   simp,
---   rw finset.filter_eq',
---   by_cases vars.X ∈ a₁.support,
---   rw if_pos,
---   rw finset.prod_singleton,
---   exact h,
---   rw if_neg,
---   rw finset.prod_empty,
---   have h1 : a₁ vars.X = 0,
---   rw finsupp.not_mem_support_iff at h,
---   exact h,
---   rw h1,
---   rw pow_zero,
---   exact h,
--- end
-
-
+/-- Converting a single variable polynomial to a multivariable polynomial and back yields the same polynomial -/
 lemma multivariable_to_single_variable (t : polynomial F) : ((t.eval₂ mv_polynomial.C X_poly).eval₂ polynomial.C singlify) = t 
 :=
 begin
   rw X_poly,
   rw polynomial.eval₂,
   rw finsupp.sum,
-  -- rw mv_polynomial.eval₂_sum,
   simp,
-  -- conv
-  -- begin
-  --   to_rhs,
-  --   rw polynomial.as_sum_support,
-  -- -- rw polynomial.as_sum_support_C_mul_X_pow,
-  -- end,
-  -- apply polynomial.ext,
-
-
-  -- intro n,
-  -- simp,
-  -- -- rw polynomial.coeff_mul,
   conv
   begin
     to_lhs,
@@ -199,59 +140,8 @@ begin
   end,
   rw ←polynomial.coeff,
   rw t.as_sum_support.symm,
-  
-  -- simp,
-  -- TODO
-  
-  
-  -- rw if_ctx_congr_prop
-  
-  -- conv
-  -- begin
-  --   to_lhs,
-  --   congr,
-  --   skip,
-  --   funext,
-  --   simp,
-  --   -- rw mv_polynomial.eval₂_mul,
-  --   -- rw mv_polynomial.eval₂_C,
-  --   -- rw mv_polynomial.eval₂_pow,
-  -- end,
-
-
-  -- rw X_poly,
-  -- rw gdi_why_is_this_necessary_todo,
-  -- rw mv_polynomial.eval₂,
-  -- rw finsupp.ext_iff,
-  -- intro a,
-  -- rw finsupp.sum_apply,
-  -- conv
-  -- begin
-  --   to_lhs,
-  --   congr,
-  --   skip,
-  --   funext,
-  --   rw gdi_again2,
-  --   rw polynomial.X_pow_eq_monomial,
-  --   rw ←polynomial.monomial_zero_left,
-  --   rw polynomial.monomial_mul_monomial,
-  --   simp,
-  --   rw ←polynomial.coeff,
-  --   rw polynomial.coeff_monomial,
-  -- end,
-  -- rw finsupp.sum,
-  -- rw finsupp.sum,
-  -- rw finset.sum_ite,
-  -- rw finset.sum_const_zero,
-  
-  -- -- rw gdi_again2,
-  -- -- rw gdi_again3,
-  -- -- rw finsupp.prod,
-  -- -- rw prod_ite,
-  -- -- rw finsupp.single_apply,
-
 end
-
+-- TODO this function is general purpose enough that it might be generalized a bit further and submitted to mathlib
 
 
 lemma t_multivariable_to_single_variable : (mv_t.eval₂ polynomial.C singlify) = t 
@@ -261,10 +151,6 @@ begin
 end
 
 
-
-
-
-
 -- TODO rewrite without lambdas
 /-- The crs elements as multivariate polynomials of the toxic waste samples -/
 def crs_powers_of_τ : fin m → (mv_polynomial vars F) := (λ i, X_poly^(i : ℕ))
@@ -272,18 +158,16 @@ def crs_γ : mv_polynomial vars F := Z_poly
 def crs_γβ : mv_polynomial vars F := Z_poly * Y_poly
 def crs_β_ssps : fin n_wit → (mv_polynomial vars F) := (λ i, (Y_poly) * (u_wit i).eval₂ mv_polynomial.C X_poly) 
 
+
 /-- The statement polynomial that the verifier computes from the statement bits, as a single variable polynomial -/
 def V_stmt_sv (a_stmt : fin n_stmt → F) : polynomial F 
 := finset.sum (finset.fin_range n_stmt) (λ i, a_stmt i • u_stmt i)
+
 
 /-- V_stmt as a multivariable polynomial of vars.X -/
 def V_stmt (a_stmt : fin n_stmt → F) : mv_polynomial vars F 
 := (V_stmt_sv a_stmt).eval₂ mv_polynomial.C X_poly
 
-
--- /-- Checks whether a witness satisfies the SSP -/
--- def satisfying_wit (a_stmt : fin n_stmt → F ) (a_wit : fin n_wit → F) := 
--- polynomial.mod_by_monic ((finset.sum (finset.fin_range n_stmt) (λ i, a_stmt i • u_stmt i))^2) t = 1
 
 /-- Checks whether a witness satisfies the SSP -/
 def satisfying_wit (a_stmt : fin n_stmt → F ) (a_wit : fin n_wit → F) := 
@@ -969,16 +853,11 @@ begin
   rw multivariable_to_single_variable,
 end
 
--- lemma foo (a b n : polynomial F) : (a * n + b) % n = b % n
--- :=
--- begin
---   hint,
--- end
 
--- TODO encapsulate all evals in their own multivariablification varaibles
+-- TODO abstract more lemmas from this theorem
 
 /-- Show that if the adversary polynomials obey the equations, then the coefficients give a satisfying witness -/
-lemma case_1 (a_stmt : fin n_stmt → F ) : 
+theorem case_1 (a_stmt : fin n_stmt → F ) : 
   (B_wit = V_wit * Y_poly) 
   -> (H * mv_t + mv_polynomial.C 1 = (V_stmt a_stmt + V_wit)^2) 
   -> (satisfying_wit a_stmt b')
@@ -1098,74 +977,19 @@ begin
   rw eqnII',
   rw add_assoc,
   -- h6_1 done
-  -- have h6_2 : (H * mv_t + mv_polynomial.C 1).coeff (finsupp.single vars.Z 2) = 0,
-  -- rw mv_polynomial.coeff_add,
-  -- rw mv_polynomial.coeff_C,
-  -- rw if_neg,
-  -- rw mv_polynomial.coeff_mul,
-  -- rw square_antidiagonal,
-  -- rw finset.sum_insert,
-  -- rw finset.sum_insert,
-  -- rw finset.sum_singleton,
-  -- simp,
-
-  -- rw [h6_2_1, h6_2_2, h6_2_3],
-  -- simp,
-  -- -- Prove that {(Z^0, Z^2), (Z^1, Z^1), (Z^2, Z^0)} is actually a set of three distinct elements
-  -- rw finset.mem_singleton,
-  -- rw prod.ext_iff,
-  -- rw decidable.not_and_iff_or_not,
-  -- left,
-  -- rw finsupp.single_eq_single_iff,
-  -- simp,
-  -- exact dec_trivial,
-  -- rw finset.mem_insert,
-  -- rw decidable.not_or_iff_and_not,
-  -- split,
-  -- rw prod.ext_iff,
-  -- rw decidable.not_and_iff_or_not,
-  -- left,
-  -- rw finsupp.single_eq_single_iff,
-  -- simp,
-  -- rw finset.mem_singleton,
-  -- rw prod.ext_iff,
-  -- rw decidable.not_and_iff_or_not,
-  -- left,
-  -- rw finsupp.single_eq_single_iff,
-  -- simp,
-  -- exact dec_trivial,
-  -- rw finsupp.single_eq_zero,
-  
-  -- todo
   rw h6_2 at h6_1,
   rw h6_3 at h6_1,
   exact pow_eq_zero (eq.symm h6_1),
   rw h6 at h5,
   simp at h5,
-  -- Turn eqnII into a statement about 1variable polynomials 
-  -- by evaluation with vars.X -> X, vars.Y -> 1, vars.Z -> 1
-  -- TODO is there a more efficient way to simply say (evaluate f on both sides of this hypothesis)?
+
+  -- TODO is there a more efficient way to simply say (evaluate f on both sides of this hypothesis)? Yes the congr tactic does this
   have h10 : ((H * mv_t + mv_polynomial.C 1).eval₂ polynomial.C singlify) %ₘ t = (((V_stmt a_stmt + V_wit)^2).eval₂ polynomial.C singlify) %ₘ t,
   rw eqnII,
   rw mv_polynomial.eval₂_add at h10,
   rw mv_polynomial.eval₂_mul at h10,
-  -- rw t_multivariable_to_single_variable at h10,
-
-
-
-  -- rw h5 at eqnII,
-
   rw satisfying_wit,
   rw ←V_wit_sv,
-  -- conv at h5
-  -- begin
-  --   to_rhs,
-  --   congr,
-  --   skip,
-  --   funext,
-  --   rw ←polynomial.eval₂_smul,
-  -- end,
-  -- TODO h5 needs to be input to h11 somehow
   rw h11,
   rw ←h10,
   rw t_multivariable_to_single_variable,
@@ -1193,11 +1017,7 @@ begin
     skip,
     funext,
     simp,
-    -- rw polynomial.eval₂_smul,
-    -- rw mv_polynomial.smul_eq_C_mul,
-    -- rw ring_hom.has_coe_to_fun,
   end,
-  -- have h15 : (∀ i : fin n_wit, ((@mv_polynomial.C vars F) (b' i) : F) = b' i),
   conv
   begin
     to_lhs,
@@ -1206,40 +1026,7 @@ begin
     funext,
     rw mv_polynomial.smul_eq_C_mul,
   end,
-
-
-
-
-
-
-
-    -- now put it all together
-
-
-  -- Plug h5 into eqnII and look at the coeff (single Z 2) of both sides.
-
-
-  -- suffices tmp: ¬(finsupp.single vars.Z 1 + finsupp.single vars.Y 1) vars.Y = (finsupp.single vars.X ↑j) vars.Y,
-  -- rw finsupp.eq_single_iff,
-
-  -- simp,
-
-
-
-  
-
-
-
 end
-
-
-
--- TODOs
--- define Prove function, taking crs and a
--- Define verify
--- NOTE: Currently we are not "in the exponent"
-
-
 
 
 end
