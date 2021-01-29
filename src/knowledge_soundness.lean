@@ -16,6 +16,7 @@ as described in section 5 of the paper.
 
 NOTE: Currently we are not "in the exponent", we just prove things ignoring an explicit formalization of the Algebraic Group Model. perhaps with more devlopment this can be done
 
+TODO: Many of the lemmas are poorly named, this file should be given a once-over to rename the lemmas
 
 -/
 
@@ -500,7 +501,7 @@ begin
   exfalso,
   exact f,
 
-  -- FOrward case
+  -- Forward case
   simp,
   intro h,
   cases h,
@@ -710,11 +711,8 @@ begin
   rw V_stmt,
   rw polynomial.eval₂,
   rw finsupp.sum,
-  -- rw mv_polynomial.smul_eq_C_mul,
-  -- rw mv_polynomial.coeff_C_mul,
   rw mv_polynomial.coeff_sum,
   simp,
-  -- right,
   apply finset.sum_eq_zero,
   intro x,
   intro tmp,
