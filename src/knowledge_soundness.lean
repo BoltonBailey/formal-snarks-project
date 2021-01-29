@@ -4,6 +4,7 @@ Author: Bolton Bailey
 import data.mv_polynomial.basic
 import data.polynomial.div
 import data.polynomial.field_division
+import .general_lemmas.polynomial_mv_sv_cast
 import .mv_divisability
 import .vars
 
@@ -91,9 +92,10 @@ def r : fin m → F := (λ i, (i : F))
 lemma nat_degree_t : t.nat_degree = m
 :=
 begin
+  sorry,
   -- rw polynomial.nat_degree,
-  rw t,
-  rw polynomial.degree_of_prod,
+  -- rw t,
+  -- rw polynomial.degree_of_prod,
   -- rw polynomial.degree,
   -- rw option.get_or_else,
 end
@@ -121,7 +123,7 @@ begin
 end
 
 /-- Converting a single variable polynomial to a multivariable polynomial and back yields the same polynomial -/
-lemma multivariable_to_single_variable (t : polynomial F) : ((t.eval₂ mv_polynomial.C X_poly).eval₂ polynomial.C singlify) = t 
+lemma my_multivariable_to_single_variable (t : polynomial F) : ((t.eval₂ mv_polynomial.C X_poly).eval₂ polynomial.C singlify) = t 
 :=
 begin
   rw X_poly,
@@ -144,11 +146,36 @@ begin
 end
 -- TODO this function is general purpose enough that it might be generalized a bit further and submitted to mathlib
 
+-- /-- Converting a single variable polynomial to a multivariable polynomial and back yields the same polynomial -/
+-- lemma my_multivariable_to_single_variable (t : polynomial F) := multivariable_to_single_variable vars vars.X singlify
+-- :=
+-- begin
+--   rw X_poly,
+--   rw polynomial.eval₂,
+--   rw finsupp.sum,
+--   simp,
+--   conv
+--   begin
+--     to_lhs,
+--     congr,
+--     skip,
+--     funext,
+--     rw polynomial.X_pow_eq_monomial,
+--     rw ←polynomial.monomial_zero_left,
+--     rw polynomial.monomial_mul_monomial,
+--     simp,  
+--   end,
+--   rw ←polynomial.coeff,
+--   rw t.as_sum_support.symm,
+-- end
+-- -- TODO this function is general purpose enough that it might be generalized a bit further and submitted to mathlib
+
 
 lemma t_multivariable_to_single_variable : (mv_t.eval₂ polynomial.C singlify) = t 
 :=
 begin
-  exact multivariable_to_single_variable t,
+  apply multivariable_to_single_variable vars vars.X singlify _ t,
+  simp,
 end
 
 
@@ -848,7 +875,9 @@ begin
   rw V_wit_eq,
   -- h11_1 done
   rw h11_1,
-  rw multivariable_to_single_variable,
+  rw X_poly,
+  rw multivariable_to_single_variable vars vars.X singlify,
+  simp,
 end
 
 
