@@ -18,7 +18,9 @@ as described in section 5 of the paper.
 
 NOTE: Currently we are not "in the exponent", we just prove things ignoring an explicit formalization of the Algebraic Group Model. perhaps with more devlopment this can be done
 
-TODO: Many of the lemmas are poorly named, this file should be given a once-over to rename the lemmas
+TODO: Many of the lemmas are poorly named, this file should be given a once-over to rename the lemmas'
+
+TODO: Move things related to definition of baby SNARK to the babysnark.lean file.
 
 -/
 
