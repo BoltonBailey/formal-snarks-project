@@ -16,7 +16,7 @@ This file proves the knowledge-soundness property of the
 [Baby SNARK](https://github.com/initc3/babySNARK) system, 
 as described in section 5 of the paper.
 
-NOTE: Currently we are not "in the exponent", we just prove things ignoring an explicit formalization of the Algebraic Group Model. perhaps with more devlopment this can be done
+NOTE: Currently we are not "in the exponent", we just prove things ignoring an explicit formalization of the Algebraic Group Model. Perhaps with more development, we can i
 
 TODO: Many of the lemmas are poorly named, this file should be given a once-over to rename the lemmas'
 
@@ -581,10 +581,10 @@ begin
   apply finset.sum_eq_zero,
   intro x,
   intro tmp,
-  simp,
-  right,
+  -- simp,
+  -- right,
   rw X_poly,
-  rw mv_polynomial.X_pow_eq_single,
+  rw ←mv_polynomial.single_eq_C_mul_X,
   rw mv_polynomial.coeff_monomial,
   rw if_neg,
   rw finsupp.single_eq_single_iff,
@@ -604,10 +604,10 @@ begin
   apply finset.sum_eq_zero,
   intro x,
   intro tmp,
-  simp,
-  right,
+  -- simp,
+  -- right,
   rw X_poly,
-  rw mv_polynomial.X_pow_eq_single,
+  rw ←mv_polynomial.single_eq_C_mul_X,
   rw mv_polynomial.coeff_monomial,
   rw if_neg,
   rw finsupp.single_eq_single_iff,
@@ -737,6 +737,8 @@ begin
   exact dec_trivial,
 end
 
+-- TODO finset.fin_range -> fin
+
 lemma h6_3_2 : mv_polynomial.coeff (finsupp.single vars.Z 2)
   (∑ i in (finset.fin_range n_wit), b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i)) = 0
 :=
@@ -746,20 +748,38 @@ begin
   rw finset.sum_const_zero,
 end
 
-lemma h6_3_3 (a_stmt) : mv_polynomial.coeff (finsupp.single vars.Z 2) (V_stmt a_stmt) = 0
+lemma h6_3_3 (a_stmt : fin n_stmt -> F) : mv_polynomial.coeff (finsupp.single vars.Z 2) 
+  (∑ (i : fin n_stmt) in finset.fin_range n_stmt, a_stmt i • polynomial.eval₂ mv_polynomial.C X_poly (u_stmt i)) = 0
 :=
 begin
-  rw V_stmt,
-  rw polynomial.eval₂,
-  rw finsupp.sum,
+  -- rw V_stmt,
+  -- rw polynomial.eval₂,
+  -- rw finsupp.sum,
   rw mv_polynomial.coeff_sum,
-  simp,
+  -- simp,
   apply finset.sum_eq_zero,
   intro x,
   intro tmp,
+  -- rw polynomial.smul,
+  -- simp,
+  -- right,
+  rw polynomial.eval₂,
+  rw finsupp.smul_sum,
+  rw finsupp.sum,
+  rw mv_polynomial.coeff_sum,
+  apply finset.sum_eq_zero,
+  intro x_1,
+  intro tmp2,
+
+  -- rw mv_polynomial.,
+  rw X_poly,
+  -- rw mv_polynomial.X,
+  -- rw polynomial.smul_eq_C_mul,
+  rw mv_polynomial.smul_eq_C_mul,
   simp,
   right,
-  rw X_poly,
+  right,
+  -- sorry,
   rw mv_polynomial.X_pow_eq_single,
   rw mv_polynomial.coeff_monomial,
   rw if_neg,
@@ -811,20 +831,55 @@ begin
   rw finset.sum_const_zero,
 end
 
-lemma h6_3_6 (a_stmt) : mv_polynomial.coeff (finsupp.single vars.Z 1) (V_stmt a_stmt) = 0 
+lemma h6_3_6 (a_stmt : fin n_stmt -> F): mv_polynomial.coeff (finsupp.single vars.Z 1) 
+  (∑ (i : fin n_stmt) in finset.fin_range n_stmt,
+  a_stmt i • polynomial.eval₂ mv_polynomial.C X_poly (u_stmt i)) = 0 
 :=
 begin
-  rw V_stmt,
-  rw polynomial.eval₂,
-  rw finsupp.sum,
+  -- rw V_stmt,
+  -- rw polynomial.eval₂,
+  -- rw finsupp.sum,
+  -- rw mv_polynomial.coeff_sum,
+  -- simp,
+  -- apply finset.sum_eq_zero,
+  -- intro x,
+  -- intro tmp,
+  -- simp,
+  -- right,
+  -- rw X_poly,
+  -- rw mv_polynomial.X_pow_eq_single,
+  -- rw mv_polynomial.coeff_monomial,
+  -- rw if_neg,
+  -- rw finsupp.single_eq_single_iff,
+  -- simp,
+    -- rw V_stmt,
+  -- rw polynomial.eval₂,
+  -- rw finsupp.sum,
   rw mv_polynomial.coeff_sum,
-  simp,
+  -- simp,
   apply finset.sum_eq_zero,
   intro x,
   intro tmp,
+  -- rw polynomial.smul,
+  -- simp,
+  -- right,
+  rw polynomial.eval₂,
+  rw finsupp.smul_sum,
+  rw finsupp.sum,
+  rw mv_polynomial.coeff_sum,
+  apply finset.sum_eq_zero,
+  intro x_1,
+  intro tmp2,
+
+  -- rw mv_polynomial.,
+  rw X_poly,
+  -- rw mv_polynomial.X,
+  -- rw polynomial.smul_eq_C_mul,
+  rw mv_polynomial.smul_eq_C_mul,
   simp,
   right,
-  rw X_poly,
+  right,
+  -- sorry,
   rw mv_polynomial.X_pow_eq_single,
   rw mv_polynomial.coeff_monomial,
   rw if_neg,
@@ -833,7 +888,11 @@ begin
 end
 
 
-lemma h6_3 (a_stmt) : ((V_stmt a_stmt + b_γβ • Z_poly + ∑ i in (finset.fin_range n_wit), b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i)) ^ 2).coeff (finsupp.single vars.Z 2) = b_γβ ^ 2
+lemma h6_3 (a_stmt : fin n_stmt -> F) : (
+    (b_γβ • Z_poly 
+      + ∑ (i : fin n_stmt) in finset.fin_range n_stmt, a_stmt i • polynomial.eval₂ mv_polynomial.C X_poly (u_stmt i) 
+      + ∑ (i : fin n_wit) in finset.fin_range n_wit, b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i)
+    ) ^ 2).coeff (finsupp.single vars.Z 2) = b_γβ ^ 2
 :=
 begin
   rw pow_succ,
@@ -845,8 +904,12 @@ begin
   rw finset.sum_insert,
   rw finset.sum_singleton,
   simp,
-  rw [h6_3_1, h6_3_2, h6_3_3],
-  rw [h6_3_4, h6_3_5, h6_3_6],
+  rw h6_3_1, 
+  rw h6_3_2, 
+  rw h6_3_3,
+  rw h6_3_4, 
+  rw h6_3_5, 
+  rw h6_3_6,
   simp,
   rw pow_succ,
   rw pow_one,
@@ -1017,28 +1080,54 @@ begin
     rw h5_1_1,
     rw finset.mul_sum,
     simp,
-  -- -- "... write V(.) as follows ..."
-  -- have h6 : V a_stmt = b_γβ • Z_poly 
-  --     + ∑ i in (finset.fin_range n_stmt), (a_stmt i) • ((u_stmt i).eval₂ mv_polynomial.C X_poly)
-  --     + ∑ i in (finset.fin_range n_wit), (b' i) • ((u_wit i).eval₂ mv_polynomial.C X_poly),
-  --   rw V,
-  --   rw V_stmt,
-  --   rw h5,
-  -- -- How is this used? TODO
+  -- "... write V(.) as follows ..."
+  -- TODO adding this code is the next step in making this proof reflect more closely the proof from the paper. However, in writing this, I found that the polynomial.eval₂_smul lemma doesn't have the format I think it should. Therefore, I will try to change that lemma before coming back to this.
+  have h6 : V a_stmt = b_γβ • Z_poly 
+      + ∑ i in (finset.fin_range n_stmt), (a_stmt i) • ((u_stmt i).eval₂ mv_polynomial.C X_poly)
+      + ∑ i in (finset.fin_range n_wit), (b' i) • ((u_wit i).eval₂ mv_polynomial.C X_poly),
+    rw V,
+    rw V_stmt,
+    rw h5,
+    rw V_stmt_sv,
+    rw polynomial.eval₂_finset_sum,
+    simp only [polynomial.eval₂_smul],
+    -- conv
+    -- begin
+    --   to_lhs,
+    --   congr,
+    --   congr,
+    --   skip,
+    --   funext,
+    --   -- rw mv_polynomial.smul_eq_C_mul,
+    -- end,
+    simp only [←mv_polynomial.smul_eq_C_mul],
+    ring,
+  -- ... we can conclude that b_γβ = 0.
   have h7 : b_γβ = 0,
     let eqnII' := eqnII,
-    rw V at eqnII',
-    rw h5 at eqnII',
-    have h6_1 : (H * mv_t + mv_polynomial.C 1).coeff (finsupp.single vars.Z 2) = (( V_stmt a_stmt + b_γβ • Z_poly + ∑ i in (finset.fin_range n_wit), b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i)) ^ 2).coeff (finsupp.single vars.Z 2),
-      rw eqnII',
-      rw add_assoc,
+    -- rw V at eqnII',
+    -- rw h5 at eqnII',
+    rw h6 at eqnII',
+    have h6_1 := congr_arg (mv_polynomial.coeff (finsupp.single vars.Z 2)) eqnII',
+    -- have h6_1 : (H * mv_t + mv_polynomial.C 1).coeff (finsupp.single vars.Z 2) = (( V_stmt a_stmt + b_γβ • Z_poly + ∑ i in (finset.fin_range n_wit), b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i)) ^ 2).coeff (finsupp.single vars.Z 2),
+    --   rw eqnII',
+    --   rw add_assoc,
     -- h6_1 done
+    -- rw h6_2 at h6_1,
     rw h6_2 at h6_1,
     rw h6_3 at h6_1,
     exact pow_eq_zero (eq.symm h6_1),
-  -- h6 done
-  rw h7 at h5,
-  simp at h5,
+  -- Finally, we arrive at the conclusion that the coefficients define a satisfying witness such that ...
+  have h8 : V a_stmt = 
+      ∑ i in (finset.fin_range n_stmt), (a_stmt i) • ((u_stmt i).eval₂ mv_polynomial.C X_poly)
+      + ∑ i in (finset.fin_range n_wit), (b' i) • ((u_wit i).eval₂ mv_polynomial.C X_poly),
+    rw h6,
+    rw h7,
+    simp,
+  -- TODO
+
+  -- rw h7 at h5,
+  -- simp at h5,
   -- TODO is there a more efficient way to simply say (evaluate f on both sides of this hypothesis)? Yes the congr tactic does this
   have h10 : ((H * mv_t + mv_polynomial.C 1).eval₂ polynomial.C singlify) %ₘ t = (((V_stmt a_stmt + V_wit)^2).eval₂ polynomial.C singlify) %ₘ t,
     rw eqnII,
@@ -1069,6 +1158,8 @@ begin
   rw h13.2,
   simp,
   rw h5,
+  rw h7,
+  simp,
   rw polynomial.eval₂_finset_sum,
   conv
   begin
