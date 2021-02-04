@@ -736,7 +736,6 @@ begin
   exact dec_trivial,
 end
 
--- TODO finset.fin_range -> fin
 
 lemma h6_3_2 : mv_polynomial.coeff (finsupp.single vars.Z 2)
   (∑ i in (finset.fin_range n_wit), b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i)) = 0
@@ -748,7 +747,7 @@ begin
 end
 
 lemma h6_3_3 (a_stmt : fin n_stmt -> F) : mv_polynomial.coeff (finsupp.single vars.Z 2) 
-  (∑ (i : fin n_stmt) in finset.fin_range n_stmt, a_stmt i • polynomial.eval₂ mv_polynomial.C X_poly (u_stmt i)) = 0
+  (∑ i in finset.fin_range n_stmt, a_stmt i • polynomial.eval₂ mv_polynomial.C X_poly (u_stmt i)) = 0
 :=
 begin
   -- rw V_stmt,
@@ -1122,23 +1121,25 @@ begin
     rw h6,
     rw h7,
     simp,
-  -- TODO
+  -- TODO use h8
 
   -- rw h7 at h5,
   -- simp at h5,
   -- TODO is there a more efficient way to simply say (evaluate f on both sides of this hypothesis)? Yes the congr tactic does this
-  have h10 : ((H * mv_t + mv_polynomial.C 1).eval₂ polynomial.C singlify) %ₘ t = (((V_stmt a_stmt + V_wit)^2).eval₂ polynomial.C singlify) %ₘ t,
+  have h10 : ((H * mv_t + mv_polynomial.C 1).eval₂ polynomial.C singlify) %ₘ t = (((V a_stmt)^2).eval₂ polynomial.C singlify) %ₘ t,
     rw eqnII,
-    rw V,
+    -- rw V,
   -- h10 done
   rw mv_polynomial.eval₂_add at h10,
   rw mv_polynomial.eval₂_mul at h10,
   rw satisfying_wit,
   rw ←V_wit_sv,
+  -- rw ←V,
   rw h11,
+  rw ←V,
   rw ←h10,
   rw mv_t,
-  rw my_multivariable_to_single_variable,
+  rw my_multivariable_to_single_variable t,
   have h12: mv_polynomial.C 1 = (polynomial.C 1 : polynomial F).eval₂ mv_polynomial.C X_poly,
     rw polynomial.eval₂_C,
   -- h12 done
