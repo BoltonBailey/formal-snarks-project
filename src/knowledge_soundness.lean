@@ -100,7 +100,6 @@ begin
   simp,
   intros i hi,
   exact polynomial.X_sub_C_ne_zero (r i),
-  -- TODO https://leanprover.zulipchat.com/#narrow/stream/217875-Is-there.20code.20for.20X.3F/topic/degree_prod/near/224438069
 end
 
 lemma monic_t : t.monic
