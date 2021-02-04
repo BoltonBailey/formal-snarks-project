@@ -22,6 +22,10 @@ TODO: Many of the lemmas are poorly named, this file should be given a once-over
 
 TODO: Move things related to definition of baby SNARK to the babysnark.lean file.
 
+TODO: remove lambdas where possible
+
+TODO: Abstract more lemmas from the main theorem. A nice goal would be to make it so that the main points in the proof from the paper appear as have statements, with a comment giving an english description of the statement
+
 -/
 
 open_locale big_operators
@@ -171,10 +175,9 @@ begin
   apply multivariable_to_single_variable,
   simp,
 end
--- TODO this function is general purpose enough that it might be generalized a bit further and submitted to mathlib
 
 
--- TODO rewrite without lambdas
+
 /-- The crs elements as multivariate polynomials of the toxic waste samples -/
 def crs_powers_of_τ : fin m → (mv_polynomial vars F) := (λ i, X_poly^(i : ℕ))
 def crs_γ : mv_polynomial vars F := Z_poly
@@ -303,7 +306,6 @@ begin
   apply (fin.eq_iff_veq x j).2,
   exact h6,
   exact h h5,
-  -- TODO rename foo, h5, h6
 end
 
 /-- Helper lemma for main theorem -/
@@ -953,8 +955,6 @@ begin
 end
 
 
--- TODO abstract more lemmas from this theorem
--- TODO A nice goal would be to make it so that the main points in the proof from the paper appear as have statements, with a comment giving an english description of the statement
 
 lemma h2_1 : (∀ (i : fin m), B_wit.coeff (finsupp.single vars.X i) = b i) :=
 begin
@@ -1121,7 +1121,7 @@ begin
     rw h6,
     rw h7,
     simp,
-  -- TODO use h8
+  -- TODO use h8 in the following
 
   -- rw h7 at h5,
   -- simp at h5,
