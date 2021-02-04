@@ -89,7 +89,7 @@ parameter {u_wit : fin n_wit → (polynomial F) }
 /-- The roots of the polynomial t -/
 parameter {r : fin m → F} 
 /-- The polynomial divisibility by which is used to verify satisfaction of the SSP -/
-def t : polynomial F := finset.prod (finset.fin_range m) (λ i, polynomial.X - polynomial.C (r i))
+def t : polynomial F := ∏ i in (finset.fin_range m), (polynomial.X - polynomial.C (r i))
 
 
 /-- t has degree m -/
@@ -177,10 +177,10 @@ end
 
 
 /-- The crs elements as multivariate polynomials of the toxic waste samples -/
-def crs_powers_of_τ : fin m → (mv_polynomial vars F) := (λ i, X_poly^(i : ℕ))
+def crs_powers_of_τ (i : fin m) : (mv_polynomial vars F) := X_poly^(i : ℕ)
 def crs_γ : mv_polynomial vars F := Z_poly
 def crs_γβ : mv_polynomial vars F := Z_poly * Y_poly
-def crs_β_ssps : fin n_wit → (mv_polynomial vars F) := (λ i, (Y_poly) * (u_wit i).eval₂ mv_polynomial.C X_poly) 
+def crs_β_ssps (i : fin n_wit) : (mv_polynomial vars F) := (Y_poly) * (u_wit i).eval₂ mv_polynomial.C X_poly
 
 
 /-- The statement polynomial that the verifier computes from the statement bits, as a single variable polynomial -/
@@ -959,7 +959,8 @@ begin
   intro j,
   rw B_wit,
   simp,
-  rw [crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps],
+  rw [crs_powers_of_τ],
+  rw [crs_γ, crs_γβ, crs_β_ssps],
   simp,
   repeat {rw mv_polynomial.smul_eq_C_mul},
   repeat {rw mv_polynomial.coeff_C_mul},
