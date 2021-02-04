@@ -20,8 +20,6 @@ NOTE: Currently we are not "in the exponent", we just prove things ignoring an e
 
 TODO: Many of the lemmas are poorly named, this file should be given a once-over to rename the lemmas'
 
-TODO: Move things related to definition of baby SNARK to the babysnark.lean file.
-
 TODO: remove lambdas where possible
 
 TODO: Abstract more lemmas from the main theorem. A nice goal would be to make it so that the main points in the proof from the paper appear as have statements, with a comment giving an english description of the statement
