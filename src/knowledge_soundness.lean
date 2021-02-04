@@ -178,12 +178,11 @@ end
 
 /-- The crs elements as multivariate polynomials of the toxic waste samples -/
 -- These can't be defined without lambdas, or the code breaks
--- def crs_powers_of_τ (i : fin m) : (mv_polynomial vars F) := X_poly^(i : ℕ)
-def crs_powers_of_τ : fin m → (mv_polynomial vars F) := λ i, X_poly^(i : ℕ)
+def crs_powers_of_τ (i : fin m) : (mv_polynomial vars F) := X_poly^(i : ℕ)
 def crs_γ : mv_polynomial vars F := Z_poly
 def crs_γβ : mv_polynomial vars F := Z_poly * Y_poly
--- def crs_β_ssps (i : fin n_wit) : (mv_polynomial vars F) := (Y_poly) * (u_wit i).eval₂ mv_polynomial.C X_poly
-def crs_β_ssps : fin n_wit -> mv_polynomial vars F := λ i, (Y_poly) * (u_wit i).eval₂ mv_polynomial.C X_poly
+def crs_β_ssps (i : fin n_wit) : (mv_polynomial vars F) := (Y_poly) * (u_wit i).eval₂ mv_polynomial.C X_poly
+
 
 
 /-- The statement polynomial that the verifier computes from the statement bits, as a single variable polynomial -/
@@ -909,9 +908,8 @@ lemma h2_1 : (∀ (i : fin m), B_wit.coeff (finsupp.single vars.X i) = b i) :=
 begin
   intro j,
   rw B_wit,
-  simp,
-  rw [crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps],
-  simp,
+  simp [crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps],
+  -- simp,
   repeat {rw mv_polynomial.smul_eq_C_mul},
   repeat {rw mv_polynomial.coeff_C_mul},
   repeat {rw mv_polynomial.coeff_sum},
@@ -945,9 +943,7 @@ lemma h3_1 : B_wit.coeff (finsupp.single vars.Z 1) = b_γ
 :=
 begin
   rw B_wit,
-  simp,
-  rw [crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps],
-  simp,
+  simp [crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps],
   repeat {rw mv_polynomial.smul_eq_C_mul},
   repeat {rw mv_polynomial.coeff_C_mul},
   repeat {rw mv_polynomial.coeff_sum},
@@ -1022,7 +1018,7 @@ begin
     rw ←eqnI,
     rw h4,
     rw crs_γβ,
-    rw crs_β_ssps,
+    simp only [crs_β_ssps],
     rw mul_add,
     rw h5_1_1,
     rw finset.mul_sum,
