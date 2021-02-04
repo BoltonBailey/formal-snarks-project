@@ -1080,7 +1080,6 @@ begin
     rw finset.mul_sum,
     simp,
   -- "... write V(.) as follows ..."
-  -- TODO adding this code is the next step in making this proof reflect more closely the proof from the paper. However, in writing this, I found that the polynomial.eval₂_smul lemma doesn't have the format I think it should. Therefore, I will try to change that lemma before coming back to this.
   have h6 : V a_stmt = b_γβ • Z_poly 
       + ∑ i in (finset.fin_range n_stmt), (a_stmt i) • ((u_stmt i).eval₂ mv_polynomial.C X_poly)
       + ∑ i in (finset.fin_range n_wit), (b' i) • ((u_wit i).eval₂ mv_polynomial.C X_poly),
