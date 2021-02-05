@@ -110,8 +110,7 @@ lemma monic_t : t.monic
 begin
   rw t,
   apply polynomial.monic_prod_of_monic,
-  intro i,
-  intro,
+  intros i hi,
   exact polynomial.monic_X_sub_C (r i),
 end
 
@@ -139,9 +138,6 @@ begin
   rw h1 at h,
   rw option.get_or_else at h,
   rw h,
-
-  -- -- rw option.get_or_else at h,
-  -- have h1: t.degree.is_some = tt,
 end
 
 
@@ -261,7 +257,6 @@ begin
   rw mv_polynomial.smul_eq_C_mul,
   rw mv_polynomial.C_mul_monomial,
   rw mul_one,
-  -- rw mv_polynomial.coeff_C_mul,
   rw mv_polynomial.coeff_monomial,
   by_cases x = j,
   have h1 : finsupp.single vars.X ↑x = finsupp.single vars.X ↑j,
@@ -324,7 +319,6 @@ begin
   rw mv_polynomial.smul_eq_C_mul,
   rw mv_polynomial.C_mul_monomial,
   rw mul_one,
-  -- rw mv_polynomial.coeff_C_mul,
   rw mv_polynomial.coeff_monomial,
   rw if_neg,
   rw finsupp.single_eq_single_iff,
@@ -740,7 +734,6 @@ begin
   intro j,
   rw B_wit,
   simp [crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps],
-  -- simp,
   repeat {rw mv_polynomial.smul_eq_C_mul},
   repeat {rw mv_polynomial.coeff_C_mul},
   repeat {rw mv_polynomial.coeff_sum},
