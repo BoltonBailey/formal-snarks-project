@@ -109,28 +109,10 @@ lemma monic_t : t.monic
 :=
 begin
   rw t,
-  rw polynomial.monic,
-  rw polynomial.leading_coeff_prod,
-  have h1 : ∀ i : fin m, (polynomial.C 1 * polynomial.X + polynomial.C (- r i)).leading_coeff = 1,
-    intro i,
-    apply polynomial.leading_coeff_X_add_C (1 : F) (-(r i)),
-    simp,
-  simp at h1,
-  have h2 : ∀ i,  polynomial.X + -polynomial.C (r i) = polynomial.X - polynomial.C (r i),
-    intro i,
-    ring,
-  -- rw add_sub
-  conv
-  begin
-    to_lhs,
-    congr,
-    skip,
-    funext,
-    rw ←h2,
-    rw h1,
-  end,
-  exact finset.prod_const_one,
-
+  apply polynomial.monic_prod_of_monic,
+  intro i,
+  intro,
+  exact polynomial.monic_X_sub_C (r i),
 end
 
 lemma degree_t_pos : 0 < m → 0 < t.degree 
