@@ -58,27 +58,6 @@ def X_poly : mv_polynomial vars F := mv_polynomial.X vars.X
 def Y_poly : mv_polynomial vars F := mv_polynomial.X vars.Y
 def Z_poly : mv_polynomial vars F := mv_polynomial.X vars.Z
 
-/-- Lemmas for handling these these as monomials -/
-lemma X_poly_mon : X_poly = mv_polynomial.monomial (finsupp.single vars.X 1) 1
-:= 
-begin
-  rw X_poly,
-  rw mv_polynomial.X,
-end
-lemma Y_poly_mon : Y_poly = mv_polynomial.monomial (finsupp.single vars.Y 1) 1
-:= 
-begin
-  rw Y_poly,
-  rw mv_polynomial.X,
-end
-lemma Z_poly_mon : Z_poly = mv_polynomial.monomial (finsupp.single vars.Z 1) 1
-:= 
-begin
-  rw Z_poly,
-  rw mv_polynomial.X,
-end
-
-
 /-- The naturals representing the number of gates in the circuit, the statement size, and witness size repectively-/ 
 parameters {m n_stmt n_wit : ℕ}
 def n := n_stmt + n_wit
@@ -302,8 +281,7 @@ begin
   simp,
   right,
   rw mul_comm,
-  rw ← Y_poly_mon,
-  rw Y_poly,
+  rw ←mv_polynomial.X,
   rw mul_var_no_constant,
   rw finsupp.single_apply,
   rw if_neg,
@@ -341,8 +319,7 @@ begin
   simp,
   right,
   rw mul_comm,
-  rw ← Y_poly_mon,
-  rw Y_poly,
+  rw ←mv_polynomial.X,
   rw mul_var_no_constant,
   rw finsupp.single_apply,
   rw if_neg,
@@ -451,8 +428,10 @@ begin
   repeat {rw mv_polynomial.smul_eq_C_mul},
   repeat {rw mv_polynomial.coeff_C_mul},
   repeat {rw mv_polynomial.coeff_sum},
-  rw Y_poly_mon,
-  rw Z_poly_mon,
+  rw Y_poly,
+  rw Z_poly,
+  rw mv_polynomial.X,
+  rw mv_polynomial.X,
   rw mv_polynomial.monomial_mul,
   repeat {rw mv_polynomial.coeff_monomial},
   rw if_neg,
@@ -723,8 +702,10 @@ begin
   repeat {rw mv_polynomial.smul_eq_C_mul},
   repeat {rw mv_polynomial.coeff_C_mul},
   repeat {rw mv_polynomial.coeff_sum},
-  rw Y_poly_mon,
-  rw Z_poly_mon,
+  rw Y_poly,
+  rw Z_poly,
+  rw mv_polynomial.X,
+  rw mv_polynomial.X,
   rw mv_polynomial.monomial_mul,
   repeat {rw mv_polynomial.coeff_monomial},
   rw if_neg,
@@ -757,8 +738,10 @@ begin
   repeat {rw mv_polynomial.smul_eq_C_mul},
   repeat {rw mv_polynomial.coeff_C_mul},
   repeat {rw mv_polynomial.coeff_sum},
-  rw Y_poly_mon,
-  rw Z_poly_mon,
+  rw Y_poly,
+  rw Z_poly,
+  rw mv_polynomial.X,
+  rw mv_polynomial.X,
   rw mv_polynomial.monomial_mul,
   repeat {rw mv_polynomial.coeff_monomial},
   rw if_pos,
