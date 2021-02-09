@@ -714,26 +714,6 @@ begin
   exact dec_trivial,
 end
 
--- lemma h11 (a_stmt) 
---   (V_wit_eq : V_wit = polynomial.eval₂ mv_polynomial.C X_poly (∑ i in (finset.fin_range n_wit), b' i • u_wit i)) : 
---   (V_stmt_sv a_stmt + V_wit_sv b') ^ 2 
---   = mv_polynomial.eval₂ polynomial.C singlify ((V_stmt_mv a_stmt + V_wit) ^ 2)
--- :=
--- begin
---   have h11_1 : (V_stmt_mv a_stmt + V_wit) ^ 2 = polynomial.eval₂ mv_polynomial.C X_poly ((V_stmt_sv a_stmt + V_wit_sv b') ^ 2),
---     rw polynomial.eval₂_pow,
---     rw polynomial.eval₂_add,
---     rw V_stmt_mv,
---     rw V_wit_sv,
---     rw V_wit_eq,
---   -- h11_1 done
---   rw h11_1,
---   rw X_poly,
---   rw multivariable_to_single_variable vars vars.X singlify,
---   simp,
--- end
-
-
 
 lemma h2_1 : (∀ (i : fin m), B_wit.coeff (finsupp.single vars.X i) = b i) :=
 begin
@@ -891,18 +871,9 @@ begin
   rw ←h9,
   clear h8 h9,
 
-
-  -- rw ←V_wit_sv,
-  -- rw h8 at h10,
-  -- (V_stmt_sv a_stmt + V_wit_sv b') ^ 2 
-  -- = mv_polynomial.eval₂ polynomial.C singlify ((V_stmt_mv a_stmt + V_wit) ^ 2)
-  -- rw h11,
-  -- rw ←V,
-
-    -- TODO is there a more efficient way to simply say (evaluate f on both sides of this hypothesis)? Yes the congr tactic does this
+  -- TODO is there a more efficient way to simply say (evaluate f on both sides of this hypothesis)? Yes the congr tactic does this
   have h10 : ((H * t_mv + mv_polynomial.C 1).eval₂ polynomial.C singlify) %ₘ t = (((V a_stmt)^2).eval₂ polynomial.C singlify) %ₘ t,
     rw eqnII,
-    -- rw V,
   -- h10 done
   rw mv_polynomial.eval₂_add at h10,
   rw mv_polynomial.eval₂_mul at h10,
