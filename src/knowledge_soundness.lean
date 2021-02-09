@@ -477,7 +477,7 @@ begin
   rw mv_polynomial.coeff_C,
   rw if_neg,
   rw mv_polynomial.coeff_mul,
-  rw square_antidiagonal,
+  rw single_2_antidiagonal_support,
   rw finset.sum_insert,
   rw finset.sum_insert,
   rw finset.sum_singleton,
@@ -674,7 +674,7 @@ begin
   rw pow_succ,
   rw pow_one,
   rw mv_polynomial.coeff_mul,
-  rw square_antidiagonal,
+  rw single_2_antidiagonal_support,
 
   rw finset.sum_insert,
   rw finset.sum_insert,
