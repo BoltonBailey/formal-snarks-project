@@ -18,7 +18,7 @@ This file proves the knowledge-soundness property of the
 [Baby SNARK](https://github.com/initc3/babySNARK) system, 
 as described in section 5 of the paper.
 
-NOTE: Currently we are not "in the exponent", we just prove things ignoring an explicit formalization of the Algebraic Group Model. Perhaps with more development, we can i
+NOTE: Currently we are not "in the exponent", we just prove things ignoring an explicit formalization of the Algebraic Group Model. Perhaps with more development, we can incorporate more of the background of this assumption
 
 TODO: Many of the lemmas are poorly named, this file should be given a once-over to rename the lemmas'
 
