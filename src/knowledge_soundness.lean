@@ -44,21 +44,10 @@ universes u
 parameter {F : Type u}
 parameter [field F]
 
-
-/-- Helper for converting mv_polynomial to single -/
-@[simp]
-def singlify : vars -> polynomial F
-| vars.X := polynomial.X 
-| vars.Y := 1
-| vars.Z := 1
-
-
-/-- Helpers for representing X, Y, Z as 3-variable polynomials -/
-def X_poly : mv_polynomial vars F := mv_polynomial.X vars.X
-def Y_poly : mv_polynomial vars F := mv_polynomial.X vars.Y
-def Z_poly : mv_polynomial vars F := mv_polynomial.X vars.Z
-
-/-- The naturals representing the number of gates in the circuit, the statement size, and witness size repectively-/ 
+/-- The naturals representing:
+  m - the number of gates in the circuit, 
+  n_stmt - the statement size, 
+  n_wit - the witness size -/ 
 parameters {m n_stmt n_wit : ℕ}
 def n := n_stmt + n_wit
 
@@ -71,9 +60,10 @@ parameter {u_wit : fin n_wit → (polynomial F) }
 
 /-- The roots of the polynomial t -/
 parameter {r : fin m → F} 
-/-- The polynomial divisibility by which is used to verify satisfaction of the SSP -/
+/-- t is the polynomial divisibility by which is used to verify satisfaction of the SSP -/
 def t : polynomial F := ∏ i in (finset.fin_range m), (polynomial.X - polynomial.C (r i))
-
+-- TODO this and the following lemmas about this could potentially be spun off 
+-- make a `monic_from_roots` function for mathlib
 
 /-- t has degree m -/
 lemma nat_degree_t : t.nat_degree = m
@@ -123,8 +113,43 @@ begin
 end
 
 
+
+-- Single variable form of V_wit
+def V_wit_sv (a_wit : fin n_wit → F) : polynomial F 
+:= ∑ i in finset.fin_range n_wit, a_wit i • u_wit i
+
+/-- The statement polynomial that the verifier computes from the statement bits, as a single variable polynomial -/
+def V_stmt_sv (a_stmt : fin n_stmt → F) : polynomial F 
+:= ∑ i in (finset.fin_range n_stmt), a_stmt i • u_stmt i
+
+/-- Checks whether a statement witness pair satisfies the SSP -/
+def satisfying (a_stmt : fin n_stmt → F ) (a_wit : fin n_wit → F) := 
+(∑ i in (finset.fin_range n_stmt), a_stmt i • u_stmt i
+  + (∑ i in (finset.fin_range n_wit), a_wit i • u_wit i))^2 %ₘ t = 1
+
+
+
+/- Multivariable polynomial definititons and ultilities -/
+
+
+/-- Helper for converting mv_polynomial to single -/
+@[simp]
+def singlify : vars -> polynomial F
+| vars.X := polynomial.X 
+| vars.Y := 1
+| vars.Z := 1
+
+/-- Helpers for representing X, Y, Z as 3-variable polynomials -/
+def X_poly : mv_polynomial vars F := mv_polynomial.X vars.X
+def Y_poly : mv_polynomial vars F := mv_polynomial.X vars.Y
+def Z_poly : mv_polynomial vars F := mv_polynomial.X vars.Z
+
 /-- Multivariable version of t -/
 def t_mv : mv_polynomial vars F := t.eval₂ mv_polynomial.C X_poly
+
+/-- V_stmt as a multivariable polynomial of vars.X -/
+def V_stmt_mv (a_stmt : fin n_stmt → F) : mv_polynomial vars F 
+:= (V_stmt_sv a_stmt).eval₂ mv_polynomial.C X_poly
 
 
 /-- Converting a single variable polynomial to a multivariable polynomial and back yields the same polynomial -/
@@ -135,53 +160,13 @@ begin
   simp,
 end
 
-
-
 /-- The crs elements as multivariate polynomials of the toxic waste samples -/
--- These can't be defined without lambdas, or the code breaks
 def crs_powers_of_τ (i : fin m) : (mv_polynomial vars F) := X_poly^(i : ℕ)
 def crs_γ : mv_polynomial vars F := Z_poly
 def crs_γβ : mv_polynomial vars F := Z_poly * Y_poly
 def crs_β_ssps (i : fin n_wit) : (mv_polynomial vars F) := (Y_poly) * (u_wit i).eval₂ mv_polynomial.C X_poly
 
 
-
--- Single variable form of V_wit
-def V_wit_sv (a_wit : fin n_wit → F) : polynomial F 
-:= ∑ i in finset.fin_range n_wit, a_wit i • u_wit i
-
-/-- The statement polynomial that the verifier computes from the statement bits, as a single variable polynomial -/
-def V_stmt_sv (a_stmt : fin n_stmt → F) : polynomial F 
-:= ∑ i in (finset.fin_range n_stmt), a_stmt i • u_stmt i
-
-
-/-- V_stmt as a multivariable polynomial of vars.X -/
-def V_stmt_mv (a_stmt : fin n_stmt → F) : mv_polynomial vars F 
-:= (V_stmt_sv a_stmt).eval₂ mv_polynomial.C X_poly
-
--- /-- V_stmt as a multivariable polynomial of vars.X in sum form -/
--- lemma V_stmt_sum_form (a_stmt : fin n_stmt → F) : V_stmt a_stmt
--- = ∑ i in (finset.fin_range n_stmt), (a_stmt i) • ((u_stmt i).eval₂ mv_polynomial.C X_poly)
--- :=
--- begin
---   rw V_stmt,
---   rw V_stmt_sv,
---   rw polynomial.eval₂_finset_sum,
---   simp,
---   conv
---   begin
---     to_lhs,
---     congr,
---     skip,
---     funext,
---     rw mv_polynomial.smul_eq_C_mul,
---   end,
--- end
-
-/-- Checks whether a statement witness pair satisfies the SSP -/
-def satisfying (a_stmt : fin n_stmt → F ) (a_wit : fin n_wit → F) := 
-(∑ i in (finset.fin_range n_stmt), a_stmt i • u_stmt i
-  + (∑ i in (finset.fin_range n_wit), a_wit i • u_wit i))^2 %ₘ t = 1
 
 /-- The coefficients of the CRS elements in the algebraic adversary's representation -/
 parameters {b v h : fin m → F}
@@ -463,28 +448,10 @@ begin
   rw [h6_2_1, h6_2_2, h6_2_3],
   simp,
   -- Prove that {(Z^0, Z^2), (Z^1, Z^1), (Z^2, Z^0)} is actually a set of three distinct elements
-  rw finset.mem_singleton,
-  rw prod.ext_iff,
-  rw decidable.not_and_iff_or_not,
-  left,
-  rw finsupp.single_eq_single_iff,
   simp,
+  simp [-finsupp.single_zero, finsupp.single_eq_single_iff],
   exact dec_trivial,
-  rw finset.mem_insert,
-  rw decidable.not_or_iff_and_not,
-  split,
-  rw prod.ext_iff,
-  rw decidable.not_and_iff_or_not,
-  left,
-  rw finsupp.single_eq_single_iff,
-  simp,
-  rw finset.mem_singleton,
-  rw prod.ext_iff,
-  rw decidable.not_and_iff_or_not,
-  left,
-  rw finsupp.single_eq_single_iff,
-  simp,
-  exact dec_trivial,
+  -- Prove final thing
   rw finsupp.ext_iff,
   rw not_forall,
   use vars.Z,
@@ -669,27 +636,8 @@ begin
   rw pow_succ,
   rw pow_one,
   -- Prove that {(Z^0, Z^2), (Z^1, Z^1), (Z^2, Z^0)} is actually a set of three distinct elements
-  rw finset.mem_singleton,
-  rw prod.ext_iff,
-  rw decidable.not_and_iff_or_not,
-  left,
-  rw finsupp.single_eq_single_iff,
   simp,
-  exact dec_trivial,
-  rw finset.mem_insert,
-  rw decidable.not_or_iff_and_not,
-  split,
-  rw prod.ext_iff,
-  rw decidable.not_and_iff_or_not,
-  left,
-  rw finsupp.single_eq_single_iff,
-  simp,
-  rw finset.mem_singleton,
-  rw prod.ext_iff,
-  rw decidable.not_and_iff_or_not,
-  left,
-  rw finsupp.single_eq_single_iff,
-  simp,
+  simp [-finsupp.single_zero, finsupp.single_eq_single_iff],
   exact dec_trivial,
 end
 
@@ -765,7 +713,9 @@ begin
 end
 
 
-/-- Show that if the adversary polynomials obey the equations, then the coefficients give a satisfying witness. This theorem appears in the Baby SNARK paper as Theorem 1 case 1.-/
+/-- Show that if the adversary polynomials obey the equations, 
+then the coefficients give a satisfying witness. 
+This theorem appears in the Baby SNARK paper as Theorem 1 case 1. -/
 theorem case_1 (a_stmt : fin n_stmt → F ) : 
   (0 < m)
   -> (B_wit = V_wit * Y_poly) 
