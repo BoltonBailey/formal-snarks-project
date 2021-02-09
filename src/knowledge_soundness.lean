@@ -8,6 +8,7 @@ import algebra.polynomial.big_operators
 import .general_lemmas.polynomial_mv_sv_cast
 import .general_lemmas.mv_divisability
 import .general_lemmas.single_antidiagonal
+import .general_lemmas.polynomial_smul_eq_C_mul
 import .vars
 
 /-!
@@ -24,6 +25,8 @@ TODO: Many of the lemmas are poorly named, this file should be given a once-over
 TODO: remove lambdas where possible
 
 TODO: Abstract more lemmas from the main theorem. A nice goal would be to make it so that the main points in the proof from the paper appear as have statements, with a comment giving an english description of the statement
+
+TODO : move all mv forms of polynomial defs later and name them consistently
 
 -/
 
@@ -142,7 +145,7 @@ end
 
 
 /-- Multivariable version of t -/
-def mv_t : mv_polynomial vars F := t.eval₂ mv_polynomial.C X_poly
+def t_mv : mv_polynomial vars F := t.eval₂ mv_polynomial.C X_poly
 
 
 /-- Converting a single variable polynomial to a multivariable polynomial and back yields the same polynomial -/
@@ -164,13 +167,17 @@ def crs_β_ssps (i : fin n_wit) : (mv_polynomial vars F) := (Y_poly) * (u_wit i)
 
 
 
+-- Single variable form of V_wit
+def V_wit_sv (a_wit : fin n_wit → F) : polynomial F 
+:= ∑ i in finset.fin_range n_wit, a_wit i • u_wit i
+
 /-- The statement polynomial that the verifier computes from the statement bits, as a single variable polynomial -/
 def V_stmt_sv (a_stmt : fin n_stmt → F) : polynomial F 
 := ∑ i in (finset.fin_range n_stmt), a_stmt i • u_stmt i
 
 
 /-- V_stmt as a multivariable polynomial of vars.X -/
-def V_stmt (a_stmt : fin n_stmt → F) : mv_polynomial vars F 
+def V_stmt_mv (a_stmt : fin n_stmt → F) : mv_polynomial vars F 
 := (V_stmt_sv a_stmt).eval₂ mv_polynomial.C X_poly
 
 -- /-- V_stmt as a multivariable polynomial of vars.X in sum form -/
@@ -192,10 +199,9 @@ def V_stmt (a_stmt : fin n_stmt → F) : mv_polynomial vars F
 --   end,
 -- end
 
-
-/-- Checks whether a witness satisfies the SSP -/
-def satisfying_wit (a_stmt : fin n_stmt → F ) (a_wit : fin n_wit → F) := 
-(V_stmt_sv a_stmt
+/-- Checks whether a statement witness pair satisfies the SSP -/
+def satisfying (a_stmt : fin n_stmt → F ) (a_wit : fin n_wit → F) := 
+(∑ i in (finset.fin_range n_stmt), a_stmt i • u_stmt i
   + (∑ i in (finset.fin_range n_wit), a_wit i • u_wit i))^2 %ₘ t = 1
 
 /-- The coefficients of the CRS elements in the algebraic adversary's representation -/
@@ -236,12 +242,9 @@ def H : mv_polynomial vars F :=
 
 /-- V as a multivariable polynomial -/
 def V (a_stmt : fin n_stmt → F) : mv_polynomial vars F 
-:= V_stmt a_stmt + V_wit
+:= V_stmt_mv a_stmt + V_wit
 
 
--- Single variable form ov V_wit
-def V_wit_sv : polynomial F 
-:= ∑ i in finset.fin_range n_wit, b' i • u_wit i
 
 -- TODO move helper lemmas to another file?
 
@@ -277,7 +280,7 @@ begin
   apply (fin.eq_iff_veq x j).2,
   exact foo,
   exact h (h5),
-  have h6 : ↑x = ↑j,
+  have h6 : ↑x = ↑j, --TODO why?
   rw foo.left,
   rw foo.right,
   have h5 : x = j,
@@ -397,10 +400,10 @@ end
 
 /-- Lemmas that denote bigger steps in the proof -/
 
-lemma h6_2_1 : mv_polynomial.coeff (finsupp.single vars.Z 2) mv_t = 0
+lemma h6_2_1 : mv_polynomial.coeff (finsupp.single vars.Z 2) t_mv = 0
 :=
 begin
-  rw mv_t,
+  rw t_mv,
   rw polynomial.eval₂,
   rw finsupp.sum,
   rw mv_polynomial.coeff_sum,
@@ -418,10 +421,10 @@ begin
 end
 
 
-lemma h6_2_2 :  mv_polynomial.coeff (finsupp.single vars.Z 1) mv_t = 0
+lemma h6_2_2 :  mv_polynomial.coeff (finsupp.single vars.Z 1) t_mv = 0
 :=
 begin
-  rw mv_t,
+  rw t_mv,
   rw polynomial.eval₂,
   rw finsupp.sum,
   rw mv_polynomial.coeff_sum,
@@ -467,7 +470,7 @@ begin
   exact dec_trivial,
 end
 
-lemma h6_2 : (H * mv_t + mv_polynomial.C 1).coeff (finsupp.single vars.Z 2) = 0
+lemma h6_2 : (H * t_mv + mv_polynomial.C 1).coeff (finsupp.single vars.Z 2) = 0
 :=
 begin
   rw mv_polynomial.coeff_add,
@@ -711,13 +714,16 @@ begin
   exact dec_trivial,
 end
 
-lemma h11 (a_stmt) (V_wit_eq : V_wit = polynomial.eval₂ mv_polynomial.C X_poly (∑ i in (finset.fin_range n_wit), b' i • u_wit i)) : (V_stmt_sv a_stmt + V_wit_sv) ^ 2 = mv_polynomial.eval₂ polynomial.C singlify ((V_stmt a_stmt + V_wit) ^ 2)
+lemma h11 (a_stmt) 
+  (V_wit_eq : V_wit = polynomial.eval₂ mv_polynomial.C X_poly (∑ i in (finset.fin_range n_wit), b' i • u_wit i)) : 
+  (V_stmt_sv a_stmt + V_wit_sv b') ^ 2 
+  = mv_polynomial.eval₂ polynomial.C singlify ((V_stmt_mv a_stmt + V_wit) ^ 2)
 :=
 begin
-  have h11_1 : (V_stmt a_stmt + V_wit) ^ 2 = polynomial.eval₂ mv_polynomial.C X_poly ((V_stmt_sv a_stmt + V_wit_sv) ^ 2),
+  have h11_1 : (V_stmt_mv a_stmt + V_wit) ^ 2 = polynomial.eval₂ mv_polynomial.C X_poly ((V_stmt_sv a_stmt + V_wit_sv b') ^ 2),
     rw polynomial.eval₂_pow,
     rw polynomial.eval₂_add,
-    rw V_stmt,
+    rw V_stmt_mv,
     rw V_wit_sv,
     rw V_wit_eq,
   -- h11_1 done
@@ -801,8 +807,8 @@ end
 theorem case_1 (a_stmt : fin n_stmt → F ) : 
   (0 < m)
   -> (B_wit = V_wit * Y_poly) 
-  -> (H * mv_t + mv_polynomial.C 1 = (V a_stmt)^2) 
-  -> (satisfying_wit a_stmt b')
+  -> (H * t_mv + mv_polynomial.C 1 = (V a_stmt)^2) 
+  -> (satisfying a_stmt b')
 :=
 begin
   intros hm eqnI eqnII,
@@ -852,7 +858,7 @@ begin
       + ∑ i in (finset.fin_range n_stmt), (a_stmt i) • ((u_stmt i).eval₂ mv_polynomial.C X_poly)
       + ∑ i in (finset.fin_range n_wit), (b' i) • ((u_wit i).eval₂ mv_polynomial.C X_poly),
     rw V,
-    rw V_stmt,
+    rw V_stmt_mv,
     rw h5,
     rw V_stmt_sv,
     rw polynomial.eval₂_finset_sum,
@@ -874,21 +880,40 @@ begin
     rw h6,
     rw h7,
     simp,
-  -- TODO use h8 in the following
-  -- TODO is there a more efficient way to simply say (evaluate f on both sides of this hypothesis)? Yes the congr tactic does this
-  have h10 : ((H * mv_t + mv_polynomial.C 1).eval₂ polynomial.C singlify) %ₘ t = (((V a_stmt)^2).eval₂ polynomial.C singlify) %ₘ t,
+  -- Treat both sides of this a single variable polynomial
+  have h9 := congr_arg (mv_polynomial.eval₂ (@polynomial.C F _) singlify) h8,
+  rw mv_polynomial.eval₂_add at h9,
+  rw mv_polynomial.eval₂_sum at h9,
+  simp [mv_polynomial.smul_eq_C_mul] at h9,
+  simp [my_multivariable_to_single_variable] at h9,
+  simp [polynomial.C_mul_eq_smul] at h9,
+  
+  -- TODO use h9 in the following
+
+  rw satisfying,
+  rw ←h9,
+  clear h8 h9,
+
+
+  -- rw ←V_wit_sv,
+  -- rw h8 at h10,
+  -- (V_stmt_sv a_stmt + V_wit_sv b') ^ 2 
+  -- = mv_polynomial.eval₂ polynomial.C singlify ((V_stmt_mv a_stmt + V_wit) ^ 2)
+  -- rw h11,
+  -- rw ←V,
+
+    -- TODO is there a more efficient way to simply say (evaluate f on both sides of this hypothesis)? Yes the congr tactic does this
+  have h10 : ((H * t_mv + mv_polynomial.C 1).eval₂ polynomial.C singlify) %ₘ t = (((V a_stmt)^2).eval₂ polynomial.C singlify) %ₘ t,
     rw eqnII,
     -- rw V,
   -- h10 done
   rw mv_polynomial.eval₂_add at h10,
   rw mv_polynomial.eval₂_mul at h10,
-  rw satisfying_wit,
-  rw ←V_wit_sv,
-  -- rw ←V,
-  rw h11,
-  rw ←V,
+
+  rw ←mv_polynomial.eval₂_pow,
+
   rw ←h10,
-  rw mv_t,
+  rw t_mv,
   rw my_multivariable_to_single_variable t,
   have h12: mv_polynomial.C 1 = (polynomial.C 1 : polynomial F).eval₂ mv_polynomial.C X_poly,
     rw polynomial.eval₂_C,
@@ -906,26 +931,26 @@ begin
   -- h13 done
   rw h13.2,
   simp,
-  rw h5,
-  rw h7,
-  simp,
-  rw polynomial.eval₂_finset_sum,
-  conv
-  begin
-    to_rhs,
-    congr,
-    skip,
-    funext,
-    simp,
-  end,
-  conv
-  begin
-    to_lhs,
-    congr,
-    skip,
-    funext,
-    rw mv_polynomial.smul_eq_C_mul,
-  end,
+  -- rw h5,
+  -- rw h7,
+  -- simp,
+  -- rw polynomial.eval₂_finset_sum,
+  -- conv
+  -- begin
+  --   to_rhs,
+  --   congr,
+  --   skip,
+  --   funext,
+  --   simp,
+  -- end,
+  -- conv
+  -- begin
+  --   to_lhs,
+  --   congr,
+  --   skip,
+  --   funext,
+  --   rw mv_polynomial.smul_eq_C_mul,
+  -- end,
 end
 
 
