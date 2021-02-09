@@ -798,7 +798,6 @@ lemma h5_1_1 : b_γβ • (Z_poly * Y_poly) = Y_poly * b_γβ • Z_poly :=
 begin
   rw mv_polynomial.smul_eq_C_mul,
   rw mv_polynomial.smul_eq_C_mul,
-  rw mul_comm,
   ring,
 end
 
