@@ -714,24 +714,24 @@ begin
   exact dec_trivial,
 end
 
-lemma h11 (a_stmt) 
-  (V_wit_eq : V_wit = polynomial.eval₂ mv_polynomial.C X_poly (∑ i in (finset.fin_range n_wit), b' i • u_wit i)) : 
-  (V_stmt_sv a_stmt + V_wit_sv b') ^ 2 
-  = mv_polynomial.eval₂ polynomial.C singlify ((V_stmt_mv a_stmt + V_wit) ^ 2)
-:=
-begin
-  have h11_1 : (V_stmt_mv a_stmt + V_wit) ^ 2 = polynomial.eval₂ mv_polynomial.C X_poly ((V_stmt_sv a_stmt + V_wit_sv b') ^ 2),
-    rw polynomial.eval₂_pow,
-    rw polynomial.eval₂_add,
-    rw V_stmt_mv,
-    rw V_wit_sv,
-    rw V_wit_eq,
-  -- h11_1 done
-  rw h11_1,
-  rw X_poly,
-  rw multivariable_to_single_variable vars vars.X singlify,
-  simp,
-end
+-- lemma h11 (a_stmt) 
+--   (V_wit_eq : V_wit = polynomial.eval₂ mv_polynomial.C X_poly (∑ i in (finset.fin_range n_wit), b' i • u_wit i)) : 
+--   (V_stmt_sv a_stmt + V_wit_sv b') ^ 2 
+--   = mv_polynomial.eval₂ polynomial.C singlify ((V_stmt_mv a_stmt + V_wit) ^ 2)
+-- :=
+-- begin
+--   have h11_1 : (V_stmt_mv a_stmt + V_wit) ^ 2 = polynomial.eval₂ mv_polynomial.C X_poly ((V_stmt_sv a_stmt + V_wit_sv b') ^ 2),
+--     rw polynomial.eval₂_pow,
+--     rw polynomial.eval₂_add,
+--     rw V_stmt_mv,
+--     rw V_wit_sv,
+--     rw V_wit_eq,
+--   -- h11_1 done
+--   rw h11_1,
+--   rw X_poly,
+--   rw multivariable_to_single_variable vars vars.X singlify,
+--   simp,
+-- end
 
 
 
@@ -886,9 +886,7 @@ begin
   simp [mv_polynomial.smul_eq_C_mul] at h9,
   simp [my_multivariable_to_single_variable] at h9,
   simp [polynomial.C_mul_eq_smul] at h9,
-  
-  -- TODO use h9 in the following
-
+  -- Now we solve the main goal. First, we expand the definition of "satisfying"
   rw satisfying,
   rw ←h9,
   clear h8 h9,
@@ -930,26 +928,6 @@ begin
   -- h13 done
   rw h13.2,
   simp,
-  -- rw h5,
-  -- rw h7,
-  -- simp,
-  -- rw polynomial.eval₂_finset_sum,
-  -- conv
-  -- begin
-  --   to_rhs,
-  --   congr,
-  --   skip,
-  --   funext,
-  --   simp,
-  -- end,
-  -- conv
-  -- begin
-  --   to_lhs,
-  --   congr,
-  --   skip,
-  --   funext,
-  --   rw mv_polynomial.smul_eq_C_mul,
-  -- end,
 end
 
 
