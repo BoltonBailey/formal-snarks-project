@@ -247,7 +247,7 @@ theorem case_1 (a_stmt : fin n_stmt → F ) :
   -> ∀ i, crs_2_δ i = crs_2 i * crs_δ
   -> ∀ i, crs_t_δ i = crs_t i * crs_δ
   -> A * B = crs_α * crs_β + (∑ i in finset.fin_range n_stmt, a_stmt i • crs_1 i ) * crs_γ + C * crs_δ
-  -> (satisfying a_stmt b2)
+  -> (satisfying a_stmt c2) -- This shows that (a`+1, . . . , am) = (C`+1, . . . , Cm) is a witness for the statement (a1, . . . , a`)
 :=
 begin
   sorry
