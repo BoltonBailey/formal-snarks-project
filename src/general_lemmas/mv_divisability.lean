@@ -1,10 +1,5 @@
 import data.mv_polynomial.basic
 
---  These lines fix the problem with the decidability of propositions of type a = b where a, b are of type vars, I feel that this should not be necessary, but I haven't found instructions on how to infer decidability for inductive types
--- TODO is classical reasoning really necessary?
-open classical
-local attribute [instance] prop_decidable
-
 
 open mv_polynomial
 section
@@ -20,6 +15,7 @@ noncomputable theory
 
 
 parameter {vars : Type}
+parameter [decidable_eq vars]
 
 
 
@@ -45,7 +41,11 @@ begin
   by_cases (s = a),
     -- h : s = a  
     have sa1: (finsupp.single s 1) a = 1,
-      from eq.trans finsupp.single_apply (if_pos h),
+      rw h,
+      rw finsupp.single_apply,
+      rw if_pos,
+      refl,
+      -- from eq.trans finsupp.single_apply (if_pos h),
     have h1f: f a = (decrement f s) a + 1,
     have h2f: (decrement f s) a + 1 = f a - (finsupp.single s 1) a + 1,
       from rfl,
@@ -67,7 +67,10 @@ begin
     exact eq.trans hfg (eq.symm h1g),
     -- h : ¬s = a
     have sa1: (finsupp.single s 1) a = 0,
-      from eq.trans finsupp.single_apply (if_neg h),
+      rw finsupp.single_apply,
+      rw if_neg,
+      exact h,
+      -- from eq.trans finsupp.single_apply (if_neg h),
     have h2f: (decrement f s) a + 1 = f a - (finsupp.single s 1) a + 1,
       from rfl,
     have h3f: (decrement f s) a + 1 = f a + 1,
@@ -196,10 +199,10 @@ begin
   rw h13,
   clear h13,
   have h14 : s ∉ m.support,
-  by_contradiction a_1,
+  intro a_1,
   exact ((m.mem_support_to_fun s).1 a_1) hc,
   apply if_neg,
-  exact h14
+  exact h14,
 end
 
 -- TODO: the converse of the above statement
