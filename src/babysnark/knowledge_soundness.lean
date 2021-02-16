@@ -5,10 +5,10 @@ import data.mv_polynomial.basic
 import data.polynomial.div
 import data.polynomial.field_division
 import algebra.polynomial.big_operators
-import .general_lemmas.polynomial_mv_sv_cast
-import .general_lemmas.mv_divisability
-import .general_lemmas.single_antidiagonal
-import .general_lemmas.polynomial_smul_eq_C_mul
+import ..general_lemmas.polynomial_mv_sv_cast
+import ..general_lemmas.mv_divisability
+import ..general_lemmas.single_antidiagonal
+import ..general_lemmas.polynomial_smul_eq_C_mul
 import .vars
 
 /-!
@@ -175,7 +175,7 @@ parameters {b' v' h' : fin n_wit → F}
 
 
 /-- Polynomial forms of the adversary's proof representation -/
-def B_wit  : mv_polynomial vars F := 
+def B_wit : mv_polynomial vars F := 
   ∑ i in (finset.fin_range m), (b i) • (crs_powers_of_τ i)
   +
   b_γ • crs_γ
@@ -374,12 +374,17 @@ begin
   intro tmp,
   rw X_poly,
   rw ←mv_polynomial.single_eq_C_mul_X,
-  rw mv_polynomial.coeff_monomial,
+  rw mv_polynomial.coeff_monomial, 
+  -- A comparison of two singles involves a comparison of two vars, a comparison of ints, and then logic. Can it be considered decidable? TODO
+  -- Indeed finsupp.decidable_eq is implemented in finsupp/basic.lean
   rw if_neg,
+  -- dec_trivial, -- Yet this doesn't work? I guess there is an x
+
   rw finsupp.single_eq_single_iff,
   simp,
-  intro,       
+  intro,    
   exact dec_trivial,
+   
 end
 
 
