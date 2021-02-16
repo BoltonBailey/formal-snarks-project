@@ -15,7 +15,7 @@ import .vars
 # Knowledge Soundness
 
 This file proves the knowledge-soundness property of the 
-[Groth16](https://eprint.iacr.org/2016/260.pdf) system.
+[Pinocchio](https://eprint.iacr.org/2013/279.pdf) system.
 
 -/
 
@@ -34,29 +34,37 @@ parameter {F : Type u}
 parameter [field F]
 
 /-- The naturals representing:
-  m - the number of gates in the circuit, 
-  n_stmt - the statement size, 
-  n_wit - the witness size -/ 
-parameters {m n_stmt n_wit : ℕ}
-def n := n_stmt + n_wit
+  m - m from paper - The QAP size 
+  n_in - n from paper - the number of inputs 
+  n_out - n' from paper - the number of outputs
+  n_mid - (m - N) from paper - the number of internal gates
+  d - the degree of h -/ 
+parameters {n_in n_out n_mid d : ℕ}
 
--- NOTE: In the paper, n_stmt is l and n_wit is n-l. Here, n is defined from these values.
+-- N from paper
+def n_stmt := n_in + n_out
 
-/-- u_stmt and u_wit are fin-indexed collections of polynomials from the square span program -/
-parameter {u_stmt : fin n_stmt → (polynomial F) }
-parameter {u_wit : fin n_wit → (polynomial F) }
-parameter {v_stmt : fin n_stmt → (polynomial F) }
-parameter {v_wit : fin n_wit → (polynomial F) }
-parameter {w_stmt : fin n_stmt → (polynomial F) }
-parameter {w_wit : fin n_wit → (polynomial F) }
+-- Alternative name
+def n_wit := n_mid
 
+def m := n_stmt + n_wit
+
+
+/-- fin-indexed collections of polynomials from the quadratic arithmetic program -/
+parameter {v_stmt : fin n_stmt → polynomial F }
+parameter {w_stmt : fin n_stmt → polynomial F }
+parameter {y_stmt : fin n_stmt → polynomial F }
+parameter {v_wit : fin n_wit → polynomial F }
+parameter {w_wit : fin n_wit → polynomial F }
+parameter {y_wit : fin n_wit → polynomial F }
+parameter {v_0 : polynomial F }
+parameter {w_0 : polynomial F }
+parameter {y_0 : polynomial F }
 
 /-- The roots of the polynomial t -/
 parameter {r : fin m → F} 
-/-- t is the polynomial divisibility by which is used to verify satisfaction of the SSP -/
+/-- t is the polynomial divisibility by which is used to verify satisfaction of the QAP -/
 def t : polynomial F := ∏ i in (finset.fin_range m), (polynomial.X - polynomial.C (r i))
--- TODO this and the following lemmas about this could potentially be spun off 
--- make a `monic_from_roots` function for mathlib
 
 /-- t has degree m -/
 lemma nat_degree_t : t.nat_degree = m
@@ -107,24 +115,28 @@ end
 
 
 
--- Single variable form of V_wit
-def V_wit_sv (a_wit : fin n_wit → F) : polynomial F 
-:= ∑ i in finset.fin_range n_wit, a_wit i • u_wit i
+-- -- Single variable form of V_wit
+-- def V_wit_sv (a_wit : fin n_wit → F) : polynomial F 
+-- := ∑ i in finset.fin_range n_wit, a_wit i • u_wit i
 
-/-- The statement polynomial that the verifier computes from the statement bits, as a single variable polynomial -/
-def V_stmt_sv (a_stmt : fin n_stmt → F) : polynomial F 
-:= ∑ i in (finset.fin_range n_stmt), a_stmt i • u_stmt i
+-- /-- The statement polynomial that the verifier computes from the statement bits, as a single variable polynomial -/
+-- def V_stmt_sv (a_stmt : fin n_stmt → F) : polynomial F 
+-- := ∑ i in (finset.fin_range n_stmt), a_stmt i • u_stmt i
 
-/-- Checks whether a statement witness pair satisfies the SSP -/
-def satisfying (a_stmt : fin n_stmt → F ) (a_wit : fin n_wit → F) := 
-(∑ i in (finset.fin_range n_stmt), a_stmt i • u_stmt i
-  + (∑ i in (finset.fin_range n_wit), a_wit i • u_wit i))
-  * 
-(∑ i in (finset.fin_range n_stmt), a_stmt i • v_stmt i
-  + (∑ i in (finset.fin_range n_wit), a_wit i • v_wit i))
-  -
-(∑ i in (finset.fin_range n_stmt), a_stmt i • w_stmt i
-  + (∑ i in (finset.fin_range n_wit), a_wit i • w_wit i))
+/-- Definition 2 from Pinocchio -/
+def satisfying (c_stmt : fin n_stmt → F) (c_wit : fin n_wit → F) := 
+(
+  (v_0 
+    + (∑ i in (finset.fin_range n_stmt), c_stmt i • v_stmt i) 
+    + ∑ i in (finset.fin_range n_wit), c_wit i • v_wit i)
+ * 
+  (w_0 
+    + (∑ i in (finset.fin_range n_stmt), c_stmt i • w_stmt i) 
+    + (∑ i in (finset.fin_range n_wit), c_wit i • w_wit i))
+ -
+  (y_0 
+    + (∑ i in (finset.fin_range n_stmt), c_stmt i • y_stmt i) 
+    + (∑ i in (finset.fin_range n_wit), c_wit i • y_wit i)))
    %ₘ t = 0
 
 
@@ -133,53 +145,77 @@ def satisfying (a_stmt : fin n_stmt → F ) (a_wit : fin n_wit → F) :=
 
 
 /-- Helper for converting mv_polynomial to single -/
-@[simp]
-def singlify : vars -> polynomial F
-| vars.X := polynomial.X 
-| vars.Alpha := 1
-| vars.Beta := 1
-| vars.Gamma := 1
-| vars.Delta := 1
+-- @[simp]
+-- def singlify : vars -> polynomial F
+-- | vars.X := polynomial.X 
+-- | vars.Alpha := 1
+-- | vars.Beta := 1
+-- | vars.Gamma := 1
+-- | vars.Delta := 1
 
--- /-- Helpers for representing X, Y, Z as 3-variable polynomials -/
-def X_poly : mv_polynomial vars F := mv_polynomial.X vars.X
--- def Y_poly : mv_polynomial vars F := mv_polynomial.X vars.Y
+-- /-- Helpers for representing vars as polynomials -/
+def s_poly : mv_polynomial vars F := mv_polynomial.X vars.s
+def α_poly : mv_polynomial vars F := mv_polynomial.X vars.α
+def β_v_poly : mv_polynomial vars F := mv_polynomial.X vars.β_v
+def β_w_poly : mv_polynomial vars F := mv_polynomial.X vars.β_w
+def β_y_poly : mv_polynomial vars F := mv_polynomial.X vars.β_y
+def γ_poly : mv_polynomial vars F := mv_polynomial.X vars.γ
 -- def Z_poly : mv_polynomial vars F := mv_polynomial.X vars.Z
 
+def poly (v : vars) : mv_polynomial vars F := mv_polynomial.X v
+
 /-- Multivariable version of t -/
-def t_mv : mv_polynomial vars F := t.eval₂ mv_polynomial.C X_poly
+-- def t_mv : mv_polynomial vars F := t.eval₂ mv_polynomial.C X_poly
 
 /-- V_stmt as a multivariable polynomial of vars.X -/
-def V_stmt_mv (a_stmt : fin n_stmt → F) : mv_polynomial vars F 
-:= (V_stmt_sv a_stmt).eval₂ mv_polynomial.C X_poly
+-- def V_stmt_mv (a_stmt : fin n_stmt → F) : mv_polynomial vars F 
+-- := (V_stmt_sv a_stmt).eval₂ mv_polynomial.C X_poly
 
 
 /-- The crs elements as multivariate polynomials of the toxic waste samples -/
-def crs_α  : mv_polynomial vars F := mv_polynomial.X vars.Alpha
-def crs_β : mv_polynomial vars F := mv_polynomial.X vars.Beta
-def crs_γ : mv_polynomial vars F := mv_polynomial.X vars.Gamma
-def crs_δ : mv_polynomial vars F := mv_polynomial.X vars.Delta
-def crs_powers_of_τ (i : fin m) : (mv_polynomial vars F) := X_poly^(i : ℕ)
--- I define prodcuts of these crs elements without the division, then later claim identities. Is this right?
-def crs_1_γ (i : fin n_stmt) : (mv_polynomial vars F) := 
-((crs_β) * (u_stmt i).eval₂ mv_polynomial.C X_poly
-+
-(crs_α) * (v_stmt i).eval₂ mv_polynomial.C X_poly
-+
-(w_stmt i).eval₂ mv_polynomial.C X_poly)
-def crs_2_δ (i : fin n_wit) : (mv_polynomial vars F) := 
-((crs_β) * (u_wit i).eval₂ mv_polynomial.C X_poly
-+
-(crs_α) * (v_wit i).eval₂ mv_polynomial.C X_poly
-+
-(w_wit i).eval₂ mv_polynomial.C X_poly)
-def crs_t_δ (i : fin m) : (mv_polynomial vars F) := 
-(X_poly^(i : ℕ) * t.eval₂ mv_polynomial.C X_poly)
+def crs_v_wit_k_of_s (k : fin n_wit) : mv_polynomial vars F := (v_wit k).eval₂ mv_polynomial.C s_poly
+def crs_w_wit_k_of_s (k : fin n_wit) : mv_polynomial vars F := (w_wit k).eval₂ mv_polynomial.C s_poly
+def crs_w_stmt_k_of_s (k : fin n_stmt) : mv_polynomial vars F := (w_stmt k).eval₂ mv_polynomial.C s_poly
+def crs_y_wit_k_of_s (k : fin n_wit) : mv_polynomial vars F := (y_wit k).eval₂ mv_polynomial.C s_poly
+def crs_y_stmt_k_of_s (k : fin n_stmt) : mv_polynomial vars F := (y_stmt k).eval₂ mv_polynomial.C s_poly
+def crs_α_v_wit_k_of_s (k : fin n_wit) : mv_polynomial vars F := α_poly * (v_wit k).eval₂ mv_polynomial.C s_poly
+def crs_α_w_wit_k_of_s (k : fin n_wit) : mv_polynomial vars F := α_poly * (w_wit k).eval₂ mv_polynomial.C s_poly
+def crs_α_w_stmt_k_of_s (k : fin n_stmt) : mv_polynomial vars F := α_poly * (w_stmt k).eval₂ mv_polynomial.C s_poly
+def crs_α_y_wit_k_of_s (k : fin n_wit) : mv_polynomial vars F := α_poly * (y_wit k).eval₂ mv_polynomial.C s_poly
+def crs_α_y_stmt_k_of_s (k : fin n_stmt) : mv_polynomial vars F := α_poly * (y_stmt k).eval₂ mv_polynomial.C s_poly
+def crs_β_v_wit_k_of_s (k : fin n_wit) : mv_polynomial vars F := β_v_poly * (v_wit k).eval₂ mv_polynomial.C s_poly
+def crs_β_w_wit_k_of_s (k : fin n_wit) : mv_polynomial vars F := β_w_poly * (w_wit k).eval₂ mv_polynomial.C s_poly
+def crs_β_w_stmt_k_of_s (k : fin n_stmt) : mv_polynomial vars F := β_w_poly * (w_stmt k).eval₂ mv_polynomial.C s_poly
+def crs_β_y_wit_k_of_s (k : fin n_wit) : mv_polynomial vars F := β_y_poly * (y_wit k).eval₂ mv_polynomial.C s_poly
+def crs_β_y_stmt_k_of_s (k : fin n_stmt) : mv_polynomial vars F := β_y_poly * (y_stmt k).eval₂ mv_polynomial.C s_poly
+def crs_powers_of_s (i : fin d) : (mv_polynomial vars F) := s_poly^(i : ℕ)
+def crs_α_powers_of_s (i : fin d) : (mv_polynomial vars F) := α_poly * s_poly^(i : ℕ)
+-- TODO this is getting out of hand. Maybe we generalize around this bloat?
+
+-- def crs_β : mv_polynomial vars F := mv_polynomial.X vars.Beta
+-- def crs_γ : mv_polynomial vars F := mv_polynomial.X vars.Gamma
+-- def crs_δ : mv_polynomial vars F := mv_polynomial.X vars.Delta
+-- def crs_powers_of_τ (i : fin m) : (mv_polynomial vars F) := X_poly^(i : ℕ)
+-- -- I define prodcuts of these crs elements without the division, then later claim identities. Is this right?
+-- def crs_1_γ (i : fin n_stmt) : (mv_polynomial vars F) := 
+-- ((crs_β) * (u_stmt i).eval₂ mv_polynomial.C X_poly
+-- +
+-- (crs_α) * (v_stmt i).eval₂ mv_polynomial.C X_poly
+-- +
+-- (w_stmt i).eval₂ mv_polynomial.C X_poly)
+-- def crs_2_δ (i : fin n_wit) : (mv_polynomial vars F) := 
+-- ((crs_β) * (u_wit i).eval₂ mv_polynomial.C X_poly
+-- +
+-- (crs_α) * (v_wit i).eval₂ mv_polynomial.C X_poly
+-- +
+-- (w_wit i).eval₂ mv_polynomial.C X_poly)
+-- def crs_t_δ (i : fin m) : (mv_polynomial vars F) := 
+-- (X_poly^(i : ℕ) * t.eval₂ mv_polynomial.C X_poly)
 
 
-parameter crs_1 (i : fin n_stmt) : (mv_polynomial vars F) 
-parameter crs_2 (i : fin n_wit) : (mv_polynomial vars F) 
-parameter crs_t (i : fin m) : (mv_polynomial vars F)
+-- parameter crs_1 (i : fin n_stmt) : (mv_polynomial vars F) 
+-- parameter crs_2 (i : fin n_wit) : (mv_polynomial vars F) 
+-- parameter crs_t (i : fin m) : (mv_polynomial vars F)
 
 /-- The coefficients of the CRS elements in the algebraic adversary's representation -/
 parameters {a a' a'' a''' b b' b'' b''' c c' c'' c''' : F}
