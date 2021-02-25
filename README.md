@@ -39,3 +39,15 @@ As of January 2021, we are in the process of refining and expanding on this proj
 * Clarifying and documenting the existing proof
 * Abstracting lemmas to make them more useful
 * Applying the techniques to other pairing-based SNARKs
+
+Some folks from CMU asked if we could expand the net to SNARKs like Marlin and Aurora? After looking at these papers, I have concluded that these constructions are too different than the ones I am dealing with to merit including.
+
+### Planning timeline
+
+Here is a list of goals and dates for this project
+
+* [ ] Implement type class for proof systems/ SNARKs and formalize the correctness and knowledge-soundness (and perhaps ZK) (March 6)
+* [ ] Implement a `ring`-like/`library-search`-like tactic to automate simplification of statements about the coefficients of polynomials (March 22)
+* [ ] Implement an alternation or decidability based way of resolving statements (End of March)
+* [ ] Implement SNARKs (April 12)
+* [ ] Write paper (End of April)
