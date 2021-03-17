@@ -184,7 +184,6 @@ def B_wit : mv_polynomial vars F :=
   +
   ∑ i in (finset.fin_range n_wit),  (b' i) • (crs_β_ssps i)
 
-
 def V_wit : mv_polynomial vars F := 
   ∑ i in (finset.fin_range m), (v i) • (crs_powers_of_τ i)
   +
@@ -225,32 +224,44 @@ begin
   rw mv_polynomial.C_mul_monomial,
   rw mul_one,
   rw mv_polynomial.coeff_monomial,
-  by_cases x = j,
-  have h1 : finsupp.single vars.X ↑x = finsupp.single vars.X ↑j,
-  rw h,
-  rw h1,
-  rw if_pos,
-  rw if_pos,
-  exact h,
-  refl,
-  rw if_neg,
-  rw if_neg,
-  exact h,
-  rw finsupp.single_eq_single_iff,
-  simp,
-  intro foo,
-  cases foo,
-  have h5 : x = j,
-  apply (fin.eq_iff_veq x j).2,
-  exact foo,
-  exact h (h5),
-  have h6 : ↑x = ↑j, --TODO why?
-  rw foo.left,
-  rw foo.right,
-  have h5 : x = j,
-  apply (fin.eq_iff_veq x j).2,
-  exact h6,
-  exact h h5,
+  simp [finsupp.single_injective],
+  unfold_coes,
+  simp [fin.eq_iff_veq],
+  -- -- rw fin.eq_iff_veq,
+  -- by_cases x = j,
+  --   simp [h],
+  --   rw if_neg,
+  --   rw if_neg,
+  --   exact h,
+  --   unfold_coes,
+  --   rw fin.eq_iff_veq,
+  
+
+  -- -- have h1 : finsupp.single vars.X ↑x = finsupp.single vars.X ↑j,
+  -- -- rw h,
+  -- -- rw h1,
+  -- -- rw if_pos,
+  -- -- rw if_pos,
+  -- -- exact h,
+  -- -- refl,
+  -- -- rw if_neg,
+  -- -- rw if_neg,
+  -- -- exact h,
+  -- -- rw finsupp.single_eq_single_iff,
+  -- -- simp,
+  -- -- intro foo,
+  -- -- cases foo,
+  -- have h5 : x = j,
+  -- apply (fin.eq_iff_veq x j).2,
+  -- exact foo,
+  -- exact h (h5),
+  -- have h6 : ↑x = ↑j, --TODO why?
+  -- rw foo.left,
+  -- rw foo.right,
+  -- have h5 : x = j,
+  -- apply (fin.eq_iff_veq x j).2,
+  -- exact h6,
+  -- exact h h5,
 end
 
 /-- Helper lemma for main theorem -/
@@ -307,7 +318,7 @@ begin
   rw ←mv_polynomial.X,
   rw mul_var_no_constant,
   rw finsupp.single_apply,
-  rw if_neg,
+  -- rw if_neg,
   simp,
 end
 
@@ -455,13 +466,13 @@ begin
   -- Prove that {(Z^0, Z^2), (Z^1, Z^1), (Z^2, Z^0)} is actually a set of three distinct elements
   simp,
   simp [-finsupp.single_zero, finsupp.single_eq_single_iff],
-  exact dec_trivial,
+  dec_trivial,
   -- Prove final thing
-  rw finsupp.ext_iff,
-  rw not_forall,
-  use vars.Z,
-  simp,
-  exact dec_trivial,
+  -- repeat {rw finsupp.single},
+  -- simp,
+  -- dec_trivial,
+  rw finsupp.eq_single_iff,
+  dec_trivial,
 
 end
 
@@ -641,6 +652,7 @@ begin
   rw pow_succ,
   rw pow_one,
   -- Prove that {(Z^0, Z^2), (Z^1, Z^1), (Z^2, Z^0)} is actually a set of three distinct elements
+  -- dec_trivial, -- Why doesn't this work?
   simp,
   simp [-finsupp.single_zero, finsupp.single_eq_single_iff],
   exact dec_trivial,
@@ -663,10 +675,10 @@ begin
   repeat {rw mv_polynomial.coeff_monomial},
   rw if_neg,
   rw if_neg,
-  simp,
+  -- simp,
   rw helper_1,
   rw finset.sum_ite,
-  simp,
+  -- simp,
   rw finset.filter_eq',
   rw if_pos,
   rw finset.sum_singleton,
@@ -675,7 +687,8 @@ begin
   simp,
   rw finsupp.ext_iff,
   simp,
-  refine ⟨vars.Y, _ ⟩,
+  -- refine ⟨vars.Y, _ ⟩,
+  use vars.Y,
   repeat { rw finsupp.single_apply },
   simp,
   rw finsupp.single_eq_single_iff,
@@ -702,11 +715,15 @@ begin
   rw helper_3,
   rw helper_4,
   simp,
-  rw finsupp.ext_iff,
+  repeat {rw finsupp.single},
   simp,
-  refine ⟨vars.Y, _ ⟩,
-  repeat { rw finsupp.single_apply },
-  simp,
+  dec_trivial,
+  -- rw finsupp.ext_iff,
+  -- simp,
+  -- -- refine ⟨vars.Y, _ ⟩,
+  -- use vars.Y,
+  -- repeat { rw finsupp.single_apply },
+  -- simp,
 end
 
 
@@ -717,17 +734,19 @@ begin
   ring,
 end
 
+def extractor : fin n_wit -> F := b'
 
 /-- Show that if the adversary polynomials obey the equations, 
 then the coefficients give a satisfying witness. 
 This theorem appears in the Baby SNARK paper as Theorem 1 case 1. -/
 theorem case_1 (a_stmt : fin n_stmt → F ) : 
   (0 < m)
-  -> (B_wit = V_wit * Y_poly) 
+  -> (B_wit = V_wit * Y_poly) -- TODO should have a Z term on both sides
   -> (H * t_mv + mv_polynomial.C 1 = (V a_stmt)^2) 
-  -> (satisfying a_stmt b')
+  -> (satisfying a_stmt extractor)
 :=
 begin
+  rw extractor,
   intros hm eqnI eqnII,
   -- "B_wit only has terms with a Y component"
   have h1 : (∀ m : vars →₀ ℕ, m vars.Y = 0 -> B_wit.coeff m = 0),
