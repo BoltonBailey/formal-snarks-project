@@ -210,79 +210,6 @@ def V (a_stmt : fin n_stmt → F) : mv_polynomial vars F
 
 /- Lemmas for proof -/
 
--- TODO move helper lemmas to another file?
-
-
-/-- Helper lemma for main theorem -/
-lemma helper_1 (j : fin m) : (λ x : fin m, mv_polynomial.coeff (finsupp.single vars.X ↑j) (b x • X_poly ^ (x : ℕ))) 
-= (λ x : fin m, ite (x = j) (b x) 0)
-:=
-begin
-  apply funext,
-  intro x,
-  rw X_poly,
-  coeff_simplify,
-  -- ite_finsupp_simplify,
-  -- rw mv_polynomial.X_pow_eq_single,
-  -- rw mv_polynomial.smul_eq_C_mul,
-  -- rw mv_polynomial.C_mul_monomial,
-  -- rw mul_one,
-  -- rw mv_polynomial.coeff_monomial,
-  unfold_coes,
-  -- simp [fin.eq_iff_veq],
-  simp [finsupp.single_injective, fin.eq_iff_veq],
-end
-
-/-- Helper lemma for main theorem -/
-lemma helper_2 (j : fin m) : (λ (x : fin n_wit), mv_polynomial.coeff (finsupp.single vars.X ↑j) (b' x • (mv_polynomial.monomial (finsupp.single vars.Y 1) 1 * polynomial.eval₂ mv_polynomial.C X_poly (u_wit x))))
-= (λ x : fin n_wit, 0)
-:=
-begin
-  apply funext,
-  intro x,
-  rw X_poly,
-  rw mv_polynomial.smul_eq_C_mul,
-  rw mv_polynomial.coeff_C_mul,
-  simp,
-  right,
-  rw mul_comm,
-  rw ←mv_polynomial.X,
-  rw mul_var_no_constant,
-  rw finsupp.single_apply,
-  rw if_neg,
-  simp,
-end
-
-/-- Helper lemma for main theorem -/
-lemma helper_3 : (λ x : fin m, mv_polynomial.coeff (finsupp.single vars.Z 1) (b x • X_poly ^ (x : ℕ))) 
-= (λ x : fin m,  0)
-:=
-begin
-  apply funext,
-  rw X_poly,
-  coeff_simplify,
-  simp [finsupp.single_eq_single_iff],
-end
-
-/-- Helper lemma for main theorem -/
-lemma helper_4 : (λ (x : fin n_wit), mv_polynomial.coeff (finsupp.single vars.Z 1) (b' x • (mv_polynomial.monomial (finsupp.single vars.Y 1) 1 * polynomial.eval₂ mv_polynomial.C X_poly (u_wit x))))
-= (λ x : fin n_wit, 0)
-:=
-begin
-  apply funext,
-  intro x,
-  rw X_poly,
-  rw mv_polynomial.smul_eq_C_mul,
-  rw mv_polynomial.coeff_C_mul,
-  simp,
-  right,
-  rw mul_comm,
-  rw ←mv_polynomial.X,
-  rw mul_var_no_constant,
-  rw finsupp.single_apply,
-  simp,
-end
-
 lemma helper_5 : (∀ i, b i = 0) -> (λ (i : fin m), b i • crs_powers_of_τ i) = (λ (i : fin m), 0)
 :=
 begin
@@ -290,36 +217,6 @@ begin
   apply funext,
   intro x,
   rw tmp x,
-  simp,
-end
-
-lemma helper_6 : (λ (x : fin m), mv_polynomial.coeff (finsupp.single vars.Z 2) (h x • crs_powers_of_τ x)) = λ x, 0
-:=
-begin
-  apply funext,
-  simp [crs_powers_of_τ],
-  rw X_poly,
-  coeff_simplify,
-  simp [finsupp.single_eq_single_iff],
-  finish,
-end
-
-lemma helper_7 : (λ (x : fin n_wit), mv_polynomial.coeff (finsupp.single vars.Z 2) (h' x • crs_β_ssps x)) = λ x, 0
-:=
-begin
-  apply funext,
-  intro x,
-  rw crs_β_ssps,
-  rw X_poly,
-  rw mv_polynomial.smul_eq_C_mul,
-  rw mv_polynomial.coeff_C_mul,
-  simp,
-  right,
-  rw mul_comm,
-  rw Y_poly,
-  rw mul_var_no_constant,
-  rw finsupp.single_apply,
-  rw if_neg,
   simp,
 end
 
@@ -434,6 +331,14 @@ begin
   rw finset.sum_insert,
   rw finset.sum_singleton,
 
+  -- TODO the coeff_simplify and ite_finsupp_simplify tactic should work here
+  --       But I get deterministic timeout
+  -- simp [X_poly, Y_poly, Z_poly],
+  -- coeff_simplify,
+  -- simp [finsupp.single_eq_single_iff],
+  -- single_add_simplify,
+  -- ite_finsupp_simplify,
+
   simp,
   rw h6_3_1, 
   rw h6_3_2, 
@@ -457,35 +362,10 @@ begin
   intro j,
   rw B_wit,
   simp [crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps],
-  repeat {rw mv_polynomial.smul_eq_C_mul},
-  repeat {rw mv_polynomial.coeff_C_mul},
-  repeat {rw mv_polynomial.coeff_sum},
-  rw Y_poly,
-  rw Z_poly,
-  rw mv_polynomial.X,
-  rw mv_polynomial.X,
-  rw mv_polynomial.monomial_mul,
-  repeat {rw mv_polynomial.coeff_monomial},
-  rw if_neg,
-  rw if_neg,
-  -- simp,
-  rw helper_1,
-  rw finset.sum_ite,
-  -- simp,
-  rw finset.filter_eq',
-  rw if_pos,
-  rw finset.sum_singleton,
-  rw helper_2,
-  simp,
-  simp,
-  rw finsupp.ext_iff,
-  simp,
-  -- refine ⟨vars.Y, _ ⟩,
-  use vars.Y,
-  repeat { rw finsupp.single_apply },
-  simp,
-  rw finsupp.single_eq_single_iff,
-  simp,
+  simp [X_poly, Y_poly, Z_poly],
+  coeff_simplify,
+  unfold_coes,
+  simp [finsupp.single_injective, ←fin.eq_iff_veq],
 end
 
 
@@ -494,23 +374,9 @@ lemma h3_1 : B_wit.coeff (finsupp.single vars.Z 1) = b_γ
 begin
   rw B_wit,
   simp [crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps],
-  repeat {rw mv_polynomial.smul_eq_C_mul},
-  repeat {rw mv_polynomial.coeff_C_mul},
-  repeat {rw mv_polynomial.coeff_sum},
-  rw Y_poly,
-  rw Z_poly,
-  rw mv_polynomial.X,
-  rw mv_polynomial.X,
-  rw mv_polynomial.monomial_mul,
-  repeat {rw mv_polynomial.coeff_monomial},
-  rw if_pos,
-  rw if_neg,
-  rw helper_3,
-  rw helper_4,
-  simp,
-  repeat {rw finsupp.single},
-  simp,
-  dec_trivial,
+  simp [X_poly, Y_poly, Z_poly],
+  coeff_simplify,
+  ite_finsupp_simplify,
 end
 
 

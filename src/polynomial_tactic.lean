@@ -52,5 +52,13 @@ do
   `[simp [finsupp.eq_single_iff, two_ne_zero, zero_ne_two, one_ne_two]] <|> tactic.trace "no eq_single"
   --  <|> tactic.trace "Goal is not a coeff"
 
+meta def single_add_simplify : tactic unit :=
+do
+  `[simp [←finsupp.single_add, ←finsupp.single_sub]]
+
+meta def single_simplify : tactic unit :=
+do
+  `[simp [finsupp.single_eq_single_iff]] <|> tactic.trace "no single_eq_single",
+  `[simp [finsupp.eq_single_iff, two_ne_zero, zero_ne_two, one_ne_two]] <|> tactic.trace "no eq_single"
 
 -- do tactic.simp [mv_polynomial.smul_eq_C_mul, mv_polynomial.X_pow_eq_single, mv_polynomial.coeff_monomial, finsupp.single_eq_single_iff, foo]
