@@ -93,7 +93,7 @@ begin
   rw h4,
 end
 
-/-- A copy of the square_antidiagonal lemma, which relies on the more general single_antidiagonal_support rather than being self contained. This should be less code, but currently single_antidiagonal_support uses sorry -/
+/-- A copy of the square_antidiagonal lemma, which relies on the more general single_antidiagonal_support rather than being self contained. -/
 lemma single_2_antidiagonal_support (s : S) : (finsupp.single s 2).antidiagonal.support = 
 {
   (finsupp.single s 0, finsupp.single s 2), 

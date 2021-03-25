@@ -10,6 +10,7 @@ import ..general_lemmas.mv_divisability
 import ..general_lemmas.single_antidiagonal
 import ..general_lemmas.polynomial_smul_eq_C_mul
 import .vars
+import polynomial_tactic
 
 /-!
 # Knowledge Soundness
@@ -207,9 +208,10 @@ def H : mv_polynomial vars F :=
 def V (a_stmt : fin n_stmt → F) : mv_polynomial vars F 
 := V_stmt_mv a_stmt + V_wit
 
-
+/- Lemmas for proof -/
 
 -- TODO move helper lemmas to another file?
+
 
 /-- Helper lemma for main theorem -/
 lemma helper_1 (j : fin m) : (λ x : fin m, mv_polynomial.coeff (finsupp.single vars.X ↑j) (b x • X_poly ^ (x : ℕ))) 
@@ -219,49 +221,16 @@ begin
   apply funext,
   intro x,
   rw X_poly,
-  rw mv_polynomial.X_pow_eq_single,
-  rw mv_polynomial.smul_eq_C_mul,
-  rw mv_polynomial.C_mul_monomial,
-  rw mul_one,
-  rw mv_polynomial.coeff_monomial,
-  simp [finsupp.single_injective],
+  coeff_simplify,
+  -- ite_finsupp_simplify,
+  -- rw mv_polynomial.X_pow_eq_single,
+  -- rw mv_polynomial.smul_eq_C_mul,
+  -- rw mv_polynomial.C_mul_monomial,
+  -- rw mul_one,
+  -- rw mv_polynomial.coeff_monomial,
   unfold_coes,
-  simp [fin.eq_iff_veq],
-  -- -- rw fin.eq_iff_veq,
-  -- by_cases x = j,
-  --   simp [h],
-  --   rw if_neg,
-  --   rw if_neg,
-  --   exact h,
-  --   unfold_coes,
-  --   rw fin.eq_iff_veq,
-  
-
-  -- -- have h1 : finsupp.single vars.X ↑x = finsupp.single vars.X ↑j,
-  -- -- rw h,
-  -- -- rw h1,
-  -- -- rw if_pos,
-  -- -- rw if_pos,
-  -- -- exact h,
-  -- -- refl,
-  -- -- rw if_neg,
-  -- -- rw if_neg,
-  -- -- exact h,
-  -- -- rw finsupp.single_eq_single_iff,
-  -- -- simp,
-  -- -- intro foo,
-  -- -- cases foo,
-  -- have h5 : x = j,
-  -- apply (fin.eq_iff_veq x j).2,
-  -- exact foo,
-  -- exact h (h5),
-  -- have h6 : ↑x = ↑j, --TODO why?
-  -- rw foo.left,
-  -- rw foo.right,
-  -- have h5 : x = j,
-  -- apply (fin.eq_iff_veq x j).2,
-  -- exact h6,
-  -- exact h h5,
+  -- simp [fin.eq_iff_veq],
+  simp [finsupp.single_injective, fin.eq_iff_veq],
 end
 
 /-- Helper lemma for main theorem -/
@@ -290,16 +259,9 @@ lemma helper_3 : (λ x : fin m, mv_polynomial.coeff (finsupp.single vars.Z 1) (b
 :=
 begin
   apply funext,
-  intro x,
   rw X_poly,
-  rw mv_polynomial.X_pow_eq_single,
-  rw mv_polynomial.smul_eq_C_mul,
-  rw mv_polynomial.C_mul_monomial,
-  rw mul_one,
-  rw mv_polynomial.coeff_monomial,
-  rw if_neg,
-  rw finsupp.single_eq_single_iff,
-  simp,
+  coeff_simplify,
+  simp [finsupp.single_eq_single_iff],
 end
 
 /-- Helper lemma for main theorem -/
@@ -318,7 +280,6 @@ begin
   rw ←mv_polynomial.X,
   rw mul_var_no_constant,
   rw finsupp.single_apply,
-  -- rw if_neg,
   simp,
 end
 
@@ -336,20 +297,11 @@ lemma helper_6 : (λ (x : fin m), mv_polynomial.coeff (finsupp.single vars.Z 2) 
 :=
 begin
   apply funext,
-  intro x,
-  rw crs_powers_of_τ,
+  simp [crs_powers_of_τ],
   rw X_poly,
-  rw mv_polynomial.smul_eq_C_mul,
-  rw mv_polynomial.coeff_C_mul,
-  simp,
-  rw mv_polynomial.X_pow_eq_single,
-  rw mv_polynomial.coeff_monomial,
-  rw if_neg,
-  simp,
-  rw finsupp.single_eq_single_iff,
-  simp,
-  intro,
-  exact two_ne_zero,
+  coeff_simplify,
+  simp [finsupp.single_eq_single_iff],
+  finish,
 end
 
 lemma helper_7 : (λ (x : fin n_wit), mv_polynomial.coeff (finsupp.single vars.Z 2) (h' x • crs_β_ssps x)) = λ x, 0
@@ -371,84 +323,6 @@ begin
   simp,
 end
 
-/-- Lemmas that denote bigger steps in the proof -/
-
-lemma h6_2_1 : mv_polynomial.coeff (finsupp.single vars.Z 2) t_mv = 0
-:=
-begin
-  rw t_mv,
-  rw polynomial.eval₂,
-  rw finsupp.sum,
-  rw mv_polynomial.coeff_sum,
-  apply finset.sum_eq_zero,
-  intro x,
-  intro tmp,
-  rw X_poly,
-  rw ←mv_polynomial.single_eq_C_mul_X,
-  rw mv_polynomial.coeff_monomial, 
-  -- A comparison of two singles involves a comparison of two vars, a comparison of ints, and then logic. Can it be considered decidable? TODO
-  -- Indeed finsupp.decidable_eq is implemented in finsupp/basic.lean
-  rw if_neg,
-  -- dec_trivial, -- Yet this doesn't work? I guess there is an x
-
-  rw finsupp.single_eq_single_iff,
-  simp,
-  intro,    
-  exact dec_trivial,
-   
-end
-
-
-lemma h6_2_2 :  mv_polynomial.coeff (finsupp.single vars.Z 1) t_mv = 0
-:=
-begin
-  rw t_mv,
-  rw polynomial.eval₂,
-  rw finsupp.sum,
-  rw mv_polynomial.coeff_sum,
-  apply finset.sum_eq_zero,
-  intro x,
-  intro tmp,
-  rw X_poly,
-  rw ←mv_polynomial.single_eq_C_mul_X,
-  rw mv_polynomial.coeff_monomial,
-  rw if_neg,
-  rw finsupp.single_eq_single_iff,
-  simp,
-end
-
-lemma h6_2_3 : mv_polynomial.coeff (finsupp.single vars.Z 2) H = 0
-:=
-begin
-  rw H,
-  simp,
-  rw mv_polynomial.coeff_sum,
-  rw helper_6,
-  rw finset.sum_const_zero,
-  rw [crs_γ, crs_γβ],
-  repeat {rw mv_polynomial.smul_eq_C_mul},
-  repeat {rw mv_polynomial.coeff_C_mul},
-  repeat {rw mv_polynomial.coeff_sum},
-  rw Y_poly,
-  rw Z_poly,
-  rw mv_polynomial.X,
-  rw mv_polynomial.X,
-  rw mv_polynomial.monomial_mul,
-  repeat {rw mv_polynomial.coeff_monomial},
-  rw if_neg,
-  rw if_neg,
-  simp,
-  rw helper_7,
-  rw finset.sum_const_zero,
-  rw finsupp.ext_iff,
-  rw not_forall,
-  use vars.Y,
-  rw finsupp.add_apply,
-  repeat {rw finsupp.single_apply},
-  simp,
-  rw finsupp.single_eq_single_iff,
-  exact dec_trivial,
-end
 
 lemma h6_2 : (H * t_mv + mv_polynomial.C 1).coeff (finsupp.single vars.Z 2) = 0
 :=
@@ -461,16 +335,14 @@ begin
   rw finset.sum_insert,
   rw finset.sum_insert,
   rw finset.sum_singleton,
-  rw [h6_2_1, h6_2_2, h6_2_3],
-  simp,
-  -- Prove that {(Z^0, Z^2), (Z^1, Z^1), (Z^2, Z^0)} is actually a set of three distinct elements
+  simp [H, t_mv, crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps, X_poly, Y_poly, Z_poly],
+  coeff_simplify,
+  ite_finsupp_simplify,
+
   simp,
   simp [-finsupp.single_zero, finsupp.single_eq_single_iff],
   dec_trivial,
-  -- Prove final thing
-  -- repeat {rw finsupp.single},
-  -- simp,
-  -- dec_trivial,
+
   rw finsupp.eq_single_iff,
   dec_trivial,
 
@@ -480,40 +352,8 @@ lemma h6_3_1 : mv_polynomial.coeff (finsupp.single vars.Z 2) (b_γβ • Z_poly)
 :=
 begin
   rw Z_poly,
-  rw mv_polynomial.smul_eq_C_mul,
-  rw mv_polynomial.coeff_C_mul,
-  rw mv_polynomial.coeff_X',
-  rw if_neg,
-  simp,
-  rw finsupp.single_eq_single_iff,
-  simp,
-  exact dec_trivial,
-end
-
-lemma h6_3_2_1 : (λ (i : fin n_wit), mv_polynomial.coeff (finsupp.single vars.Z 2) (b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i))) = (λ i, 0)
-:=
-begin
-  funext,
-  rw polynomial.eval₂,
-  rw finsupp.sum,
-  rw mv_polynomial.smul_eq_C_mul,
-  rw mv_polynomial.coeff_C_mul,
-  rw mv_polynomial.coeff_sum,
-  simp,
-  right,
-  apply finset.sum_eq_zero,
-  intro x,
-  intro tmp,
-  simp,
-  right,
-  rw X_poly,
-  rw mv_polynomial.X_pow_eq_single,
-  rw mv_polynomial.coeff_monomial,
-  rw if_neg,
-  rw finsupp.single_eq_single_iff,
-  simp,
-  intro,
-  exact dec_trivial,
+  coeff_simplify,
+  ite_finsupp_simplify,
 end
 
 
@@ -521,80 +361,49 @@ lemma h6_3_2 : mv_polynomial.coeff (finsupp.single vars.Z 2)
   (∑ i in (finset.fin_range n_wit), b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i)) = 0
 :=
 begin
-  rw mv_polynomial.coeff_sum,
-  rw h6_3_2_1,
-  rw finset.sum_const_zero,
+  rw X_poly,
+  coeff_simplify,
+  ite_finsupp_simplify,
 end
 
 lemma h6_3_3 (a_stmt : fin n_stmt -> F) : mv_polynomial.coeff (finsupp.single vars.Z 2) 
   (∑ i in finset.fin_range n_stmt, a_stmt i • polynomial.eval₂ mv_polynomial.C X_poly (u_stmt i)) = 0
 :=
 begin
-  rw mv_polynomial.coeff_sum,
-  apply finset.sum_eq_zero,
-  intro x,
-  intro tmp,
-  rw polynomial.eval₂,
-  rw finsupp.smul_sum,
-  rw finsupp.sum,
-  rw mv_polynomial.coeff_sum,
-  apply finset.sum_eq_zero,
-  intro x_1,
-  intro tmp2,
   rw X_poly,
-  rw mv_polynomial.smul_eq_C_mul,
-  simp,
-  right,
-  right,
-  rw mv_polynomial.X_pow_eq_single,
-  rw mv_polynomial.coeff_monomial,
-  rw if_neg,
-  rw finsupp.single_eq_single_iff,
-  simp,
-  intro,
-  exact dec_trivial,  
+
+  coeff_simplify,
+    simp [finsupp.single_eq_single_iff],
+
+  simp [two_ne_zero],
+
 end
 
 lemma h6_3_4 : mv_polynomial.coeff (finsupp.single vars.Z 1) (b_γβ • Z_poly) = b_γβ
 :=
 begin
   rw Z_poly,
-  rw mv_polynomial.smul_eq_C_mul,
-  rw mv_polynomial.coeff_C_mul,
-  rw mv_polynomial.coeff_X,
-  simp,
+  coeff_simplify,
+  ite_finsupp_simplify,
+
 end
 
 lemma h6_3_5_1 : (λ (i : fin n_wit), mv_polynomial.coeff (finsupp.single vars.Z 1) (b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i))) = (λ i, 0)
 :=
 begin
   funext,
-  rw polynomial.eval₂,
-  rw finsupp.sum,
-  rw mv_polynomial.smul_eq_C_mul,
-  rw mv_polynomial.coeff_C_mul,
-  rw mv_polynomial.coeff_sum,
-  simp,
-  right,
-  apply finset.sum_eq_zero,
-  intro x,
-  intro tmp,
-  simp,
-  right,
   rw X_poly,
-  rw mv_polynomial.X_pow_eq_single,
-  rw mv_polynomial.coeff_monomial,
-  rw if_neg,
-  rw finsupp.single_eq_single_iff,
-  simp,
+  coeff_simplify,
+  simp [finsupp.single_eq_single_iff],
+
 end
 
 lemma h6_3_5 : mv_polynomial.coeff (finsupp.single vars.Z 1) (∑ i in(finset.fin_range n_wit), b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i)) = 0
 :=
 begin
-  rw mv_polynomial.coeff_sum,
-  rw h6_3_5_1,
-  rw finset.sum_const_zero,
+  rw X_poly,
+  coeff_simplify,
+    simp [finsupp.single_eq_single_iff],
 end
 
 lemma h6_3_6 (a_stmt : fin n_stmt -> F): mv_polynomial.coeff (finsupp.single vars.Z 1) 
@@ -602,29 +411,12 @@ lemma h6_3_6 (a_stmt : fin n_stmt -> F): mv_polynomial.coeff (finsupp.single var
   a_stmt i • polynomial.eval₂ mv_polynomial.C X_poly (u_stmt i)) = 0 
 :=
 begin
-  rw mv_polynomial.coeff_sum,
-  apply finset.sum_eq_zero,
-  intro x,
-  intro tmp,
-  rw polynomial.eval₂,
-  rw finsupp.smul_sum,
-  rw finsupp.sum,
-  rw mv_polynomial.coeff_sum,
-  apply finset.sum_eq_zero,
-  intro x_1,
-  intro tmp2,
   rw X_poly,
-  rw mv_polynomial.smul_eq_C_mul,
-  simp,
-  right,
-  right,
-  rw mv_polynomial.X_pow_eq_single,
-  rw mv_polynomial.coeff_monomial,
-  rw if_neg,
-  rw finsupp.single_eq_single_iff,
-  simp,
+  coeff_simplify,
+  simp [finsupp.single_eq_single_iff],
 end
 
+-- TODO check all lemmas are used
 
 lemma h6_3 (a_stmt : fin n_stmt -> F) : (
     (b_γβ • Z_poly 
@@ -641,6 +433,7 @@ begin
   rw finset.sum_insert,
   rw finset.sum_insert,
   rw finset.sum_singleton,
+
   simp,
   rw h6_3_1, 
   rw h6_3_2, 
@@ -718,12 +511,6 @@ begin
   repeat {rw finsupp.single},
   simp,
   dec_trivial,
-  -- rw finsupp.ext_iff,
-  -- simp,
-  -- -- refine ⟨vars.Y, _ ⟩,
-  -- use vars.Y,
-  -- repeat { rw finsupp.single_apply },
-  -- simp,
 end
 
 

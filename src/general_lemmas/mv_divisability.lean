@@ -222,6 +222,7 @@ begin
 end
 
 
+
 -- For all monomials with no X component, the coefficient of a is zero
 -- a * b = c
 -- then for all monomials with no X component, the coefficient of a is zero
