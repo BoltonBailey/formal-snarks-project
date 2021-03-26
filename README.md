@@ -47,7 +47,7 @@ Some folks from CMU asked if we could expand the net to SNARKs like Marlin and A
 Here is a list of goals and dates for this project
 
 * [X] Implement type class for proof systems/ SNARKs and formalize the correctness and knowledge-soundness (and perhaps ZK) (March 6)
-* [ ] Implement a `ring`-like/`library-search`-like tactic to automate simplification of statements about the coefficients of polynomials (March 22)
+* [X] Implement a `ring`-like/`library-search`-like tactic to automate simplification of statements about the coefficients of polynomials (March 22)
 * [ ] Implement an alternation or decidability based way of resolving statements (End of March)
 * [ ] Implement SNARKs (April 12)
 * [ ] Write paper (End of April)
