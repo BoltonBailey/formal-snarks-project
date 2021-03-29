@@ -3,6 +3,7 @@ import data.mv_polynomial.basic
 import .general_lemmas.mv_X_mul
 -- import tactic.basic
 
+-- TODO remove these practice tactics
 meta def my_first_tactic : tactic unit := 
 do
   tactic.trace "Hello,",
@@ -41,9 +42,12 @@ A tactic to simplify expressions including a coeff of a polynomial
 -/
 meta def coeff_simplify : tactic unit :=
 do
-  `[simp [polynomial.eval₂, 
+  `[simp only [polynomial.eval₂, 
           finsupp.sum, finsupp.smul_sum, 
-          mv_polynomial.coeff_sum, mv_polynomial.smul_eq_C_mul, mv_polynomial.X_pow_eq_single, mv_polynomial.coeff_monomial, mv_polynomial.coeff_mul_X', mv_polynomial.coeff_X', coeff_X_mul']]
+          mv_polynomial.coeff_sum, 
+          mv_polynomial.smul_eq_C_mul,
+          mv_polynomial.coeff_C_mul,
+          mv_polynomial.X_pow_eq_single, mv_polynomial.coeff_monomial, mv_polynomial.coeff_mul_X', mv_polynomial.coeff_X', coeff_X_mul']]
 
 meta def ite_finsupp_simplify : tactic unit :=
 do

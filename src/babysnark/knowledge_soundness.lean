@@ -210,7 +210,29 @@ def V (a_stmt : fin n_stmt → F) : mv_polynomial vars F
 
 /- Lemmas for proof -/
 
-lemma helper_5 : (∀ i, b i = 0) -> (λ (i : fin m), b i • crs_powers_of_τ i) = (λ (i : fin m), 0)
+lemma h2_1 : (∀ (i : fin m), B_wit.coeff (finsupp.single vars.X i) = b i) :=
+begin
+  intro j,
+  rw B_wit,
+  simp [crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps],
+  simp [X_poly, Y_poly, Z_poly],
+  coeff_simplify,
+  unfold_coes,
+  simp [finsupp.single_injective, ←fin.eq_iff_veq],
+end
+
+
+lemma h3_1 : B_wit.coeff (finsupp.single vars.Z 1) = b_γ
+:=
+begin
+  rw B_wit,
+  simp [crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps],
+  simp [X_poly, Y_poly, Z_poly],
+  coeff_simplify,
+  ite_finsupp_simplify,
+end
+
+lemma h4_1 : (∀ i, b i = 0) -> (λ (i : fin m), b i • crs_powers_of_τ i) = (λ (i : fin m), 0)
 :=
 begin
   intro tmp,
@@ -220,6 +242,13 @@ begin
   simp,
 end
 
+
+lemma h5_1 : b_γβ • (Z_poly * Y_poly) = Y_poly * b_γβ • Z_poly :=
+begin
+  rw mv_polynomial.smul_eq_C_mul,
+  rw mv_polynomial.smul_eq_C_mul,
+  ring,
+end
 
 lemma h6_2 : (H * t_mv + mv_polynomial.C 1).coeff (finsupp.single vars.Z 2) = 0
 :=
@@ -245,74 +274,6 @@ begin
 
 end
 
-lemma h6_3_1 : mv_polynomial.coeff (finsupp.single vars.Z 2) (b_γβ • Z_poly) = 0
-:=
-begin
-  rw Z_poly,
-  coeff_simplify,
-  ite_finsupp_simplify,
-end
-
-
-lemma h6_3_2 : mv_polynomial.coeff (finsupp.single vars.Z 2)
-  (∑ i in (finset.fin_range n_wit), b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i)) = 0
-:=
-begin
-  rw X_poly,
-  coeff_simplify,
-  ite_finsupp_simplify,
-end
-
-lemma h6_3_3 (a_stmt : fin n_stmt -> F) : mv_polynomial.coeff (finsupp.single vars.Z 2) 
-  (∑ i in finset.fin_range n_stmt, a_stmt i • polynomial.eval₂ mv_polynomial.C X_poly (u_stmt i)) = 0
-:=
-begin
-  rw X_poly,
-
-  coeff_simplify,
-    simp [finsupp.single_eq_single_iff],
-
-  simp [two_ne_zero],
-
-end
-
-lemma h6_3_4 : mv_polynomial.coeff (finsupp.single vars.Z 1) (b_γβ • Z_poly) = b_γβ
-:=
-begin
-  rw Z_poly,
-  coeff_simplify,
-  ite_finsupp_simplify,
-
-end
-
-lemma h6_3_5_1 : (λ (i : fin n_wit), mv_polynomial.coeff (finsupp.single vars.Z 1) (b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i))) = (λ i, 0)
-:=
-begin
-  funext,
-  rw X_poly,
-  coeff_simplify,
-  simp [finsupp.single_eq_single_iff],
-
-end
-
-lemma h6_3_5 : mv_polynomial.coeff (finsupp.single vars.Z 1) (∑ i in(finset.fin_range n_wit), b' i • polynomial.eval₂ mv_polynomial.C X_poly (u_wit i)) = 0
-:=
-begin
-  rw X_poly,
-  coeff_simplify,
-    simp [finsupp.single_eq_single_iff],
-end
-
-lemma h6_3_6 (a_stmt : fin n_stmt -> F): mv_polynomial.coeff (finsupp.single vars.Z 1) 
-  (∑ (i : fin n_stmt) in finset.fin_range n_stmt,
-  a_stmt i • polynomial.eval₂ mv_polynomial.C X_poly (u_stmt i)) = 0 
-:=
-begin
-  rw X_poly,
-  coeff_simplify,
-  simp [finsupp.single_eq_single_iff],
-end
-
 -- TODO check all lemmas are used
 
 lemma h6_3 (a_stmt : fin n_stmt -> F) : (
@@ -331,62 +292,22 @@ begin
   rw finset.sum_insert,
   rw finset.sum_singleton,
 
-  -- TODO the coeff_simplify and ite_finsupp_simplify tactic should work here
-  --       But I get deterministic timeout
-  -- simp [X_poly, Y_poly, Z_poly],
-  -- coeff_simplify,
-  -- simp [finsupp.single_eq_single_iff],
-  -- single_add_simplify,
-  -- ite_finsupp_simplify,
-
-  simp,
-  rw h6_3_1, 
-  rw h6_3_2, 
-  rw h6_3_3,
-  rw h6_3_4, 
-  rw h6_3_5, 
-  rw h6_3_6,
-  simp,
-  rw pow_succ,
-  rw pow_one,
-  -- Prove that {(Z^0, Z^2), (Z^1, Z^1), (Z^2, Z^0)} is actually a set of three distinct elements
-  -- dec_trivial, -- Why doesn't this work?
-  simp,
-  simp [-finsupp.single_zero, finsupp.single_eq_single_iff],
-  exact dec_trivial,
-end
-
-
-lemma h2_1 : (∀ (i : fin m), B_wit.coeff (finsupp.single vars.X i) = b i) :=
-begin
-  intro j,
-  rw B_wit,
-  simp [crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps],
-  simp [X_poly, Y_poly, Z_poly],
-  coeff_simplify,
-  unfold_coes,
-  simp [finsupp.single_injective, ←fin.eq_iff_veq],
-end
-
-
-lemma h3_1 : B_wit.coeff (finsupp.single vars.Z 1) = b_γ
-:=
-begin
-  rw B_wit,
-  simp [crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps],
+  -- NOTE The coeff_simplify and ite_finsupp_simplify tactic work here
+  --      But I used to get deterministic timeout - i fixed this by making coeff_simplify do simp only instead
+  --
   simp [X_poly, Y_poly, Z_poly],
   coeff_simplify,
   ite_finsupp_simplify,
+  rw pow_succ,
+  rw pow_one,
+
+  simp,
+  simp [-finsupp.single_zero, finsupp.single_eq_single_iff],
+  finish,
 end
 
 
-lemma h5_1_1 : b_γβ • (Z_poly * Y_poly) = Y_poly * b_γβ • Z_poly :=
-begin
-  rw mv_polynomial.smul_eq_C_mul,
-  rw mv_polynomial.smul_eq_C_mul,
-  ring,
-end
-
+/-- This function represents the exctractor in the AGM. -/
 def extractor : fin n_wit -> F := b'
 
 /-- Show that if the adversary polynomials obey the equations, 
@@ -408,12 +329,10 @@ begin
   -- "b_0 b_1, ..., b_m, ... are all zero"
   have h2 : ∀ i : fin m, b i = 0,
     intro i,
-    have tmp := h2_1 i,
-    rw ← tmp,
+    rw ← (h2_1 i),
     rw eqnI,
     apply mul_var_no_constant,
     rw finsupp.single_apply,
-    rw if_neg,
     simp,
   -- b_γ = 0
   have h3 : b_γ = 0,
@@ -421,12 +340,11 @@ begin
     rw eqnI,
     apply mul_var_no_constant,
     rw finsupp.single_apply,
-    rw if_neg,
     simp,
   -- "We can write B_wit as ..."
   have h4 : B_wit = b_γβ • crs_γβ + ∑ i in (finset.fin_range n_wit), (b' i) • (crs_β_ssps i),
     rw B_wit,
-    rw helper_5 h2,
+    rw h4_1 h2,
     rw h3,
     simp,
   -- "... we also see that V_wit must not have any Y terms at all"
@@ -439,7 +357,7 @@ begin
     rw crs_γβ,
     simp only [crs_β_ssps],
     rw mul_add,
-    rw h5_1_1,
+    rw h5_1,
     rw finset.mul_sum,
     simp,
   -- "... write V(.) as follows ..."
