@@ -195,14 +195,10 @@ m s = 0 -> (a * X s).coeff m = 0
 :=
 begin
   intro hc,
-  have h13 := coeff_mul_X' m s a,
-  rw h13,
-  clear h13,
-  have h14 : s ∉ m.support,
+  rw coeff_mul_X' m s a,
+  apply if_neg,
   intro a_1,
   exact ((m.mem_support_to_fun s).1 a_1) hc,
-  apply if_neg,
-  exact h14,
 end
 
 -- TODO: the converse of the above statement
