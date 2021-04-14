@@ -167,13 +167,10 @@ def crs_γ : mv_polynomial vars F := Z_poly
 def crs_γβ : mv_polynomial vars F := Z_poly * Y_poly
 def crs_β_ssps (i : fin n_wit) : (mv_polynomial vars F) := (Y_poly) * (u_wit i).eval₂ mv_polynomial.C X_poly
 
-
-
 /-- The coefficients of the CRS elements in the algebraic adversary's representation -/
 parameters {b v h : fin m → F}
 parameters {b_γ v_γ h_γ b_γβ v_γβ h_γβ : F}
 parameters {b' v' h' : fin n_wit → F}
-
 
 /-- Polynomial forms of the adversary's proof representation -/
 def B_wit : mv_polynomial vars F := 
@@ -216,9 +213,12 @@ begin
   rw B_wit,
   simp [crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps],
   simp [X_poly, Y_poly, Z_poly],
-  coeff_simplify,
+  simp only with coeff_simp,
   unfold_coes,
+  --TODO is this best?
   simp [finsupp.single_injective, ←fin.eq_iff_veq],
+  rw finsupp.single_eq_single_iff,
+  finish,
 end
 
 
@@ -228,7 +228,7 @@ begin
   rw B_wit,
   simp [crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps],
   simp [X_poly, Y_poly, Z_poly],
-  coeff_simplify,
+  simp only with coeff_simp,
   ite_finsupp_simplify,
 end
 
@@ -262,7 +262,7 @@ begin
   rw finset.sum_insert,
   rw finset.sum_singleton,
   simp [H, t_mv, crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps, X_poly, Y_poly, Z_poly],
-  coeff_simplify,
+  simp only with coeff_simp,
   ite_finsupp_simplify,
 
   simp,
@@ -292,11 +292,12 @@ begin
   rw finset.sum_insert,
   rw finset.sum_singleton,
 
-  -- NOTE The coeff_simplify and ite_finsupp_simplify tactic work here
-  --      But I used to get deterministic timeout - i fixed this by making coeff_simplify do simp only instead
+  -- NOTE The simp only with coeff_simp and ite_finsupp_simplify tactic work here
+  --      But I used to get deterministic timeout - i fixed this by making simp only with coeff_simp do simp only instead
   --
   simp [X_poly, Y_poly, Z_poly],
-  coeff_simplify,
+  simp only with coeff_simp,
+  -- simp only with coeff_simp,
   ite_finsupp_simplify,
   rw pow_succ,
   rw pow_one,
@@ -315,13 +316,14 @@ then the coefficients give a satisfying witness.
 This theorem appears in the Baby SNARK paper as Theorem 1 case 1. -/
 theorem case_1 (a_stmt : fin n_stmt → F ) : 
   (0 < m)
-  -> (B_wit = V_wit * Y_poly) -- TODO should have a Z term on both sides
+  -> (B_wit = V_wit * Y_poly)
   -> (H * t_mv + mv_polynomial.C 1 = (V a_stmt)^2) 
   -> (satisfying a_stmt extractor)
 :=
 begin
   rw extractor,
   intros hm eqnI eqnII,
+  -- TODO eqnI should have a Z term on both sides
   -- "B_wit only has terms with a Y component"
   have h1 : (∀ m : vars →₀ ℕ, m vars.Y = 0 -> B_wit.coeff m = 0),
     rw eqnI,
@@ -354,8 +356,7 @@ begin
     rw mul_comm,
     rw ←eqnI,
     rw h4,
-    rw crs_γβ,
-    simp only [crs_β_ssps],
+    simp only [crs_γβ, crs_β_ssps],
     rw mul_add,
     rw h5_1,
     rw finset.mul_sum,
