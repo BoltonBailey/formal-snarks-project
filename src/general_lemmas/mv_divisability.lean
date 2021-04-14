@@ -203,8 +203,8 @@ end
 
 -- TODO: the converse of the above statement
 
-lemma left_cancel_X_mul {a b : mv_polynomial vars F} (s : vars) :
-X s * a = X s * b -> a = b
+lemma right_cancel_X_mul {a b : mv_polynomial vars F} (s : vars) :
+a * X s = b * X s -> a = b
 :=
 begin
   intro h,
@@ -212,12 +212,19 @@ begin
   intro m,
   rw ← coeff_mul_X m s a,
   rw ← coeff_mul_X m s b,
-  rw mul_comm,
-  rw h,
-  rw mul_comm,  
+  rw h,  
 end
 
-
+lemma left_cancel_X_mul {a b : mv_polynomial vars F} (s : vars) :
+X s * a = X s * b -> a = b
+:=
+begin
+  intro h,
+  apply right_cancel_X_mul,
+  rw mul_comm,
+  rw h,
+  rw mul_comm,
+end
 
 -- For all monomials with no X component, the coefficient of a is zero
 -- a * b = c
