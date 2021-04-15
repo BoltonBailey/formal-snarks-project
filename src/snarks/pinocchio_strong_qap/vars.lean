@@ -1,4 +1,4 @@
-
+import data.fintype.basic
 
 section
 
