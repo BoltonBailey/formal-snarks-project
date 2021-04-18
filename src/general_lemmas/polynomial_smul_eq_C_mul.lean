@@ -11,13 +11,8 @@ section semiring
 variables [semiring R] {p q : polynomial R}
 
 /-- A scalar multiplication is equivalent to constant polynomial multiplication for polynomials -/
-lemma smul_eq_C_mul (a : R) : a • p = (polynomial.C a) * p :=
-begin
-  rw polynomial.ext_iff,
-  intro n,
-  rw polynomial.coeff_C_mul,
-  rw polynomial.coeff_smul,
-end
+lemma smul_eq_C_mul (a : R) : a • p = (polynomial.C a) * p := by simp [polynomial.ext_iff]
 -- TODO create mathlib PR
 
-end
+end semiring
+end polynomial
