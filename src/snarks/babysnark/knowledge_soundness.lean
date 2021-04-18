@@ -394,7 +394,8 @@ begin
   rw mv_polynomial.eval₂_sum at h9,
   simp [mv_polynomial.smul_eq_C_mul] at h9,
   simp [my_multivariable_to_single_variable] at h9,
-  simp [polynomial.C_mul_eq_smul] at h9,
+  -- simp [polynomial.C_mul_eq_smul] at h9,
+  simp [←polynomial.smul_eq_C_mul] at h9,
   -- Now we solve the main goal. First, we expand the definition of "satisfying"
   rw satisfying,
   rw ←h9,

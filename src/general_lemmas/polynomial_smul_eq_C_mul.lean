@@ -20,12 +20,4 @@ begin
 end
 -- TODO create mathlib PR
 
-lemma C_mul_eq_smul (a : R) : (polynomial.C a) * p = a • p :=
-begin
-  rw polynomial.ext_iff,
-  intro n,
-  rw polynomial.coeff_C_mul,
-  rw polynomial.coeff_smul,
-end
-
 end
