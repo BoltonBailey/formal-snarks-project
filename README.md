@@ -49,5 +49,17 @@ Here is a list of goals and dates for this project
 * [X] Implement type class for proof systems/ SNARKs and formalize the correctness and knowledge-soundness (and perhaps ZK) (March 6)
 * [X] Implement a `ring`-like/`library-search`-like tactic to automate simplification of statements about the coefficients of polynomials (March 22)
 * [ ] Implement an alternation or decidability based way of resolving statements (End of March)
-* [ ] Implement SNARKs (April 12)
+* Implement SNARKs
+  * BabySNARK
+    * [x] Implementation
+    * [x] Proof
+  * Pinocchio
+    * [x] Implementation
+    * [ ] Proof
+  * Groth '16
+    * [x] Implementation
+    * [ ] Proof
+  * Sonic
+    * [ ] Implementation
+    * [ ] Proof
 * [ ] Write paper (End of April)
