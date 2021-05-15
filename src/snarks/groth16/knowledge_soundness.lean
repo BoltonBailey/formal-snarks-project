@@ -17,11 +17,21 @@ import .vars
 This file proves the knowledge-soundness property of the 
 [Groth16](https://eprint.iacr.org/2016/260.pdf) system.
 
+Specifically, we prove this property for the NILP system 
+described in section 3.1 of that paper.
+
+Furthermore, we carry out the reduction to non-laurent polynomials by multiplying through the CRS with γδ.
+
+We choose r,s to be 0, todo, allow other values
+
 -/
 
 open_locale big_operators
 
+
 section
+
+open mv_polynomial
 
 noncomputable theory
 
@@ -34,11 +44,14 @@ parameter {F : Type u}
 parameter [field F]
 
 /-- The naturals representing:
-  m - the number of gates in the circuit, 
   n_stmt - the statement size, 
   n_wit - the witness size -/ 
-parameters {m n_stmt n_wit : ℕ}
-def n := n_stmt + n_wit
+parameters {n_stmt n_wit n : ℕ}
+
+def l : ℕ := n_stmt
+
+def m : ℕ := n_wit
+
 
 -- NOTE: In the paper, n_stmt is l and n_wit is n-l. Here, n is defined from these values.
 
@@ -135,57 +148,67 @@ def satisfying (a_stmt : fin n_stmt → F ) (a_wit : fin n_wit → F) :=
 /-- Helper for converting mv_polynomial to single -/
 @[simp]
 def singlify : vars -> polynomial F
-| vars.X := polynomial.X 
-| vars.Alpha := 1
-| vars.Beta := 1
-| vars.Gamma := 1
-| vars.Delta := 1
+| vars.x := polynomial.X 
+| vars.α := 1
+| vars.β := 1
+| vars.γ := 1
+| vars.δ := 1
 
--- /-- Helpers for representing X, Y, Z as 3-variable polynomials -/
-def X_poly : mv_polynomial vars F := mv_polynomial.X vars.X
--- def Y_poly : mv_polynomial vars F := mv_polynomial.X vars.Y
--- def Z_poly : mv_polynomial vars F := mv_polynomial.X vars.Z
+
 
 /-- Multivariable version of t -/
-def t_mv : mv_polynomial vars F := t.eval₂ mv_polynomial.C X_poly
+def t_mv : mv_polynomial vars F := t.eval₂ mv_polynomial.C (X vars.x)
 
 /-- V_stmt as a multivariable polynomial of vars.X -/
 def V_stmt_mv (a_stmt : fin n_stmt → F) : mv_polynomial vars F 
-:= (V_stmt_sv a_stmt).eval₂ mv_polynomial.C X_poly
+:= (V_stmt_sv a_stmt).eval₂ mv_polynomial.C (X vars.x)
+
+
+
+run_cmd mk_simp_attr `crs
+run_cmd tactic.add_doc_string `simp_attr.crs "Attribute for defintions of CRS elements"
 
 
 /-- The crs elements as multivariate polynomials of the toxic waste samples -/
-def crs_α  : mv_polynomial vars F := mv_polynomial.X vars.Alpha
-def crs_β : mv_polynomial vars F := mv_polynomial.X vars.Beta
-def crs_γ : mv_polynomial vars F := mv_polynomial.X vars.Gamma
-def crs_δ : mv_polynomial vars F := mv_polynomial.X vars.Delta
-def crs_powers_of_τ (i : fin m) : (mv_polynomial vars F) := X_poly^(i : ℕ)
+@[crs]
+def crs_α  : mv_polynomial vars F := X vars.α * X vars.γ * X vars.δ
+@[crs]
+def crs_β : mv_polynomial vars F := X vars.β * X vars.γ * X vars.δ
+@[crs]
+def crs_γ : mv_polynomial vars F := X vars.γ * X vars.γ * X vars.δ
+@[crs]
+def crs_δ : mv_polynomial vars F := X vars.δ * X vars.γ * X vars.δ
+@[crs]
+def crs_powers_of_x (i : fin m) : (mv_polynomial vars F) := (X vars.x)^(i : ℕ) * X vars.γ * X vars.δ
 -- I define prodcuts of these crs elements without the division, then later claim identities. Is this right?
-def crs_1_γ (i : fin n_stmt) : (mv_polynomial vars F) := 
-((crs_β) * (u_stmt i).eval₂ mv_polynomial.C X_poly
+@[crs]
+def crs_l (i : fin n_stmt) : (mv_polynomial vars F) := 
+((X vars.β * X vars.δ) * (u_stmt i).eval₂ mv_polynomial.C (X vars.x)
 +
-(crs_α) * (v_stmt i).eval₂ mv_polynomial.C X_poly
+(X vars.α * X vars.δ) * (v_stmt i).eval₂ mv_polynomial.C (X vars.x)
 +
-(w_stmt i).eval₂ mv_polynomial.C X_poly)
-def crs_2_δ (i : fin n_wit) : (mv_polynomial vars F) := 
-((crs_β) * (u_wit i).eval₂ mv_polynomial.C X_poly
+X vars.δ * (w_stmt i).eval₂ mv_polynomial.C (X vars.x))
+@[crs]
+def crs_m (i : fin n_wit) : (mv_polynomial vars F) := 
+((X vars.β * X vars.γ) * (u_wit i).eval₂ mv_polynomial.C (X vars.x)
 +
-(crs_α) * (v_wit i).eval₂ mv_polynomial.C X_poly
+(X vars.α * X vars.γ) * (v_wit i).eval₂ mv_polynomial.C (X vars.x)
 +
-(w_wit i).eval₂ mv_polynomial.C X_poly)
-def crs_t_δ (i : fin m) : (mv_polynomial vars F) := 
-(X_poly^(i : ℕ) * t.eval₂ mv_polynomial.C X_poly)
+X vars.γ * (w_wit i).eval₂ mv_polynomial.C (X vars.x))
+@[crs]
+def crs_n (i : fin n) : (mv_polynomial vars F) := 
+X vars.γ * (X vars.x)^(i : ℕ) * t.eval₂ mv_polynomial.C (X vars.x)
 
 
-parameter crs_1 (i : fin n_stmt) : (mv_polynomial vars F) 
-parameter crs_2 (i : fin n_wit) : (mv_polynomial vars F) 
-parameter crs_t (i : fin m) : (mv_polynomial vars F)
+-- parameter crs_1 (i : fin n_stmt) : (mv_polynomial vars F) 
+-- parameter crs_2 (i : fin n_wit) : (mv_polynomial vars F) 
+-- parameter crs_t (i : fin m) : (mv_polynomial vars F)
 
 /-- The coefficients of the CRS elements in the algebraic adversary's representation -/
 parameters {a a' a'' a''' b b' b'' b''' c c' c'' c''' : F}
 parameters {a1 b1 c1 : fin n_stmt → F}
 parameters {a2 b2 c2 : fin n_wit → F}
-parameters {a3 b3 c3 : fin m → F}
+parameters {a3 b3 c3 : fin n → F}
 
 
 /-- Polynomial forms of the adversary's proof representation -/
@@ -198,11 +221,11 @@ def A  : mv_polynomial vars F :=
   +
   a''' • crs_δ
   +
-  ∑ i in (finset.fin_range n_stmt), (a1 i) • (crs_1 i)
+  ∑ i in (finset.fin_range n_stmt), (a1 i) • (crs_l i)
   +
-  ∑ i in (finset.fin_range n_wit), (a2 i) • (crs_2 i)
+  ∑ i in (finset.fin_range n_wit), (a2 i) • (crs_m i)
   +
-  ∑ i in (finset.fin_range m), (a3 i) • (crs_t i)
+  ∑ i in (finset.fin_range n), (a3 i) • (crs_n i)
 
 def B : mv_polynomial vars F := 
   a • crs_α
@@ -213,11 +236,11 @@ def B : mv_polynomial vars F :=
   +
   a''' • crs_δ
   +
-  ∑ i in (finset.fin_range n_stmt), (a1 i) • (crs_1 i)
+  ∑ i in (finset.fin_range n_stmt), (a1 i) • (crs_l i)
   +
-  ∑ i in (finset.fin_range n_wit), (a2 i) • (crs_2 i)
+  ∑ i in (finset.fin_range n_wit), (a2 i) • (crs_m i)
   +
-  ∑ i in (finset.fin_range m), (a3 i) • (crs_t i)
+  ∑ i in (finset.fin_range n), (a3 i) • (crs_n i)
 
 def C : mv_polynomial vars F := 
   a • crs_α
@@ -228,11 +251,11 @@ def C : mv_polynomial vars F :=
   +
   a''' • crs_δ
   +
-  ∑ i in (finset.fin_range n_stmt), (a1 i) • (crs_1 i)
+  ∑ i in (finset.fin_range n_stmt), (a1 i) • (crs_l i)
   +
-  ∑ i in (finset.fin_range n_wit), (a2 i) • (crs_2 i)
+  ∑ i in (finset.fin_range n_wit), (a2 i) • (crs_m i)
   +
-  ∑ i in (finset.fin_range m), (a3 i) • (crs_t i)
+  ∑ i in (finset.fin_range n), (a3 i) • (crs_n i)
 
 
 
@@ -243,15 +266,18 @@ then the coefficients give a satisfying witness.
 TODO is b2 right here? Perhaps it should be replaced by some other function of the a2 b2 c2 or other coefficients -/
 theorem case_1 (a_stmt : fin n_stmt → F ) : 
   (0 < m)
-  -> ∀ i, crs_1_γ i = crs_1 i * crs_γ
-  -> ∀ i, crs_2_δ i = crs_2 i * crs_δ
-  -> ∀ i, crs_t_δ i = crs_t i * crs_δ
-  -> A * B = crs_α * crs_β + (∑ i in finset.fin_range n_stmt, a_stmt i • crs_1 i ) * crs_γ + C * crs_δ
+  -- -> ∀ i, crs_1_γ i = crs_1 i * crs_γ
+  -- -> ∀ i, crs_2_δ i = crs_2 i * crs_δ
+  -- -> ∀ i, crs_t_δ i = crs_t i * crs_δ
+  -> A * B = crs_α * crs_β + (∑ i in finset.fin_range n_stmt, a_stmt i • crs_l i ) * crs_γ + C * crs_δ
   -> (satisfying a_stmt c2) -- This shows that (a`+1, . . . , am) = (C`+1, . . . , Cm) is a witness for the statement (a1, . . . , a`)
 :=
 begin
-  sorry
+  intros hm eqn,
+  rw [A, B, C] at eqn,
+  simp only with crs at eqn,
 end
+
 
 
 end
