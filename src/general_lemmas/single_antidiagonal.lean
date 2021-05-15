@@ -8,7 +8,7 @@ section
 parameter {S : Type}
 parameter [decidable_eq S]
 
-/-- A general lemma about the anitdiagonal of a finsupp.single. Currently incomplete TODO-/
+/-- A general lemma about the anitdiagonal of a finsupp.single. -/
 lemma single_antidiagonal_support (s : S) (n : ℕ) : 
   (finsupp.single s n).antidiagonal.support 
   = (finset.range (n+1)).image (λ i, (finsupp.single s (n-i), finsupp.single s (i))) 
@@ -92,6 +92,8 @@ begin
     exact nat.sub_add_cancel h_h_w,
   rw h4,
 end
+
+-- TODO make a lemma about how the antidiagonal of a sum of disjoint support finsupps is given by taking the product over the individual antidiagonals and summing.
 
 /-- A copy of the square_antidiagonal lemma, which relies on the more general single_antidiagonal_support rather than being self contained. -/
 lemma single_2_antidiagonal_support (s : S) : (finsupp.single s 2).antidiagonal.support = 
