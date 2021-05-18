@@ -6,6 +6,7 @@ import data.polynomial.div
 import data.polynomial.field_division
 import algebra.polynomial.big_operators
 import .vars
+import ...polynomial_tactic
 
 /-!
 # Knowledge Soundness
@@ -718,7 +719,7 @@ def proof_Z : mv_polynomial vars F :=
   +
   ∑ i in (finset.fin_range n_wit), (Z_comp_crs_y_wit_k i) • (crs_v_wit_k i)
   +
-  ∑ i in (finset.fin_range n_wit), (Z_comp_crs_w_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (Z_comp_crs_w_wit_k i) • (crs_v_wit_k i) -- TODO seems this should be crs_w_wit_k and this mistake is everywhere
   +
   ∑ i in (finset.fin_range n_wit), (Z_comp_crs_α_v_wit_k i) • (crs_v_wit_k i)
   + 
@@ -803,7 +804,10 @@ theorem soundness (c_stmt : fin n_stmt → F ) :
 :=
 begin
   intros hm eqnI eqnII eqnIII eqnIV eqnV,
-  sorry,
+  have foo := congr_arg (mv_polynomial.coeff (finsupp.single vars.r_v 1)) eqnII,
+  rw [proof_α_v_wit, proof_v_wit, crs_α_v] at foo,
+  simp [crs_v_wit_k] at foo,
+  simp only with coeff_simp at foo,
 end
 
 
