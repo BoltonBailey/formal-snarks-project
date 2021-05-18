@@ -8,6 +8,8 @@ section
 parameter {S : Type}
 parameter [decidable_eq S]
 
+-- TODO rephrase proof with nat_antidiagonal
+
 /-- A general lemma about the anitdiagonal of a finsupp.single. -/
 lemma single_antidiagonal_support (s : S) (n : ℕ) : 
   (finsupp.single s n).antidiagonal.support 
