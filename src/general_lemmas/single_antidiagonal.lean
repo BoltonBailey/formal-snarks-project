@@ -95,6 +95,13 @@ end
 
 -- TODO make a lemma about how the antidiagonal of a sum of disjoint support finsupps is given by taking the product over the individual antidiagonals and summing.
 
+-- or
+lemma add_antidiagonal (f g : S →₀ ℕ) : (f + g).antidiagonal.support = (finset.product (f.antidiagonal.support) (g.antidiagonal.support)).image (λ x, ((x.fst.fst + x.snd.fst), (x.fst.snd + x.snd.snd))) :=
+begin
+  sorry
+end
+
+
 /-- A copy of the square_antidiagonal lemma, which relies on the more general single_antidiagonal_support rather than being self contained. -/
 lemma single_2_antidiagonal_support (s : S) : (finsupp.single s 2).antidiagonal.support = 
 {
