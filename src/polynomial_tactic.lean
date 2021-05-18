@@ -58,6 +58,8 @@ attribute [coeff_simp] finsupp.smul_sum
 attribute [coeff_simp] mv_polynomial.smul_eq_C_mul
 attribute [coeff_simp] mv_polynomial.X_pow_eq_single
 attribute [coeff_simp] mv_polynomial.coeff_sum
+attribute [coeff_simp] mv_polynomial.coeff_add
+attribute [coeff_simp] mv_polynomial.coeff_mul
 attribute [coeff_simp] mv_polynomial.coeff_C_mul
 attribute [coeff_simp] mv_polynomial.coeff_monomial
 attribute [coeff_simp] mv_polynomial.coeff_mul_X'
