@@ -1,9 +1,13 @@
 
 import data.finsupp.basic
+import data.finsupp.lattice
 import data.finset.basic
+import data.finsupp.antidiagonal
 -- import ..vars
 
 section
+
+open finsupp
 
 parameter {S : Type}
 parameter [decidable_eq S]
@@ -11,14 +15,14 @@ parameter [decidable_eq S]
 -- TODO rephrase proof with nat_antidiagonal
 
 /-- A general lemma about the anitdiagonal of a finsupp.single. -/
-lemma single_antidiagonal_support (s : S) (n : ℕ) : 
-  (finsupp.single s n).antidiagonal.support 
+lemma single_antidiagonal (s : S) (n : ℕ) : 
+  (single s n).antidiagonal 
   = (finset.range (n+1)).image (λ i, (finsupp.single s (n-i), finsupp.single s (i))) 
 :=
 begin
   rw finset.ext_iff,
   intro a,
-  rw finsupp.mem_antidiagonal_support,
+  rw finsupp.mem_antidiagonal,
   rw finset.mem_image,
   split,
   intro h,
@@ -59,7 +63,9 @@ begin
    rw finsupp.single_apply at h3,
    simp at h3,
    rw if_neg at h3,
-   rw add_eq_zero_iff at h3,
+   simp at h3,
+  --  rw nat.sub_zero,
+  --  rw add_eq_zero_iff at h3,
    rw h3.left,
    finish,
    finish,
@@ -77,7 +83,9 @@ begin
     rw finsupp.single_apply at h3,
     simp at h3,
     rw if_neg at h3,
-    rw add_eq_zero_iff at h3,
+    -- rw add_eq_zero_iff at h3,
+    simp at h3,
+
     rw h3.right,
     finish,
     finish,
@@ -86,8 +94,8 @@ begin
   cases h_h,
   let h1 := prod.ext_iff.1 h_h_h,
   rw [←h1.left, ←h1.right],
-  simp,
-  rw [←finsupp.single_sub, ←finsupp.single_add],
+  simp,  
+  rw [←finsupp.single_nat_sub, ←finsupp.single_add],
   rw finset.mem_range at h_h_w,
   have h4 : n - h_w + h_w = n,
     rw nat.lt_succ_iff at h_h_w,
@@ -95,17 +103,93 @@ begin
   rw h4,
 end
 
--- TODO make a lemma about how the antidiagonal of a sum of disjoint support finsupps is given by taking the product over the individual antidiagonals and summing.
 
--- or
-lemma add_antidiagonal (f g : S →₀ ℕ) : (f + g).antidiagonal.support = (finset.product (f.antidiagonal.support) (g.antidiagonal.support)).image (λ x, ((x.fst.fst + x.snd.fst), (x.fst.snd + x.snd.snd))) :=
+
+lemma finsupp.sub_le_right_of_le_add (a b c : S →₀ ℕ) (h : a ≤ b + c) : a - c ≤ b := 
 begin
-  sorry
+  intro,
+  have z := h s,
+  rw nat_sub_apply,
+  rw add_apply at z,
+  -- rw z,
+  exact nat.sub_le_right_of_le_add z,
+end
+
+-- TODO generalize and add to mathlib
+lemma nat.add_inf (a b c : ℕ) : a + (b ⊓ c) = (a + b) ⊓ (a + c) := 
+begin
+  by_cases b ≤ c,
+  simp [inf_eq_left.2 h],
+  exact h,
+  have h' : c ≤ b,
+    exact le_of_not_ge h,
+  simp [inf_eq_right.2 h'],
+  exact h',
+end
+
+lemma finsupp.nat_add_inf (a b c : S →₀ ℕ) : a + (b ⊓ c) = (a + b) ⊓ (a + c) := 
+begin
+  ext,
+  simp only [add_apply, finsupp.inf_apply],
+  apply nat.add_inf,
+end
+
+-- TODO: Put in mathlib
+lemma add_antidiagonal (f g : S →₀ ℕ) : (f + g).antidiagonal = (finset.product (f.antidiagonal) (g.antidiagonal)).image (λ x, ((x.fst.fst + x.snd.fst), (x.fst.snd + x.snd.snd))) :=
+begin
+  rw finset.ext_iff,
+  intro a,
+  rw mem_antidiagonal,
+  rw finset.mem_image,
+  split,
+  { 
+    intro h,
+    use ((a.fst ⊓ f, f - (a.fst ⊓ f)), (a.fst - (a.fst ⊓ f), g - (a.fst - (a.fst ⊓ f)))),
+    split,
+    -- TODO abstract lemma about a+b, a+c, b+d, c+d
+    rw finset.mem_product,
+    split,
+    simp only [mem_antidiagonal],
+    apply finsupp.nat_add_sub_of_le,
+    exact inf_le_right,
+    simp only [mem_antidiagonal],
+    apply finsupp.nat_add_sub_of_le,
+    apply finsupp.sub_le_right_of_le_add,
+    rw finsupp.nat_add_inf,
+    simp,
+    rw add_comm,
+    rw ←h,
+    simp,
+    -- simp only,
+    have tmp : a = (a.fst, a.snd),
+    simp,
+    rw tmp,
+    simp only,
+    apply congr_arg2,
+    apply finsupp.nat_add_sub_of_le,
+    exact inf_le_left,
+    -- apply finsupp.nat_add_sub_of_le,
+    sorry,},
+  { intro h,
+    cases h with a1 h2,
+    cases h2 with H h3,
+    rw finset.mem_product at H,
+    rw finsupp.mem_antidiagonal at H,
+    rw finsupp.mem_antidiagonal at H,
+    rw [←H.left, ←H.right],
+    rw prod.ext_iff at h3,
+    rw [←h3.left, ←h3.right],
+    finish,
+    }
+  -- hint,
+  -- ext,
+  -- simp only,
+  -- use 
 end
 
 
-/-- A copy of the square_antidiagonal lemma, which relies on the more general single_antidiagonal_support rather than being self contained. -/
-lemma single_2_antidiagonal_support (s : S) : (finsupp.single s 2).antidiagonal.support = 
+/-- A copy of the square_antidiagonal lemma, which relies on the more general single_antidiagonal rather than being self contained. -/
+lemma single_2_antidiagonal (s : S) : (finsupp.single s 2).antidiagonal = 
 {
   (finsupp.single s 0, finsupp.single s 2), 
   (finsupp.single s 1, finsupp.single s 1), 
@@ -113,11 +197,12 @@ lemma single_2_antidiagonal_support (s : S) : (finsupp.single s 2).antidiagonal.
 }
 :=
 begin
-  rw single_antidiagonal_support s 2,
+  rw single_antidiagonal s 2,
   rw finset.ext_iff,
   intro a,
   rw finset.range,
   rw finset.image,
-  simp [-finsupp.single_sub],
+  simp [-finsupp.single_nat_sub],
 end
+
 end
