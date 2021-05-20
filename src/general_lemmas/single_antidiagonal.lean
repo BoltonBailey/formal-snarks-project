@@ -134,6 +134,36 @@ begin
   apply nat.add_inf,
 end
 
+-- -- TODO generalize and add to mathlib
+-- lemma nat.add_lemma (a b c : ℕ) (h : b ≤ a) : a - b + c = a + c - b := 
+-- begin
+--   exact nat.sub_add_eq_add_sub h,
+-- end
+
+-- TODO generalize and add to mathlib
+lemma nat.add_lemma2 (a b c : ℕ) : c = a + b -> c - a = b := 
+begin
+  exact nat.sub_eq_of_eq_add
+end
+
+lemma helper (a b c d : ℕ) (h : b + d = a + c) : a - b ⊓ a + (c - (b - b ⊓ a)) = d :=
+begin
+  by_cases h1 : b ≤ a,
+  simp [inf_eq_left.2 h1],
+  rw nat.sub_add_eq_add_sub,
+  rw <-h,
+  exact norm_num.sub_nat_pos (b + d) b d rfl,
+  exact h1,
+  have h' : a ≤ b,
+    exact le_of_not_ge h1,
+  simp [inf_eq_right.2 h'],
+  apply nat.sub_eq_of_eq_add,
+  rw nat.sub_add_eq_add_sub,
+  rw h,
+  simp only [nat.add_sub_cancel_left],
+  exact h'
+end
+
 -- TODO: Put in mathlib
 lemma add_antidiagonal (f g : S →₀ ℕ) : (f + g).antidiagonal = (finset.product (f.antidiagonal) (g.antidiagonal)).image (λ x, ((x.fst.fst + x.snd.fst), (x.fst.snd + x.snd.snd))) :=
 begin
@@ -168,8 +198,16 @@ begin
     apply congr_arg2,
     apply finsupp.nat_add_sub_of_le,
     exact inf_le_left,
-    -- apply finsupp.nat_add_sub_of_le,
-    sorry,},
+
+    -- TODO probably the best way to finish is
+    ext,
+    simp only [add_apply, nat_sub_apply, finsupp.inf_apply],
+    apply helper,
+    have h1 := finsupp.ext_iff.1 h,
+    exact h1 a_1,
+
+    -- then by_cases on the ⊓ which is greater.
+  },
   { intro h,
     cases h with a1 h2,
     cases h2 with H h3,
