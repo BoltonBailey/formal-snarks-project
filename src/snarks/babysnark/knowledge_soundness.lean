@@ -9,6 +9,7 @@ import ...general_lemmas.polynomial_mv_sv_cast
 import ...general_lemmas.mv_divisability
 import ...general_lemmas.single_antidiagonal
 import ...general_lemmas.polynomial_smul_eq_C_mul
+import ...general_lemmas.single_injective
 import .vars
 import ...polynomial_tactic
 
@@ -216,9 +217,10 @@ begin
   simp only with coeff_simp,
   unfold_coes,
   --TODO is this best?
-  simp [finsupp.single_injective, ←fin.eq_iff_veq],
-  rw finsupp.single_eq_single_iff,
-  finish,
+  -- TODO improve ite_finsupp_simplify with this
+  -- simp [],
+  simp only [single_injective_iff],
+  simp [finsupp.single_eq_single_iff, ←fin.eq_iff_veq],
 end
 
 
@@ -257,17 +259,19 @@ begin
   rw mv_polynomial.coeff_C,
   rw if_neg,
   rw mv_polynomial.coeff_mul,
-  rw single_2_antidiagonal_support,
+  rw single_2_antidiagonal,
   rw finset.sum_insert,
   rw finset.sum_insert,
   rw finset.sum_singleton,
   simp [H, t_mv, crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps, X_poly, Y_poly, Z_poly],
-  simp only with coeff_simp,
-  ite_finsupp_simplify,
+  simp only with coeff_simp, 
+  -- unfold_coes,
 
-  simp,
+  ite_finsupp_simplify,
+  -- simp only with coeff_simp,
+
   simp [-finsupp.single_zero, finsupp.single_eq_single_iff],
-  dec_trivial,
+  -- dec_trivial,
 
   rw finsupp.eq_single_iff,
   dec_trivial,
@@ -286,7 +290,7 @@ begin
   rw pow_succ,
   rw pow_one,
   rw mv_polynomial.coeff_mul,
-  rw single_2_antidiagonal_support,
+  rw single_2_antidiagonal,
 
   rw finset.sum_insert,
   rw finset.sum_insert,
@@ -304,7 +308,7 @@ begin
 
   simp,
   simp [-finsupp.single_zero, finsupp.single_eq_single_iff],
-  finish,
+  -- finish,
 end
 
 
