@@ -1,6 +1,7 @@
 
 import data.mv_polynomial.basic
 import .general_lemmas.mv_X_mul
+import .general_lemmas.single_antidiagonal
 -- import tactic.basic
 
 -- TODO remove these practice tactics
@@ -34,39 +35,51 @@ end
 -- { name := `coeff_simp,
 --   descr := "Attribute for lemmas that are used in the simplification of coeff statements" }
 
+
+run_cmd mk_simp_attr `polynomial_nf
+run_cmd tactic.add_doc_string `simp_attr.polynomial_nf "Attribute for lemmas that are used in the conversion of mv_polynomial expressions to a normal form consisting of adds of sums of muls of mv_polynomials"
+
+attribute [polynomial_nf] polynomial.eval₂
+attribute [polynomial_nf] polynomial.sum
+attribute [polynomial_nf] finsupp.sum
+attribute [polynomial_nf] finsupp.smul_sum
+attribute [polynomial_nf] mv_polynomial.smul_eq_C_mul
+
+
 run_cmd mk_simp_attr `coeff_simp
-run_cmd tactic.add_doc_string `simp_attr.coeff_simp "Attribute for lemmas that are used in the simplification of coeff statements"
-
-@[user_attribute] meta def finsupp_simp_attribute : user_attribute :=
-{ name := `finsupp_simp,
-  descr := "Attribute for lemmas that are used in the simplification of TODO" }
+run_cmd tactic.add_doc_string `simp_attr.coeff_simp "Attribute for lemmas that are used in the simplification of statements about coefficients of mv_polynomials"
 
 
-@[finsupp_simp]
-lemma zero_ne_two : ¬(0 = 2) := 
-  by exact dec_trivial
-
-lemma one_ne_two : ¬(1 = 2) := 
-  by exact dec_trivial
--- TODO be more clean than just naming these random lemmas 
+-- attribute [coeff_simp] mv_polynomial.coeff_mul
+-- attribute [coeff_simp] single_1_antidiagonal
+-- attribute [coeff_simp] single_2_antidiagonal
+-- attribute [coeff_simp] finset.range
+-- attribute [coeff_simp] finset.image
 
 
 
-attribute [coeff_simp] polynomial.eval₂
-attribute [coeff_simp] polynomial.sum
-attribute [coeff_simp] finsupp.sum
-attribute [coeff_simp] finsupp.smul_sum
-attribute [coeff_simp] mv_polynomial.smul_eq_C_mul
+
 attribute [coeff_simp] mv_polynomial.X_pow_eq_single
 attribute [coeff_simp] mv_polynomial.coeff_sum
 attribute [coeff_simp] mv_polynomial.coeff_add
--- attribute [coeff_simp] mv_polynomial.coeff_mul
+
 attribute [coeff_simp] mv_polynomial.coeff_C_mul
 attribute [coeff_simp] mv_polynomial.coeff_monomial
 attribute [coeff_simp] mv_polynomial.coeff_mul_X'
 attribute [coeff_simp] mv_polynomial.coeff_X'
 attribute [coeff_simp] coeff_X_mul'
 attribute [coeff_simp] mv_polynomial.coeff_C
+
+
+
+
+
+lemma zero_ne_two : ¬(0 = 2) := 
+  by exact dec_trivial
+
+lemma one_ne_two : ¬(1 = 2) := 
+  by exact dec_trivial
+-- TODO be more clean than just naming these random lemmas 
 
 
 meta def ite_finsupp_simplify : tactic unit :=

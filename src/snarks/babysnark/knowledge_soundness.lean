@@ -214,11 +214,12 @@ begin
   rw B_wit,
   simp [crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps],
   simp [X_poly, Y_poly, Z_poly],
-  simp only with coeff_simp,
+  simp with coeff_simp,
   unfold_coes,
   --TODO is this best?
   -- TODO improve ite_finsupp_simplify with this
   -- simp [],
+  -- ite_finsupp_simplify,
   simp only [single_injective_iff],
   simp [finsupp.single_eq_single_iff, ←fin.eq_iff_veq],
 end
@@ -230,8 +231,14 @@ begin
   rw B_wit,
   simp [crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps],
   simp [X_poly, Y_poly, Z_poly],
-  simp only with coeff_simp,
+  simp? with coeff_simp,
+  -- -- simp? [-finsupp.single_nat_sub],
+  -- simp?,
   ite_finsupp_simplify,
+  -- simp only with coeff_simp,
+  -- ite_finsupp_simplify,
+
+
 end
 
 lemma h4_1 : (∀ i, b i = 0) -> (λ (i : fin m), b i • crs_powers_of_τ i) = (λ (i : fin m), 0)
@@ -264,7 +271,7 @@ begin
   rw finset.sum_insert,
   rw finset.sum_singleton,
   simp [H, t_mv, crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps, X_poly, Y_poly, Z_poly],
-  simp only with coeff_simp, 
+  simp only with coeff_simp polynomial_nf, 
   -- unfold_coes,
 
   ite_finsupp_simplify,
@@ -300,7 +307,7 @@ begin
   --      But I used to get deterministic timeout - i fixed this by making simp only with coeff_simp do simp only instead
   --
   simp [X_poly, Y_poly, Z_poly],
-  simp only with coeff_simp,
+  simp only with coeff_simp polynomial_nf,
   -- simp only with coeff_simp,
   ite_finsupp_simplify,
   rw pow_succ,
