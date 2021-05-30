@@ -228,34 +228,35 @@ def A  : mv_polynomial vars F :=
   ∑ i in (finset.fin_range n), (a3 i) • (crs_n i)
 
 def B : mv_polynomial vars F := 
-  a • crs_α
+  b • crs_α
   +
-  a' • crs_β
+  b' • crs_β
   + 
-  a'' • crs_γ
+  b'' • crs_γ
   +
-  a''' • crs_δ
+  b''' • crs_δ
   +
-  ∑ i in (finset.fin_range n_stmt), (a1 i) • (crs_l i)
+  ∑ i in (finset.fin_range n_stmt), (b1 i) • (crs_l i)
   +
-  ∑ i in (finset.fin_range n_wit), (a2 i) • (crs_m i)
+  ∑ i in (finset.fin_range n_wit), (b2 i) • (crs_m i)
   +
-  ∑ i in (finset.fin_range n), (a3 i) • (crs_n i)
+  ∑ i in (finset.fin_range n), (b3 i) • (crs_n i)
 
 def C : mv_polynomial vars F := 
-  a • crs_α
+  c • crs_α
   +
-  a' • crs_β
+  c' • crs_β
   + 
-  a'' • crs_γ
+  c'' • crs_γ
   +
-  a''' • crs_δ
+  c''' • crs_δ
   +
-  ∑ i in (finset.fin_range n_stmt), (a1 i) • (crs_l i)
+  ∑ i in (finset.fin_range n_stmt), (c1 i) • (crs_l i)
   +
-  ∑ i in (finset.fin_range n_wit), (a2 i) • (crs_m i)
+  ∑ i in (finset.fin_range n_wit), (c2 i) • (crs_m i)
   +
-  ∑ i in (finset.fin_range n), (a3 i) • (crs_n i)
+  ∑ i in (finset.fin_range n), (c3 i) • (crs_n i)
+
 
 
 
