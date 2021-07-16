@@ -1,0 +1,1092 @@
+
+lemma coeff0002 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0002 := congr_arg (coeff (single vars.α 0 + single vars.β 0 + single vars.δ 0 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0002,
+simp at congr_coeff0002,
+-- exact congr_coeff0002,
+end
+
+
+lemma coeff0011 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0011 := congr_arg (coeff (single vars.α 0 + single vars.β 0 + single vars.δ 1 + single vars.γ 1)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0011,
+simp at congr_coeff0011,
+-- exact congr_coeff0011,
+end
+
+
+lemma coeff0012 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0012 := congr_arg (coeff (single vars.α 0 + single vars.β 0 + single vars.δ 1 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0012,
+simp at congr_coeff0012,
+-- exact congr_coeff0012,
+end
+
+
+lemma coeff0013 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0013 := congr_arg (coeff (single vars.α 0 + single vars.β 0 + single vars.δ 1 + single vars.γ 3)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0013,
+simp at congr_coeff0013,
+-- exact congr_coeff0013,
+end
+
+
+lemma coeff0020 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0020 := congr_arg (coeff (single vars.α 0 + single vars.β 0 + single vars.δ 2 + single vars.γ 0)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0020,
+simp at congr_coeff0020,
+-- exact congr_coeff0020,
+end
+
+
+lemma coeff0021 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0021 := congr_arg (coeff (single vars.α 0 + single vars.β 0 + single vars.δ 2 + single vars.γ 1)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0021,
+simp at congr_coeff0021,
+-- exact congr_coeff0021,
+end
+
+
+lemma coeff0022 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0022 := congr_arg (coeff (single vars.α 0 + single vars.β 0 + single vars.δ 2 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0022,
+simp at congr_coeff0022,
+-- exact congr_coeff0022,
+end
+
+
+lemma coeff0023 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0023 := congr_arg (coeff (single vars.α 0 + single vars.β 0 + single vars.δ 2 + single vars.γ 3)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0023,
+simp at congr_coeff0023,
+-- exact congr_coeff0023,
+end
+
+
+lemma coeff0024 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0024 := congr_arg (coeff (single vars.α 0 + single vars.β 0 + single vars.δ 2 + single vars.γ 4)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0024,
+simp at congr_coeff0024,
+-- exact congr_coeff0024,
+end
+
+
+lemma coeff0031 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0031 := congr_arg (coeff (single vars.α 0 + single vars.β 0 + single vars.δ 3 + single vars.γ 1)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0031,
+simp at congr_coeff0031,
+-- exact congr_coeff0031,
+end
+
+
+lemma coeff0032 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0032 := congr_arg (coeff (single vars.α 0 + single vars.β 0 + single vars.δ 3 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0032,
+simp at congr_coeff0032,
+-- exact congr_coeff0032,
+end
+
+
+lemma coeff0033 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0033 := congr_arg (coeff (single vars.α 0 + single vars.β 0 + single vars.δ 3 + single vars.γ 3)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0033,
+simp at congr_coeff0033,
+-- exact congr_coeff0033,
+end
+
+
+lemma coeff0042 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0042 := congr_arg (coeff (single vars.α 0 + single vars.β 0 + single vars.δ 4 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0042,
+simp at congr_coeff0042,
+-- exact congr_coeff0042,
+end
+
+
+lemma coeff0102 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0102 := congr_arg (coeff (single vars.α 0 + single vars.β 1 + single vars.δ 0 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0102,
+simp at congr_coeff0102,
+-- exact congr_coeff0102,
+end
+
+
+lemma coeff0111 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0111 := congr_arg (coeff (single vars.α 0 + single vars.β 1 + single vars.δ 1 + single vars.γ 1)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0111,
+simp at congr_coeff0111,
+-- exact congr_coeff0111,
+end
+
+
+lemma coeff0112 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0112 := congr_arg (coeff (single vars.α 0 + single vars.β 1 + single vars.δ 1 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0112,
+simp at congr_coeff0112,
+-- exact congr_coeff0112,
+end
+
+
+lemma coeff0113 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0113 := congr_arg (coeff (single vars.α 0 + single vars.β 1 + single vars.δ 1 + single vars.γ 3)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0113,
+simp at congr_coeff0113,
+-- exact congr_coeff0113,
+end
+
+
+lemma coeff0120 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0120 := congr_arg (coeff (single vars.α 0 + single vars.β 1 + single vars.δ 2 + single vars.γ 0)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0120,
+simp at congr_coeff0120,
+-- exact congr_coeff0120,
+end
+
+
+lemma coeff0121 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0121 := congr_arg (coeff (single vars.α 0 + single vars.β 1 + single vars.δ 2 + single vars.γ 1)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0121,
+simp at congr_coeff0121,
+-- exact congr_coeff0121,
+end
+
+
+lemma coeff0122 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0122 := congr_arg (coeff (single vars.α 0 + single vars.β 1 + single vars.δ 2 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0122,
+simp at congr_coeff0122,
+-- exact congr_coeff0122,
+end
+
+
+lemma coeff0123 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0123 := congr_arg (coeff (single vars.α 0 + single vars.β 1 + single vars.δ 2 + single vars.γ 3)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0123,
+simp at congr_coeff0123,
+-- exact congr_coeff0123,
+end
+
+
+lemma coeff0124 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0124 := congr_arg (coeff (single vars.α 0 + single vars.β 1 + single vars.δ 2 + single vars.γ 4)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0124,
+simp at congr_coeff0124,
+-- exact congr_coeff0124,
+end
+
+
+lemma coeff0131 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0131 := congr_arg (coeff (single vars.α 0 + single vars.β 1 + single vars.δ 3 + single vars.γ 1)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0131,
+simp at congr_coeff0131,
+-- exact congr_coeff0131,
+end
+
+
+lemma coeff0132 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0132 := congr_arg (coeff (single vars.α 0 + single vars.β 1 + single vars.δ 3 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0132,
+simp at congr_coeff0132,
+-- exact congr_coeff0132,
+end
+
+
+lemma coeff0133 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0133 := congr_arg (coeff (single vars.α 0 + single vars.β 1 + single vars.δ 3 + single vars.γ 3)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0133,
+simp at congr_coeff0133,
+-- exact congr_coeff0133,
+end
+
+
+lemma coeff0142 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0142 := congr_arg (coeff (single vars.α 0 + single vars.β 1 + single vars.δ 4 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0142,
+simp at congr_coeff0142,
+-- exact congr_coeff0142,
+end
+
+
+lemma coeff0202 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0202 := congr_arg (coeff (single vars.α 0 + single vars.β 2 + single vars.δ 0 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0202,
+simp at congr_coeff0202,
+-- exact congr_coeff0202,
+end
+
+
+lemma coeff0211 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0211 := congr_arg (coeff (single vars.α 0 + single vars.β 2 + single vars.δ 1 + single vars.γ 1)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0211,
+simp at congr_coeff0211,
+-- exact congr_coeff0211,
+end
+
+
+lemma coeff0212 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0212 := congr_arg (coeff (single vars.α 0 + single vars.β 2 + single vars.δ 1 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0212,
+simp at congr_coeff0212,
+-- exact congr_coeff0212,
+end
+
+
+lemma coeff0213 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0213 := congr_arg (coeff (single vars.α 0 + single vars.β 2 + single vars.δ 1 + single vars.γ 3)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0213,
+simp at congr_coeff0213,
+-- exact congr_coeff0213,
+end
+
+
+lemma coeff0220 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0220 := congr_arg (coeff (single vars.α 0 + single vars.β 2 + single vars.δ 2 + single vars.γ 0)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0220,
+simp at congr_coeff0220,
+-- exact congr_coeff0220,
+end
+
+
+lemma coeff0221 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0221 := congr_arg (coeff (single vars.α 0 + single vars.β 2 + single vars.δ 2 + single vars.γ 1)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0221,
+simp at congr_coeff0221,
+-- exact congr_coeff0221,
+end
+
+
+lemma coeff0222 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0222 := congr_arg (coeff (single vars.α 0 + single vars.β 2 + single vars.δ 2 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0222,
+simp at congr_coeff0222,
+-- exact congr_coeff0222,
+end
+
+
+lemma coeff0223 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0223 := congr_arg (coeff (single vars.α 0 + single vars.β 2 + single vars.δ 2 + single vars.γ 3)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0223,
+simp at congr_coeff0223,
+-- exact congr_coeff0223,
+end
+
+
+lemma coeff0224 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0224 := congr_arg (coeff (single vars.α 0 + single vars.β 2 + single vars.δ 2 + single vars.γ 4)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0224,
+simp at congr_coeff0224,
+-- exact congr_coeff0224,
+end
+
+
+lemma coeff0231 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0231 := congr_arg (coeff (single vars.α 0 + single vars.β 2 + single vars.δ 3 + single vars.γ 1)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0231,
+simp at congr_coeff0231,
+-- exact congr_coeff0231,
+end
+
+
+lemma coeff0232 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0232 := congr_arg (coeff (single vars.α 0 + single vars.β 2 + single vars.δ 3 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0232,
+simp at congr_coeff0232,
+-- exact congr_coeff0232,
+end
+
+
+lemma coeff0233 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0233 := congr_arg (coeff (single vars.α 0 + single vars.β 2 + single vars.δ 3 + single vars.γ 3)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0233,
+simp at congr_coeff0233,
+-- exact congr_coeff0233,
+end
+
+
+lemma coeff0242 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff0242 := congr_arg (coeff (single vars.α 0 + single vars.β 2 + single vars.δ 4 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0242,
+simp at congr_coeff0242,
+-- exact congr_coeff0242,
+end
+
+
+lemma coeff1002 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff1002 := congr_arg (coeff (single vars.α 1 + single vars.β 0 + single vars.δ 0 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1002,
+simp at congr_coeff1002,
+-- exact congr_coeff1002,
+end
+
+
+lemma coeff1011 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff1011 := congr_arg (coeff (single vars.α 1 + single vars.β 0 + single vars.δ 1 + single vars.γ 1)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1011,
+simp at congr_coeff1011,
+-- exact congr_coeff1011,
+end
+
+
+lemma coeff1012 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff1012 := congr_arg (coeff (single vars.α 1 + single vars.β 0 + single vars.δ 1 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1012,
+simp at congr_coeff1012,
+-- exact congr_coeff1012,
+end
+
+
+lemma coeff1013 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff1013 := congr_arg (coeff (single vars.α 1 + single vars.β 0 + single vars.δ 1 + single vars.γ 3)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1013,
+simp at congr_coeff1013,
+-- exact congr_coeff1013,
+end
+
+
+lemma coeff1020 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff1020 := congr_arg (coeff (single vars.α 1 + single vars.β 0 + single vars.δ 2 + single vars.γ 0)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1020,
+simp at congr_coeff1020,
+-- exact congr_coeff1020,
+end
+
+
+lemma coeff1021 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff1021 := congr_arg (coeff (single vars.α 1 + single vars.β 0 + single vars.δ 2 + single vars.γ 1)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1021,
+simp at congr_coeff1021,
+-- exact congr_coeff1021,
+end
+
+
+lemma coeff1022 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff1022 := congr_arg (coeff (single vars.α 1 + single vars.β 0 + single vars.δ 2 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1022,
+simp at congr_coeff1022,
+-- exact congr_coeff1022,
+end
+
+
+lemma coeff1023 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff1023 := congr_arg (coeff (single vars.α 1 + single vars.β 0 + single vars.δ 2 + single vars.γ 3)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1023,
+simp at congr_coeff1023,
+-- exact congr_coeff1023,
+end
+
+
+lemma coeff1024 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff1024 := congr_arg (coeff (single vars.α 1 + single vars.β 0 + single vars.δ 2 + single vars.γ 4)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1024,
+simp at congr_coeff1024,
+-- exact congr_coeff1024,
+end
+
+
+lemma coeff1031 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff1031 := congr_arg (coeff (single vars.α 1 + single vars.β 0 + single vars.δ 3 + single vars.γ 1)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1031,
+simp at congr_coeff1031,
+-- exact congr_coeff1031,
+end
+
+
+lemma coeff1032 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff1032 := congr_arg (coeff (single vars.α 1 + single vars.β 0 + single vars.δ 3 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1032,
+simp at congr_coeff1032,
+-- exact congr_coeff1032,
+end
+
+
+lemma coeff1033 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff1033 := congr_arg (coeff (single vars.α 1 + single vars.β 0 + single vars.δ 3 + single vars.γ 3)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1033,
+simp at congr_coeff1033,
+-- exact congr_coeff1033,
+end
+
+
+lemma coeff1042 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff1042 := congr_arg (coeff (single vars.α 1 + single vars.β 0 + single vars.δ 4 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1042,
+simp at congr_coeff1042,
+-- exact congr_coeff1042,
+end
+
+
+lemma coeff1102 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff1102 := congr_arg (coeff (single vars.α 1 + single vars.β 1 + single vars.δ 0 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1102,
+simp at congr_coeff1102,
+-- exact congr_coeff1102,
+end
+
+
+lemma coeff1111 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff1111 := congr_arg (coeff (single vars.α 1 + single vars.β 1 + single vars.δ 1 + single vars.γ 1)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1111,
+simp at congr_coeff1111,
+-- exact congr_coeff1111,
+end
+
+
+lemma coeff1112 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff1112 := congr_arg (coeff (single vars.α 1 + single vars.β 1 + single vars.δ 1 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1112,
+simp at congr_coeff1112,
+-- exact congr_coeff1112,
+end
+
+
+lemma coeff1113 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff1113 := congr_arg (coeff (single vars.α 1 + single vars.β 1 + single vars.δ 1 + single vars.γ 3)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1113,
+simp at congr_coeff1113,
+-- exact congr_coeff1113,
+end
+
+
+lemma coeff1120 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff1120 := congr_arg (coeff (single vars.α 1 + single vars.β 1 + single vars.δ 2 + single vars.γ 0)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1120,
+simp at congr_coeff1120,
+-- exact congr_coeff1120,
+end
+
+
+lemma coeff1121 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff1121 := congr_arg (coeff (single vars.α 1 + single vars.β 1 + single vars.δ 2 + single vars.γ 1)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1121,
+simp at congr_coeff1121,
+-- exact congr_coeff1121,
+end
+
+
+lemma coeff1122 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff1122 := congr_arg (coeff (single vars.α 1 + single vars.β 1 + single vars.δ 2 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1122,
+simp at congr_coeff1122,
+-- exact congr_coeff1122,
+end
+
+
+lemma coeff1123 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff1123 := congr_arg (coeff (single vars.α 1 + single vars.β 1 + single vars.δ 2 + single vars.γ 3)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1123,
+simp at congr_coeff1123,
+-- exact congr_coeff1123,
+end
+
+
+lemma coeff1124 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff1124 := congr_arg (coeff (single vars.α 1 + single vars.β 1 + single vars.δ 2 + single vars.γ 4)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1124,
+simp at congr_coeff1124,
+-- exact congr_coeff1124,
+end
+
+
+lemma coeff1131 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff1131 := congr_arg (coeff (single vars.α 1 + single vars.β 1 + single vars.δ 3 + single vars.γ 1)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1131,
+simp at congr_coeff1131,
+-- exact congr_coeff1131,
+end
+
+
+lemma coeff1132 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff1132 := congr_arg (coeff (single vars.α 1 + single vars.β 1 + single vars.δ 3 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1132,
+simp at congr_coeff1132,
+-- exact congr_coeff1132,
+end
+
+
+lemma coeff1133 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff1133 := congr_arg (coeff (single vars.α 1 + single vars.β 1 + single vars.δ 3 + single vars.γ 3)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1133,
+simp at congr_coeff1133,
+-- exact congr_coeff1133,
+end
+
+
+lemma coeff1142 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff1142 := congr_arg (coeff (single vars.α 1 + single vars.β 1 + single vars.δ 4 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1142,
+simp at congr_coeff1142,
+-- exact congr_coeff1142,
+end
+
+
+lemma coeff2002 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff2002 := congr_arg (coeff (single vars.α 2 + single vars.β 0 + single vars.δ 0 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff2002,
+simp at congr_coeff2002,
+-- exact congr_coeff2002,
+end
+
+
+lemma coeff2011 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff2011 := congr_arg (coeff (single vars.α 2 + single vars.β 0 + single vars.δ 1 + single vars.γ 1)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff2011,
+simp at congr_coeff2011,
+-- exact congr_coeff2011,
+end
+
+
+lemma coeff2012 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff2012 := congr_arg (coeff (single vars.α 2 + single vars.β 0 + single vars.δ 1 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff2012,
+simp at congr_coeff2012,
+-- exact congr_coeff2012,
+end
+
+
+lemma coeff2013 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff2013 := congr_arg (coeff (single vars.α 2 + single vars.β 0 + single vars.δ 1 + single vars.γ 3)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff2013,
+simp at congr_coeff2013,
+-- exact congr_coeff2013,
+end
+
+
+lemma coeff2020 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff2020 := congr_arg (coeff (single vars.α 2 + single vars.β 0 + single vars.δ 2 + single vars.γ 0)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff2020,
+simp at congr_coeff2020,
+-- exact congr_coeff2020,
+end
+
+
+lemma coeff2021 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff2021 := congr_arg (coeff (single vars.α 2 + single vars.β 0 + single vars.δ 2 + single vars.γ 1)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff2021,
+simp at congr_coeff2021,
+-- exact congr_coeff2021,
+end
+
+
+lemma coeff2022 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff2022 := congr_arg (coeff (single vars.α 2 + single vars.β 0 + single vars.δ 2 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff2022,
+simp at congr_coeff2022,
+-- exact congr_coeff2022,
+end
+
+
+lemma coeff2023 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff2023 := congr_arg (coeff (single vars.α 2 + single vars.β 0 + single vars.δ 2 + single vars.γ 3)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff2023,
+simp at congr_coeff2023,
+-- exact congr_coeff2023,
+end
+
+
+lemma coeff2024 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff2024 := congr_arg (coeff (single vars.α 2 + single vars.β 0 + single vars.δ 2 + single vars.γ 4)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff2024,
+simp at congr_coeff2024,
+-- exact congr_coeff2024,
+end
+
+
+lemma coeff2031 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff2031 := congr_arg (coeff (single vars.α 2 + single vars.β 0 + single vars.δ 3 + single vars.γ 1)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff2031,
+simp at congr_coeff2031,
+-- exact congr_coeff2031,
+end
+
+
+lemma coeff2032 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff2032 := congr_arg (coeff (single vars.α 2 + single vars.β 0 + single vars.δ 3 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff2032,
+simp at congr_coeff2032,
+-- exact congr_coeff2032,
+end
+
+
+lemma coeff2033 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff2033 := congr_arg (coeff (single vars.α 2 + single vars.β 0 + single vars.δ 3 + single vars.γ 3)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff2033,
+simp at congr_coeff2033,
+-- exact congr_coeff2033,
+end
+
+
+lemma coeff2042 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+1 = 0 :=
+begin
+rw verified' at eqn,
+rw [A', B', C'] at eqn,
+simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+have congr_coeff2042 := congr_arg (coeff (single vars.α 2 + single vars.β 0 + single vars.δ 4 + single vars.γ 2)) eqn,
+clear eqn,
+simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff2042,
+simp at congr_coeff2042,
+-- exact congr_coeff2042,
+end
+

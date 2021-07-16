@@ -220,7 +220,7 @@ begin
   -- TODO improve ite_finsupp_simplify with this
   -- simp [],
   -- ite_finsupp_simplify,
-  simp only [single_injective_iff],
+  -- simp only [single_injective_iff],
   simp [finsupp.single_eq_single_iff, ←fin.eq_iff_veq],
 end
 
@@ -231,7 +231,7 @@ begin
   rw B_wit,
   simp [crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps],
   simp [X_poly, Y_poly, Z_poly],
-  simp? with coeff_simp,
+  simp with coeff_simp,
   -- -- simp? [-finsupp.single_nat_sub],
   -- simp?,
   ite_finsupp_simplify,

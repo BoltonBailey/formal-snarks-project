@@ -9,7 +9,7 @@ open_locale classical big_operators
 open set function finsupp add_monoid_algebra
 open_locale big_operators
 
-universes u
+universes u v
 variables {R : Type u} 
 
 
@@ -30,7 +30,6 @@ lemma coeff_X_mul' (m) (s : σ) (p : mv_polynomial σ R) :
 begin
   rw mul_comm,
   rw mv_polynomial.coeff_mul_X',
-  finish,
 end
 
 end decidable_eq
@@ -80,14 +79,83 @@ begin
 end
 
 
-lemma rearrange1 (n : ℕ) (v1 v2 : σ) (p : mv_polynomial σ R) : (mv_polynomial.X v1 ^ n) * (mv_polynomial.X v2 * p) = mv_polynomial.X v2 * ((mv_polynomial.X v1 ^ n) * p) :=
+
+lemma sum_X_mul {α : Type u} (r : finset α) (f : α -> mv_polynomial σ R) (s : σ) : 
+  (∑ x in r, X s * f x) = X s * (∑ x in r, f x)
+:= 
+begin
+  rw finset.mul_sum,
+end
+
+lemma sum_C_mul {α : Type u} {r : finset α} {f : α -> mv_polynomial σ R} (e : R) : 
+  (∑ x in r, C e * f x) = C e * (∑ x in r, f x)
+:= 
+begin
+  rw finset.mul_sum,
+end
+
+lemma C_mul_C (a a' : R) : C a * C a' = (C (a * a') : mv_polynomial σ R)  := 
+begin
+  simp,
+end
+
+-- FOr some reason, this lemma is actually useless https://leanprover.zulipchat.com/#narrow/stream/113488-general/topic/Extracting.20constant.20from.20sum
+-- I expect many other lemmas in theis file may be useless as well
+-- TODO investigate and clean up
+lemma finset_sum_C {α : Type u} {r : finset α} {f : α -> R} (e : R) : 
+  (∑ x in r, (C (f x) : mv_polynomial σ R)) = C (∑ x in r, f x)
+:= 
+begin
+  rw finset.sum_hom,
+end
+
+-- lemma rearrange1 (n : ℕ) (v1 v2 : σ) (p : mv_polynomial σ R) : (mv_polynomial.X v1 ^ n) * (mv_polynomial.X v2 * p) = mv_polynomial.X v2 * ((mv_polynomial.X v1 ^ n) * p) :=
+-- begin
+--   ring,
+-- end
+
+-- lemma rearrange2 (n : ℕ) (f : R) (v1 : σ) (p : mv_polynomial σ R) : (mv_polynomial.X v1 ^ n) * (mv_polynomial.C f * p) = mv_polynomial.C f * ((mv_polynomial.X v1 ^ n) * p) :=
+-- begin
+--   ring,
+-- end
+
+-- move constants right of X
+lemma rearrange_constants_right (f : R) (v1 : σ) : 
+ mv_polynomial.C f * mv_polynomial.X v1 = (mv_polynomial.X v1) * (mv_polynomial.C f)
+:=
 begin
   ring,
 end
 
-lemma rearrange2 (n : ℕ) (f : R) (v1 : σ) (p : mv_polynomial σ R) : (mv_polynomial.X v1 ^ n) * (mv_polynomial.C f * p) = mv_polynomial.C f * ((mv_polynomial.X v1 ^ n) * p) :=
+
+lemma rearrange_constants_right_with_extra (f : R) (v1 : σ) (p : mv_polynomial σ R) : 
+ mv_polynomial.C f * (mv_polynomial.X v1 * p) = (mv_polynomial.X v1) * (mv_polynomial.C f * p)
+:=
 begin
   ring,
+end
+
+lemma rearrange_sums_right_with_extra {α : Type u} {r : finset α} {f : α -> mv_polynomial σ R} (s : σ) (p : mv_polynomial σ R) : 
+  (∑ x in r, f x) * (X s * p) = X s * (∑ x in r, f x) * p
+:=
+begin
+  ring,
+end
+
+lemma rearrange_sums_right {α : Type u} {r : finset α} {f : α -> mv_polynomial σ R} (s : σ) : 
+  (∑ x in r, f x) * X s = X s * (∑ x in r, f x)
+:=
+begin
+  ring,
+end
+
+
+-- move constants right of X
+lemma rearrange_smul_right (n : ℕ) (a : R) (v1 : σ) (p : mv_polynomial σ R) : 
+ a • (mv_polynomial.X v1 * p) = (mv_polynomial.X v1) * (a • p)
+:=
+begin
+  sorry
 end
 
 end comm_semiring

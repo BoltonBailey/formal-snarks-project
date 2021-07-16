@@ -12,7 +12,7 @@ open finsupp
 parameter {S : Type}
 parameter [decidable_eq S]
 
--- TODO rephrase proof with nat_antidiagonal
+-- TODO rephrase lemma with nat_antidiagonal
 
 /-- A general lemma about the anitdiagonal of a finsupp.single. -/
 lemma single_antidiagonal (s : S) (n : ℕ) : 
@@ -235,9 +235,20 @@ lemma single_2_antidiagonal (s : S) : (finsupp.single s 2).antidiagonal =
 }
 :=
 begin
-  rw single_antidiagonal s 2,
-  rw finset.ext_iff,
-  intro a,
+  rw single_antidiagonal,
+  rw finset.range,
+  rw finset.image,
+  simp [-finsupp.single_nat_sub],
+end
+
+lemma single_1_antidiagonal (s : S) : (finsupp.single s 1).antidiagonal = 
+{
+  (finsupp.single s 0, finsupp.single s 1), 
+  (finsupp.single s 1, finsupp.single s 0), 
+}
+:=
+begin
+  rw single_antidiagonal,
   rw finset.range,
   rw finset.image,
   simp [-finsupp.single_nat_sub],
