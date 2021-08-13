@@ -163,7 +163,7 @@ lemma rearrange_smul_right (n : ℕ) (a : R) (v1 : σ) (p : mv_polynomial σ R) 
  a • (mv_polynomial.X v1 * p) = (mv_polynomial.X v1) * (a • p)
 :=
 begin
-  sorry
+  rw mul_smul_comm,
 end
 
 end comm_semiring
