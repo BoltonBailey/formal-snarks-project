@@ -493,24 +493,25 @@ open finsupp
 
 
 lemma coeff0002 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
-  ∑ (x : fin n_wit) in
-          finset.fin_range n_wit,
-          ∑ (x_1 : fin n_wit) in finset.fin_range n_wit, B_m x_1 • A_m x • (w_wit x * w_wit x_1) +
-        ∑ (x : fin (n_var - 1)) in
-          finset.fin_range (n_var - 1),
-          ∑ (x_1 : fin n_wit) in finset.fin_range n_wit, B_m x_1 • A_h x • (polynomial.X ^ (x : ℕ) * t * w_wit x_1) +
-      (∑ (x : fin n_wit) in
-           finset.fin_range n_wit,
-           ∑ (x_1 : fin (n_var - 1)) in
+    (∑ (x : fin n_wit) in finset.fin_range n_wit, w_wit x * polynomial.C (A_m x)) *
+          ∑ (x : fin n_wit) in finset.fin_range n_wit, w_wit x * polynomial.C (B_m x) +
+        (∑ (x : fin (n_var - 1)) in
              finset.fin_range (n_var - 1),
-             B_h x_1 • A_m x • (w_wit x * (polynomial.X ^ (x_1 : ℕ) * t)) +
-         ∑ (x : fin (n_var - 1)) in
-           finset.fin_range (n_var - 1),
-           ∑ (x_1 : fin (n_var - 1)) in
+             polynomial.X ^ (x : ℕ) * (t * polynomial.C (A_h x))) *
+          ∑ (x : fin n_wit) in finset.fin_range n_wit, w_wit x * polynomial.C (B_m x) +
+      ((∑ (x : fin n_wit) in finset.fin_range n_wit, w_wit x * polynomial.C (A_m x)) *
+           ∑ (x : fin (n_var - 1)) in
              finset.fin_range (n_var - 1),
-             B_h x_1 • A_h x • (polynomial.X ^ (x : ℕ) * t * (polynomial.X ^ (x_1 : ℕ) * t))) =
+             polynomial.X ^ (x : ℕ) * (t * polynomial.C (B_h x)) +
+         (∑ (x : fin (n_var - 1)) in
+              finset.fin_range (n_var - 1),
+              polynomial.X ^ (x : ℕ) * (t * polynomial.C (A_h x))) *
+           ∑ (x : fin (n_var - 1)) in
+             finset.fin_range (n_var - 1),
+             polynomial.X ^ (x : ℕ) * (t * polynomial.C (B_h x))) =
     0 :=
 begin
+  sorry,
   rw verified' at eqn,
   rw [A', B', C'] at eqn,
   simp only with crs polynomial_nf rearrange at eqn,
@@ -521,31 +522,31 @@ begin
 end
 
 
-lemma coeff0002simpler (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
-  ((∑ (x : fin n_wit) in finset.fin_range n_wit, A_m x • w_wit x) 
-    + ∑ (x : fin (n_var - 1)) in
-             finset.fin_range (n_var - 1), A_h x • (polynomial.X ^ (x : ℕ) * t))
-  *
-  ((∑ (x : fin n_wit) in finset.fin_range n_wit, B_m x • w_wit x)  
-    + 
-    ∑ (x : fin (n_var - 1)) in
-             finset.fin_range (n_var - 1), B_h x • (polynomial.X ^ (x : ℕ) * t))
-  =
-  0
-  :=
-begin
-  simp only with polynomial_nf,
-  rw <-coeff0002 a_stmt eqn,
-  congr,
-  funext,
-  congr,
-  funext,
-  rw mul_assoc,
-  funext,
-  congr,
-  funext,
-  rw mul_assoc,
-end
+-- lemma coeff0002simpler (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+--   ((∑ (x : fin n_wit) in finset.fin_range n_wit, A_m x • w_wit x) 
+--     + ∑ (x : fin (n_var - 1)) in
+--              finset.fin_range (n_var - 1), A_h x • (polynomial.X ^ (x : ℕ) * t))
+--   *
+--   ((∑ (x : fin n_wit) in finset.fin_range n_wit, B_m x • w_wit x)  
+--     + 
+--     ∑ (x : fin (n_var - 1)) in
+--              finset.fin_range (n_var - 1), B_h x • (polynomial.X ^ (x : ℕ) * t))
+--   =
+--   0
+--   :=
+-- begin
+--   simp only with polynomial_nf,
+--   rw <-coeff0002 a_stmt eqn,
+--   congr,
+--   funext,
+--   congr,
+--   funext,
+--   rw mul_assoc,
+--   funext,
+--   congr,
+--   funext,
+--   rw mul_assoc,
+-- end
 
 lemma coeff0012 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
     ∑ (x : fin n_wit) in
@@ -576,10 +577,14 @@ begin
 end
 
 lemma coeff0013 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
-      ∑ (x : fin n_wit) in finset.fin_range n_wit, B_γ • A_m x • w_wit x +
-          ∑ (x : fin (n_var - 1)) in finset.fin_range (n_var - 1), B_γ • A_h x • (polynomial.X ^ (x : ℕ) * t) +
-        ∑ (x : fin n_wit) in finset.fin_range n_wit, B_m x • A_γ • w_wit x +
-      ∑ (x : fin (n_var - 1)) in finset.fin_range (n_var - 1), B_h x • A_γ • (polynomial.X ^ (x : ℕ) * t) =
+      (∑ (x : fin n_wit) in finset.fin_range n_wit, w_wit x * ⇑polynomial.C (A_m x)) * ⇑polynomial.C B_γ +
+          (∑ (x : fin (n_var - 1)) in
+               finset.fin_range (n_var - 1),
+               polynomial.X ^ ↑x * (t * ⇑polynomial.C (A_h x))) *
+            ⇑polynomial.C B_γ +
+        ⇑polynomial.C A_γ * ∑ (x : fin n_wit) in finset.fin_range n_wit, w_wit x * ⇑polynomial.C (B_m x) +
+      ⇑polynomial.C A_γ *
+        ∑ (x : fin (n_var - 1)) in finset.fin_range (n_var - 1), polynomial.X ^ ↑x * (t * ⇑polynomial.C (B_h x)) =
     0 :=
 begin
   rw verified' at eqn,
@@ -1090,7 +1095,7 @@ theorem case_1 (a_stmt : fin n_stmt → F ) :
   -> (satisfying a_stmt C_m) -- This shows that (a`+1, . . . , am) = (C`+1, . . . , Cm) is a witness for the statement (a1, . . . , a`)
 :=
 begin
-  classical,
+  
   intros hm eqn,
   rw ←modification_equivalence at eqn,
   rw verified' at eqn,
@@ -1123,7 +1128,7 @@ begin
 
 
 
-  by_cases B_α_zero : B_α = 0,
+  cases h2022 B_α_zero A_α_zero,
     {
       clear h2022,
       simp only [zero_add, B_α_zero, zero_mul] at h1122,
