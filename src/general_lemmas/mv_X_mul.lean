@@ -135,6 +135,14 @@ begin
   ring,
 end
 
+
+lemma rearrange_constants_right_hard (f : R) (p : polynomial R) : 
+  polynomial.C f * p = (p) * (polynomial.C f)
+:=
+begin
+  ring,
+end
+
 lemma rearrange_sums_right_with_extra {α : Type u} {r : finset α} {f : α -> mv_polynomial σ R} (s : σ) (p : mv_polynomial σ R) : 
   (∑ x in r, f x) * (X s * p) = X s * (∑ x in r, f x) * p
 :=
