@@ -2,6 +2,7 @@
 Author: Bolton Bailey
 -/
 import snarks.groth16.declarations
+import ...attributes
 
 /-!
 # Knowledge Soundness
@@ -1493,10 +1494,10 @@ end
 calc polynomial.C a = 1 ↔ polynomial.C a = polynomial.C 1 : by rw polynomial.C_1
          ... ↔ a = 1 : polynomial.C_inj
 
-@[simp] lemma eq_zero_of_zero_eq (p : polynomial F) : 0 = p ↔ p = 0 :=
-begin
-  exact eq_comm,
-end
+-- @[simp] lemma eq_zero_of_zero_eq (p : polynomial F) : 0 = p ↔ p = 0 :=
+-- begin
+--   exact eq_comm,
+-- end
 
 lemma polynomial.mul_mod_by_monic (t p : polynomial F) (mt : t.monic) : (t * p) %ₘ t = 0 :=
 begin
@@ -1638,7 +1639,7 @@ begin
       --     sorry,
       --   },
 
-      simp [B_α_zero] at h1122,
+      squeeze_simp [B_α_zero] at h1122,
       rw <-polynomial.C_mul at h1122, -- add this, <-C_add,  C_eq_one, C_eq_zero to a simplifier
       rw polynomial.C_eq_one at h1122,
 
@@ -1650,7 +1651,7 @@ begin
       clear h0222,
       
       -- simp [B_α_zero] at h2012,
-      simp * at *,
+      squeeze_simp * at *,
       cases_matching* true,
       -- simp [B_α_zero, A_β_zero, B_β_ne_zero, A_α_ne_zero] at *,
       -- clear B_α_zero A_β_zero B_β_ne_zero A_α_ne_zero,
@@ -1667,35 +1668,35 @@ begin
 
       cases h0020 with w_A_l_zero w_B_l_zero,
       {
-        simp * at *,
+        squeeze_simp * at *,
         cases h1020 with v_A_l_zero W_B_l_zero,
         {
-          simp * at *,
+          squeeze_simp * at *,
           cases_type or,
           {
             sorry,
           },
           {
-            simp * at *,
-            rw <-mul_add at h1012,
-            rw <-add_mul at h0112,
-            rw coeff0022reformat at h0022,
-            simp only [rearrange_constants_right_hard] at h1022,
-            simp only [rearrange_constants_right_hard] at h0122,
-            have h1022s := h1022.symm, 
-            have h0122s := h0122.symm, 
-            clear h0122 h1022,
+            simp only [*] with integral_domain_simp at *,
+            -- rw <-mul_add at h1012,
+            -- rw <-add_mul at h0112,
+            -- rw coeff0022reformat at h0022,
+            -- simp only [rearrange_constants_right_hard] at h1022,
+            -- simp only [rearrange_constants_right_hard] at h0122,
+            -- have h1022s := h1022.symm, 
+            -- have h0122s := h0122.symm, 
+            -- clear h0122 h1022,
 
-            simp * at *,
-            rw mul_assoc,
-            rw mul_comm (polynomial.C B_β),
-            rw mul_assoc,
-            rw <-polynomial.C_mul,
-            simp [h1122],
-            simp only [rearrange_constants_right_hard] at h0022,
-            rw h0022,
-            ring,
-            done,
+            -- simp * at *,
+            -- rw mul_assoc,
+            -- rw mul_comm (polynomial.C B_β),
+            -- rw mul_assoc,
+            -- rw <-polynomial.C_mul,
+            -- simp [h1122],
+            -- simp only [rearrange_constants_right_hard] at h0022,
+            -- rw h0022,
+            -- ring,
+            -- done,
 
           },
         },
