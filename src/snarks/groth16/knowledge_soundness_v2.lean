@@ -1651,7 +1651,7 @@ begin
       clear h0222,
       
       -- simp [B_α_zero] at h2012,
-      squeeze_simp * at *,
+      simp only [*] with integral_domain_simp at *,
       cases_matching* true,
       -- simp [B_α_zero, A_β_zero, B_β_ne_zero, A_α_ne_zero] at *,
       -- clear B_α_zero A_β_zero B_β_ne_zero A_α_ne_zero,
@@ -1668,18 +1668,18 @@ begin
 
       cases h0020 with w_A_l_zero w_B_l_zero,
       {
-        squeeze_simp * at *,
+        simp only [*] with integral_domain_simp at *,
         cases h1020 with v_A_l_zero W_B_l_zero,
         {
-          squeeze_simp * at *,
+          simp only [*] with integral_domain_simp at *,
           cases_type or,
           {
             sorry,
           },
           {
             simp only [*] with integral_domain_simp at *,
-            -- rw <-mul_add at h1012,
-            -- rw <-add_mul at h0112,
+            rw <-mul_add at h1012,
+            rw <-add_mul at h0112,
             -- rw coeff0022reformat at h0022,
             -- simp only [rearrange_constants_right_hard] at h1022,
             -- simp only [rearrange_constants_right_hard] at h0122,
