@@ -14,36 +14,6 @@ universes u
 parameters {F vars : Type u}
 parameter [field F]
 
--- TODO remove these practice tactics
-meta def my_first_tactic : tactic unit := 
-do
-  tactic.trace "Hello,",
-  tactic.trace "World."
-
-
-meta def my_fail_tactic : tactic unit := 
-tactic.fail "This tactic failed, we apologize for the inconvenience."
-
-run_cmd add_interactive [`my_first_tactic, `my_fail_tactic]
-
-
-meta def my_orelse_tactic : tactic unit :=
-my_fail_tactic <|> my_first_tactic
-
-meta def my_tactic : tactic unit :=
-do
-  goal ← tactic.target,
-  tactic.trace goal
-
-example : true :=
-begin
-  my_tactic,
-  trivial
-end
-
--- @[user_attribute] meta def my_attribute : user_attribute :=
--- { name := `coeff_simp,
---   descr := "Attribute for lemmas that are used in the simplification of coeff statements" }
 
 
 run_cmd mk_simp_attr `polynomial_nf

@@ -1,6 +1,7 @@
 
 import tactic
 import tactic.abel
+import data.real.basic
 
 open tactic expr
 
@@ -31,4 +32,16 @@ end tactic
 example (n : ℕ) : true :=
 begin
   add_nonneg_proof (n + n) hx,
+end
+
+example ( a b c d : ℝ) (h : (a + b) * c = d) : a * c + b * c = d :=
+begin
+  ring_nf,
+  ring_nf,
+  ring_nf at h,
+end
+
+example ( a b c d : ℝ) (h : (-a + a) * b = 0) : false :=
+begin
+  ring_nf at h,
 end

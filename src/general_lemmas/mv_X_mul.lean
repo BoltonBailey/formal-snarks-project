@@ -158,12 +158,46 @@ begin
 end
 
 
+
+
 -- move constants right of X
 lemma rearrange_smul_right (n : ℕ) (a : R) (v1 : σ) (p : mv_polynomial σ R) : 
  a • (mv_polynomial.X v1 * p) = (mv_polynomial.X v1) * (a • p)
 :=
 begin
   rw mul_smul_comm,
+end
+
+lemma rearrange_001 (f : R) (p1 p2 p3 : polynomial R) : 
+ polynomial.C f * p1 = p2 + p3 ↔ p2 + p3 = polynomial.C f * p1
+:=
+begin
+  split,
+  {
+    intro h, rw h,
+  },
+  {
+    intro h, rw h,
+  },
+end
+
+lemma rearrange_002 (f : R) (p1 p2 p3 : polynomial R) : 
+ p1 * polynomial.C f  = p2 + p3 ↔ p2 + p3 = p1 * polynomial.C f
+:=
+begin
+  split,
+  {
+    intro h, rw h,
+  },
+  {
+    intro h, rw h,
+  },
+end
+
+
+lemma add_mul_distrib (a b c d : R) : a + b * c + b * d = a + b * (c + d) :=
+begin
+  ring,
 end
 
 end comm_semiring

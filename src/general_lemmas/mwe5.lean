@@ -1,34 +1,13 @@
-import data.mv_polynomial.basic
+import data.real.basic
 
-noncomputable theory
+-- example (a b c : ℝ) : a * c + b * c = 0 :=
+-- begin
+--   ring_nf, -- c * a + b * c = 0
+--   ring_nf, -- (a + b) * c = 0
+--   ring_nf, -- c * a + c * b = 0
+-- end
 
-open_locale classical big_operators
+-- have : a * b * d * c = a * b * c * d := by ring_nf,
+-- rw this
 
-open set function finsupp add_monoid_algebra
-open_locale big_operators
-
-universes u
-variables {R : Type u} 
-
-
-namespace mv_polynomial
-variables {σ : Type*} {e : ℕ} {n m : σ} {s : σ →₀ ℕ}
-
-section comm_semiring
-
-variables [comm_semiring R] {p q : mv_polynomial σ R}
-
-
--- variables [decidable_eq σ]
-
-
-lemma coeff_X_mul' (m) (s : σ) (p : mv_polynomial σ R) :
-  coeff m (X s * p) = if s ∈ m.support then coeff (m - finsupp.single s 1) p else 0 := 
-begin
-  rw mul_comm,
-  rw mv_polynomial.coeff_mul_X',
-  -- finish,
-end
-
-end comm_semiring
-
+example (a b : ℝ) (h : a + b = 0) : a = -b := eq_neg_of_add_eq_zero h

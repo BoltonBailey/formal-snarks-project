@@ -19,6 +19,7 @@ import data.mv_polynomial.basic
 import .general_lemmas.mv_X_mul
 import .general_lemmas.single_antidiagonal
 import tactic.abel
+import .attributes
 
 open tactic
 
@@ -29,7 +30,7 @@ universes u
 
 /-- The finite field parameter of our SNARK -/
 parameters {R vars : Type u}
-parameter [ring R]
+-- parameter [ring R]
 
 -- TODO remove these practice tactics
 meta def my_first_tactic : tactic unit := 
@@ -52,20 +53,39 @@ do
   goal ← tactic.target,
   tactic.trace goal
 
-/-- A tactic for solving systems of equationd in an integral domain -/
+-- /-- A tactic for solving systems of equationd in an integral domain -/
+-- meta def integral_domain_tactic : tactic unit :=
+-- do
+--   goal ← tactic.target,
+--   goal_type ← infer_type goal,
+--   -- TODO Check goal is equality expression
+--   -- goal_lhs
+--   tactic.trace (goal),
+--   tactic.trace (goal_type)
+
+/-- A tactic for solving systems of equations in an integral domain -/
 meta def integral_domain_tactic : tactic unit :=
 do
-  goal ← tactic.target,
-  goal_type ← infer_type goal,
-  -- TODO Check goal is equality expression
-  -- goal_lhs
-  tactic.trace (goal),
-  tactic.trace (goal_type)
+  try (`[simp only [*, <-mul_add, <-add_mul] with integral_domain_simp at *]),
+  try `[cases_type* true false],
+  `[done] <|> -- If done stop
+  -- If not done, do cases_type or
+  (( do `[cases_type or],
+        trace "cases_type or succeeds"
+       -- If cases_type or succeeds, call tactic recursively
+        `[integral_domain_tactic],
+        `[integral_domain_tactic]) 
+        -- If cases_type or fails, rewrite using more powerful simp
+        )
 
-/-- A tactic for solving systems of equationd in an integral domain -/
-meta def integral_domain_tactic' : tactic unit :=
+
+/-- A tactic for solving systems of equations in an integral domain -/
+meta def integral_domain_tactic_one_iter : tactic unit :=
 do
-  -- Call simp * at *, (perhaps TODO restrict the lemmas used, does simp * with my_tag at * work?)
+  try `[simp only [*, <-mul_add, <-add_mul, <-add_assoc] with integral_domain_simp at *],
+  try `[cases_type* true false],
+  done <|> `[cases_type or]
+
   -- Is there a disjunction in the current context?
     -- If so, 
       -- Find a disjunction and split it using cases_type or
@@ -74,21 +94,35 @@ do
     
   -- locate
 
-example (a b c d e f : R) (h1 : a + b = c + d) (h2 : c + d = e + f) : a + b = e + f :=
+run_cmd add_interactive [`integral_domain_tactic]
+
+example [ring R] (a b c d e f : R) (h1 : a + b = c + d) (h2 : c + d = e + f) : a + b = e + f :=
 begin
   integral_domain_tactic,
 end
 
-example (a b c d e f : R) (h1 : a * b = 1) (h2 : a * c = 0) (h3 : b * d = 0) : c * e + f * d = 0 :=
-begin
-  -- Since a b nonzero, c, d zero and this holds.
-  integral_domain_tactic,
-end
+-- example [ring R] (a b c d e f : R) (h1 : a * b = 1) (h2 : a * c = 0) (h3 : b * d = 0) : c * e + f * d = 0 :=
+-- begin
+--   integral_domain_tactic,
+--   -- Fails since R is only a ring. c and d might be nonzero zero divisors.
+--   sorry,
+-- end
 
-example (a b c d e f : R) (h1 : 0 = a + 0) (h2 : a + b = 0) : b = c :=
-begin
-  simp only [*, add_zero, zero_add] at *,
-end
+-- example [integral_domain R] (a b c d e f : R) (h1 : a * b = 1) (h2 : a * c = 0) (h3 : b * d = 0) : c * e + f * d = 0 :=
+-- begin
+--   -- Since a b nonzero, in an integral domain, c, d zero and this holds.
+--   integral_domain_tactic,
+-- end
 
+-- example [ring R] (a b c d e f : R) (h1 : 0 = a + 0) (h2 : a + b = 0) : b = c :=
+-- begin
+--   simp only [*, add_zero, zero_add] at *,
+--   sorry,
+-- end
+
+-- example (p q : Prop) (h1 : true) : q ∨ p :=
+-- begin
+--   cases_type true,
+-- end
 
 end

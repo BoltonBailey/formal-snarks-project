@@ -3,6 +3,7 @@ Author: Bolton Bailey
 -/
 import snarks.groth16.declarations
 import ...attributes
+import ...integral_domain_tactic
 
 /-!
 # Knowledge Soundness
@@ -1514,10 +1515,16 @@ end
 calc polynomial.C a = 1 ↔ polynomial.C a = polynomial.C 1 : by rw polynomial.C_1
          ... ↔ a = 1 : polynomial.C_inj
 
--- @[simp] lemma eq_zero_of_zero_eq (p : polynomial F) : 0 = p ↔ p = 0 :=
--- begin
---   exact eq_comm,
--- end
+
+lemma simplifier1 (x : fin n_stmt) (a_stmt : fin n_stmt → F ) 
+  : polynomial.C (a_stmt x) * u_stmt x = u_stmt x * polynomial.C (a_stmt x)
+  :=
+  by ring
+
+lemma simplifier2 (x : fin n_stmt) (a_stmt : fin n_stmt → F ) 
+  : polynomial.C (a_stmt x) * v_stmt x = v_stmt x * polynomial.C (a_stmt x)
+  :=
+  by ring
 
 lemma polynomial.mul_mod_by_monic (t p : polynomial F) (mt : t.monic) : (t * p) %ₘ t = 0 :=
 begin
@@ -1525,6 +1532,9 @@ begin
   apply dvd_mul_right,
   exact mt,
 end
+
+example (a b : F) : a + b = 0 ↔ a = -b := add_eq_zero_iff_eq_neg
+example (a b c : F) : a - b = c ↔ a = b + c := sub_eq_iff_eq_add'
 
 /-- The main theorem for the soundness of the Groth '16 SNARK. 
 Show that if the adversary polynomials obey the equations, 
@@ -1633,9 +1643,11 @@ begin
 
   -- simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at *,
   -- simp at *,
+  -- my_fail_tactic,
+  simp only [simplifier1, simplifier2] at *,
 
 
-  cases h2022 with A_α_zero B_α_zero,
+  cases_type or,
     {
       sorry,
     },
@@ -1658,89 +1670,19 @@ begin
       --     sorry,
       --   },
 
-      squeeze_simp [B_α_zero] at h1122,
-      rw <-polynomial.C_mul at h1122, -- add this, <-C_add,  C_eq_one, C_eq_zero to a simplifier
-      rw polynomial.C_eq_one at h1122,
+      -- squeeze_simp [B_α_zero] at h1122,
+      -- rw <-polynomial.C_mul at h1122, -- add this, <-C_add,  C_eq_one, C_eq_zero to a simplifier
+      -- rw polynomial.C_eq_one at h1122,
 
-      have A_α_ne_zero := left_ne_zero_of_mul (ne_zero_of_eq_one h1122),
-      have B_β_ne_zero := right_ne_zero_of_mul (ne_zero_of_eq_one h1122),
+      have val_ne_zero := ne_zero_of_eq_one h1122,
 
-      have A_β_zero := or.resolve_right h0222 B_β_ne_zero,
-
-      clear h0222,
-      
-      -- simp [B_α_zero] at h2012,
-      simp only [*] with integral_domain_simp at *,
-      cases_matching* true,
-      -- simp [B_α_zero, A_β_zero, B_β_ne_zero, A_α_ne_zero] at *,
-      -- clear B_α_zero A_β_zero B_β_ne_zero A_α_ne_zero,
-      -- -- TODO these come up later. FInd a way to make them not simplify themselves.
-
-      -- have A_γ_zero := h0123,
-      -- have B_γ_zero := h1023,
-
-      -- simp [A_γ_zero, B_γ_zero] at *,
-      -- clear A_γ_zero B_γ_zero,
-
-
-      -- simp [h2012, h2021, h0212, h0221] at *,
-
-      cases h0020 with w_A_l_zero w_B_l_zero,
-      {
-        simp only [*] with integral_domain_simp at *,
-        cases h1020 with v_A_l_zero W_B_l_zero,
-        {
-          simp only [*] with integral_domain_simp at *,
-          cases_type or,
-          {
-            sorry,
-          },
-          {
-            -- simp only [*] with integral_domain_simp at *,
-            -- rw <-mul_add at h1012,
-            -- rw <-add_mul at h0112,
-            -- -- rw coeff0022reformat at h0022,
-            -- -- simp only [rearrange_constants_right_hard] at h1022,
-            -- -- simp only [rearrange_constants_right_hard] at h0122,
-            -- -- have h1022s := h1022.symm, 
-            -- -- have h0122s := h0122.symm, 
-            -- -- clear h0122 h1022,
-
-            -- simp * at *,
-            -- rw mul_assoc,
-            -- rw mul_comm (polynomial.C B_β),
-            -- rw mul_assoc,
-            -- rw <-polynomial.C_mul,
-            -- simp [h1122],
-            -- simp only [rearrange_constants_right_hard] at h0022,
-            -- rw h0022,
-            -- ring,
-            -- done,
-
-          },
-        },
-        {
-          sorry,
-        },
-      },
-      {
-        sorry,
-      },
-
-
-      -- TODO simp things at other things, as they become val = 0
-
-      -- TODO
-      -- rw mul_eq_zero at h???? for h???? of form x * y = 0, (start with 0002?)
-      -- do by_cases 
-      -- simplify at * using what you get
-      -- repeat
-      
-
-      -- simp [A_β_zero] at h0212,
-      -- simp [B_α_zero, A_β_zero] at h1012,
-      -- simp [B_α_zero, A_β_zero] at h0112,
-
+      repeat {integral_domain_tactic_one_iter},
+      repeat { simp only [*, rearrange_001, rearrange_002] with integral_domain_simp at *,
+        simp only [h1022, h0122, mul_assoc, rearrange_constants_right_hard, h1122],
+        simp only [*, add_mul_distrib] at *,
+        simp only [*, rearrange_001, rearrange_002] with integral_domain_simp at *,
+        simp only [sub_eq_iff_eq_add', <-add_assoc, <-h0022],
+        ring,},
         
     },
 
