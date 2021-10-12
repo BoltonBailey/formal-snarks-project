@@ -10,4 +10,9 @@ import data.real.basic
 -- have : a * b * d * c = a * b * c * d := by ring_nf,
 -- rw this
 
-example (a b : ℝ) (h : a + b = 0) : a = -b := eq_neg_of_add_eq_zero h
+example (a b : ℝ) (h : a + b = 0) : a = -b := 
+begin
+  
+  fail_if_success
+end
+

@@ -596,20 +596,27 @@ begin
   -- exact congr_coeff0022,
 end
 
+-- -- Rewriting in terms of polynomial.C
+-- lemma coeff0024 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+--  A_γ = 0 ∨ B_γ = 0
+-- :=
+-- begin
+--   sorry,
+--   -- rw verified' at eqn,
+--   -- rw [A', B', C'] at eqn,
+--   -- simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+--   -- have congr_coeff0024 := congr_arg (coeff (single α 0 + single β 0 + single δ 2 + single γ 4)) eqn,
+--   -- clear eqn,
+--   -- simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0024,
+--   -- simp at congr_coeff0024,
+--   -- exact congr_coeff0024,
+-- end
 
 lemma coeff0024 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
- A_γ = 0 ∨ B_γ = 0
+ polynomial.C A_γ = 0 ∨ polynomial.C B_γ = 0
 :=
 begin
   sorry,
-  -- rw verified' at eqn,
-  -- rw [A', B', C'] at eqn,
-  -- simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
-  -- have congr_coeff0024 := congr_arg (coeff (single α 0 + single β 0 + single δ 2 + single γ 4)) eqn,
-  -- clear eqn,
-  -- simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0024,
-  -- simp at congr_coeff0024,
-  -- exact congr_coeff0024,
 end
 
 
@@ -992,20 +999,27 @@ begin
   -- exact congr_coeff0221,
 end
 
+-- -- Rewriting in terms of polynomial.C
+-- lemma coeff0222 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+--  A_β = 0 ∨ B_β = 0
+-- :=
+-- begin
+--   sorry,
+--   -- rw verified' at eqn,
+--   -- rw [A', B', C'] at eqn,
+--   -- simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+--   -- have congr_coeff0222 := congr_arg (coeff (single α 0 + single β 2 + single δ 2 + single γ 2)) eqn,
+--   -- clear eqn,
+--   -- simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0222,
+--   -- simp at congr_coeff0222,
+--   -- exact congr_coeff0222,
+-- end
 
 lemma coeff0222 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
- A_β = 0 ∨ B_β = 0
+ polynomial.C A_β = 0 ∨ polynomial.C B_β = 0
 :=
 begin
   sorry,
-  -- rw verified' at eqn,
-  -- rw [A', B', C'] at eqn,
-  -- simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
-  -- have congr_coeff0222 := congr_arg (coeff (single α 0 + single β 2 + single δ 2 + single γ 2)) eqn,
-  -- clear eqn,
-  -- simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0222,
-  -- simp at congr_coeff0222,
-  -- exact congr_coeff0222,
 end
 
 
@@ -1438,9 +1452,24 @@ begin
   -- exact congr_coeff2021,
 end
 
+-- -- Replacing this with a version that keeps it in terms of polynomial.C
+-- lemma coeff2022 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
+--  A_α = 0 ∨ B_α = 0
+-- :=
+-- begin
+--   sorry,
+--   -- rw verified' at eqn,
+--   -- rw [A', B', C'] at eqn,
+--   -- simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+--   -- have congr_coeff2022 := congr_arg (coeff (single α 2 + single β 0 + single δ 2 + single γ 2)) eqn,
+--   -- clear eqn,
+--   -- simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff2022,
+--   -- simp at congr_coeff2022,
+--   -- exact congr_coeff2022,
+-- end
 
 lemma coeff2022 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
- A_α = 0 ∨ B_α = 0
+ polynomial.C A_α = 0 ∨ polynomial.C B_α = 0
 :=
 begin
   sorry,
@@ -1453,6 +1482,7 @@ begin
   -- simp at congr_coeff2022,
   -- exact congr_coeff2022,
 end
+
 
 lemma coeff0022reformat (a_stmt : fin n_stmt → F) :   
   (∑ (x : fin n_wit) in finset.fin_range n_wit, w_wit x * polynomial.C (A_m x)) * polynomial.C B_δ +
@@ -1633,11 +1663,12 @@ begin
     (∑ (i : fin n_stmt) in finset.fin_range n_stmt, u_stmt i * polynomial.C (a_stmt i) + ∑ (i : fin n_wit) in finset.fin_range n_wit, u_wit i * polynomial.C (C_m i)) 
     * 
     (∑ (i : fin n_stmt) in finset.fin_range n_stmt, v_stmt i * polynomial.C (a_stmt i) + ∑ (i : fin n_wit) in finset.fin_range n_wit, v_wit i * polynomial.C (C_m i)) 
-    - 
-    (∑ (i : fin n_stmt) in finset.fin_range n_stmt, w_stmt i * polynomial.C (a_stmt i) + ∑ (i : fin n_wit) in finset.fin_range n_wit, w_wit i * polynomial.C (C_m i)) 
     = 
+    (∑ (i : fin n_stmt) in finset.fin_range n_stmt, w_stmt i * polynomial.C (a_stmt i) + ∑ (i : fin n_wit) in finset.fin_range n_wit, w_wit i * polynomial.C (C_m i)) 
+    +
     ∑ (x : fin (n_var - 1)) in finset.fin_range (n_var - 1), polynomial.X ^ (x : ℕ) * (t * polynomial.C (C_h x)),
   {
+    rw <-sub_eq_iff_eq_add' at this,
     have h := congr_arg (%ₘ t) this,
     simp only at h,
     rw h,
@@ -1676,8 +1707,8 @@ begin
   have h0024 := coeff0024 a_stmt eqn',
   have h0031 := coeff0031 a_stmt eqn',
   have h0032 := coeff0032 a_stmt eqn',
-  have h0033 := coeff0033 a_stmt eqn',
-  have h0042 := coeff0042 a_stmt eqn',
+  -- have h0033 := coeff0033 a_stmt eqn', -- definitely useless
+  -- have h0042 := coeff0042 a_stmt eqn', -- definitely useless
   have h0102 := coeff0102 a_stmt eqn',
   have h0111 := coeff0111 a_stmt eqn',
   have h0112 := coeff0112 a_stmt eqn',
@@ -1687,7 +1718,7 @@ begin
   have h0122 := coeff0122 a_stmt eqn',
   have h0123 := coeff0123 a_stmt eqn',
   have h0131 := coeff0131 a_stmt eqn',
-  have h0132 := coeff0132 a_stmt eqn',
+  -- have h0132 := coeff0132 a_stmt eqn', -- definitely useless
   have h0202 := coeff0202 a_stmt eqn',
   have h0211 := coeff0211 a_stmt eqn',
   have h0212 := coeff0212 a_stmt eqn',
@@ -1703,7 +1734,7 @@ begin
   have h1022 := coeff1022 a_stmt eqn',
   have h1023 := coeff1023 a_stmt eqn',
   have h1031 := coeff1031 a_stmt eqn',
-  have h1032 := coeff1032 a_stmt eqn',
+  -- have h1032 := coeff1032 a_stmt eqn', -- definitely useless
   have h1102 := coeff1102 a_stmt eqn',
   have h1111 := coeff1111 a_stmt eqn',
   have h1112 := coeff1112 a_stmt eqn',
@@ -1717,17 +1748,23 @@ begin
   have h2021 := coeff2021 a_stmt eqn',
   have h2022 := coeff2022 a_stmt eqn',
   
-  clear h0033 h1032 h0132 h0042, -- Clear some statements about C_ values that give no info
+  -- clear h0033 h1032 h0132 h0042, -- Clear some statements about C_ values that give no info
 
 
-
-  -- clear eqn,
+  clear eqn eqn',
+  -- done,
 
 
   -- simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at *,
   -- simp at *,
   -- my_fail_tactic,
+  trace "Moving Cs right",
   simp only [simplifier1, simplifier2] at *,
+
+  trace "Grouping distributivity",
+  simp only [<-mul_add, <-add_mul, <-add_assoc, add_mul_distrib, add_mul_distrib'] at *,
+
+  trace "main simplification",
   
   -- rw <-p_w_wit_A_m at *,
 
@@ -1828,79 +1865,101 @@ begin
               sorry,
             },
             {
+              
+
+              -- -- <<< This runs for >10 hours and doesn't terminate
+              -- repeat { simp only [*] with integral_domain_simp at *, 
+              --           done <|> cases_type or, },
+
+              -- repeat {integral_domain_tactic_one_iter,},
+              -- repeat { simp only [*, rearrange_001, rearrange_002] with integral_domain_simp at *,
+              --         simp only [h1022, h0122, mul_assoc, rearrange_constants_right_hard, h1122],
+              --         simp only [*, add_mul_distrib] at *,
+              --         simp only [*, rearrange_001, rearrange_002] with integral_domain_simp at *,
+              --         simp only [sub_eq_iff_eq_add', <-add_assoc, <-h0022],
+              --         ring,},
+              -- -- >>>
+
               simp only [*] with integral_domain_simp at *,
               cases_type or,
               {
                 sorry,
               },
               {
+
+
+
+
+
                 simp only [*] with integral_domain_simp at *,
                 cases_type or,
                 {
                   sorry,
                 },
                 {
-                  -- repeat {integral_domain_tactic_one_iter,},
-                  -- repeat { 
-                  --   simp only [*, rearrange_001, rearrange_002] with integral_domain_simp at *,
-                  --             simp only [h1022, h0122, mul_assoc, rearrange_constants_right_hard, h1122],
-                  --             simp only [*, add_mul_distrib] at *,
-                  --             simp only [*, rearrange_001, rearrange_002] with integral_domain_simp at *,
-                  --             simp only [sub_eq_iff_eq_add', <-add_assoc, <-h0022],
-                  --             ring,},
-                  -- done,
                   simp only [*] with integral_domain_simp at *,
                   cases_type or,
                   {
+                    simp only [*] with integral_domain_simp at *,
+                    cases_type or,
+                    {
+                      simp only [*] with integral_domain_simp at *,
+                      cases_type or,
+                      {
 
-                    -- this step Leaves 15 goals, runs 40 min
-                    repeat { simp only [*] with integral_domain_simp at *, 
-                             done <|> cases_type or, },
-                    -- adding this leaves 2 goals, runs total of 20 min even with previous command. Weird. Does it remember or something?
-                    repeat {integral_domain_tactic_one_iter,},
-                    -- trying this now finishes the goals, with 35 min to compile
-                    repeat { simp only [*, rearrange_001, rearrange_002] with integral_domain_simp at *,
-                            simp only [h1022, h0122, mul_assoc, rearrange_constants_right_hard, h1122],
-                            simp only [*, add_mul_distrib] at *,
-                            simp only [*, rearrange_001, rearrange_002] with integral_domain_simp at *,
-                            simp only [sub_eq_iff_eq_add', <-add_assoc, <-h0022],
-                            ring,},
+                        simp only [*] with integral_domain_simp at *,
 
-                    -- -- Takes Over 40 min
-                    -- repeat {integral_domain_tactic_one_iter,},
-                    -- repeat { simp only [*, rearrange_001, rearrange_002] with integral_domain_simp at *,
-                    --         simp only [h1022, h0122, mul_assoc, rearrange_constants_right_hard, h1122],
-                    --         simp only [*, add_mul_distrib] at *,
-                    --         simp only [*, rearrange_001, rearrange_002] with integral_domain_simp at *,
-                    --         simp only [sub_eq_iff_eq_add', <-add_assoc, <-h0022],
-                    --         ring,},
+                        -- dnf in >7min
+                        -- tactic.integral_domain_tactic,
 
-                    -- simp only [*] with integral_domain_simp at *,
-                    -- cases_type or,
-                    -- {
-                    --   sorry,
-                    --   -- The following works < 10 min
-                    --   -- repeat {integral_domain_tactic_one_iter}, 
-                    --   -- done,
-                    -- },
-                    -- {
-                    --   -- Below works in ~23 min
-                    --   repeat {integral_domain_tactic_one_iter,},
-                    --   repeat { simp only [*, rearrange_001, rearrange_002] with integral_domain_simp at *,
-                    --         simp only [h1022, h0122, mul_assoc, rearrange_constants_right_hard, h1122],
-                    --         simp only [*, add_mul_distrib] at *,
-                    --         simp only [*, rearrange_001, rearrange_002] with integral_domain_simp at *,
-                    --         simp only [sub_eq_iff_eq_add', <-add_assoc, <-h0022],
-                    --         ring,},
+                        -- done in ~2min, leaves 5 goals
+                        -- iterate {
+                        --   trace "iteration",
+                        --   fail_if_success { done },
+                        --   try {simp only [] with integral_domain_simp at *}, 
+                        --   try {clear found_zero}, -- clear "found_zero" if present
+                        --   done <|> id {cases ‹_ ∨ _› with found_zero found_zero; rw found_zero at *}, },
 
-                    -- },
+
+                        -- done in ~2min, leaves 5 goals
+                        -- iterate {
+                        --   trace "iteration",
+                        --   fail_if_success { done },
+                        --   try {simp only [] with integral_domain_simp at *}, 
+                        --   try {clear found_zero}, -- clear "found_zero" if present
+                        --   done <|> id {cases ‹_ ∨ _› with found_zero found_zero; simp only [found_zero] at *}, },
+
+                        -- done in 70 min with 8 goals
+                        tactic.integral_domain_tactic_3,
+
+                      },
+                      {
+                        sorry,
+                      },
+                    },
+                    {
+                      sorry,
+                    },
                   },
                   {
                     sorry,
-                    -- The following works < 2 min
-                    -- repeat {integral_domain_tactic_one_iter},
-                    -- done,
+                    -- simp only [*] with integral_domain_simp at *,
+
+
+
                   },
+
+                -- Finishes everything in ~30 min
+                -- repeat { simp only [*] with integral_domain_simp at *, 
+                --           done <|> cases_type or, },
+
+                -- repeat {integral_domain_tactic_one_iter,},
+                -- repeat { simp only [*, rearrange_001, rearrange_002] with integral_domain_simp at *,
+                --         simp only [h1022, h0122, mul_assoc, rearrange_constants_right_hard, h1122],
+                --         simp only [*, add_mul_distrib] at *,
+                --         simp only [*, rearrange_001, rearrange_002] with integral_domain_simp at *,
+                --         simp only [sub_eq_iff_eq_add', <-add_assoc, <-h0022],
+                --         ring,},
                 },
               },
             },

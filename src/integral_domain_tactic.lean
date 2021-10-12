@@ -23,7 +23,123 @@ import .attributes
 
 open tactic
 
-section
+
+
+namespace tactic
+
+namespace interactive
+open interactive interactive.types expr
+
+setup_tactic_parser
+
+meta def my_simp_only (hs : parse simp_arg_list) (attr_names : parse with_ident_list)
+              (locat : parse location) (cfg : simp_config_ext := {}) : tactic unit :=
+propagate_tags $
+do lms ← simp_core cfg.to_simp_config cfg.discharger tt hs attr_names locat,
+  if cfg.trace_lemmas then trace (↑"Try this: simp only " ++ to_fmt lms.to_list) else skip
+
+meta def get_the_name : expr → option name
+| (local_const unique pretty bi type) := some pretty
+| _ := none
+
+/-- Returns a list of names of propositions in the local context which are either equalities or 
+have some logical definition -/
+meta def context_prop_name_getter : tactic (list name) := do
+  ctx <- local_context,
+  ctx' <- ctx.mfilter (λ e, do 
+    tp <- infer_type e,
+    return (option.is_some (is_eq tp) 
+            || option.is_some (is_not tp) 
+            || option.is_some (is_ne tp)
+            || option.is_some (is_or tp))
+  ),
+  let names := ctx'.filter_map get_the_name in do
+  -- trace ctx',
+  return names
+
+/-- For a name in the local context, simplify at it with found_zero, and if that is successful, simplifies again with integral_domain_simp. -/
+meta def simplify_at_name (nm : name) : tactic unit :=
+  if nm = `found_zero then do skip else do
+  found_zero_expr <- get_local `found_zero,
+  used_set <- simp_core {fail_if_unchanged := ff} (failed) tt [simp_arg_type.expr (pexpr.of_expr found_zero_expr)] [] (loc.ns [some nm]),
+  match name_set.empty used_set with
+  | tt := skip
+  | ff := do attr_used_set <- simp_core {fail_if_unchanged := ff} (failed) tt [] [`integral_domain_simp] (loc.ns [some nm]), skip
+  end
+
+  
+/-- For each name in the local context, simplifies with found zero, and if that is successful, simplifies again with integral_domain_simp. -/
+meta def simplify_everywhere : tactic unit := do
+  names <- context_prop_name_getter,
+  names.mmap' simplify_at_name,
+  -- Simp the target
+  try `[simp only [found_zero] with integral_domain_simp]
+
+
+end interactive
+
+
+-- Adapted from Mario's example
+meta def integral_domain_tactic : tactic unit := do
+  -- trace "\nCall to integral_domain_tactic", 
+  -- trace_state, -- printf debugging
+  `[my_simp_only [] with integral_domain_simp
+    at * {fail_if_unchanged := ff}],
+  try `[cases_type* true false],
+  _::_ ← get_goals | skip, 
+  cases_success <- try_core `[cases ‹_ ∨ _› with nm nm],
+  match cases_success with 
+  | some _ := all_goals' `[simp only [nm] at *, done <|> id { integral_domain_tactic }]
+  -- TODO, I need to change this so that, 
+  -- if rw found_zero fails the program stops and doesn't clear found_zero.
+  -- for now I remove the clear nm part
+  | none := skip
+  end
+
+-- Broken version that tries to only simplify things when we know they have changed.
+meta def integral_domain_tactic_2 : tactic unit := do
+  trace "\nCall to integral_domain_tactic_2", 
+  -- trace_state, -- printf debugging
+  try `[cases_type* true false],
+  _::_ ← get_goals | skip, 
+  try `[clear found_zero],
+  cases_success <- try_core `[cases ‹_ ∨ _› with found_zero found_zero],
+  match cases_success with -- simplify everywhere might produce a simplification that can further help.
+  | some _ := all_goals' (do tactic.interactive.simplify_everywhere, done <|> integral_domain_tactic_2)
+  | none := skip
+  end
+
+-- Adapted from Mario's example
+meta def integral_domain_tactic_3 : tactic unit := do
+  trace "\nCall to integral_domain_tactic_3", 
+  -- trace_state, -- printf debugging
+  `[my_simp_only [*] with integral_domain_simp
+    at * {fail_if_unchanged := ff}],
+  try `[cases_type* true false],
+  _::_ ← get_goals | skip, 
+  try `[clear found_zero],
+  cases_success <- try_core `[cases ‹_ ∨ _› with found_zero found_zero],
+  match cases_success with 
+  | some _ := all_goals' `[done <|> id { integral_domain_tactic }]
+  -- TODO, I need to change this so that, 
+  -- if rw found_zero fails the program stops and doesn't clear found_zero.
+  -- for now I remove the clear found_zero part
+  | none := skip
+  end
+
+
+open expr
+
+
+
+
+
+end tactic
+
+
+-- run_cmd add_interactive [`integral_domain_tactic]
+
+section test
 
 universes u
 
@@ -32,97 +148,64 @@ universes u
 parameters {R vars : Type u}
 -- parameter [ring R]
 
--- TODO remove these practice tactics
-meta def my_first_tactic : tactic unit := 
-do
-  tactic.trace "Hello,",
-  tactic.trace "World."
 
-
-meta def my_fail_tactic : tactic unit := 
-tactic.fail "This tactic failed, we apologize for the inconvenience."
-
-run_cmd add_interactive [`my_first_tactic, `my_fail_tactic]
-
-
-meta def my_orelse_tactic : tactic unit :=
-my_fail_tactic <|> my_first_tactic
-
-meta def mytrace_goal_tactic : tactic unit :=
-do
-  goal ← tactic.target,
-  tactic.trace goal
-
--- /-- A tactic for solving systems of equationd in an integral domain -/
--- meta def integral_domain_tactic : tactic unit :=
--- do
---   goal ← tactic.target,
---   goal_type ← infer_type goal,
---   -- TODO Check goal is equality expression
---   -- goal_lhs
---   tactic.trace (goal),
---   tactic.trace (goal_type)
-
-/-- A tactic for solving systems of equations in an integral domain -/
-meta def integral_domain_tactic : tactic unit :=
-do
-  try (`[simp only [*, <-mul_add, <-add_mul] with integral_domain_simp at *]),
-  try `[cases_type* true false],
-  `[done] <|> -- If done stop
-  -- If not done, do cases_type or
-  (( do `[cases_type or],
-        trace "cases_type or succeeds"
-       -- If cases_type or succeeds, call tactic recursively
-        `[integral_domain_tactic],
-        `[integral_domain_tactic]) 
-        -- If cases_type or fails, rewrite using more powerful simp
-        )
-
-
-/-- A tactic for solving systems of equations in an integral domain -/
-meta def integral_domain_tactic_one_iter : tactic unit :=
-do
-  try `[simp only [*, <-mul_add, <-add_mul, <-add_assoc] with integral_domain_simp at *],
-  try `[cases_type* true false],
-  done <|> `[cases_type or]
-
-  -- Is there a disjunction in the current context?
-    -- If so, 
-      -- Find a disjunction and split it using cases_type or
-      -- Recursively call integral domain tactic twice
-    -- If not,
-    
-  -- locate
-
-run_cmd add_interactive [`integral_domain_tactic]
-
-example [ring R] (a b c d e f : R) (h1 : a + b = c + d) (h2 : c + d = e + f) : a + b = e + f :=
+lemma zero_eq_zero [integral_domain R] : (0 : R) = 0 ↔ true := 
 begin
-  integral_domain_tactic,
+  simp only [eq_self_iff_true],
 end
 
--- example [ring R] (a b c d e f : R) (h1 : a * b = 1) (h2 : a * c = 0) (h3 : b * d = 0) : c * e + f * d = 0 :=
--- begin
---   integral_domain_tactic,
---   -- Fails since R is only a ring. c and d might be nonzero zero divisors.
---   sorry,
--- end
+example [integral_domain R] (a b c d e f g h i : R) (h11 : ¬a = 0) (h12 : ¬b = 0)  (h2 : a * c = 0) (h3 : b * d = 0) (h4 : h * i = 0): c * e + f * d = h :=
+begin
+  -- integral_domain_tactic,
+  simp only [] with integral_domain_simp
+    at * {fail_if_unchanged := ff},
+  -- integral_domain_tactic',
+  sorry,
+end
 
--- example [integral_domain R] (a b c d e f : R) (h1 : a * b = 1) (h2 : a * c = 0) (h3 : b * d = 0) : c * e + f * d = 0 :=
--- begin
---   -- Since a b nonzero, in an integral domain, c, d zero and this holds.
---   integral_domain_tactic,
--- end
+example [integral_domain R] (a b c d e f g h i : R) (h11 : ¬a = 0) (h12 : ¬b = 0) (h4 : h = 0 ∨ i = 0): f * 0 = h :=
+begin
+  simp only [] with integral_domain_simp
+    at * {fail_if_unchanged := ff},
+  cases ‹_ ∨ _› with found_zero found_zero,
+  -- tactic.context_name_getter,
+  rw found_zero at *,
+  rw found_zero at *,
+  sorry,
+end
 
--- example [ring R] (a b c d e f : R) (h1 : 0 = a + 0) (h2 : a + b = 0) : b = c :=
--- begin
---   simp only [*, add_zero, zero_add] at *,
---   sorry,
--- end
+example [integral_domain R] (a b c d e f : R) (h11 : ¬a = 0) (h12 : ¬b = 0)  (h2 : a * c = 0) (h3 : b * d = 0) : c * e + f * d = 0 :=
+begin
+  simp only [] with integral_domain_simp
+    at * {fail_if_unchanged := ff},
+  tactic.integral_domain_tactic_3,
+  -- tactic.integral_domain_tactic,
+end
 
--- example (p q : Prop) (h1 : true) : q ∨ p :=
--- begin
---   cases_type true,
--- end
+example [integral_domain R] (a b c d e f g : R) (h11 : ¬a = 0) (h12 : ¬b = 0)  (h2 : a * c = 0) (h3 : b * d = 0) : c * e + f * d = g :=
+begin
+  tactic.integral_domain_tactic,
+  sorry, 
+end
+
+example [integral_domain R] (a b c d e f : R) (h11 : ¬a = 0) (h12 : ¬b = 0)  (h2 : a * c = 0) (h3 : b * d = 0) : c * e + f * d = 0 :=
+begin
+  simp only [] with integral_domain_simp
+    at * {fail_if_unchanged := ff},
+  cases ‹_ ∨ _› with found_zero found_zero,
+  context_prop_name_getter,
+  simplify_everywhere,
+  simplify_at_name `h11,
+  simplify_at_name `h12,
+  simplify_at_name `found_zero,
+  sorry,
+  sorry,
 
 end
+
+
+end test
+
+-- end
+
+

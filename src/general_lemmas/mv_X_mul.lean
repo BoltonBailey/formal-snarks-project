@@ -200,6 +200,11 @@ begin
   ring,
 end
 
+lemma add_mul_distrib' (a b c d : R) : a + c * b + d * b = a + b * (c + d) :=
+begin
+  ring,
+end
+
 end comm_semiring
 
 end mv_polynomial
