@@ -5,7 +5,7 @@ This repository implements a formal verification of the [babySNARK](https://gith
 
 As of 1/29/2020 the knowledge soundness proof for babySNARK is sorry free. The full proof of the theorem can be found at the end of knowledge_soundness.lean.
 
-## Summary of the lean code
+## Summary of the BabySNARK code
 
 The knowledge_soundness.lean file has several parameter statements that match the parameters of the babySNARK instantiation. These are:
   
@@ -34,13 +34,9 @@ There are a total of ~50 lemmas across the lean files in the project. These incl
 
 ## In the works
 
-As of January 2021, we are in the process of refining and expanding on this project. TODOs include:
+As of January 2021, we are in the process of refining and expanding on this project to apply the techniques to other pairing-based SNARKs
 
-* Clarifying and documenting the existing proof
-* Abstracting lemmas to make them more useful
-* Applying the techniques to other pairing-based SNARKs
-
-Some folks from CMU asked if we could expand the net to SNARKs like Marlin and Aurora? After looking at these papers, I have concluded that these constructions are too different than the ones I am dealing with to merit including.
+Some folks from CMU asked if we could expand the net to SNARKs like Marlin and Aurora. After looking at these papers, I have concluded that these constructions are too different than the ones I am dealing with to include. Some code from this repository could be useful in formalizing a soundness proof for these SNARKs, but for now, this is future work.
 
 ### Planning timeline
 
@@ -62,4 +58,3 @@ Here is a list of goals and dates for this project
   * Pinocchio
     * [x] Implementation
     * [ ] Proof
-  * ~~Sonic~~ (This project focuses only on the linear SNARKs, see upcoming paper for more details)
