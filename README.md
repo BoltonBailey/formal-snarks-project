@@ -46,20 +46,20 @@ Some folks from CMU asked if we could expand the net to SNARKs like Marlin and A
 
 Here is a list of goals and dates for this project
 
-* [X] Implement type class for proof systems/ SNARKs and formalize the correctness and knowledge-soundness (and perhaps ZK) (March 6)
-* [X] Implement a `ring`-like/`library-search`-like tactic to automate simplification of statements about the coefficients of polynomials (March 22)
-* [ ] Implement an alternation or decidability based way of resolving statements (End of March)
+* [x] Implement type class for proof systems/ SNARKs and formalize the correctness and knowledge-soundness (and perhaps ZK) (March 6)
+* [x] Implement a `ring`-like/`library-search`-like tactic to automate simplification of statements about the coefficients of polynomials (March 22)
+* [x] Implement an alternation or decidability based way of resolving statements (End of March)
 * Implement SNARKs
   * BabySNARK
     * [x] Implementation
     * [x] Proof
-  * Pinocchio
+  * Type III Groth '16 (as presented [here](https://eprint.iacr.org/2020/811.pdf))
     * [x] Implementation
-    * [ ] Proof
+    * [x] Proof
   * Groth '16
     * [x] Implementation
     * [ ] Proof
-  * Sonic
-    * [ ] Implementation
+  * Pinocchio
+    * [x] Implementation
     * [ ] Proof
-* [ ] Write paper (End of April)
+  * ~~Sonic~~ (This project focuses only on the linear SNARKs, see upcoming paper for more details)
