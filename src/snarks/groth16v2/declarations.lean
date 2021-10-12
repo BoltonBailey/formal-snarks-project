@@ -2,7 +2,6 @@
 Author: Bolton Bailey
 -/
 import data.mv_polynomial.basic
-import data.polynomial.div
 import data.polynomial.field_division
 import algebra.polynomial.big_operators
 import polynomial_tactic
