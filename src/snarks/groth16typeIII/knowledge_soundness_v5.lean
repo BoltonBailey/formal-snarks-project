@@ -4,6 +4,7 @@ Author: Bolton Bailey
 import snarks.groth16.declarations
 import ...attributes
 import ...integral_domain_tactic
+import ...general_lemmas.polynomial_degree
 
 /-!
 # Knowledge Soundness
@@ -60,50 +61,16 @@ def t : polynomial F := ∏ i in (finset.fin_range m), (polynomial.X - polynomia
 -- TODO this and the following lemmas about this could potentially be spun off 
 -- make a `monic_from_roots` function for mathlib
 
-/-- t has degree m -/
-lemma nat_degree_t : t.nat_degree = m :=
-begin
-  rw t,
-  rw polynomial.nat_degree_prod,
-  simp,
-  intros i hi,
-  exact polynomial.X_sub_C_ne_zero (r i),
-end
 
-lemma monic_t : t.monic
-:=
-begin
-  rw t,
-  apply polynomial.monic_prod_of_monic,
-  intros i hi,
-  exact polynomial.monic_X_sub_C (r i),
-end
+-- lemma monic_t : t.monic
+-- :=
+-- begin
+--   rw t,
+--   apply polynomial.monic_prod_of_monic,
+--   intros i hi,
+--   exact polynomial.monic_X_sub_C (r i),
+-- end
 
-lemma degree_t_pos : 0 < m → 0 < t.degree 
-:=
-begin
-  intro hm,
-  suffices h : t.degree = some m,
-    rw h,
-    apply with_bot.some_lt_some.2,
-    exact hm,
-
-  have h := nat_degree_t,
-  rw polynomial.nat_degree at h,
-
-  induction h1 : t.degree,
-
-  rw h1 at h,
-  rw option.get_or_else at h,
-  rw h at hm,
-  have h2 := has_lt.lt.false hm,
-  exfalso,
-  exact h2,
-
-  rw h1 at h,
-  rw option.get_or_else at h,
-  rw h,
-end
 
 
 
@@ -316,7 +283,7 @@ end
 
 open finsupp
 
--- ************ Needed here, as in page 10 of "Another look ..."
+-- From page 9-10 of Baghery et al., we take the coefficients of the relevant monomials.
 
 lemma coeff1122 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
   polynomial.C A_α * polynomial.C B_β = 1
@@ -649,16 +616,11 @@ begin
     end,
     rw <-finset.mul_sum,
     apply polynomial.mul_mod_by_monic,
-    exact monic_t,
-    done,
+    rw t,
+    apply monic_of_product_form,
   },
-  -- TODO suffices to satisfy
+  done,
   have eqn' := modification_equivalence a_stmt (eqn),
-  -- rw verified' at eqn,
-  -- rw [A', B', C'] at eqn,
-  -- simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
-
-
 
   have h0012 := coeff0012 a_stmt eqn',
   have h0021 := coeff0021 a_stmt eqn',
