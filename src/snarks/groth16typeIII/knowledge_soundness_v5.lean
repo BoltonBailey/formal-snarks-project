@@ -8,13 +8,9 @@ import ...integral_domain_tactic
 /-!
 # Knowledge Soundness
 
-This file proves the knowledge-soundness property of the 
-[Groth16](https://eprint.iacr.org/2016/260.pdf) system.
-
-Specifically, we prove this property for the NILP system 
-described in section 3.1 of that paper.
-
-Furthermore, we carry out the reduction to non-laurent polynomials by multiplying through the CRS with γδ.
+This file proves the knowledge-soundness property of the Groth16 system for type III pairings, as 
+presented in "Another Look at Extraction and Randomization of Groth’s zk-SNARK" by 
+[Baghery et al.](https://eprint.iacr.org/2020/811.pdf).
 
 -/
 
@@ -65,10 +61,8 @@ def t : polynomial F := ∏ i in (finset.fin_range m), (polynomial.X - polynomia
 -- make a `monic_from_roots` function for mathlib
 
 /-- t has degree m -/
-lemma nat_degree_t : t.nat_degree = m
-:=
+lemma nat_degree_t : t.nat_degree = m :=
 begin
-  -- rw polynomial.nat_degree,
   rw t,
   rw polynomial.nat_degree_prod,
   simp,
