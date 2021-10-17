@@ -6,7 +6,7 @@ import data.polynomial.div
 import data.polynomial.field_division
 import algebra.polynomial.big_operators
 import .vars
-import ...polynomial_tactic
+import ...attributes
 
 /-!
 # Knowledge Soundness

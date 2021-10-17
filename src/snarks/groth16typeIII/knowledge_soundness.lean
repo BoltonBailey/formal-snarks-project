@@ -291,7 +291,8 @@ lemma coeff1122 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
 begin
   rw verified' at eqn,
   rw [A', B', C'] at eqn,
-  simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+  simp only [] with crs at eqn,
+  simp only [<-finset.mul_sum] with polynomial_nf_2 at eqn,
   have congr_coeff1122 := congr_arg (coeff (single α 1 + single β 1 + single δ 2 + single γ 2)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1122,
@@ -305,7 +306,8 @@ lemma coeff0222 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
 begin
   rw verified' at eqn,
   rw [A', B', C'] at eqn,
-  simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+  simp only [] with crs at eqn,
+  simp only [<-finset.mul_sum] with polynomial_nf_2 at eqn,
   have congr_coeff0222 := congr_arg (coeff (single α 0 + single β 2 + single δ 2 + single γ 2)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0222,
@@ -319,7 +321,8 @@ lemma coeff1023 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
 begin
   rw verified' at eqn,
   rw [A', B', C'] at eqn,
-  simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+  simp only [] with crs at eqn,
+  simp only [<-finset.mul_sum] with polynomial_nf_2 at eqn,
   have congr_coeff1023 := congr_arg (coeff (single α 1 + single β 0 + single δ 2 + single γ 3)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1023,
@@ -333,7 +336,8 @@ lemma coeff0212 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
 begin
   rw verified' at eqn,
   rw [A', B', C'] at eqn,
-  simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+  simp only [] with crs at eqn,
+  simp only [<-finset.mul_sum] with polynomial_nf_2 at eqn,
   have congr_coeff0212 := congr_arg (coeff (single α 0 + single β 2 + single δ 1 + single γ 2)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0212,
@@ -347,7 +351,8 @@ lemma coeff1112 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
 begin
   rw verified' at eqn,
   rw [A', B', C'] at eqn,
-  simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+  simp only [] with crs at eqn,
+  simp only [<-finset.mul_sum] with polynomial_nf_2 at eqn,
   have congr_coeff1112 := congr_arg (coeff (single α 1 + single β 1 + single δ 1 + single γ 2)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1112,
@@ -370,7 +375,8 @@ lemma coeff0112 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
 begin
   rw verified' at eqn,
   rw [A', B', C'] at eqn,
-  simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+  simp only [] with crs at eqn,
+  simp only [<-finset.mul_sum] with polynomial_nf_2 at eqn,
   have congr_coeff0112 := congr_arg (coeff (single α 0 + single β 1 + single δ 1 + single γ 2)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0112,
@@ -388,7 +394,8 @@ lemma coeff0012 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
 begin
   rw verified' at eqn,
   rw [A', B', C'] at eqn,
-  simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+  simp only [] with crs at eqn,
+  simp only [<-finset.mul_sum] with polynomial_nf_2 at eqn,
   have congr_coeff0012 := congr_arg (coeff (single α 0 + single β 0 + single δ 1 + single γ 2)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0012,
@@ -403,7 +410,8 @@ lemma coeff0221 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
 begin
   rw verified' at eqn,
   rw [A', B', C'] at eqn,
-  simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+  simp only [] with crs at eqn,
+  simp only [<-finset.mul_sum] with polynomial_nf_2 at eqn,
   have congr_coeff0221 := congr_arg (coeff (single α 0 + single β 2 + single δ 2 + single γ 1)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0221,
@@ -418,7 +426,8 @@ lemma coeff1121 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
 begin
   rw verified' at eqn,
   rw [A', B', C'] at eqn,
-  simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+  simp only [] with crs at eqn,
+  simp only [<-finset.mul_sum] with polynomial_nf_2 at eqn,
   have congr_coeff1121 := congr_arg (coeff (single α 1 + single β 1 + single δ 2 + single γ 1)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1121,
@@ -436,7 +445,8 @@ lemma coeff0121 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
 begin
   rw verified' at eqn,
   rw [A', B', C'] at eqn,
-  simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+  simp only [] with crs at eqn,
+  simp only [<-finset.mul_sum] with polynomial_nf_2 at eqn,
   have congr_coeff0121 := congr_arg (coeff (single α 0 + single β 1 + single δ 2 + single γ 1)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0121,
@@ -453,7 +463,8 @@ lemma coeff0021 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
 begin
   rw verified' at eqn,
   rw [A', B', C'] at eqn,
-  simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+  simp only [] with crs at eqn,
+  simp only [<-finset.mul_sum] with polynomial_nf_2 at eqn,
   have congr_coeff0021 := congr_arg (coeff (single α 0 + single β 0 + single δ 2 + single γ 1)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0021,
@@ -474,7 +485,8 @@ lemma coeff0122 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
 begin
   rw verified' at eqn,
   rw [A', B', C'] at eqn,
-  simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+  simp only [] with crs at eqn,
+  simp only [<-finset.mul_sum] with polynomial_nf_2 at eqn,
   have congr_coeff0122 := congr_arg (coeff (single α 0 + single β 1 + single δ 2 + single γ 2)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0122,
@@ -496,7 +508,8 @@ lemma coeff1022 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
 begin
   rw verified' at eqn,
   rw [A', B', C'] at eqn,
-  simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+  simp only [] with crs at eqn,
+  simp only [<-finset.mul_sum] with polynomial_nf_2 at eqn,
   have congr_coeff1022 := congr_arg (coeff (single α 1 + single β 0 + single δ 2 + single γ 2)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1022,
@@ -520,7 +533,8 @@ lemma coeff0022 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
 begin
   rw verified' at eqn,
   rw [A', B', C'] at eqn,
-  simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
+  simp only [] with crs at eqn,
+  simp only [<-finset.mul_sum] with polynomial_nf_2 at eqn,
   have congr_coeff0022 := congr_arg (coeff (single α 0 + single β 0 + single δ 2 + single γ 2)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0022,
@@ -619,7 +633,7 @@ begin
     rw t,
     apply monic_of_product_form,
   },
-  done,
+
   have eqn' := modification_equivalence a_stmt (eqn),
 
   have h0012 := coeff0012 a_stmt eqn',

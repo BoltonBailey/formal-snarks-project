@@ -11,7 +11,7 @@ import ...general_lemmas.single_antidiagonal
 import ...general_lemmas.polynomial_smul_eq_C_mul
 import ...general_lemmas.single_injective
 import .vars
-import ...polynomial_tactic
+import ...attributes
 
 /-!
 # Knowledge Soundness
