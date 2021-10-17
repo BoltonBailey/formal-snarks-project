@@ -7,7 +7,7 @@ import data.polynomial.div
 import data.polynomial.field_division
 import algebra.polynomial.big_operators
 import .vars
-import ...polynomial_tactic
+import ...attributes
 -- import ...general_lemmas.sub_for_mv_polynomial
 
 /-!
