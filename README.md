@@ -1,9 +1,9 @@
 
 # Formal Baby Snark
 
-This repository implements a formal verification of the [babySNARK](https://github.com/initc3/babySNARK) proof system, using the [Lean Theorem Prover](https://leanprover.github.io/). This is a work in progress.
+This repository implements a formal verification of a variety of SNARK proof systems, using the [Lean Theorem Prover](https://leanprover.github.io/), in the Algebraic Group Model. This is a work in progress.
 
-As of 1/29/2020 the knowledge soundness proof for babySNARK is sorry free. The full proof of the theorem can be found at the end of knowledge_soundness.lean.
+As of 10/14/2020 the knowledge soundness proofs for [babySNARK](https://github.com/initc3/babySNARK) and the Type III Groth '16 are complete. The full proofs of these theorems can be found at the end of `knowledge_soundness.lean` in their respective directories.
 
 ## Summary of the BabySNARK code
 
@@ -34,7 +34,7 @@ There are a total of ~50 lemmas across the lean files in the project. These incl
 
 ## In the works
 
-As of January 2021, we are in the process of refining and expanding on this project to apply the techniques to other pairing-based SNARKs
+We are in the process of refining and expanding on this project to apply the techniques to other pairing-based SNARKs.
 
 Some folks from CMU asked if we could expand the net to SNARKs like Marlin and Aurora. After looking at these papers, I have concluded that these constructions are too different than the ones I am dealing with to include. Some code from this repository could be useful in formalizing a soundness proof for these SNARKs, but for now, this is future work.
 
