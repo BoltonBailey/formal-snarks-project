@@ -285,6 +285,13 @@ open finsupp
 
 -- From page 9-10 of Baghery et al., we take the coefficients of the relevant monomials.
 
+-- example : 
+--   (∑ (i : fin (n_var - 1)) in finset.fin_range (n_var - 1),
+--     (@mv_polynomial.X F vars _) γ * (@mv_polynomial.C F vars _) ((@polynomial.X F _) ^ (i : ℕ) * (t * (@polynomial.C F _) (A_α)))) = 0 :=
+-- begin
+
+-- end 
+
 lemma coeff1122 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
   polynomial.C A_α * polynomial.C B_β = 1
 :=
@@ -292,13 +299,16 @@ begin
   rw verified' at eqn,
   rw [A', B', C'] at eqn,
   simp only [] with crs at eqn,
-  simp only [<-finset.mul_sum] with polynomial_nf_2 at eqn,
+  simp only [] with polynomial_nf_3 at eqn,
+  -- done,
+  -- simp only [mv_polynomial.X, mv_polynomial.monomial_mul, mv_polynomial.C_mul_monomial, C_mul_monomial'] at eqn,
   have congr_coeff1122 := congr_arg (coeff (single α 1 + single β 1 + single δ 2 + single γ 2)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1122,
   simp only [] with finsupp_simp at congr_coeff1122,
   exact congr_coeff1122,
 end
+
 
 lemma coeff0222 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
  polynomial.C A_β * polynomial.C B_β = 0
@@ -307,7 +317,7 @@ begin
   rw verified' at eqn,
   rw [A', B', C'] at eqn,
   simp only [] with crs at eqn,
-  simp only [<-finset.mul_sum] with polynomial_nf_2 at eqn,
+  simp only [] with polynomial_nf_3 at eqn,
   have congr_coeff0222 := congr_arg (coeff (single α 0 + single β 2 + single δ 2 + single γ 2)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0222,
@@ -322,7 +332,7 @@ begin
   rw verified' at eqn,
   rw [A', B', C'] at eqn,
   simp only [] with crs at eqn,
-  simp only [<-finset.mul_sum] with polynomial_nf_2 at eqn,
+  simp only [] with polynomial_nf_3 at eqn,
   have congr_coeff1023 := congr_arg (coeff (single α 1 + single β 0 + single δ 2 + single γ 3)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1023,
@@ -337,7 +347,7 @@ begin
   rw verified' at eqn,
   rw [A', B', C'] at eqn,
   simp only [] with crs at eqn,
-  simp only [<-finset.mul_sum] with polynomial_nf_2 at eqn,
+  simp only [] with polynomial_nf_3 at eqn,
   have congr_coeff0212 := congr_arg (coeff (single α 0 + single β 2 + single δ 1 + single γ 2)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0212,
@@ -352,7 +362,7 @@ begin
   rw verified' at eqn,
   rw [A', B', C'] at eqn,
   simp only [] with crs at eqn,
-  simp only [<-finset.mul_sum] with polynomial_nf_2 at eqn,
+  simp only [] with polynomial_nf_3 at eqn,
   have congr_coeff1112 := congr_arg (coeff (single α 1 + single β 1 + single δ 1 + single γ 2)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1112,
@@ -376,7 +386,7 @@ begin
   rw verified' at eqn,
   rw [A', B', C'] at eqn,
   simp only [] with crs at eqn,
-  simp only [<-finset.mul_sum] with polynomial_nf_2 at eqn,
+  simp only [] with polynomial_nf_3 at eqn,
   have congr_coeff0112 := congr_arg (coeff (single α 0 + single β 1 + single δ 1 + single γ 2)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0112,
@@ -395,7 +405,7 @@ begin
   rw verified' at eqn,
   rw [A', B', C'] at eqn,
   simp only [] with crs at eqn,
-  simp only [<-finset.mul_sum] with polynomial_nf_2 at eqn,
+  simp only [] with polynomial_nf_3 at eqn,
   have congr_coeff0012 := congr_arg (coeff (single α 0 + single β 0 + single δ 1 + single γ 2)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0012,
@@ -411,7 +421,7 @@ begin
   rw verified' at eqn,
   rw [A', B', C'] at eqn,
   simp only [] with crs at eqn,
-  simp only [<-finset.mul_sum] with polynomial_nf_2 at eqn,
+  simp only [] with polynomial_nf_3 at eqn,
   have congr_coeff0221 := congr_arg (coeff (single α 0 + single β 2 + single δ 2 + single γ 1)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0221,
@@ -427,7 +437,7 @@ begin
   rw verified' at eqn,
   rw [A', B', C'] at eqn,
   simp only [] with crs at eqn,
-  simp only [<-finset.mul_sum] with polynomial_nf_2 at eqn,
+  simp only [] with polynomial_nf_3 at eqn,
   have congr_coeff1121 := congr_arg (coeff (single α 1 + single β 1 + single δ 2 + single γ 1)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1121,
@@ -446,7 +456,7 @@ begin
   rw verified' at eqn,
   rw [A', B', C'] at eqn,
   simp only [] with crs at eqn,
-  simp only [<-finset.mul_sum] with polynomial_nf_2 at eqn,
+  simp only [] with polynomial_nf_3 at eqn,
   have congr_coeff0121 := congr_arg (coeff (single α 0 + single β 1 + single δ 2 + single γ 1)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0121,
@@ -464,7 +474,7 @@ begin
   rw verified' at eqn,
   rw [A', B', C'] at eqn,
   simp only [] with crs at eqn,
-  simp only [<-finset.mul_sum] with polynomial_nf_2 at eqn,
+  simp only [] with polynomial_nf_3 at eqn,
   have congr_coeff0021 := congr_arg (coeff (single α 0 + single β 0 + single δ 2 + single γ 1)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0021,
@@ -486,7 +496,7 @@ begin
   rw verified' at eqn,
   rw [A', B', C'] at eqn,
   simp only [] with crs at eqn,
-  simp only [<-finset.mul_sum] with polynomial_nf_2 at eqn,
+  simp only [] with polynomial_nf_3 at eqn,
   have congr_coeff0122 := congr_arg (coeff (single α 0 + single β 1 + single δ 2 + single γ 2)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0122,
@@ -509,7 +519,7 @@ begin
   rw verified' at eqn,
   rw [A', B', C'] at eqn,
   simp only [] with crs at eqn,
-  simp only [<-finset.mul_sum] with polynomial_nf_2 at eqn,
+  simp only [] with polynomial_nf_3 at eqn,
   have congr_coeff1022 := congr_arg (coeff (single α 1 + single β 0 + single δ 2 + single γ 2)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1022,
@@ -534,7 +544,7 @@ begin
   rw verified' at eqn,
   rw [A', B', C'] at eqn,
   simp only [] with crs at eqn,
-  simp only [<-finset.mul_sum] with polynomial_nf_2 at eqn,
+  simp only [] with polynomial_nf_3 at eqn,
   have congr_coeff0022 := congr_arg (coeff (single α 0 + single β 0 + single δ 2 + single γ 2)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0022,

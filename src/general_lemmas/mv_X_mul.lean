@@ -94,9 +94,25 @@ begin
   rw finset.mul_sum,
 end
 
+lemma extract_mul_from_sum {α : Type u} {r : finset α} {f : α -> mv_polynomial σ R} (p : mv_polynomial σ R) : 
+  (∑ x in r, p * f x) = p * (∑ x in r, f x)
+:= 
+begin
+  rw finset.mul_sum,
+end
+
+
 lemma C_mul_C (a a' : R) : C a * C a' = (C (a * a') : mv_polynomial σ R)  := 
 begin
   simp,
+end
+
+lemma C_mul_monomial' (a a' : R) (s : σ →₀ ℕ) : monomial s a' * C a  = monomial s (a' * a) :=
+by simp [C_apply, monomial, single_mul_single]
+
+lemma C_to_monomial (a : R) : @C _ σ _ a = monomial 0 (a) :=
+begin
+  exact C_apply,
 end
 
 -- FOr some reason, this lemma is actually useless https://leanprover.zulipchat.com/#narrow/stream/113488-general/topic/Extracting.20constant.20from.20sum

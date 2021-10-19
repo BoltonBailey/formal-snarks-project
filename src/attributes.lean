@@ -2,6 +2,7 @@
 import data.mv_polynomial.basic
 import .general_lemmas.mv_X_mul
 import .general_lemmas.single_antidiagonal
+import .general_lemmas.mul_sum_symm
 
 section
 
@@ -49,15 +50,9 @@ attribute [polynomial_nf] smul_mul_assoc
 run_cmd mk_simp_attr `polynomial_nf_2
 run_cmd tactic.add_doc_string `simp_attr.polynomial_nf_2 "Attribute for lemmas that are used in the conversion of mv_polynomial expressions to a normal form consisting of adds of sums of muls of mv_polynomials"
 
--- attribute [polynomial_nf_2] polynomial.eval₂
--- attribute [polynomial_nf_2] polynomial.sum
--- attribute [polynomial_nf_2] finsupp.sum
 attribute [polynomial_nf_2] mul_add
 attribute [polynomial_nf_2] add_mul
--- attribute [polynomial_nf_2] finset.sum_mul
--- attribute [polynomial_nf_2] finset.mul_sum
 attribute [polynomial_nf_2] finset.sum_add_distrib
-
 attribute [polynomial_nf_2] sum_X_mul
 attribute [polynomial_nf_2] sum_C_mul
 attribute [polynomial_nf_2] rearrange_constants_right
@@ -67,17 +62,56 @@ attribute [polynomial_nf_2] rearrange_sums_right_with_extra
 attribute [polynomial_nf_2] C_mul_C
 attribute [polynomial_nf_2] finset.sum_hom
 attribute [polynomial_nf_2] mv_polynomial.smul_eq_C_mul
-
-
-
-
 attribute [polynomial_nf_2] mul_assoc
-
 attribute [polynomial_nf_2] finsupp.smul_sum
 attribute [polynomial_nf_2] mul_smul_comm
 attribute [polynomial_nf_2] smul_add
 attribute [polynomial_nf_2] mul_smul
 attribute [polynomial_nf_2] smul_mul_assoc
+
+
+run_cmd mk_simp_attr `polynomial_nf_3
+run_cmd tactic.add_doc_string `simp_attr.polynomial_nf_3 "Attribute for lemmas that are used in the conversion of mv_polynomial expressions to a normal form consisting of adds of sums of muls of mv_polynomials"
+
+
+attribute [polynomial_nf_3] mul_add
+attribute [polynomial_nf_3] add_mul
+attribute [polynomial_nf_3] finset.sum_add_distrib
+-- attribute [polynomial_nf_3] sum_X_mul
+-- attribute [polynomial_nf_3] sum_C_mul
+attribute [polynomial_nf_3] mul_sum_symm
+attribute [polynomial_nf_3] rearrange_constants_right
+attribute [polynomial_nf_3] rearrange_constants_right_with_extra
+attribute [polynomial_nf_3] rearrange_sums_right
+attribute [polynomial_nf_3] rearrange_sums_right_with_extra
+attribute [polynomial_nf_3] C_mul_C
+attribute [polynomial_nf_3] finset.sum_hom
+attribute [polynomial_nf_3] mv_polynomial.smul_eq_C_mul
+attribute [polynomial_nf_3] mul_assoc
+attribute [polynomial_nf_3] finsupp.smul_sum
+attribute [polynomial_nf_3] mul_smul_comm
+attribute [polynomial_nf_3] smul_add
+attribute [polynomial_nf_3] mul_smul
+attribute [polynomial_nf_3] smul_mul_assoc
+
+-- attribute [polynomial_nf_3] mul_add
+-- attribute [polynomial_nf_3] add_mul
+-- attribute [polynomial_nf_3] finset.sum_add_distrib
+-- -- attribute [polynomial_nf_3] finset.sum_mul
+-- -- attribute [polynomial_nf_3] finset.mul_sum
+-- attribute [polynomial_nf_3] rearrange_sums_right
+-- attribute [polynomial_nf_3] rearrange_sums_right_with_extra
+-- -- attribute [polynomial_nf_3] C_mul_C
+-- attribute [polynomial_nf_3] finset.sum_hom -- Should extract multiplications from within sums
+-- attribute [polynomial_nf_3] mv_polynomial.smul_eq_C_mul
+-- attribute [polynomial_nf_3] mul_assoc
+-- attribute [polynomial_nf_3] finsupp.smul_sum
+-- attribute [polynomial_nf_3] mul_smul_comm
+-- attribute [polynomial_nf_3] smul_add
+-- attribute [polynomial_nf_3] mul_smul
+-- attribute [polynomial_nf_3] smul_mul_assoc
+-- attribute [polynomial_nf_3] mv_polynomial.X mv_polynomial.monomial_mul mv_polynomial.C_apply
+-- attribute [polynomial_nf_3] mul_one one_mul
 
 run_cmd mk_simp_attr `rearrange
 run_cmd tactic.add_doc_string `simp_attr.rearrange "TODO a few rearrangement lemmas"
@@ -138,12 +172,13 @@ attribute [integral_domain_simp] add_zero zero_add mul_zero zero_mul mul_one one
 run_cmd mk_simp_attr `finsupp_simp
 run_cmd tactic.add_doc_string `simp_attr.finsupp_simp "Attribute for lemmas that are useful in finsupp statements"
 
+lemma zero_ne_succ (n : ℕ) : 0 ≠ nat.succ n := (nat.succ_ne_zero n).symm
 
 -- Verison without polynomial manipulation
 attribute [finsupp_simp] nat.one_ne_zero finsupp.single_eq_of_ne finsupp.single_eq_same add_zero if_true if_false  pi.add_apply pi.zero_apply
   eq_self_iff_true not_true eq_zero_of_zero_eq if_false ne.def nat.sub_zero zero_add not_false_iff bit0_eq_zero
   and_self finsupp.coe_nat_sub and_false finsupp.coe_add false_and pi.sub_apply finsupp.coe_zero
-    nat.succ_ne_zero     
-  
+    nat.succ_ne_zero zero_ne_succ nat.succ_inj' -- To simplify nat equalities
+  and_true true_and
 
 end
