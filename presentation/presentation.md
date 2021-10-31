@@ -18,14 +18,15 @@ This formalization is done in the Lean Theorem Prover
 
 --------
 
-## The Current State of the Project
+## Two SNARKs formalized and more on the way
 
-We have implemented a proof of the Knowledge-soundness of the BabySNARK protocol in the Algebraic Group model
+We have implemented a proof of the knowledge-soundness of BabySNARK and the Type III Groth '16 described in Baghery et al. in the Algebraic Group model.
 
 We are in the process of formalizing statements of other pairing-based SNARKs in the AGM:
 
-* Groth16 
-* The GGPR version from the Pinocchio paper.
+* Groth16
+* GGPR
+* Pinocchio
 
 --------
 
@@ -38,7 +39,7 @@ Build a framework to make it convenient to formalize new SNARK proofs
 * Write tactics for facilitating proofs about polynomials and their coefficients.
 * Write a general framework for pairing based SNARK schemes.
 
---------
+<!-- --------
 
 ## Primer on Baby SNARK - Square Span Program
 
@@ -79,11 +80,26 @@ $$ V := V_{wit} + \sum_{i \in [n_{stmt}]} a_i u_i(\tau) $$
 And then verifies, via pairing function $e$
 
 $$ e(H, t(\tau)) + e(1, 1) = e(V, V) $$
-$$ e(B_{wit}, \gamma) = e(\gamma \beta, V_{wit} ) $$
+$$ e(B_{wit}, \gamma) = e(\gamma \beta, V_{wit} ) $$ -->
 
 --------
 
 ## What are the givens in the main theorem, and what is the goal?
+
+In the AGM model we assume the proof elements are some linear combination of the CRS elements, and that the prover knows the coefficients of this linear combination. To prove knowledge soundness, we must extract from these coefficients a satisfying witness assignment.
+ <!-- the proof elements in terms of a linear combination of the CRS elements (represented as `mv_polynomial vars F` in Lean, with coefficients in `F`).
+ -->
+<!-- We assume the equations that the verifier checks hold. -->
+
+To do this, we assume the equations that the verifier checks hold. We then prove a series of facts about the coefficients, culminating in the fact that a particular set of the coefficients satisfy the Square Span Program.
+
+From this, it follows that any algebraic adversary cannot produce a valid proof without knowing a satisfying witness.
+
+<!-- A critical point - the proof of the main theorem is designed so that you can read the paper side-by-side with the code -->
+
+--------
+
+## How does the Automated Proof handle this?
 
 In the AGM model we assume the proof elements are some linear combination of the CRS elements, and that the prover knows the coefficients of this linear combination. To prove knowledge soundness, we must extract from these coefficients a satisfying witness assignment.
  <!-- the proof elements in terms of a linear combination of the CRS elements (represented as `mv_polynomial vars F` in Lean, with coefficients in `F`).
