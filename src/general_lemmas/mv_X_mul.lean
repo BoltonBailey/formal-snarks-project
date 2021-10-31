@@ -94,6 +94,13 @@ begin
   rw finset.mul_sum,
 end
 
+lemma sum_C_hom {α : Type u} {r : finset α} {f : α -> R} : 
+  ((∑ x in r, C (f x)) : mv_polynomial σ R) = C (∑ x in r, f x)
+:= 
+begin
+  exact finset.sum_hom r C,
+end
+
 lemma extract_mul_from_sum {α : Type u} {r : finset α} {f : α -> mv_polynomial σ R} (p : mv_polynomial σ R) : 
   (∑ x in r, p * f x) = p * (∑ x in r, f x)
 := 
