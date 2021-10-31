@@ -1,10 +1,15 @@
 /-
 Author: Bolton Bailey
 -/
-import snarks.groth16.declarations
+-- import snarks.groth16.declarations
 import ...attributes
 import ...integral_domain_tactic
 import ...general_lemmas.polynomial_degree
+import data.mv_polynomial.basic
+import data.polynomial.field_division
+import algebra.polynomial.big_operators
+-- import ...attributes
+import .vars
 
 /-!
 # Knowledge Soundness
@@ -17,14 +22,11 @@ presented in "Another Look at Extraction and Randomization of Groth’s zk-SNARK
 
 open_locale big_operators classical
 
-
 section groth16
 
-open mv_polynomial groth16 vars
+open mv_polynomial vars
 
 noncomputable theory
-
-
 
 universes u
 
@@ -38,13 +40,6 @@ parameter [field F]
   n_wit - the witness size -/ 
 parameters {n_stmt n_wit n_var : ℕ}
 
-def l : ℕ := n_stmt
-
-def m : ℕ := n_wit
-
-
--- NOTE: In the paper, n_stmt is l and n_wit is n-l. Here, n is defined from these values.
-
 /-- u_stmt and u_wit are fin-indexed collections of polynomials from the square span program -/
 parameter {u_stmt : fin n_stmt → (polynomial F) }
 parameter {u_wit : fin n_wit → (polynomial F) }
@@ -55,32 +50,11 @@ parameter {w_wit : fin n_wit → (polynomial F) }
 
 
 /-- The roots of the polynomial t -/
-parameter {r : fin m → F} 
+parameter {r : fin n_wit → F} 
 /-- t is the polynomial divisibility by which is used to verify satisfaction of the SSP -/
-def t : polynomial F := ∏ i in (finset.fin_range m), (polynomial.X - polynomial.C (r i))
--- TODO this and the following lemmas about this could potentially be spun off 
--- make a `monic_from_roots` function for mathlib
+def t : polynomial F := ∏ i in (finset.fin_range n_wit), (polynomial.X - polynomial.C (r i))
+-- TODO this could potentially be spun off into a mathlib definition
 
-
--- lemma monic_t : t.monic
--- :=
--- begin
---   rw t,
---   apply polynomial.monic_prod_of_monic,
---   intros i hi,
---   exact polynomial.monic_X_sub_C (r i),
--- end
-
-
-
-
--- Single variable form of V_wit
-def V_wit_sv (a_wit : fin n_wit → F) : polynomial F 
-:= ∑ i in finset.fin_range n_wit, a_wit i • u_wit i
-
-/-- The statement polynomial that the verifier computes from the statement bits, as a single variable polynomial -/
-def V_stmt_sv (a_stmt : fin n_stmt → F) : polynomial F 
-:= ∑ i in (finset.fin_range n_stmt), a_stmt i • u_stmt i
 
 /-- Checks whether a statement witness pair satisfies the SSP -/
 def satisfying (a_stmt : fin n_stmt → F ) (a_wit : fin n_wit → F) := 
@@ -219,7 +193,7 @@ X vars.γ * mv_polynomial.C ((polynomial.X)^(i : ℕ) * t)
 /-- Polynomial form of A in the adversary's proof representation -/
 def A'  : groth16polynomial := 
   crs'_α * mv_polynomial.C (polynomial.C (A_α))
-  + -- TODO
+  +
   crs'_β * mv_polynomial.C (polynomial.C (A_β))
   + 
   crs'_δ * mv_polynomial.C (polynomial.C (A_δ))
@@ -245,7 +219,7 @@ def B'  : groth16polynomial :=
 /-- Polynomial form of C in the adversary's proof representation -/
 def C'  : groth16polynomial := 
   crs'_α * mv_polynomial.C (polynomial.C (C_α))
-  + -- TODO
+  +
   crs'_β * mv_polynomial.C (polynomial.C (C_β))
   + 
   crs'_δ * mv_polynomial.C (polynomial.C (C_δ))
@@ -279,18 +253,9 @@ begin
 end
 
 
-
-
 open finsupp
 
 -- From page 9-10 of Baghery et al., we take the coefficients of the relevant monomials.
-
--- example : 
---   (∑ (i : fin (n_var - 1)) in finset.fin_range (n_var - 1),
---     (@mv_polynomial.X F vars _) γ * (@mv_polynomial.C F vars _) ((@polynomial.X F _) ^ (i : ℕ) * (t * (@polynomial.C F _) (A_α)))) = 0 :=
--- begin
-
--- end 
 
 lemma coeff1122 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
   polynomial.C A_α * polynomial.C B_β = 1
@@ -300,8 +265,6 @@ begin
   rw [A', B', C'] at eqn,
   simp only [] with crs at eqn,
   simp only [] with polynomial_nf_3 at eqn,
-  -- done,
-  -- simp only [mv_polynomial.X, mv_polynomial.monomial_mul, mv_polynomial.C_mul_monomial, C_mul_monomial'] at eqn,
   have congr_coeff1122 := congr_arg (coeff (single α 1 + single β 1 + single δ 2 + single γ 2)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1122,
@@ -598,9 +561,6 @@ begin
   exact mt,
 end
 
-example (a b : F) : a + b = 0 ↔ a = -b := add_eq_zero_iff_eq_neg
-example (a b c : F) : a - b = c ↔ a = b + c := sub_eq_iff_eq_add'
-
 /-- The main theorem for the soundness of the Groth '16 SNARK. 
 Show that if the adversary polynomials obey the equations, 
 then the coefficients give a satisfying witness. -/
@@ -660,11 +620,33 @@ begin
   have h1112 := coeff1112 a_stmt eqn',
   have h1121 := coeff1121 a_stmt eqn',
   have h1122 := coeff1122 a_stmt eqn',
-  
-  -- clear h0033 h1032 h0132 h0042, -- Clear some statements about C_ values that give no info
 
+  -- TODO the below alternative to the above doesn't run fast. Why?
+  -- rw verified' at eqn',
+  -- rw [A', B', C'] at eqn',
+  -- simp only [] with crs at eqn',
+  -- simp only [] with polynomial_nf_3 at eqn',
 
-  clear eqn eqn',
+  -- have h0012 := congr_arg (coeff (single α 0 + single β 0 + single γ 1 + single δ 2)) eqn',
+  -- have h0021 := congr_arg (coeff (single α 0 + single β 0 + single γ 2 + single δ 1)) eqn',
+  -- have h0022 := congr_arg (coeff (single α 0 + single β 0 + single γ 2 + single δ 2)) eqn',
+  -- have h0112 := congr_arg (coeff (single α 0 + single β 1 + single γ 1 + single δ 2)) eqn',
+  -- have h0121 := congr_arg (coeff (single α 0 + single β 1 + single γ 2 + single δ 1)) eqn',
+  -- have h0122 := congr_arg (coeff (single α 0 + single β 1 + single γ 2 + single δ 2)) eqn',
+  -- have h0212 := congr_arg (coeff (single α 0 + single β 2 + single γ 1 + single δ 2)) eqn',
+  -- have h0221 := congr_arg (coeff (single α 0 + single β 2 + single γ 2 + single δ 1)) eqn',
+  -- have h0222 := congr_arg (coeff (single α 0 + single β 2 + single γ 2 + single δ 2)) eqn',
+  -- have h1022 := congr_arg (coeff (single α 1 + single β 0 + single γ 2 + single δ 2)) eqn',
+  -- have h1023 := congr_arg (coeff (single α 1 + single β 0 + single γ 2 + single δ 3)) eqn',
+  -- have h1112 := congr_arg (coeff (single α 1 + single β 1 + single γ 1 + single δ 2)) eqn',
+  -- have h1121 := congr_arg (coeff (single α 1 + single β 1 + single γ 2 + single δ 1)) eqn',
+  -- have h1122 := congr_arg (coeff (single α 1 + single β 1 + single γ 2 + single δ 2)) eqn',
+
+  -- clear eqn eqn',
+
+  -- simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at *,
+  -- simp only [] with finsupp_simp at *,
+
   -- done,
 
 
