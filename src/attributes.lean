@@ -94,24 +94,6 @@ attribute [polynomial_nf_3] smul_add
 attribute [polynomial_nf_3] mul_smul
 attribute [polynomial_nf_3] smul_mul_assoc
 
--- attribute [polynomial_nf_3] mul_add
--- attribute [polynomial_nf_3] add_mul
--- attribute [polynomial_nf_3] finset.sum_add_distrib
--- -- attribute [polynomial_nf_3] finset.sum_mul
--- -- attribute [polynomial_nf_3] finset.mul_sum
--- attribute [polynomial_nf_3] rearrange_sums_right
--- attribute [polynomial_nf_3] rearrange_sums_right_with_extra
--- -- attribute [polynomial_nf_3] C_mul_C
--- attribute [polynomial_nf_3] finset.sum_hom -- Should extract multiplications from within sums
--- attribute [polynomial_nf_3] mv_polynomial.smul_eq_C_mul
--- attribute [polynomial_nf_3] mul_assoc
--- attribute [polynomial_nf_3] finsupp.smul_sum
--- attribute [polynomial_nf_3] mul_smul_comm
--- attribute [polynomial_nf_3] smul_add
--- attribute [polynomial_nf_3] mul_smul
--- attribute [polynomial_nf_3] smul_mul_assoc
--- attribute [polynomial_nf_3] mv_polynomial.X mv_polynomial.monomial_mul mv_polynomial.C_apply
--- attribute [polynomial_nf_3] mul_one one_mul
 
 run_cmd mk_simp_attr `rearrange
 run_cmd tactic.add_doc_string `simp_attr.rearrange "TODO a few rearrangement lemmas"
