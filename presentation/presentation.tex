@@ -1,0 +1,371 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Beamer Presentation
+% LaTeX Template
+% Version 1.0 (10/11/12)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND THEMES
+
+%----------------------------------------------------------------------------------------
+
+\documentclass{beamer}
+
+\usepackage[utf8]{inputenc}
+\usepackage{alphabeta}
+\usepackage{circuitikz}
+
+
+\mode<presentation> {
+
+% The Beamer class comes with a number of default slide themes
+% which change the colors and layouts of slides. Below this is a list
+% of all the themes, uncomment each in turn to see what they look like.
+
+%\usetheme{default}
+%\usetheme{AnnArbor}
+%\usetheme{Antibes}
+%\usetheme{Bergen}
+%\usetheme{Berkeley}
+%\usetheme{Berlin}
+%\usetheme{Boadilla}
+%\usetheme{CambridgeUS}
+%\usetheme{Copenhagen}
+%\usetheme{Darmstadt}
+%\usetheme{Dresden}
+%\usetheme{Frankfurt}
+%\usetheme{Goettingen}
+%\usetheme{Hannover}
+%\usetheme{Ilmenau}
+%\usetheme{JuanLesPins}
+%\usetheme{Luebeck}
+\usetheme{Madrid}
+%\usetheme{Malmoe}
+%\usetheme{Marburg}
+%\usetheme{Montpellier}
+%\usetheme{PaloAlto}
+%\usetheme{Pittsburgh}
+%\usetheme{Rochester}
+%\usetheme{Singapore}
+%\usetheme{Szeged}
+%\usetheme{Warsaw}
+
+% As well as themes, the Beamer class has a number of color themes
+% for any slide theme. Uncomment each of these in turn to see how it
+% changes the colors of your current slide theme.
+
+%\usecolortheme{albatross}
+%\usecolortheme{beaver}
+%\usecolortheme{beetle}
+%\usecolortheme{crane}
+%\usecolortheme{dolphin}
+%\usecolortheme{dove}
+%\usecolortheme{fly}
+%\usecolortheme{lily}
+%\usecolortheme{orchid}
+%\usecolortheme{rose}
+%\usecolortheme{seagull}
+%\usecolortheme{seahorse}
+%\usecolortheme{whale}
+%\usecolortheme{wolverine}
+
+%\setbeamertemplate{footline} % To remove the footer line in all slides uncomment this line
+%\setbeamertemplate{footline}[page number] % To replace the footer line in all slides with a simple slide count uncomment this line
+
+%\setbeamertemplate{navigation symbols}{} % To remove the navigation symbols from the bottom of all slides uncomment this line
+}
+
+\usepackage{graphicx} % Allows including images
+\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\title[Formal SNARKs Project]{Formal SNARKs Project} % The short title appears at the bottom of every slide, the full title is only on the title page
+
+\author{Bolton Bailey, Andrew Miller} % Your name
+\institute[UIUC] % Your institution as it will appear on the bottom of every slide, may be shorthand to save space
+{
+University of Illinois Urbana-Champaign \\ % Your institution for the title page
+\medskip
+\textit{boltonb2@illinois.edu} % Your email address
+}
+\date{\today} % Date, can be changed to a custom date
+
+\begin{document}
+
+\begin{frame}
+\titlepage % Print the title page as the first slide
+\end{frame}
+
+\begin{frame}
+    \frametitle{Formalizing SNARKs in the Lean Theorem Prover}
+
+    \begin{itemize}
+        \item Lean seems to be an active language right now
+        \item The mathlib library has support for multivariable polynomials which is critical
+        \item The mathlib community is open to accepting pull requests, which has been convenient
+    \end{itemize}    
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Goals: A Library of SNARKs with Formal Proofs}
+    
+    We want to make it easy and convenient to formalize new SNARK proofs
+
+    To this end, we have written tactics for facilitating proofs about polynomials and their coefficients.
+    
+    We also have general framework for pairing based SNARK schemes.
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Two SNARKs formalized and more on the way}
+    We have implemented a proof of the knowledge-soundness of BabySNARK and the Type III Groth '16 described in Baghery et al. in the Algebraic Group model.
+
+    We are in the process of formalizing statements of other pairing-based SNARKs in the AGM:
+
+    \begin{itemize}
+        \item The original Groth '16 (amenable to all types of pairings)
+        \item GGPR
+        \item Pinocchio
+    \end{itemize}    
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{The Algebraic Group Model for Linear SNARKs}
+
+    \begin{itemize}
+        \item In the AGM model we assume the proof elements are some linear combination of the CRS elements, and that the prover knows the coefficients of this linear combination. 
+        \item To prove knowledge soundness, we must extract from these coefficients a satisfying witness assignment.
+        \item To do this, we assume the equations that the verifier checks hold. We then prove a series of facts about the coefficients, culminating in the fact that a particular set of the coefficients satisfy the Square Span Program.
+        \item From this, it follows that any algebraic adversary cannot produce a valid proof without knowing a satisfying witness.
+    \end{itemize}
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{An Extremely Simple (Incomplete) Toy SNARK}
+
+    Let $\textcolor{red}{A},\textcolor{red}{B},\textcolor{red}{C},\textcolor{red}{D},\textcolor{red}{E}$ be 0/1 valued. Make a SNARK that proves 
+    $$(\textcolor{red}{A}  \textcolor{red}{D}) = \textcolor{red}{E}  \text{ or } (\textcolor{red}{B} \textcolor{red}{C}) = \textcolor{red}{E}$$
+
+    \begin{center}
+        \begin{circuitikz} 
+            \node (D) at (-2,2-0.3) {$\textcolor{red}{D}$};
+            \node (C) at (-2, -0.3) {$\textcolor{red}{C}$};
+            \node (B) at (-2, +0.3) {$\textcolor{red}{B}$};
+            \node (A) at (-2,2+0.3) {$\textcolor{red}{A}$};
+            \node (E) at (3,1) {$\textcolor{red}{E}$};
+            \draw
+            (0,2) node[and port] (myand1) {}
+            (0,0) node[and port] (myand2) {}
+            (2,1) node[or port] (myor) {}
+            (A) -- (myand1.in 1)
+            (D) -- (myand1.in 2)
+            (B) -- (myand2.in 1)
+            (C) -- (myand2.in 2)
+            (myor.out) -- (E)
+            (myand1.out) -- (myor.in 1)
+            (myand2.out) -- (myor.in 2);
+        \end{circuitikz}        
+    \end{center}
+
+    Two unknown field elements \texttt{\textcolor{blue}{\alpha}, \textcolor{blue}{\beta}}
+    Three CRS group elements \texttt{\textcolor{blue}{\alpha}, \textcolor{blue}{\beta}, \textcolor{blue}{\alpha\beta}}.
+
+    Prover returns (\texttt{\textcolor{red}{A}\textcolor{blue}{\alpha}+\textcolor{red}B\textcolor{blue}{β}, \textcolor{red}C\textcolor{blue}{α}+\textcolor{red}D\textcolor{blue}{β}, \textcolor{red}E\textcolor{blue}{α}\textcolor{blue}{β}})     
+
+    $ \implies $
+    Verifier checks \texttt{(\textcolor{red}{A}\textcolor{blue}{\alpha}+\textcolor{red}B\textcolor{blue}{β})(\textcolor{red}C\textcolor{blue}{α}+\textcolor{red}D\textcolor{blue}{β}) = \textcolor{red}E\textcolor{blue}{α}\textcolor{blue}{β}}  
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Step 0: Load Assumptions and Goal into Lean}
+
+    Assumption:
+    $$\texttt{(\textcolor{red}{A} * \textcolor{blue}{\alpha} + \textcolor{red}B * \textcolor{blue}{β})(\textcolor{red}C * \textcolor{blue}{α} + \textcolor{red}D * \textcolor{blue}{β}) = \textcolor{red}E * \textcolor{blue}{α} * \textcolor{blue}{β}}  $$   
+
+    Goal:
+    $$\texttt{(\textcolor{red}{A} * \textcolor{red}{D}) = \textcolor{red}{E}  \text{ or } (\textcolor{red}{B} * \textcolor{red}{C}) = \textcolor{red}{E}}$$
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Step 1: Isolate Coefficients}
+
+    Old Assumption:
+    $$\texttt{(\textcolor{red}{A} * \textcolor{blue}{\alpha} + \textcolor{red}B * \textcolor{blue}{β})(\textcolor{red}C * \textcolor{blue}{α} + \textcolor{red}D * \textcolor{blue}{β}) = \textcolor{red}E * \textcolor{blue}{α} * \textcolor{blue}{β}}  $$   
+
+    New Assumption:
+    $$\texttt{\textcolor{red}{A}*\textcolor{red}{C} * \textcolor{blue}{\alpha}$^2$ + (\textcolor{red}{A}*\textcolor{red}D + \textcolor{red}{B}*\textcolor{red}C ) * \textcolor{blue}{α} * \textcolor{blue}{β} + (\textcolor{red}B*\textcolor{red}D * \textcolor{blue}{β}$^2$) = \textcolor{red}E * \textcolor{blue}{α} * \textcolor{blue}{β}}  $$   
+
+    Goal:
+    $$\texttt{(\textcolor{red}{A} * \textcolor{red}{D}) = \textcolor{red}{E}  \text{ or } (\textcolor{red}{B} * \textcolor{red}{C}) = \textcolor{red}{E}}$$
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Step 2: Reexpress Polynomial as Equation of Coefficients}
+
+    Old Assumption:
+    $$\texttt{\textcolor{red}{A}*\textcolor{red}{C} * \textcolor{blue}{\alpha}$^2$ + (\textcolor{red}{A}*\textcolor{red}D + \textcolor{red}{B}*\textcolor{red}C ) * \textcolor{blue}{α} * \textcolor{blue}{β} + (\textcolor{red}B*\textcolor{red}D * \textcolor{blue}{β}$^2$) = \textcolor{red}E * \textcolor{blue}{α} * \textcolor{blue}{β}}  $$    
+
+    New Assumptions:
+    $$ \texttt{\textcolor{red}{A}*\textcolor{red}{C} = 0} $$
+    $$ \texttt{\textcolor{red}{A}*\textcolor{red}D + \textcolor{red}{B}*\textcolor{red}C = \textcolor{red}E} $$
+    $$ \texttt{\textcolor{red}B*\textcolor{red}D = 0}  $$   
+
+    Goal:
+    $$\texttt{(\textcolor{red}{A} * \textcolor{red}{D}) = \textcolor{red}{E}  \text{ or } (\textcolor{red}{B} * \textcolor{red}{C}) = \textcolor{red}{E}}$$
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Step 3: Recursively Case on Zero Divisors and Simplify}
+
+    Old Assumptions:
+    $$ \texttt{\textcolor{red}{A}*\textcolor{red}{C} = 0} $$
+    $$ \texttt{\textcolor{red}{A}*\textcolor{red}D + \textcolor{red}{B}*\textcolor{red}C = \textcolor{red}E} $$
+    $$ \texttt{\textcolor{red}B*\textcolor{red}D = 0}  $$   
+
+    New Assumptions:
+    $$ \texttt{\textcolor{red}{A} = 0 or \textcolor{red}{C} = 0} $$
+    $$ \texttt{\textcolor{red}{A}*\textcolor{red}D + \textcolor{red}{B}*\textcolor{red}C = \textcolor{red}E} $$
+    $$ \texttt{\textcolor{red}B = 0 or \textcolor{red}D = 0}  $$   
+
+    Goal:
+    $$\texttt{(\textcolor{red}{A} * \textcolor{red}{D}) = \textcolor{red}{E}  \text{ or } (\textcolor{red}{B} * \textcolor{red}{C}) = \textcolor{red}{E}}$$
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Step 3: Recursively Case on Zero Divisors and Simplify}
+
+    \parbox[t]{5cm}{
+    \centering
+    Case 1
+        $$ \texttt{\textcolor{red}{A} = 0}$$
+        $$ \texttt{\textcolor{red}{A}*\textcolor{red}D + \textcolor{red}{B}*\textcolor{red}C = \textcolor{red}E} $$
+        $$ \texttt{\textcolor{red}B = 0 or \textcolor{red}D = 0}  $$ }%
+    \hspace{1cm}%
+    \parbox[t]{5cm}{
+    \centering
+    Case 2
+        $$ \texttt{\textcolor{red}{C} = 0}$$
+        $$ \texttt{\textcolor{red}{A}*\textcolor{red}D + \textcolor{red}{B}*\textcolor{red}C = \textcolor{red}E} $$
+        $$ \texttt{\textcolor{red}B = 0 or \textcolor{red}D = 0}  $$ }%
+
+
+    Goal:
+    $$\texttt{(\textcolor{red}{A} * \textcolor{red}{D}) = \textcolor{red}{E}  \text{ or } (\textcolor{red}{B} * \textcolor{red}{C}) = \textcolor{red}{E}}$$
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Step 3: Recursively Case on Zero Divisors and Simplify}
+
+    \parbox[t]{5cm}{
+    \centering
+    Case 1
+        $$ \texttt{\textcolor{red}{A} = 0}$$
+        $$ \texttt{0*\textcolor{red}D + \textcolor{red}{B}*\textcolor{red}C = \textcolor{red}E} $$
+        $$ \texttt{\textcolor{red}B = 0 or \textcolor{red}D = 0}  $$ }%
+    \hspace{1cm}%
+    \parbox[t]{5cm}{
+    \centering
+    Case 2
+        $$ \texttt{\textcolor{red}{C} = 0}$$
+        $$ \texttt{\textcolor{red}{A}*\textcolor{red}D + \textcolor{red}{B}*0 = \textcolor{red}E} $$
+        $$ \texttt{\textcolor{red}B = 0 or \textcolor{red}D = 0}  $$ }%
+
+
+    Goal:
+    $$\texttt{(\textcolor{red}{A} * \textcolor{red}{D}) = \textcolor{red}{E}  \text{ or } (\textcolor{red}{B} * \textcolor{red}{C}) = \textcolor{red}{E}}$$
+
+\end{frame}
+
+\begin{frame}
+
+    \frametitle{Step 3: Recursively Case on Zero Divisors and Simplify}
+
+    \parbox[t]{5cm}{
+    \centering
+    Case 1
+        $$ \texttt{\textcolor{red}{A} = 0}$$
+        $$ \texttt{\textcolor{red}{B} * \textcolor{red}C = \textcolor{red}E} $$
+        $$ \texttt{\textcolor{red}B = 0 or \textcolor{red}D = 0}  $$ }%
+    \hspace{1cm}%
+    \parbox[t]{5cm}{
+    \centering
+    Case 2
+        $$ \texttt{\textcolor{red}{C} = 0}$$
+        $$ \texttt{\textcolor{red}{A} * \textcolor{red}D = \textcolor{red}E} $$
+        $$ \texttt{\textcolor{red}B = 0 or \textcolor{red}D = 0}  $$ }%
+
+
+    Goal:
+    $$\texttt{(\textcolor{red}{A} * \textcolor{red}{D}) = \textcolor{red}{E}  \text{ or } (\textcolor{red}{B} * \textcolor{red}{C}) = \textcolor{red}{E}}$$
+
+\end{frame}
+
+\begin{frame}
+
+    \frametitle{Step 3: Recursively Case on Zero Divisors and Simplify}
+
+    \parbox[t]{5cm}{
+    \centering
+    Case 1
+        $$ \texttt{\textcolor{red}{A} = 0}$$
+        $$ \texttt{\textcolor{blue}{{B} * C = E}} $$
+        $$ \texttt{\textcolor{red}B = 0 or \textcolor{red}D = 0}  $$ }%
+    \hspace{1cm}%
+    \parbox[t]{5cm}{
+    \centering
+    Case 2
+        $$ \texttt{\textcolor{red}{C} = 0}$$
+        $$ \texttt{\textcolor{green}{{A} * D = E}} $$
+        $$ \texttt{\textcolor{red}B = 0 or \textcolor{red}D = 0}  $$ }%
+
+
+    Goal:
+    $$\texttt{\textcolor{green}{({A} * {D}) = {E}}  \text{ or } \textcolor{blue}{({B} * {C}) = {E}}}$$
+    \begin{center}
+        \includegraphics[width=0.2\textwidth]{partypopper.png}        
+    \end{center}
+
+\end{frame}
+
+\begin{frame}
+
+    \frametitle{(Sometimes needed) Step 4: Cleanup}
+
+    \begin{itemize}
+        \item In real SNARKs there are sums over polynomials, but these can generally be treated as atoms.
+        \item SNARKs are based on pairings so the preceding polynomials usually have degree 2.
+        \item The preceding steps generally close most goals - by design zeros keep popping up.
+        \item ... But usually there are a few critical cases that need to be solved by hand (4 in the case of Groth '16).
+    \end{itemize}
+
+\end{frame}
+
+\begin{frame}
+
+    \frametitle{Performance}
+
+    TODO create a table of the performance of different steps for different SNARKs 
+
+\end{frame}
+
+\end{document} 
