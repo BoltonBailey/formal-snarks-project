@@ -5,12 +5,7 @@ import data.mv_polynomial.basic
 import data.polynomial.field_division
 import algebra.polynomial.big_operators
 import ...attributes
--- import .general_lemmas.polynomial_mv_sv_cast
--- import .general_lemmas.mv_divisability
--- import .general_lemmas.single_antidiagonal
--- import .general_lemmas.polynomial_smul_eq_C_mul
 import .vars
--- import tactic.wlog
 
 /-!
 # Knowledge Soundness
