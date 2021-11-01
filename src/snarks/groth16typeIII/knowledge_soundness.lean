@@ -243,7 +243,7 @@ lemma modification_equivalence (a_stmt : fin n_stmt → F ) :
   verified a_stmt -> verified' a_stmt
 :=
 begin
-  -- Apply functional extensionality to *both* sides.
+  -- Apply functional extensionality
   -- TODO different now that we switch to mv_poly vars (poly F)
   rw verified,
   rw verified',

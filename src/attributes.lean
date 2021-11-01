@@ -88,11 +88,11 @@ attribute [polynomial_nf_3] C_mul_C
 attribute [polynomial_nf_3] finset.sum_hom
 attribute [polynomial_nf_3] mv_polynomial.smul_eq_C_mul
 attribute [polynomial_nf_3] mul_assoc
-attribute [polynomial_nf_3] finsupp.smul_sum
-attribute [polynomial_nf_3] mul_smul_comm
-attribute [polynomial_nf_3] smul_add
-attribute [polynomial_nf_3] mul_smul
-attribute [polynomial_nf_3] smul_mul_assoc
+-- attribute [polynomial_nf_3] finsupp.smul_sum
+-- attribute [polynomial_nf_3] mul_smul_comm
+-- attribute [polynomial_nf_3] smul_add
+-- attribute [polynomial_nf_3] mul_smul
+-- attribute [polynomial_nf_3] smul_mul_assoc
 
 
 run_cmd mk_simp_attr `rearrange
