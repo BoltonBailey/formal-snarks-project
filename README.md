@@ -1,5 +1,5 @@
 
-# Formal Baby Snark
+# Formalization of SNARKs
 
 This repository implements a formal verification of a variety of SNARK proof systems, using the [Lean Theorem Prover](https://leanprover.github.io/), in the Algebraic Group Model. This is a work in progress.
 
