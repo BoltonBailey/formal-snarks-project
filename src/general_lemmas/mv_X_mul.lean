@@ -101,6 +101,25 @@ begin
   exact finset.sum_hom r C,
 end
 
+-- TODO add to mathlib
+instance (s : σ →₀ ℕ) : is_add_monoid_hom (@monomial R σ _ s) := 
+{
+  map_add := begin
+    intros x y,
+    exact monomial_add.symm,
+  end,
+  map_zero := monomial_zero,
+}
+
+lemma sum_monomial_hom {α : Type u} {r : finset α} {f : α -> R}  (s : σ →₀ ℕ) : 
+  ((∑ x in r, monomial s (f x)) : mv_polynomial σ R) = monomial s (∑ x in r, f x)
+:= 
+begin
+  exact finset.sum_hom r (monomial s),
+end
+
+
+
 lemma extract_mul_from_sum {α : Type u} {r : finset α} {f : α -> mv_polynomial σ R} (p : mv_polynomial σ R) : 
   (∑ x in r, p * f x) = p * (∑ x in r, f x)
 := 
