@@ -523,23 +523,6 @@ lemma A_α_mul (p : polynomial F) : p * polynomial.C A_α  = polynomial.C A_α *
 
 lemma B_β_mul (p : polynomial F) : p * polynomial.C B_β  = polynomial.C B_β * p := by ring
 
-example (h1122 : polynomial.C A_α * polynomial.C B_β = 1) : (∑ (i : fin n_var) in finset.fin_range n_var, polynomial.X ^ (i : nat) * polynomial.C (A_x i)) *
-        polynomial.C B_β *
-      (polynomial.C A_α *
-         ∑ (i : fin n_var) in finset.fin_range n_var, polynomial.X ^ (i : nat) * polynomial.C (B_x i)) =
-    (∑ (i : fin n_var) in finset.fin_range n_var, polynomial.X ^ (i : nat) * polynomial.C (A_x i)) *
-      ∑ (i : fin n_var) in finset.fin_range n_var, polynomial.X ^ (i : nat) * polynomial.C (B_x i) :=
-begin
-  simp only [B_β_mul],
-  simp only [<-mul_assoc],
-  simp only [A_α_mul],
-  simp only [<-mul_assoc],
-  -- simp only [B_β_mul, <-mul_assoc], -- TODO why does this cause a hang, but the previous two are fine? Make a mwe
-  rw h1122,
-  ring,
-
-end
-
 -- TODO Add to Mathlib next to C_eq_zero
 @[simp] lemma polynomial.C_eq_one (a : F) : polynomial.C a = 1 ↔ a = 1 :=
 calc polynomial.C a = 1 ↔ polynomial.C a = polynomial.C 1 : by rw polynomial.C_1
@@ -667,30 +650,28 @@ begin
 
 
   simp only [*] with integral_domain_simp at *,
-  tactic.integral_domain_tactic_3,
-  { -- simp only [mul_comm] at h0022,
-    rw [<-h1022, <-h0122, <-h0022],
+  tactic.integral_domain_tactic_4,
+  -- done,
+  { rw [<-h1022, <-h0122, <-h0022],
     simp only [B_β_mul],
     simp only [<-mul_assoc],
     simp only [A_α_mul],
     simp only [<-mul_assoc],
     rw h1122,
     ring, },
-  { -- simp only [mul_comm] at h0022,
-    rw [h1022, <-h0122, h0022],
-    ring, },
-  { -- simp only [mul_comm] at h0022,
-    rw [<-h1022, <-h0122, <-h0022],
-    simp only [B_β_mul],
-    simp only [<-mul_assoc],
-    simp only [A_α_mul],
-    simp only [<-mul_assoc],
-    rw h1122,
-    ring, },
-  { -- simp only [mul_comm] at h0022,
-    rw [h1022, <-h0122, h0022],
-    ring, }, 
   done,
+  -- { rw [h1022, <-h0122, h0022],
+  --   ring, },
+  -- { rw [<-h1022, <-h0122, <-h0022],
+  --   simp only [B_β_mul],
+  --   simp only [<-mul_assoc],
+  --   simp only [A_α_mul],
+  --   simp only [<-mul_assoc],
+  --   rw h1122,
+  --   ring, },
+  -- { rw [h1022, <-h0122, h0022],
+  --   ring, }, 
+  -- done,
 
 
 
