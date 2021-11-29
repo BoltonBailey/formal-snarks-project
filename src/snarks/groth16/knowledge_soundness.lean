@@ -1626,6 +1626,9 @@ def p_C_x := ∑ (i : fin n_var) in finset.fin_range n_var, polynomial.X ^ (i : 
 calc polynomial.C a = 1 ↔ polynomial.C a = polynomial.C 1 : by rw polynomial.C_1
          ... ↔ a = 1 : polynomial.C_inj
 
+lemma A_α_mul (p : polynomial F) : p * polynomial.C A_α  = polynomial.C A_α * p := by ring
+
+lemma B_β_mul (p : polynomial F) : p * polynomial.C B_β  = polynomial.C B_β * p := by ring
 
 lemma simplifier1 (x : fin n_stmt) (a_stmt : fin n_stmt → F ) 
   : polynomial.C (a_stmt x) * u_stmt x = u_stmt x * polynomial.C (a_stmt x)
@@ -1689,327 +1692,185 @@ begin
     exact monic_t,
     done,
   },
-  -- TODO suffices to satisfy
+
   have eqn' := modification_equivalence a_stmt (eqn),
-  -- rw verified' at eqn,
-  -- rw [A', B', C'] at eqn,
-  -- simp only [<-finset.mul_sum] with crs polynomial_nf_2 at eqn,
 
-
-  have h0002 := coeff0002 a_stmt eqn',
-  have h0011 := coeff0011 a_stmt eqn',
-  have h0012 := coeff0012 a_stmt eqn',
-  have h0013 := coeff0013 a_stmt eqn',
-  have h0020 := coeff0020 a_stmt eqn',
-  have h0021 := coeff0021 a_stmt eqn',
-  have h0022 := coeff0022 a_stmt eqn',
-  have h0023 := coeff0023 a_stmt eqn',
-  have h0024 := coeff0024 a_stmt eqn',
-  have h0031 := coeff0031 a_stmt eqn',
-  have h0032 := coeff0032 a_stmt eqn',
-  -- have h0033 := coeff0033 a_stmt eqn', -- definitely useless
-  -- have h0042 := coeff0042 a_stmt eqn', -- definitely useless
-  have h0102 := coeff0102 a_stmt eqn',
-  have h0111 := coeff0111 a_stmt eqn',
-  have h0112 := coeff0112 a_stmt eqn',
-  have h0113 := coeff0113 a_stmt eqn',
-  have h0120 := coeff0120 a_stmt eqn',
-  have h0121 := coeff0121 a_stmt eqn',
-  have h0122 := coeff0122 a_stmt eqn',
-  have h0123 := coeff0123 a_stmt eqn',
-  have h0131 := coeff0131 a_stmt eqn',
-  -- have h0132 := coeff0132 a_stmt eqn', -- definitely useless
-  have h0202 := coeff0202 a_stmt eqn',
-  have h0211 := coeff0211 a_stmt eqn',
-  have h0212 := coeff0212 a_stmt eqn',
-  have h0220 := coeff0220 a_stmt eqn',
-  have h0221 := coeff0221 a_stmt eqn',
+  -- Do these first
   have h0222 := coeff0222 a_stmt eqn',
-  have h1002 := coeff1002 a_stmt eqn',
-  have h1011 := coeff1011 a_stmt eqn',
-  have h1012 := coeff1012 a_stmt eqn',
-  have h1013 := coeff1013 a_stmt eqn',
-  have h1020 := coeff1020 a_stmt eqn',
-  have h1021 := coeff1021 a_stmt eqn',
-  have h1022 := coeff1022 a_stmt eqn',
-  have h1023 := coeff1023 a_stmt eqn',
-  have h1031 := coeff1031 a_stmt eqn',
-  -- have h1032 := coeff1032 a_stmt eqn', -- definitely useless
-  have h1102 := coeff1102 a_stmt eqn',
-  have h1111 := coeff1111 a_stmt eqn',
-  have h1112 := coeff1112 a_stmt eqn',
-  have h1120 := coeff1120 a_stmt eqn',
-  have h1121 := coeff1121 a_stmt eqn',
   have h1122 := coeff1122 a_stmt eqn',
-  have h2002 := coeff2002 a_stmt eqn',
-  have h2011 := coeff2011 a_stmt eqn',
-  have h2012 := coeff2012 a_stmt eqn',
-  have h2020 := coeff2020 a_stmt eqn',
-  have h2021 := coeff2021 a_stmt eqn',
-  have h2022 := coeff2022 a_stmt eqn',
-  
-  -- clear h0033 h1032 h0132 h0042, -- Clear some statements about C_ values that give no info
+  have h2022 := coeff2022 a_stmt eqn', 
+
+  cases h0222, 
+
+  {
+
+    have h0002 := coeff0002 a_stmt eqn',
+    have h0011 := coeff0011 a_stmt eqn',
+    have h0012 := coeff0012 a_stmt eqn',
+    have h0013 := coeff0013 a_stmt eqn',
+    have h0020 := coeff0020 a_stmt eqn',
+    have h0021 := coeff0021 a_stmt eqn',
+    have h0022 := coeff0022 a_stmt eqn',
+    have h0023 := coeff0023 a_stmt eqn',
+    have h0024 := coeff0024 a_stmt eqn',
+    -- have h0031 := coeff0031 a_stmt eqn', --trying, might still need
+    -- have h0032 := coeff0032 a_stmt eqn', -- trying
+    -- have h0033 := coeff0033 a_stmt eqn', -- definitely useless
+    -- have h0042 := coeff0042 a_stmt eqn', -- definitely useless
+    have h0102 := coeff0102 a_stmt eqn',
+    have h0111 := coeff0111 a_stmt eqn',
+    have h0112 := coeff0112 a_stmt eqn',
+    -- have h0113 := coeff0113 a_stmt eqn', -- Maybe useless?
+    have h0120 := coeff0120 a_stmt eqn',
+    have h0121 := coeff0121 a_stmt eqn',
+    have h0122 := coeff0122 a_stmt eqn',
+    have h0123 := coeff0123 a_stmt eqn',
+    -- have h0131 := coeff0131 a_stmt eqn', -- Maybe useless?
+    -- have h0132 := coeff0132 a_stmt eqn', -- definitely useless
+    have h0202 := coeff0202 a_stmt eqn',
+    have h0211 := coeff0211 a_stmt eqn',
+    have h0212 := coeff0212 a_stmt eqn',
+    -- have h0220 := coeff0220 a_stmt eqn', -- Maybe useless?
+    have h0221 := coeff0221 a_stmt eqn',
+    -- have h0222 := coeff0222 a_stmt eqn',
+    have h1002 := coeff1002 a_stmt eqn',
+    have h1011 := coeff1011 a_stmt eqn',
+    have h1012 := coeff1012 a_stmt eqn',
+    -- have h1013 := coeff1013 a_stmt eqn', -- Maybe useless?
+    have h1020 := coeff1020 a_stmt eqn',
+    have h1021 := coeff1021 a_stmt eqn',
+    have h1022 := coeff1022 a_stmt eqn',
+    have h1023 := coeff1023 a_stmt eqn',
+    -- have h1031 := coeff1031 a_stmt eqn', -- Maybe useless?
+    -- have h1032 := coeff1032 a_stmt eqn', -- definitely useless
+    have h1102 := coeff1102 a_stmt eqn',
+    have h1111 := coeff1111 a_stmt eqn',
+    have h1112 := coeff1112 a_stmt eqn',
+    have h1120 := coeff1120 a_stmt eqn',
+    have h1121 := coeff1121 a_stmt eqn',
+    -- have h1122 := coeff1122 a_stmt eqn',
+    -- have h2002 := coeff2002 a_stmt eqn', -- Maybe useless?
+    have h2011 := coeff2011 a_stmt eqn',
+    have h2012 := coeff2012 a_stmt eqn',
+    -- have h2020 := coeff2020 a_stmt eqn', -- Maybe useless?
+    have h2021 := coeff2021 a_stmt eqn',
+    -- have h2022 := coeff2022 a_stmt eqn',
+    
+    -- clear h0033 h1032 h0132 h0042, -- Clear some statements about C_ values that give no info
 
 
-  clear eqn eqn',
-  -- done,
+    clear eqn eqn',
+    -- done,
 
 
-  -- simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at *,
-  -- simp at *,
-  -- my_fail_tactic,
-  trace "Moving Cs right",
-  simp only [simplifier1, simplifier2] at *,
+    -- simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at *,
+    -- simp at *,
+    -- my_fail_tactic,
+    trace "Moving Cs right",
+    simp only [simplifier1, simplifier2] at *,
 
-  trace "Grouping distributivity",
-  simp only [<-mul_add, <-add_mul, <-add_assoc, add_mul_distrib, add_mul_distrib'] at *,
+    trace "Grouping distributivity",
+    simp only [<-mul_add, <-add_mul, <-add_assoc, add_mul_distrib, add_mul_distrib'] at *,
 
-  trace "main simplification",
-  
-  -- rw <-p_w_wit_A_m at *,
+    trace "main simplification",
+    
+    tactic.integral_domain_tactic_v4,
 
-  -- rw <-p_u_stmt_A_l at *,
-  -- rw <-p_v_stmt_A_l at *,
-  -- rw <-p_w_stmt_A_l at *,
-  -- rw <-p_u_stmt_B_l at *,
-  -- rw <-p_v_stmt_B_l at *,
-  -- rw <-p_w_stmt_B_l at *,
-  -- rw <-p_u_stmt_C_l at *,
-  -- rw <-p_v_stmt_C_l at *,
-  -- rw <-p_w_stmt_C_l at *,
-  -- rw <-p_u_wit_A_m at *,
-  -- rw <-p_v_wit_A_m at *,
-  -- rw <-p_w_wit_A_m at *,
-  -- rw <-p_u_wit_B_m at *,
-  -- rw <-p_v_wit_B_m at *,
-  -- rw <-p_w_wit_B_m at *,
-  -- rw <-p_u_wit_C_m at *,
-  -- rw <-p_v_wit_C_m at *,
-  -- rw <-p_w_wit_C_m at *,
-  -- rw <-p_t_A_h at *,
-  -- rw <-p_t_B_h at *,
-  -- rw <-p_t_C_h at *,
-  -- rw <-p_A_x at *,
-  -- rw <-p_B_x at *,
-  -- rw <-p_C_x at *,
+    repeat { 
+      rw [<-h1022, <-h0122, <-h0022],
+      simp only [B_β_mul],
+      simp only [<-mul_assoc],
+      simp only [A_α_mul],
+      simp only [<-mul_assoc],
+      rw h1122,
+      ring,
+    }
+  },
+  {
 
-
-
-  cases_type or,
-    {
-      sorry,
-    },
-    {
-      -- simp * at *,
-      -- cases_matching* [_ ∨ _],
-      -- repeat { simp * at * },
-      -- cases h0222,
-      --   {
-      --     simp * at *,
-      --     cases h1023,
-      --     {
-      --       simp * at *,
-      --     },
-      --     {
-      --       simp * at *,
-      --     }
-      --   },
-      --   {
-      --     sorry,
-      --   },
-
-      -- squeeze_simp [B_α_zero] at h1122,
-      -- rw <-polynomial.C_mul at h1122, -- add this, <-C_add,  C_eq_one, C_eq_zero to a simplifier
-      -- rw polynomial.C_eq_one at h1122,
-
-      have val_ne_zero := ne_zero_of_eq_one h1122,
-
-
-      -- have val1_ne_zero := left_ne_zero_of_mul (ne_zero_of_eq_one h1122),
-      -- have val2_ne_zero := right_ne_zero_of_mul (ne_zero_of_eq_one h1122),
-
-      -- have A_β_zero := or.resolve_right h0222 B_β_ne_zero,
-
-      -- clear h0222,
-      
-      -- -- simp [B_α_zero] at h2012,
-      -- simp only [*] with integral_domain_simp at *,
-      -- cases_matching* true,
-      -- simp [B_α_zero, A_β_zero, B_β_ne_zero, A_α_ne_zero] at *,
-      -- clear B_α_zero A_β_zero B_β_ne_zero A_α_ne_zero,
-      -- -- TODO these come up later. FInd a way to make them not simplify themselves.
-
-      -- have A_γ_zero := h0123,
-      -- have B_γ_zero := h1023,
-
-      -- simp [A_γ_zero, B_γ_zero] at *,
-      -- clear A_γ_zero B_γ_zero,
+    have h0002 := coeff0002 a_stmt eqn',
+    have h0011 := coeff0011 a_stmt eqn',
+    have h0012 := coeff0012 a_stmt eqn',
+    have h0013 := coeff0013 a_stmt eqn',
+    have h0020 := coeff0020 a_stmt eqn',
+    have h0021 := coeff0021 a_stmt eqn',
+    have h0022 := coeff0022 a_stmt eqn',
+    have h0023 := coeff0023 a_stmt eqn',
+    have h0024 := coeff0024 a_stmt eqn',
+    -- have h0031 := coeff0031 a_stmt eqn',-- trying ocmmenting this, semms unneeded
+    -- have h0032 := coeff0032 a_stmt eqn', -- trying ocmmenting this, semms unneeded
+    -- have h0033 := coeff0033 a_stmt eqn', -- definitely useless
+    -- have h0042 := coeff0042 a_stmt eqn', -- definitely useless
+    have h0102 := coeff0102 a_stmt eqn',
+    have h0111 := coeff0111 a_stmt eqn',
+    have h0112 := coeff0112 a_stmt eqn',
+    -- have h0113 := coeff0113 a_stmt eqn', -- Maybe useless?
+    have h0120 := coeff0120 a_stmt eqn',
+    have h0121 := coeff0121 a_stmt eqn',
+    have h0122 := coeff0122 a_stmt eqn',
+    have h0123 := coeff0123 a_stmt eqn',
+    -- have h0131 := coeff0131 a_stmt eqn', -- Maybe useless?
+    -- have h0132 := coeff0132 a_stmt eqn', -- definitely useless
+    -- have h0202 := coeff0202 a_stmt eqn', -- Switched from former
+    have h0211 := coeff0211 a_stmt eqn',
+    have h0212 := coeff0212 a_stmt eqn',
+    -- have h0220 := coeff0220 a_stmt eqn', -- Maybe useless?
+    have h0221 := coeff0221 a_stmt eqn',
+    -- have h0222 := coeff0222 a_stmt eqn',
+    have h1002 := coeff1002 a_stmt eqn',
+    have h1011 := coeff1011 a_stmt eqn',
+    have h1012 := coeff1012 a_stmt eqn',
+    -- have h1013 := coeff1013 a_stmt eqn', -- Maybe useless?
+    have h1020 := coeff1020 a_stmt eqn',
+    have h1021 := coeff1021 a_stmt eqn',
+    have h1022 := coeff1022 a_stmt eqn',
+    have h1023 := coeff1023 a_stmt eqn',
+    -- have h1031 := coeff1031 a_stmt eqn', -- Maybe useless?
+    -- have h1032 := coeff1032 a_stmt eqn', -- definitely useless
+    have h1102 := coeff1102 a_stmt eqn',
+    have h1111 := coeff1111 a_stmt eqn',
+    have h1112 := coeff1112 a_stmt eqn',
+    have h1120 := coeff1120 a_stmt eqn',
+    have h1121 := coeff1121 a_stmt eqn',
+    -- have h1122 := coeff1122 a_stmt eqn',
+    have h2002 := coeff2002 a_stmt eqn', -- Switched from former
+    have h2011 := coeff2011 a_stmt eqn',
+    have h2012 := coeff2012 a_stmt eqn',
+    -- have h2020 := coeff2020 a_stmt eqn', -- Maybe useless?
+    have h2021 := coeff2021 a_stmt eqn',
+    -- have h2022 := coeff2022 a_stmt eqn',
+    
+    -- clear h0033 h1032 h0132 h0042, -- Clear some statements about C_ values that give no info
 
 
-      -- simp [h2012, h2021, h0212, h0221] at *,
-
-      cases_type or,
-      {
-        simp only [*] with integral_domain_simp at *,
-        cases_type or,
-        {
-          simp only [*] with integral_domain_simp at *,
-          cases_type or,
-          {
-            sorry,
-          },
-          {
-            simp only [*] with integral_domain_simp at *,
-            cases_type or,
-            {
-              sorry,
-            },
-            {
-              
-
-              -- -- <<< This runs for >10 hours and doesn't terminate
-              -- repeat { simp only [*] with integral_domain_simp at *, 
-              --           done <|> cases_type or, },
-
-              -- repeat {integral_domain_tactic_one_iter,},
-              -- repeat { simp only [*, rearrange_001, rearrange_002] with integral_domain_simp at *,
-              --         simp only [h1022, h0122, mul_assoc, rearrange_constants_right_hard, h1122],
-              --         simp only [*, add_mul_distrib] at *,
-              --         simp only [*, rearrange_001, rearrange_002] with integral_domain_simp at *,
-              --         simp only [sub_eq_iff_eq_add', <-add_assoc, <-h0022],
-              --         ring,},
-              -- -- >>>
-
-              simp only [*] with integral_domain_simp at *,
-              cases_type or,
-              {
-                sorry,
-              },
-              {
+    clear eqn eqn',
+    -- done,
 
 
+    -- simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at *,
+    -- simp at *,
+    -- my_fail_tactic,
+    trace "Moving Cs right",
+    simp only [simplifier1, simplifier2] at *,
 
+    trace "Grouping distributivity",
+    simp only [<-mul_add, <-add_mul, <-add_assoc, add_mul_distrib, add_mul_distrib'] at *,
 
+    trace "main simplification",
+    
+    tactic.integral_domain_tactic_v4,
 
-                simp only [*] with integral_domain_simp at *,
-                cases_type or,
-                {
-                  sorry,
-                },
-                {
-                  simp only [*] with integral_domain_simp at *,
-                  cases_type or,
-                  {
-                    simp only [*] with integral_domain_simp at *,
-                    cases_type or,
-                    {
-                      simp only [*] with integral_domain_simp at *,
-                      cases_type or,
-                      {
+    -- repeat { 
+    --   rw [<-h1022, <-h0122, <-h0022],
+    --   simp only [B_β_mul],
+    --   simp only [<-mul_assoc],
+    --   simp only [A_α_mul],
+    --   simp only [<-mul_assoc],
+    --   rw h1122,
+    --   ring,
+    -- }
+  },
 
-                        simp only [*] with integral_domain_simp at *,
-
-                        -- dnf in >7min
-                        -- tactic.integral_domain_tactic,
-
-                        -- done in ~2min, leaves 5 goals
-                        -- iterate {
-                        --   trace "iteration",
-                        --   fail_if_success { done },
-                        --   try {simp only [] with integral_domain_simp at *}, 
-                        --   try {clear found_zero}, -- clear "found_zero" if present
-                        --   done <|> id {cases ‹_ ∨ _› with found_zero found_zero; rw found_zero at *}, },
-
-
-                        -- done in ~2min, leaves 5 goals
-                        -- iterate {
-                        --   trace "iteration",
-                        --   fail_if_success { done },
-                        --   try {simp only [] with integral_domain_simp at *}, 
-                        --   try {clear found_zero}, -- clear "found_zero" if present
-                        --   done <|> id {cases ‹_ ∨ _› with found_zero found_zero; simp only [found_zero] at *}, },
-
-                        -- done in 70 min with 8 goals
-                        tactic.integral_domain_tactic_v4,
-
-                      },
-                      {
-                        sorry,
-                      },
-                    },
-                    {
-                      sorry,
-                    },
-                  },
-                  {
-                    sorry,
-                    -- simp only [*] with integral_domain_simp at *,
-
-
-
-                  },
-
-                -- Finishes everything in ~30 min
-                -- repeat { simp only [*] with integral_domain_simp at *, 
-                --           done <|> cases_type or, },
-
-                -- repeat {integral_domain_tactic_one_iter,},
-                -- repeat { simp only [*, rearrange_001, rearrange_002] with integral_domain_simp at *,
-                --         simp only [h1022, h0122, mul_assoc, rearrange_constants_right_hard, h1122],
-                --         simp only [*, add_mul_distrib] at *,
-                --         simp only [*, rearrange_001, rearrange_002] with integral_domain_simp at *,
-                --         simp only [sub_eq_iff_eq_add', <-add_assoc, <-h0022],
-                --         ring,},
-                },
-              },
-            },
-            -- simp only [*] with integral_domain_simp at *,
-            -- rw <-mul_add at h1012,
-            -- rw <-add_mul at h0112,
-            -- -- rw coeff0022reformat at h0022,
-            -- -- simp only [rearrange_constants_right_hard] at h1022,
-            -- -- simp only [rearrange_constants_right_hard] at h0122,
-            -- -- have h1022s := h1022.symm, 
-            -- -- have h0122s := h0122.symm, 
-            -- -- clear h0122 h1022,
-
-            -- simp * at *,
-            -- rw mul_assoc,
-            -- rw mul_comm (polynomial.C B_β),
-            -- rw mul_assoc,
-            -- rw <-polynomial.C_mul,
-            -- simp [h1122],
-            -- simp only [rearrange_constants_right_hard] at h0022,
-            -- rw h0022,
-            -- ring,
-            -- done,
-
-          },
-        },
-        {
-          sorry,
-        },
-      },
-      {
-        sorry,
-      },
-
-
-      -- TODO simp things at other things, as they become val = 0
-
-      -- TODO
-      -- rw mul_eq_zero at h???? for h???? of form x * y = 0, (start with 0002?)
-      -- do by_cases 
-      -- simplify at * using what you get
-      -- repeat
-      
-
-      -- simp [A_β_zero] at h0212,
-      -- simp [B_α_zero, A_β_zero] at h1012,
-      -- simp [B_α_zero, A_β_zero] at h0112,
-
-        
-    },
 
 
 end 

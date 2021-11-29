@@ -1,6 +1,6 @@
 import data.finsupp.basic
 
-section
+namespace groth16
 
 
 /-- An inductive type from which to index the variables of the mv_polynomials the proof manages -/
@@ -61,4 +61,4 @@ begin
   -- induction,
 end
 
-end
+end groth16

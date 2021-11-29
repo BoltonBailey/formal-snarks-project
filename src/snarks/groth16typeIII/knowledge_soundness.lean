@@ -6,6 +6,7 @@ import ...attributes
 import ...integral_domain_tactic
 import ...general_lemmas.polynomial_degree
 import data.mv_polynomial.basic
+import data.mv_polynomial.funext
 import data.polynomial.field_division
 import algebra.polynomial.big_operators
 -- import ...attributes
@@ -24,7 +25,7 @@ open_locale big_operators classical
 
 section groth16
 
-open mv_polynomial vars
+open mv_polynomial groth16
 
 noncomputable theory
 
@@ -77,32 +78,32 @@ These funtions are actually multivariate Laurent polynomials of the toxic waste 
 but we represent them here as functions on assignments of the variables to values.
 -/
 @[crs]
-def crs_α  (f : vars → F) (x : F) : F := f vars.α
+def crs_α  (f : groth16.vars → F) : polynomial F := polynomial.C (f vars.α)
 @[crs]
-def crs_β (f : vars → F) (x : F) : F := f vars.β
+def crs_β (f : groth16.vars → F) : polynomial F := polynomial.C (f vars.β)
 @[crs]
-def crs_γ (f : vars → F) (x : F) : F := f vars.γ
+def crs_γ (f : groth16.vars → F) : polynomial F := polynomial.C (f vars.γ)
 @[crs]
-def crs_δ (f : vars → F) (x : F) : F := f vars.δ
+def crs_δ (f : groth16.vars → F) : polynomial F := polynomial.C (f vars.δ)
 @[crs]
-def crs_powers_of_x (i : fin n_var) (f : vars → F) (x : F) : F := (x)^(i : ℕ)
+def crs_powers_of_x (i : fin n_var) (f : groth16.vars → F) : polynomial F := ((polynomial.X)^(i : ℕ))
 @[crs]
-def crs_l (i : fin n_stmt) (f : vars → F) (x : F) : F := 
-((f vars.β / f vars.γ) * (u_stmt i).eval (x)
+def crs_l (i : fin n_stmt) (f : groth16.vars → F) : polynomial F := 
+polynomial.C (1 / f vars.γ) * (polynomial.C (f vars.β / f vars.γ) * u_stmt i
 +
-(f vars.α / f vars.γ) * (v_stmt i).eval (x)
+polynomial.C  (f vars.α / f vars.γ) * v_stmt i
 +
-(w_stmt i).eval (x)) / f vars.γ
+(w_stmt i)) 
 @[crs]
-def crs_m (i : fin n_wit) (f : vars → F) (x : F) : F := 
-((f vars.β / f vars.δ) * (u_wit i).eval (x)
+def crs_m (i : fin n_wit) (f : groth16.vars → F) : polynomial F := 
+polynomial.C (1 / f vars.δ) * (polynomial.C  (f vars.β / f vars.δ) * (u_wit i)
 +
-(f vars.α / f vars.δ) * (v_wit i).eval (x)
+polynomial.C  (f vars.α / f vars.δ) * (v_wit i)
 +
-(w_wit i).eval (x)) / f vars.δ
+(w_wit i)) 
 @[crs]
-def crs_n (i : fin (n_var - 1)) (f : vars → F) (x : F) : F := 
-(x)^(i : ℕ) * t.eval (x) / f vars.δ
+def crs_n (i : fin (n_var - 1)) (f : groth16.vars → F) : polynomial F := 
+(polynomial.X)^(i : ℕ) * t * polynomial.C (1 / f vars.δ)
 
 /-- The coefficients of the CRS elements in the algebraic adversary's representation -/
 parameters {A_α A_β A_γ A_δ B_α B_β B_γ B_δ C_α C_β C_γ C_δ  : F}
@@ -113,44 +114,44 @@ parameters {A_h B_h C_h : fin (n_var-1) → F}
 
 
 /-- Polynomial forms of the adversary's proof representation -/
-def A (f : vars → F) (x : F) : F := 
-  A_α * crs_α f x
+def A (f : groth16.vars → F) : polynomial F := 
+  polynomial.C A_α * (crs_α f)
   +
-  A_β * crs_β f x
+  polynomial.C A_β * (crs_β f)
   +
-  A_δ * crs_δ f x
+  polynomial.C A_δ * crs_δ f
   +
-  ∑ i in (finset.fin_range n_var), (A_x i) * (crs_powers_of_x i f x)
+  ∑ i in (finset.fin_range n_var), polynomial.C (A_x i) * (crs_powers_of_x i f)
   +
-  ∑ i in (finset.fin_range n_stmt), (A_l i) * (crs_l i f x)
+  ∑ i in (finset.fin_range n_stmt), polynomial.C (A_l i) * (crs_l i f)
   +
-  ∑ i in (finset.fin_range n_wit), (A_m i) * (crs_m i f x)
+  ∑ i in (finset.fin_range n_wit), polynomial.C (A_m i) * (crs_m i f)
   +
-  ∑ i in (finset.fin_range (n_var-1)), (A_h i) * (crs_n i f x)
+  ∑ i in (finset.fin_range (n_var-1)), polynomial.C (A_h i) * (crs_n i f)
 
-def B (f : vars → F) (x : F) : F  := 
-  B_β * crs_β f x
+def B (f : groth16.vars → F) : polynomial F  := 
+  polynomial.C B_β * crs_β f
   + 
-  B_γ * crs_γ f x
+  polynomial.C B_γ * crs_γ f
   +
-  B_δ * crs_δ f x
+  polynomial.C B_δ * crs_δ f
   +
-  ∑ i in (finset.fin_range n_var), (B_x i) * (crs_powers_of_x i f x)
+  ∑ i in (finset.fin_range n_var), polynomial.C (B_x i) * (crs_powers_of_x i f)
 
-def C (f : vars → F) (x : F) : F  := 
-  C_α * crs_α f x
+def C (f : groth16.vars → F) : polynomial F  := 
+  polynomial.C C_α * crs_α f
   +
-  C_β * crs_β f x
+  polynomial.C C_β * crs_β f
   +
-  C_δ * crs_δ f x
+  polynomial.C C_δ * crs_δ f
   +
-  ∑ i in (finset.fin_range n_var), (C_x i) * (crs_powers_of_x i f x)
+  ∑ i in (finset.fin_range n_var), polynomial.C (C_x i) * (crs_powers_of_x i f)
   +
-  ∑ i in (finset.fin_range n_stmt), (C_l i) * (crs_l i f x)
+  ∑ i in (finset.fin_range n_stmt), polynomial.C (C_l i) * (crs_l i f)
   +
-  ∑ i in (finset.fin_range n_wit), (C_m i) * (crs_m i f x)
+  ∑ i in (finset.fin_range n_wit), polynomial.C (C_m i) * (crs_m i f)
   +
-  ∑ i in (finset.fin_range (n_var-1)), (C_h i) * (crs_n i f x)
+  ∑ i in (finset.fin_range (n_var-1)), polynomial.C (C_h i) * (crs_n i f)
 
 
 local notation `groth16polynomial` := mv_polynomial vars (polynomial F)
@@ -245,12 +246,26 @@ lemma modification_equivalence (a_stmt : fin n_stmt → F ) :
   verified a_stmt -> verified' a_stmt
 :=
 begin
-  -- Apply functional extensionality
-  -- TODO different now that we switch to mv_poly vars (poly F)
-  rw verified,
-  rw verified',
-  funext,
   sorry,
+  -- -- TODO different now that we switch to mv_poly vars (poly F)
+  -- rw verified,
+  -- rw verified',
+  -- intro h,
+  -- rw function.funext_iff at h,
+  -- -- Apply functional extensionality
+  -- simp [A, B, C] at h,
+
+  -- rw mv_polynomial.funext_iff,
+  -- intro vars_evaluation,
+  -- simp [A', B', C'] with crs,
+  -- -- apply polynomial.funext, -- TODO prove a version of this lemma for degree bounded polynomials on non infinite fields.
+  -- -- intro x_evaluation,
+  -- -- simp,
+  -- -- simp [A', B', C'],
+  -- -- simp with crs,
+
+  -- have h2 := h vars_evaluation,
+  -- done,
 
 end
 
@@ -271,7 +286,7 @@ begin
   -- done,
   -- simp only [] with polynomial_nf_3 at eqdn,
   -- simp only [mul_add, add_mul, finset.sum_add_distrib, C_mul_C, finset.sum_hom, mul_assoc, mul_sum_symm,rearrange_constants_right, rearrange_constants_right_with_extra, rearrange_sums_right, rearrange_sums_right_with_extra] at eqn,
-  have congr_coeff1122 := congr_arg (coeff (single α 1 + single β 1 + single δ 2 + single γ 2)) eqn,
+  have congr_coeff1122 := congr_arg (coeff (single vars.α 1 + single vars.β 1 + single vars.δ 2 + single vars.γ 2)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1122,
   simp only [] with finsupp_simp at congr_coeff1122,
@@ -289,7 +304,7 @@ begin
   -- simp only [] with polynomial_nf_3 at eqn,
   simp only [mv_polynomial.smul_eq_C_mul] at eqn,
   simp only [mv_polynomial.X, C_apply, mv_polynomial.monomial_mul, one_mul, mul_one, add_zero, zero_add, finset.sum_add_distrib, finset.sum_hom, mul_add, add_mul, sum_monomial_hom] at eqn,
-  have congr_coeff0222 := congr_arg (coeff (single α 0 + single β 2 + single δ 2 + single γ 2)) eqn,
+  have congr_coeff0222 := congr_arg (coeff (single vars.α 0 + single vars.β 2 + single vars.δ 2 + single vars.γ 2)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0222,
   simp only [] with finsupp_simp at  congr_coeff0222,
@@ -306,7 +321,7 @@ begin
   -- simp only [] with polynomial_nf_3 at eqn,
   simp only [mv_polynomial.smul_eq_C_mul] at eqn,
   simp only [mv_polynomial.X, C_apply, mv_polynomial.monomial_mul, one_mul, mul_one, add_zero, zero_add, finset.sum_add_distrib, finset.sum_hom, mul_add, add_mul, sum_monomial_hom] at eqn,
-  have congr_coeff1023 := congr_arg (coeff (single α 1 + single β 0 + single δ 2 + single γ 3)) eqn,
+  have congr_coeff1023 := congr_arg (coeff (single vars.α 1 + single vars.β 0 + single vars.δ 2 + single vars.γ 3)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1023,
   simp only [] with finsupp_simp at  congr_coeff1023,
@@ -323,7 +338,7 @@ begin
   -- simp only [] with polynomial_nf_3 at eqn,
   simp only [mv_polynomial.smul_eq_C_mul] at eqn,
   simp only [mv_polynomial.X, C_apply, mv_polynomial.monomial_mul, one_mul, mul_one, add_zero, zero_add, finset.sum_add_distrib, finset.sum_hom, mul_add, add_mul, sum_monomial_hom] at eqn,
-  have congr_coeff0212 := congr_arg (coeff (single α 0 + single β 2 + single δ 1 + single γ 2)) eqn,
+  have congr_coeff0212 := congr_arg (coeff (single vars.α 0 + single vars.β 2 + single vars.δ 1 + single vars.γ 2)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0212,
   simp only [] with finsupp_simp at  congr_coeff0212,
@@ -340,7 +355,7 @@ begin
   -- simp only [] with polynomial_nf_3 at eqn,
   simp only [mv_polynomial.smul_eq_C_mul] at eqn,
   simp only [mv_polynomial.X, C_apply, mv_polynomial.monomial_mul, one_mul, mul_one, add_zero, zero_add, finset.sum_add_distrib, finset.sum_hom, mul_add, add_mul, sum_monomial_hom] at eqn,
-  have congr_coeff1112 := congr_arg (coeff (single α 1 + single β 1 + single δ 1 + single γ 2)) eqn,
+  have congr_coeff1112 := congr_arg (coeff (single vars.α 1 + single vars.β 1 + single vars.δ 1 + single vars.γ 2)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1112,
   simp only [] with finsupp_simp at  congr_coeff1112,
@@ -364,7 +379,7 @@ begin
   -- simp only [] with polynomial_nf_3 at eqn,
   simp only [mv_polynomial.smul_eq_C_mul] at eqn,
   simp only [mv_polynomial.X, C_apply, mv_polynomial.monomial_mul, one_mul, mul_one, add_zero, zero_add, finset.sum_add_distrib, finset.sum_hom, mul_add, add_mul, sum_monomial_hom] at eqn,
-  have congr_coeff0112 := congr_arg (coeff (single α 0 + single β 1 + single δ 1 + single γ 2)) eqn,
+  have congr_coeff0112 := congr_arg (coeff (single vars.α 0 + single vars.β 1 + single vars.δ 1 + single vars.γ 2)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0112,
   simp only [] with finsupp_simp at  congr_coeff0112,
@@ -381,7 +396,7 @@ begin
   -- simp only [] with polynomial_nf_3 at eqn,
   simp only [mv_polynomial.smul_eq_C_mul] at eqn,
   simp only [mv_polynomial.X, C_apply, mv_polynomial.monomial_mul, one_mul, mul_one, add_zero, zero_add, finset.sum_add_distrib, finset.sum_hom, mul_add, add_mul, sum_monomial_hom] at eqn,
-  have congr_coeff0012 := congr_arg (coeff (single α 0 + single β 0 + single δ 1 + single γ 2)) eqn,
+  have congr_coeff0012 := congr_arg (coeff (single vars.α 0 + single vars.β 0 + single vars.δ 1 + single vars.γ 2)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0012,
   simp only [] with finsupp_simp at  congr_coeff0012,
@@ -399,7 +414,7 @@ begin
   -- simp only [] with polynomial_nf_3 at eqn,
   simp only [mv_polynomial.smul_eq_C_mul] at eqn,
   simp only [mv_polynomial.X, C_apply, mv_polynomial.monomial_mul, one_mul, mul_one, add_zero, zero_add, finset.sum_add_distrib, finset.sum_hom, mul_add, add_mul, sum_monomial_hom] at eqn,
-  have congr_coeff0221 := congr_arg (coeff (single α 0 + single β 2 + single δ 2 + single γ 1)) eqn,
+  have congr_coeff0221 := congr_arg (coeff (single vars.α 0 + single vars.β 2 + single vars.δ 2 + single vars.γ 1)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0221,
   simp only [] with finsupp_simp at  congr_coeff0221,
@@ -417,7 +432,7 @@ begin
   -- simp only [] with polynomial_nf_3 at eqn,
   simp only [mv_polynomial.smul_eq_C_mul] at eqn,
   simp only [mv_polynomial.X, C_apply, mv_polynomial.monomial_mul, one_mul, mul_one, add_zero, zero_add, finset.sum_add_distrib, finset.sum_hom, mul_add, add_mul, sum_monomial_hom] at eqn,
-  have congr_coeff1121 := congr_arg (coeff (single α 1 + single β 1 + single δ 2 + single γ 1)) eqn,
+  have congr_coeff1121 := congr_arg (coeff (single vars.α 1 + single vars.β 1 + single vars.δ 2 + single vars.γ 1)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1121,
   simp only [] with finsupp_simp at  congr_coeff1121,
@@ -435,7 +450,7 @@ begin
   -- simp only [] with polynomial_nf_3 at eqn,
   simp only [mv_polynomial.smul_eq_C_mul] at eqn,
   simp only [mv_polynomial.X, C_apply, mv_polynomial.monomial_mul, one_mul, mul_one, add_zero, zero_add, finset.sum_add_distrib, finset.sum_hom, mul_add, add_mul, sum_monomial_hom] at eqn,
-  have congr_coeff0121 := congr_arg (coeff (single α 0 + single β 1 + single δ 2 + single γ 1)) eqn,
+  have congr_coeff0121 := congr_arg (coeff (single vars.α 0 + single vars.β 1 + single vars.δ 2 + single vars.γ 1)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0121,
   simp only [] with finsupp_simp at  congr_coeff0121,
@@ -455,7 +470,7 @@ begin
   -- simp only [] with polynomial_nf_3 at eqn,
   simp only [mv_polynomial.smul_eq_C_mul] at eqn,
   simp only [mv_polynomial.X, C_apply, mv_polynomial.monomial_mul, one_mul, mul_one, add_zero, zero_add, finset.sum_add_distrib, finset.sum_hom, mul_add, add_mul, sum_monomial_hom] at eqn,
-  have congr_coeff0021 := congr_arg (coeff (single α 0 + single β 0 + single δ 2 + single γ 1)) eqn,
+  have congr_coeff0021 := congr_arg (coeff (single vars.α 0 + single vars.β 0 + single vars.δ 2 + single vars.γ 1)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0021,
   simp only [] with finsupp_simp at  congr_coeff0021,
@@ -473,7 +488,7 @@ begin
   -- simp only [] with polynomial_nf_3 at eqn,
   simp only [mv_polynomial.smul_eq_C_mul] at eqn,
   simp only [mv_polynomial.X, C_apply, mv_polynomial.monomial_mul, one_mul, mul_one, add_zero, zero_add, finset.sum_add_distrib, finset.sum_hom, mul_add, add_mul, sum_monomial_hom] at eqn,
-  have congr_coeff0122 := congr_arg (coeff (single α 0 + single β 1 + single δ 2 + single γ 2)) eqn,
+  have congr_coeff0122 := congr_arg (coeff (single vars.α 0 + single vars.β 1 + single vars.δ 2 + single vars.γ 2)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0122,
   simp only [] with finsupp_simp at  congr_coeff0122,
@@ -493,7 +508,7 @@ begin
   -- simp only [] with polynomial_nf_3 at eqn,
   simp only [mv_polynomial.smul_eq_C_mul] at eqn,
   simp only [mv_polynomial.X, C_apply, mv_polynomial.monomial_mul, one_mul, mul_one, add_zero, zero_add, finset.sum_add_distrib, finset.sum_hom, mul_add, add_mul, sum_monomial_hom] at eqn,
-  have congr_coeff1022 := congr_arg (coeff (single α 1 + single β 0 + single δ 2 + single γ 2)) eqn,
+  have congr_coeff1022 := congr_arg (coeff (single vars.α 1 + single vars.β 0 + single vars.δ 2 + single vars.γ 2)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff1022,
   simp only [] with finsupp_simp at  congr_coeff1022,
@@ -510,7 +525,7 @@ begin
   -- simp only [] with polynomial_nf_3 at eqn,
   simp only [mv_polynomial.smul_eq_C_mul] at eqn,
   simp only [mv_polynomial.X, C_apply, mv_polynomial.monomial_mul, one_mul, mul_one, add_zero, zero_add, finset.sum_add_distrib, finset.sum_hom, mul_add, add_mul, sum_monomial_hom] at eqn,
-  have congr_coeff0022 := congr_arg (coeff (single α 0 + single β 0 + single δ 2 + single γ 2)) eqn,
+  have congr_coeff0022 := congr_arg (coeff (single vars.α 0 + single vars.β 0 + single vars.δ 2 + single vars.γ 2)) eqn,
   clear eqn,
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff0022,
   simp only [] with finsupp_simp at  congr_coeff0022,
@@ -613,20 +628,20 @@ begin
   -- simp only [] with crs at eqn',
   -- simp only [] with polynomial_nf_3 at eqn',
 
-  -- have h0012 := congr_arg (coeff (single α 0 + single β 0 + single γ 1 + single δ 2)) eqn',
-  -- have h0021 := congr_arg (coeff (single α 0 + single β 0 + single γ 2 + single δ 1)) eqn',
-  -- have h0022 := congr_arg (coeff (single α 0 + single β 0 + single γ 2 + single δ 2)) eqn',
-  -- have h0112 := congr_arg (coeff (single α 0 + single β 1 + single γ 1 + single δ 2)) eqn',
-  -- have h0121 := congr_arg (coeff (single α 0 + single β 1 + single γ 2 + single δ 1)) eqn',
-  -- have h0122 := congr_arg (coeff (single α 0 + single β 1 + single γ 2 + single δ 2)) eqn',
-  -- have h0212 := congr_arg (coeff (single α 0 + single β 2 + single γ 1 + single δ 2)) eqn',
-  -- have h0221 := congr_arg (coeff (single α 0 + single β 2 + single γ 2 + single δ 1)) eqn',
-  -- have h0222 := congr_arg (coeff (single α 0 + single β 2 + single γ 2 + single δ 2)) eqn',
-  -- have h1022 := congr_arg (coeff (single α 1 + single β 0 + single γ 2 + single δ 2)) eqn',
-  -- have h1023 := congr_arg (coeff (single α 1 + single β 0 + single γ 2 + single δ 3)) eqn',
-  -- have h1112 := congr_arg (coeff (single α 1 + single β 1 + single γ 1 + single δ 2)) eqn',
-  -- have h1121 := congr_arg (coeff (single α 1 + single β 1 + single γ 2 + single δ 1)) eqn',
-  -- have h1122 := congr_arg (coeff (single α 1 + single β 1 + single γ 2 + single δ 2)) eqn',
+  -- have h0012 := congr_arg (coeff (single vars.α 0 + single vars.β 0 + single vars.γ 1 + single vars.δ 2)) eqn',
+  -- have h0021 := congr_arg (coeff (single vars.α 0 + single vars.β 0 + single vars.γ 2 + single vars.δ 1)) eqn',
+  -- have h0022 := congr_arg (coeff (single vars.α 0 + single vars.β 0 + single vars.γ 2 + single vars.δ 2)) eqn',
+  -- have h0112 := congr_arg (coeff (single vars.α 0 + single vars.β 1 + single vars.γ 1 + single vars.δ 2)) eqn',
+  -- have h0121 := congr_arg (coeff (single vars.α 0 + single vars.β 1 + single vars.γ 2 + single vars.δ 1)) eqn',
+  -- have h0122 := congr_arg (coeff (single vars.α 0 + single vars.β 1 + single vars.γ 2 + single vars.δ 2)) eqn',
+  -- have h0212 := congr_arg (coeff (single vars.α 0 + single vars.β 2 + single vars.γ 1 + single vars.δ 2)) eqn',
+  -- have h0221 := congr_arg (coeff (single vars.α 0 + single vars.β 2 + single vars.γ 2 + single vars.δ 1)) eqn',
+  -- have h0222 := congr_arg (coeff (single vars.α 0 + single vars.β 2 + single vars.γ 2 + single vars.δ 2)) eqn',
+  -- have h1022 := congr_arg (coeff (single vars.α 1 + single vars.β 0 + single vars.γ 2 + single vars.δ 2)) eqn',
+  -- have h1023 := congr_arg (coeff (single vars.α 1 + single vars.β 0 + single vars.γ 2 + single vars.δ 3)) eqn',
+  -- have h1112 := congr_arg (coeff (single vars.α 1 + single vars.β 1 + single vars.γ 1 + single vars.δ 2)) eqn',
+  -- have h1121 := congr_arg (coeff (single vars.α 1 + single vars.β 1 + single vars.γ 2 + single vars.δ 1)) eqn',
+  -- have h1122 := congr_arg (coeff (single vars.α 1 + single vars.β 1 + single vars.γ 2 + single vars.δ 2)) eqn',
 
   -- clear eqn eqn',
 
@@ -650,7 +665,7 @@ begin
 
 
   simp only [*] with integral_domain_simp at *,
-  tactic.integral_domain_tactic_4,
+  tactic.integral_domain_tactic_v4,
   -- done,
   { rw [<-h1022, <-h0122, <-h0022],
     simp only [B_β_mul],
@@ -659,18 +674,18 @@ begin
     simp only [<-mul_assoc],
     rw h1122,
     ring, },
-  done,
-  -- { rw [h1022, <-h0122, h0022],
-  --   ring, },
-  -- { rw [<-h1022, <-h0122, <-h0022],
-  --   simp only [B_β_mul],
-  --   simp only [<-mul_assoc],
-  --   simp only [A_α_mul],
-  --   simp only [<-mul_assoc],
-  --   rw h1122,
-  --   ring, },
-  -- { rw [h1022, <-h0122, h0022],
-  --   ring, }, 
+  -- done,
+  { rw [h1022, <-h0122, h0022],
+    ring, },
+  { rw [<-h1022, <-h0122, <-h0022],
+    simp only [B_β_mul],
+    simp only [<-mul_assoc],
+    simp only [A_α_mul],
+    simp only [<-mul_assoc],
+    rw h1122,
+    ring, },
+  { rw [h1022, <-h0122, h0022],
+    ring, }, 
   -- done,
 
 

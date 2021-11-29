@@ -86,7 +86,7 @@ begin
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at *,
   simp only [] with finsupp_simp at *,
 
-  tactic.integral_domain_tactic_3,
+  tactic.integral_domain_tactic_v3,
   repeat { apply or.inr, assumption, },
   repeat { apply or.inl, assumption, },
 
