@@ -7,20 +7,20 @@ As of 10/14/2020 the knowledge soundness proofs for [babySNARK](https://github.c
 
 ## Summary of the BabySNARK code
 
-The knowledge_soundness.lean file has several parameter statements that match the parameters of the babySNARK instantiation. These are:
+The knowledge_soundness.lean file has several parameter statements that correspond to the parameters of the BabySNARK instantiation. These are:
   
-* $F$ The field over which the polynomials are defined.
-* $m$, $n_{stmt}$, $n_{wit}$, corresponding to $m$, $l$ and $n-l$ from the paper.
-* $r$, the indexed collection of roots of the polynomial $t$
-* $u_{stmt}, u_{wit}$, indexed collections of single variable polynomials corresponding to the $u_i$ from the paper.
+* `F` The field over which the polynomials are defined.
+* `m`, `n_stmt`, `n_wit`, corresponding to `m`, `l` and `n-l` from the paper.
+* `r`, the indexed collection of roots of the polynomial `t`
+* `u_stmt, u_wit`, indexed collections of single variable polynomials corresponding to the `u_i` from the paper.
 * The various coefficients of the adversary polynomials given by the algebraic group model.
   
 This file also defines various values from these parameters, including:
 
-* $t$, the monic polynomial over which the modulo is taken.
-* A multivariable analogue of $t$
+* `t`, the monic polynomial over which the modulo is taken.
+* A multivariable analogue of `t`
 * The multivariable polynomial forms of the CRS.
-* $B_{wit}, V_{wit}, H$, multivariable polynomials of the AGM representation.
+* `B_wit, V_wit, H`, multivariable polynomials of the AGM representation.
 * `satisfying_wit` a proposition-valued function of a collection of field elements indicating whether they satisfy the square span program.
 
 There are a total of ~50 lemmas across the lean files in the project. These include:
@@ -44,7 +44,7 @@ Here is a list of goals and dates for this project
 
 * [x] Implement type class for proof systems/ SNARKs and formalize the correctness and knowledge-soundness (and perhaps ZK)
 * [x] Implement a `ring`-like/`library-search`-like tactic to automate simplification of statements about the coefficients of polynomials
-* [x] Implement an alternation or decidability based way of resolving statements
+* [x] Implement a procedure to solve systems of equations of polynomials
 * Implement SNARKs
   * BabySNARK
     * [x] Implementation
