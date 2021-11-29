@@ -115,6 +115,7 @@ meta def mutually_simplify : tactic unit := do
   names <- context_prop_name_getter,
   mutually_simplify_aux names []
 
+/-- Assuming nm is the only changed name, simplify with that -/
 meta def mutually_simplify_one (nm : name) : tactic unit := do
   names <- context_prop_name_getter,
   let names' := list.erase names nm,
@@ -198,14 +199,15 @@ meta def integral_domain_tactic_v4 : tactic unit := do
 
 meta def integral_domain_tactic_v5 : tactic unit := do
   trace "\nCall to integral_domain_tactic_v5", 
-  `[my_simp_only [*] with integral_domain_simp
-    at * {fail_if_unchanged := ff}],
+  tactic.interactive.mutually_simplify_one `found_zero,
+  -- `[my_simp_only [*] with integral_domain_simp
+  --   at * {fail_if_unchanged := ff}],
   try `[cases_type* true false],
   _::_ ← get_goals | skip, 
   try `[clear found_zero],
   cases_success <- try_core `[cases ‹_ ∨ _› with found_zero found_zero],
   match cases_success with 
-  | some _ := all_goals' `[done <|> id { integral_domain_tactic_v4 }]
+  | some _ := all_goals' `[done <|> id { integral_domain_tactic_v5 }]
   -- TODO, I need to change this so that, 
   -- if rw found_zero fails the program stops and doesn't clear found_zero.
   -- for now I remove the clear found_zero part
