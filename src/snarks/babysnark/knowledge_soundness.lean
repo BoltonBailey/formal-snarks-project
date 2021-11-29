@@ -208,6 +208,18 @@ def V (a_stmt : fin n_stmt → F) : mv_polynomial vars F
 
 /- Lemmas for proof -/
 
+lemma eq_helper (x j : ℕ) : x = j ∨ (x = 0 ∧ j = 0) ↔ x = j :=
+begin
+  split,
+  intro h, 
+  cases h,
+  exact h,
+  rw [h.left, h.right],
+  intro h,
+  left,
+  exact h,
+end
+
 lemma h2_1 : (∀ (i : fin m), B_wit.coeff (finsupp.single vars.X i) = b i) :=
 begin
   intro j,
@@ -221,7 +233,11 @@ begin
   -- simp [],
   -- ite_finsupp_simplify,
   -- simp only [single_injective_iff],
-  simp [finsupp.single_eq_single_iff, ←fin.eq_iff_veq],
+  -- simp [finsupp.single_eq_single_iff, ←fin.eq_iff_veq],
+  simp [finsupp.single_eq_single_iff],
+  simp only [eq_helper],
+  unfold_coes,
+  simp [←fin.eq_iff_veq],
 end
 
 
@@ -232,9 +248,10 @@ begin
   simp [crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps],
   simp [X_poly, Y_poly, Z_poly],
   simp with coeff_simp,
+  simp [finsupp.single_eq_single_iff],
   -- -- simp? [-finsupp.single_nat_sub],
   -- simp?,
-  ite_finsupp_simplify,
+  -- ite_finsupp_simplify,
   -- simp only with coeff_simp,
   -- ite_finsupp_simplify,
 
@@ -274,14 +291,18 @@ begin
   simp only with coeff_simp polynomial_nf, 
   -- unfold_coes,
 
-  ite_finsupp_simplify,
+  -- ite_finsupp_simplify,
   -- simp only with coeff_simp,
 
   simp [-finsupp.single_zero, finsupp.single_eq_single_iff],
-  -- dec_trivial,
+  rw finset.mem_singleton,
+  simp,
+  simp [finset.mem_insert, finset.mem_singleton],
+  simp,
+  -- -- dec_trivial,
 
-  rw finsupp.eq_single_iff,
-  dec_trivial,
+  -- rw finsupp.eq_single_iff,
+  -- dec_trivial,
 
 end
 
@@ -309,12 +330,14 @@ begin
   simp [X_poly, Y_poly, Z_poly],
   simp only with coeff_simp polynomial_nf,
   -- simp only with coeff_simp,
-  ite_finsupp_simplify,
+  -- ite_finsupp_simplify,
   rw pow_succ,
   rw pow_one,
 
   simp,
   simp [-finsupp.single_zero, finsupp.single_eq_single_iff],
+  simp [finset.mem_insert, finset.mem_singleton],
+  simp,
   -- finish,
 end
 
