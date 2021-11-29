@@ -115,6 +115,10 @@ meta def mutually_simplify : tactic unit := do
   names <- context_prop_name_getter,
   mutually_simplify_aux names []
 
+meta def mutually_simplify_one (nm : name) : tactic unit := do
+  names <- context_prop_name_getter,
+  let names' := list.erase names nm,
+  mutually_simplify_aux (nm::[]) names
 
 end interactive
 
@@ -137,23 +141,26 @@ meta def integral_domain_tactic : tactic unit := do
   end
 
 -- Broken version that tries to only simplify things when we know they have changed.
-meta def integral_domain_tactic_2 : tactic unit := do
-  trace "\nCall to integral_domain_tactic_2", 
+meta def integral_domain_tactic_v2 : tactic unit := do
+  trace "\nCall to integral_domain_tactic_v2", 
   -- trace_state, -- printf debugging
   try `[cases_type* true false],
   _::_ ← get_goals | skip, 
   try `[clear found_zero],
   cases_success <- try_core `[cases ‹_ ∨ _› with found_zero found_zero],
   match cases_success with -- simplify everywhere might produce a simplification that can further help.
-  | some _ := all_goals' (do tactic.interactive.simplify_everywhere, done <|> integral_domain_tactic_2)
+  | some _ := all_goals' (do tactic.interactive.simplify_everywhere, done <|> integral_domain_tactic_v2)
   | none := skip
   end
 
 -- Adapted from Mario's example
 -- I screwed this one up and made the recursive call to integral_domain_tactic
--- instead of integral_domain_tactic_3. Switching to _4 and leaving this for posterity.
-meta def integral_domain_tactic_3 : tactic unit := do
-  trace "\nCall to integral_domain_tactic_3", 
+-- instead of integral_domain_tactic_v3. Switching to _4 and leaving this for posterity.
+-- _4 below seems to make this take 1 min instead of 30 min, which the amount of time
+-- this has been taking the past few weeks.
+-- :(
+meta def integral_domain_tactic_v3 : tactic unit := do
+  trace "\nCall to integral_domain_tactic_v3", 
   -- trace_state, -- printf debugging
   `[my_simp_only [*] with integral_domain_simp
     at * {fail_if_unchanged := ff}],
@@ -171,8 +178,8 @@ meta def integral_domain_tactic_3 : tactic unit := do
   
 
 
-meta def integral_domain_tactic_4 : tactic unit := do
-  trace "\nCall to integral_domain_tactic_4", 
+meta def integral_domain_tactic_v4 : tactic unit := do
+  trace "\nCall to integral_domain_tactic_v4", 
   -- trace_state, -- printf debugging
   `[my_simp_only [*] with integral_domain_simp
     at * {fail_if_unchanged := ff}],
@@ -181,7 +188,7 @@ meta def integral_domain_tactic_4 : tactic unit := do
   try `[clear found_zero],
   cases_success <- try_core `[cases ‹_ ∨ _› with found_zero found_zero],
   match cases_success with 
-  | some _ := all_goals' `[done <|> id { integral_domain_tactic_4 }]
+  | some _ := all_goals' `[done <|> id { integral_domain_tactic_v4 }]
   -- TODO, I need to change this so that, 
   -- if rw found_zero fails the program stops and doesn't clear found_zero.
   -- for now I remove the clear found_zero part
@@ -189,14 +196,21 @@ meta def integral_domain_tactic_4 : tactic unit := do
   end
 
 
--- meta def integral_domain_tactic_5 : tactic unit := do
-  -- trace "\nCall to integral_domain_tactic_5", 
-  -- `[my_simp_only [*] with integral_domain_simp
-  --   at * {fail_if_unchanged := ff}],
-  -- try `[cases_type* true false],
-  -- _::_ ← get_goals | skip, 
-  -- context_prop_names <- tactic.interactive.context_prop_name_getter,
-
+meta def integral_domain_tactic_v5 : tactic unit := do
+  trace "\nCall to integral_domain_tactic_v5", 
+  `[my_simp_only [*] with integral_domain_simp
+    at * {fail_if_unchanged := ff}],
+  try `[cases_type* true false],
+  _::_ ← get_goals | skip, 
+  try `[clear found_zero],
+  cases_success <- try_core `[cases ‹_ ∨ _› with found_zero found_zero],
+  match cases_success with 
+  | some _ := all_goals' `[done <|> id { integral_domain_tactic_v4 }]
+  -- TODO, I need to change this so that, 
+  -- if rw found_zero fails the program stops and doesn't clear found_zero.
+  -- for now I remove the clear found_zero part
+  | none := skip
+  end
   -- TODO, I need to make it so that I'm not running simp * at * every round.
   -- step 1, get a list of
 
@@ -251,7 +265,7 @@ end
 -- begin
 --   simp only [] with integral_domain_simp
 --     at * {fail_if_unchanged := ff},
---   tactic.integral_domain_tactic_3,
+--   tactic.integral_domain_tactic_v3,
 --   -- tactic.integral_domain_tactic,
 -- end
 
