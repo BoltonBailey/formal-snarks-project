@@ -21,6 +21,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{alphabeta}
 \usepackage{circuitikz}
+\usepackage{hyperref}
 
 
 \mode<presentation> {
@@ -82,6 +83,21 @@
 %\setbeamertemplate{navigation symbols}{} % To remove the navigation symbols from the bottom of all slides uncomment this line
 }
 
+% TODO discuss schwartz-zippel
+% emphasize suitability of soundness for formality
+% better graphics on the pairing slide
+% emphasize that all of the proof is automatic
+% Two senses of "proof"
+% FOrmal applies to paper too, "mechanized" is better
+% amit's question, does the superfluousness of some equations mean that the SNARK construction can be simplified (no). What are the tradeoffs of eliminating these equations before simplification?
+% What is the difference between the extractor in an interactive proof and the extractor here
+% What are the other cryptographic assumptions
+% Venn diagram of SNARKs
+% TODO latex sections
+
+% amiller: A good motivating example of "Why bother with this?" beyond the complexity of snark applications is the three or so examples where a soundness bug was introduced, there's the parno paper unsoundness of vntinyram, there's the most famous bug that was left in ZCash for a year or so, affecting the same paper but it's an entirely separate bug
+% more lean examples would be really good, there was 1 or 2 slides on it basically but i think there's an interesting segment of the audience that is maybe, devs who know of snarks and are comfortable programming but are unfamiliar with lean, showing some more stepping stone examples of what's involved  would probably be appreciated by them
+
 \usepackage{graphicx} % Allows including images
 \usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
 
@@ -106,67 +122,208 @@ University of Illinois Urbana-Champaign \\ % Your institution for the title page
 \titlepage % Print the title page as the first slide
 \end{frame}
 
+
+
+% \begin{frame}
+%     \frametitle{Goals: A Library of SNARKs with Formal Proofs}
+    
+%     We want to make it easy and convenient to formalize new SNARK constructions
+
+%     To this end, we have written tactics for facilitating proofs about polynomials and their coefficients.
+    
+%     We also have general framework for pairing based SNARK schemes.
+
+% \end{frame}
+
+
+
 \begin{frame}
     \frametitle{Formalizing SNARKs in the Lean Theorem Prover}
 
-    \begin{itemize}
-        \item Lean seems to be an active language right now
-        \item The mathlib library has support for multivariable polynomials which is critical
-        \item The mathlib community is open to accepting pull requests, which has been convenient
-    \end{itemize}    
+    SNARKs are a kind of cryptographic protocol. In this project, we formalize and verify a variety of SNARK constructions
 
-\end{frame}
-
-\begin{frame}
-    \frametitle{Goals: A Library of SNARKs with Formal Proofs}
+    \vspace{0.5cm}
     
-    We want to make it easy and convenient to formalize new SNARK proofs
-
-    To this end, we have written tactics for facilitating proofs about polynomials and their coefficients.
-    
-    We also have general framework for pairing based SNARK schemes.
-
-\end{frame}
-
-\begin{frame}
-    \frametitle{Two SNARKs formalized and more on the way}
-    We have implemented a proof of the knowledge-soundness of BabySNARK and the Type III Groth '16 described in Baghery et al. in the Algebraic Group model.
-
-    We are in the process of formalizing statements of other pairing-based SNARKs in the AGM:
+    For this, we use the Lean Theorem Prover. See our \underline{\href{https://github.com/BoltonBailey/formal_baby_snark}{Github Repo}}. % TODO stylize
 
     \begin{itemize}
-        \item The original Groth '16 (amenable to all types of pairings)
-        \item GGPR
-        \item Pinocchio
-    \end{itemize}    
-
-\end{frame}
-
-\begin{frame}
-    \frametitle{The Algebraic Group Model for Linear SNARKs}
-
-    \begin{itemize}
-        \item In the AGM model we assume the proof elements are some linear combination of the CRS elements, and that the prover knows the coefficients of this linear combination. 
-        \item To prove knowledge soundness, we must extract from these coefficients a satisfying witness assignment.
-        \item To do this, we assume the equations that the verifier checks hold. We then prove a series of facts about the coefficients, culminating in the fact that a particular set of the coefficients satisfy the Square Span Program.
-        \item From this, it follows that any algebraic adversary cannot produce a valid proof without knowing a satisfying witness.
+        \item We leverage the \texttt{mathlib} library, which has support for multivariable polynomials and is open for pull requests. 
+        \item We write tactics for automating proofs that anyone can then run on their own constructions.
     \end{itemize}
 
+    Our goal is to increase confidence in the use of this technology by double-checking proofs and facilitating the audit of existing and new implementations.
+
 \end{frame}
+
+\begin{frame}
+
+    \frametitle{SNARKs give us Efficiently Verifiable Computation}
+
+    What is a SNARK?
+    \begin{center}
+        \textcolor{olive}{Succinct}, \textcolor{blue}{Noninteractive}, \textcolor{purple}{Argument of Knowledge}       
+    \end{center}
+
+    In other words:
+
+    \begin{center}
+        A \textcolor{olive}{short ($\approx$200 Byte)}, \textcolor{blue}{single message}, that \textcolor{purple}{proves something is true}        
+    \end{center}
+
+    Many potential uses in cryptography:
+
+    \begin{itemize}
+        \item Securing privacy in blockchains
+        \item Receipt-free voting systems
+        \item Verifiable outsourced computation 
+    \end{itemize}    
+
+\end{frame}
+
+\begin{frame}
+    
+    \frametitle{Completeness and Soundness: The Properties of a SNARK}
+
+    % Given some circuit $C$, taking a statement $x$ and a witness $w$:
+
+    % $\text{Prove}(x, w, CRS)$ outputs $\pi$, 
+
+    % and $\text{Verify}(x, \pi, CRS)$ outputs success or fail.
+
+    \begin{center}
+        \includegraphics[width=0.9\textwidth]{aliceandbob.png}        
+    \end{center}
+
+    \textbf{Completeness:} Alice can prove true statements
+    
+    If the $x, w$ is a correct pair according to the circuit, then $\pi \gets \text{Prove}(x, w, CRS)$, then $\text{Verify}(x, \pi, CRS)$ outputs success.
+
+    \textbf{Soundness:} Alice can't prove false statements
+    
+    For any adversary generating $x, \pi \gets \text{Adv}$, then either $\text{Verify}(x, \pi, CRS)$ outputs failure, or $x \in L$ (with high probability).
+
+
+    % Worth it to talk about zero knowledge and why that's easy to prove too
+\end{frame}
+
+\begin{frame}
+    
+    \frametitle{Knowledge Soundness - Proof Alice Knows}
+
+    \textbf{Knowledge Soundness:} (Even stronger than soundness!)
+    
+    Not only can Alice never lie - when she makes a valid proof, an \textit{Extractor} with access to the prover's thoughts can determine $w$.
+
+    \begin{center}
+        \includegraphics[width=0.9\textwidth]{dontdoiterik.png}        
+    \end{center}
+
+    How can we prove there is an extractor that works for any adversary Alice?
+
+    
+\end{frame}
+
+
+\begin{frame}
+    
+    \frametitle{The Algebraic Group Model}
+
+    \begin{center}
+        \includegraphics[width=0.9\textwidth]{dontdoiterik.png}        
+    \end{center}
+
+    Assume Alice only generates group elements as a product of group operations that she performs.
+    
+    The proof output that Alice gives must be a linear combination of her initial group elements.
+    
+    Charles reconstructs the witness $w$ from this linear combination.
+
+
+    
+\end{frame}
+
+\begin{frame}
+    
+    \frametitle{Where Alice gets her Group Elements - CRS Model}
+
+    \begin{center}
+        \includegraphics[width=0.9\textwidth]{andgodsaidlettherebecrs.png}        
+    \end{center}
+
+    For any circuit, we need a collection of starting group elements.
+
+    All these group elements come from a trusted third party/MPC.
+    
+    These are public, but depend on secret exponents that the creator must not publish (or else the soundness proof fails).
+    
+\end{frame}
+
+
+
+\begin{frame}
+    
+    \frametitle{Elliptic Curve Pairings allow Multiplication of Group Elements}
+
+    \begin{center}
+        \includegraphics[width=0.9\textwidth]{andgodsaidlettherebecrs.png}        
+    \end{center}
+
+    $$ E(g^{\alpha}, g^{\beta}) = g^{\alpha\beta} $$
+
+    Individuals can compute products ``in the group exponent''.
+    
+\end{frame}
+
+\begin{frame}
+    
+    \frametitle{The Game Plan for Proving Soundness}
+
+    \begin{enumerate}
+        \item Start by assuming the equalities the verifier checks are true.
+        \item We specify a witness as a function of the coefficients of Alice's linear combination.
+        \item ???
+        \item Prove that this witness is correct for the circuit and the $x$ value
+    \end{enumerate}
+    
+\end{frame}
+
+\begin{frame}
+    
+    \frametitle{Before we move on to the formal proof...}
+
+    \begin{center}
+        ... any questions?        
+    \end{center}
+
+    
+    
+\end{frame}
+
+% \begin{frame}
+%     \frametitle{The Algebraic Group Model for Linear SNARKs}
+
+%     \begin{itemize}
+%         \item In the AGM model we assume the proof elements are some linear combination of the (CRS TODO?) elements, and that the prover knows the coefficients of this linear combination. 
+%         \item To prove knowledge soundness, we must extract from these coefficients a satisfying witness assignment.
+%         \item To do this, we assume the equations that the verifier checks hold. We then prove a series of facts about the coefficients, culminating in the fact that a particular set of the coefficients satisfy the Square Span Program.
+%         \item From this, it follows that any algebraic adversary cannot produce a valid proof without knowing a satisfying witness.
+%     \end{itemize}
+
+% \end{frame}
 
 \begin{frame}
     \frametitle{An Extremely Simple (Incomplete) Toy SNARK}
 
-    Let $\textcolor{red}{A},\textcolor{red}{B},\textcolor{red}{C},\textcolor{red}{D},\textcolor{red}{E}$ be 0/1 valued. Make a SNARK that proves 
-    $$(\textcolor{red}{A}  \textcolor{red}{D}) = \textcolor{red}{E}  \text{ or } (\textcolor{red}{B} \textcolor{red}{C}) = \textcolor{red}{E}$$
+    Let $\textcolor{red}{w} = (\textcolor{red}{A},\textcolor{red}{B}), \textcolor{violet}{x} = (\textcolor{violet}{C},\textcolor{violet}{D},\textcolor{violet}{E})$. Make a SNARK that proves 
+    $$(\textcolor{red}{A}  \textcolor{violet}{D}) = \textcolor{violet}{E}  \text{ or } (\textcolor{red}{B} \textcolor{violet}{C}) = \textcolor{violet}{E}$$
 
     \begin{center}
         \begin{circuitikz} 
-            \node (D) at (-2,2-0.3) {$\textcolor{red}{D}$};
-            \node (C) at (-2, -0.3) {$\textcolor{red}{C}$};
+            \node (D) at (-2,2-0.3) {$\textcolor{violet}{D}$};
+            \node (C) at (-2, -0.3) {$\textcolor{violet}{C}$};
             \node (B) at (-2, +0.3) {$\textcolor{red}{B}$};
             \node (A) at (-2,2+0.3) {$\textcolor{red}{A}$};
-            \node (E) at (3,1) {$\textcolor{red}{E}$};
+            \node (E) at (3,1) {$\textcolor{violet}{E}$};
             \draw
             (0,2) node[and port] (myand1) {}
             (0,0) node[and port] (myand2) {}
@@ -181,24 +338,38 @@ University of Illinois Urbana-Champaign \\ % Your institution for the title page
         \end{circuitikz}        
     \end{center}
 
-    Two unknown field elements \texttt{\textcolor{blue}{\alpha}, \textcolor{blue}{\beta}}
-    Three CRS group elements \texttt{\textcolor{blue}{\alpha}, \textcolor{blue}{\beta}, \textcolor{blue}{\alpha\beta}}.
+    Two unknown field elements \texttt{\textcolor{green}{\alpha}, \textcolor{green}{\beta}}
 
-    Prover returns (\texttt{\textcolor{red}{A}\textcolor{blue}{\alpha}+\textcolor{red}B\textcolor{blue}{β}, \textcolor{red}C\textcolor{blue}{α}+\textcolor{red}D\textcolor{blue}{β}, \textcolor{red}E\textcolor{blue}{α}\textcolor{blue}{β}})     
+    Three CRS group elements 
+    $g^{\texttt{\textcolor{blue}{\alpha}}}, g^{\texttt{\textcolor{blue}{\beta}}}, g^{\texttt{\textcolor{blue}{\alpha\beta}}}$, hereafter just denoted ${\texttt{\textcolor{blue}{\alpha}}}, {\texttt{\textcolor{blue}{\beta}}}, {\texttt{\textcolor{blue}{\alpha\beta}}}$.
 
+    Prover returns 
+    (\texttt{\textcolor{red}{A}\textcolor{blue}{\alpha}+\textcolor{red}B\textcolor{blue}{β}})     
+    % (\texttt{\textcolor{red}{A}\textcolor{blue}{\alpha}+\textcolor{red}B\textcolor{blue}{β}, \textcolor{violet}C\textcolor{blue}{α}+\textcolor{violet}{D}\textcolor{blue}{β}, \textcolor{violet}{E}\textcolor{blue}{α}\textcolor{blue}{β}})     
     $ \implies $
-    Verifier checks \texttt{(\textcolor{red}{A}\textcolor{blue}{\alpha}+\textcolor{red}B\textcolor{blue}{β})(\textcolor{red}C\textcolor{blue}{α}+\textcolor{red}D\textcolor{blue}{β}) = \textcolor{red}E\textcolor{blue}{α}\textcolor{blue}{β}}  
+    Verifier checks \texttt{(\textcolor{red}{A}\textcolor{blue}{\alpha}+\textcolor{red}B\textcolor{blue}{β})(\textcolor{violet}C\textcolor{blue}{α}+\textcolor{violet}{D}\textcolor{blue}{β}) = \textcolor{violet}{E}\textcolor{blue}{α}\textcolor{blue}{β}}  
 
 \end{frame}
 
 \begin{frame}
     \frametitle{Step 0: Load Assumptions and Goal into Lean}
 
-    Assumption:
-    $$\texttt{(\textcolor{red}{A} * \textcolor{blue}{\alpha} + \textcolor{red}B * \textcolor{blue}{β})(\textcolor{red}C * \textcolor{blue}{α} + \textcolor{red}D * \textcolor{blue}{β}) = \textcolor{red}E * \textcolor{blue}{α} * \textcolor{blue}{β}}  $$   
+    For any coefficients the adversary generates ...
+    $$ 
+    \forall 
+    \texttt{
+    \textcolor{red}{A}
+    \textcolor{red}{B}
+    \textcolor{violet}{C}
+    \textcolor{violet}{D}
+    \textcolor{violet}{E}}
+    : \mathbb{F}  $$
+
+    Assume the polynomials in $\texttt{\textcolor{blue}{\alpha}, \textcolor{blue}{\beta}}$ are equal (by Schwartz-Zippel):
+    $$\texttt{(\textcolor{red}{A} * \textcolor{blue}{\alpha} + \textcolor{red}B * \textcolor{blue}{β})(\textcolor{violet}C * \textcolor{blue}{α} + \textcolor{violet}{D} * \textcolor{blue}{β}) = \textcolor{violet}{E} * \textcolor{blue}{α} * \textcolor{blue}{β}}  $$   
 
     Goal:
-    $$\texttt{(\textcolor{red}{A} * \textcolor{red}{D}) = \textcolor{red}{E}  \text{ or } (\textcolor{red}{B} * \textcolor{red}{C}) = \textcolor{red}{E}}$$
+    $$\texttt{(\textcolor{red}{A} * \textcolor{violet}{D}) = \textcolor{violet}{E}  \text{ or } (\textcolor{red}{B} * \textcolor{violet}{C}) = \textcolor{violet}{E}}$$
 
 \end{frame}
 
@@ -206,13 +377,13 @@ University of Illinois Urbana-Champaign \\ % Your institution for the title page
     \frametitle{Step 1: Isolate Coefficients}
 
     Old Assumption:
-    $$\texttt{(\textcolor{red}{A} * \textcolor{blue}{\alpha} + \textcolor{red}B * \textcolor{blue}{β})(\textcolor{red}C * \textcolor{blue}{α} + \textcolor{red}D * \textcolor{blue}{β}) = \textcolor{red}E * \textcolor{blue}{α} * \textcolor{blue}{β}}  $$   
+    $$\texttt{(\textcolor{red}{A} * \textcolor{blue}{\alpha} + \textcolor{red}B * \textcolor{blue}{β})(\textcolor{violet}C * \textcolor{blue}{α} + \textcolor{violet}{D} * \textcolor{blue}{β}) = \textcolor{violet}{E} * \textcolor{blue}{α} * \textcolor{blue}{β}}  $$   
 
     New Assumption:
-    $$\texttt{\textcolor{red}{A}*\textcolor{red}{C} * \textcolor{blue}{\alpha}$^2$ + (\textcolor{red}{A}*\textcolor{red}D + \textcolor{red}{B}*\textcolor{red}C ) * \textcolor{blue}{α} * \textcolor{blue}{β} + (\textcolor{red}B*\textcolor{red}D * \textcolor{blue}{β}$^2$) = \textcolor{red}E * \textcolor{blue}{α} * \textcolor{blue}{β}}  $$   
+    $$\texttt{\textcolor{red}{A}*\textcolor{violet}{C} * \textcolor{blue}{\alpha}$^2$ + (\textcolor{red}{A}*\textcolor{violet}{D} + \textcolor{red}{B}*\textcolor{violet}C) * \textcolor{blue}{α} * \textcolor{blue}{β} + \textcolor{red}B*\textcolor{violet}{D} * \textcolor{blue}{β}$^2$ = \textcolor{violet}{E} * \textcolor{blue}{α} * \textcolor{blue}{β}}  $$   
 
     Goal:
-    $$\texttt{(\textcolor{red}{A} * \textcolor{red}{D}) = \textcolor{red}{E}  \text{ or } (\textcolor{red}{B} * \textcolor{red}{C}) = \textcolor{red}{E}}$$
+    $$\texttt{(\textcolor{red}{A} * \textcolor{violet}{D}) = \textcolor{violet}{E}  \text{ or } (\textcolor{red}{B} * \textcolor{violet}{C}) = \textcolor{violet}{E}}$$
 
 \end{frame}
 
@@ -220,33 +391,33 @@ University of Illinois Urbana-Champaign \\ % Your institution for the title page
     \frametitle{Step 2: Reexpress Polynomial as Equation of Coefficients}
 
     Old Assumption:
-    $$\texttt{\textcolor{red}{A}*\textcolor{red}{C} * \textcolor{blue}{\alpha}$^2$ + (\textcolor{red}{A}*\textcolor{red}D + \textcolor{red}{B}*\textcolor{red}C ) * \textcolor{blue}{α} * \textcolor{blue}{β} + (\textcolor{red}B*\textcolor{red}D * \textcolor{blue}{β}$^2$) = \textcolor{red}E * \textcolor{blue}{α} * \textcolor{blue}{β}}  $$    
+    $$\texttt{\textcolor{red}{A}*\textcolor{violet}{C} * \textcolor{blue}{\alpha}$^2$ + (\textcolor{red}{A}*\textcolor{violet}{D} + \textcolor{red}{B}*\textcolor{violet}C) * \textcolor{blue}{α} * \textcolor{blue}{β} + (\textcolor{red}B*\textcolor{violet}{D} * \textcolor{blue}{β}$^2$) = \textcolor{violet}{E} * \textcolor{blue}{α} * \textcolor{blue}{β}}  $$    
 
     New Assumptions:
-    $$ \texttt{\textcolor{red}{A}*\textcolor{red}{C} = 0} $$
-    $$ \texttt{\textcolor{red}{A}*\textcolor{red}D + \textcolor{red}{B}*\textcolor{red}C = \textcolor{red}E} $$
-    $$ \texttt{\textcolor{red}B*\textcolor{red}D = 0}  $$   
+    $$ \texttt{\textcolor{red}{A}*\textcolor{violet}{C} = 0} $$
+    $$ \texttt{\textcolor{red}{A}*\textcolor{violet}{D} + \textcolor{red}{B}*\textcolor{violet}C = \textcolor{violet}{E}} $$
+    $$ \texttt{\textcolor{red}B*\textcolor{violet}{D} = 0}  $$   
 
     Goal:
-    $$\texttt{(\textcolor{red}{A} * \textcolor{red}{D}) = \textcolor{red}{E}  \text{ or } (\textcolor{red}{B} * \textcolor{red}{C}) = \textcolor{red}{E}}$$
+    $$\texttt{(\textcolor{red}{A} * \textcolor{violet}{D}) = \textcolor{violet}{E}  \text{ or } (\textcolor{red}{B} * \textcolor{violet}{C}) = \textcolor{violet}{E}}$$
 
 \end{frame}
 
 \begin{frame}
     \frametitle{Step 3: Recursively Case on Zero Divisors and Simplify}
 
-    Old Assumptions:
-    $$ \texttt{\textcolor{red}{A}*\textcolor{red}{C} = 0} $$
-    $$ \texttt{\textcolor{red}{A}*\textcolor{red}D + \textcolor{red}{B}*\textcolor{red}C = \textcolor{red}E} $$
-    $$ \texttt{\textcolor{red}B*\textcolor{red}D = 0}  $$   
+    Old Assumptions: 
+    $$ \texttt{\textcolor{red}{A}*\textcolor{violet}{C} = 0} $$
+    $$ \texttt{\textcolor{red}{A}*\textcolor{violet}{D} + \textcolor{red}{B}*\textcolor{violet}C = \textcolor{violet}{E}} $$
+    $$ \texttt{\textcolor{red}B*\textcolor{violet}{D} = 0}  $$   
 
     New Assumptions:
-    $$ \texttt{\textcolor{red}{A} = 0 or \textcolor{red}{C} = 0} $$
-    $$ \texttt{\textcolor{red}{A}*\textcolor{red}D + \textcolor{red}{B}*\textcolor{red}C = \textcolor{red}E} $$
-    $$ \texttt{\textcolor{red}B = 0 or \textcolor{red}D = 0}  $$   
+    $$ \texttt{\textcolor{red}{A} = 0 or \textcolor{violet}{C} = 0} $$
+    $$ \texttt{\textcolor{red}{A}*\textcolor{violet}{D} + \textcolor{red}{B}*\textcolor{violet}C = \textcolor{violet}{E}} $$
+    $$ \texttt{\textcolor{red}B = 0 or \textcolor{violet}{D} = 0}  $$   
 
     Goal:
-    $$\texttt{(\textcolor{red}{A} * \textcolor{red}{D}) = \textcolor{red}{E}  \text{ or } (\textcolor{red}{B} * \textcolor{red}{C}) = \textcolor{red}{E}}$$
+    $$\texttt{(\textcolor{red}{A} * \textcolor{violet}{D}) = \textcolor{violet}{E}  \text{ or } (\textcolor{red}{B} * \textcolor{violet}{C}) = \textcolor{violet}{E}}$$
 
 \end{frame}
 
@@ -257,19 +428,19 @@ University of Illinois Urbana-Champaign \\ % Your institution for the title page
     \centering
     Case 1
         $$ \texttt{\textcolor{red}{A} = 0}$$
-        $$ \texttt{\textcolor{red}{A}*\textcolor{red}D + \textcolor{red}{B}*\textcolor{red}C = \textcolor{red}E} $$
-        $$ \texttt{\textcolor{red}B = 0 or \textcolor{red}D = 0}  $$ }%
+        $$ \texttt{\textcolor{red}{A}*\textcolor{violet}{D} + \textcolor{red}{B}*\textcolor{violet}C = \textcolor{violet}{E}} $$
+        $$ \texttt{\textcolor{red}B = 0 or \textcolor{violet}{D} = 0}  $$ }%
     \hspace{1cm}%
     \parbox[t]{5cm}{
     \centering
     Case 2
-        $$ \texttt{\textcolor{red}{C} = 0}$$
-        $$ \texttt{\textcolor{red}{A}*\textcolor{red}D + \textcolor{red}{B}*\textcolor{red}C = \textcolor{red}E} $$
-        $$ \texttt{\textcolor{red}B = 0 or \textcolor{red}D = 0}  $$ }%
+        $$ \texttt{\textcolor{violet}{C} = 0}$$
+        $$ \texttt{\textcolor{red}{A}*\textcolor{violet}{D} + \textcolor{red}{B}*\textcolor{violet}C = \textcolor{violet}{E}} $$
+        $$ \texttt{\textcolor{red}B = 0 or \textcolor{violet}{D} = 0}  $$ }%
 
 
     Goal:
-    $$\texttt{(\textcolor{red}{A} * \textcolor{red}{D}) = \textcolor{red}{E}  \text{ or } (\textcolor{red}{B} * \textcolor{red}{C}) = \textcolor{red}{E}}$$
+    $$\texttt{(\textcolor{red}{A} * \textcolor{violet}{D}) = \textcolor{violet}{E}  \text{ or } (\textcolor{red}{B} * \textcolor{violet}{C}) = \textcolor{violet}{E}}$$
 
 \end{frame}
 
@@ -280,19 +451,19 @@ University of Illinois Urbana-Champaign \\ % Your institution for the title page
     \centering
     Case 1
         $$ \texttt{\textcolor{red}{A} = 0}$$
-        $$ \texttt{0*\textcolor{red}D + \textcolor{red}{B}*\textcolor{red}C = \textcolor{red}E} $$
-        $$ \texttt{\textcolor{red}B = 0 or \textcolor{red}D = 0}  $$ }%
+        $$ \texttt{0*\textcolor{violet}{D} + \textcolor{red}{B}*\textcolor{violet}C = \textcolor{violet}{E}} $$
+        $$ \texttt{\textcolor{red}B = 0 or \textcolor{violet}{D} = 0}  $$ }%
     \hspace{1cm}%
     \parbox[t]{5cm}{
     \centering
     Case 2
-        $$ \texttt{\textcolor{red}{C} = 0}$$
-        $$ \texttt{\textcolor{red}{A}*\textcolor{red}D + \textcolor{red}{B}*0 = \textcolor{red}E} $$
-        $$ \texttt{\textcolor{red}B = 0 or \textcolor{red}D = 0}  $$ }%
+        $$ \texttt{\textcolor{violet}{C} = 0}$$
+        $$ \texttt{\textcolor{red}{A}*\textcolor{violet}{D} + \textcolor{red}{B}*0 = \textcolor{violet}{E}} $$
+        $$ \texttt{\textcolor{red}B = 0 or \textcolor{violet}{D} = 0}  $$ }%
 
 
     Goal:
-    $$\texttt{(\textcolor{red}{A} * \textcolor{red}{D}) = \textcolor{red}{E}  \text{ or } (\textcolor{red}{B} * \textcolor{red}{C}) = \textcolor{red}{E}}$$
+    $$\texttt{(\textcolor{red}{A} * \textcolor{violet}{D}) = \textcolor{violet}{E}  \text{ or } (\textcolor{red}{B} * \textcolor{violet}{C}) = \textcolor{violet}{E}}$$
 
 \end{frame}
 
@@ -304,19 +475,19 @@ University of Illinois Urbana-Champaign \\ % Your institution for the title page
     \centering
     Case 1
         $$ \texttt{\textcolor{red}{A} = 0}$$
-        $$ \texttt{\textcolor{red}{B} * \textcolor{red}C = \textcolor{red}E} $$
-        $$ \texttt{\textcolor{red}B = 0 or \textcolor{red}D = 0}  $$ }%
+        $$ \texttt{\textcolor{red}{B} * \textcolor{violet}C = \textcolor{violet}{E}} $$
+        $$ \texttt{\textcolor{red}B = 0 or \textcolor{violet}{D} = 0}  $$ }%
     \hspace{1cm}%
     \parbox[t]{5cm}{
     \centering
     Case 2
-        $$ \texttt{\textcolor{red}{C} = 0}$$
-        $$ \texttt{\textcolor{red}{A} * \textcolor{red}D = \textcolor{red}E} $$
-        $$ \texttt{\textcolor{red}B = 0 or \textcolor{red}D = 0}  $$ }%
+        $$ \texttt{\textcolor{violet}{C} = 0}$$
+        $$ \texttt{\textcolor{red}{A} * \textcolor{violet}{D} = \textcolor{violet}{E}} $$
+        $$ \texttt{\textcolor{red}B = 0 or \textcolor{violet}{D} = 0}  $$ }%
 
 
     Goal:
-    $$\texttt{(\textcolor{red}{A} * \textcolor{red}{D}) = \textcolor{red}{E}  \text{ or } (\textcolor{red}{B} * \textcolor{red}{C}) = \textcolor{red}{E}}$$
+    $$\texttt{(\textcolor{red}{A} * \textcolor{violet}{D}) = \textcolor{violet}{E}  \text{ or } (\textcolor{red}{B} * \textcolor{violet}{C}) = \textcolor{violet}{E}}$$
 
 \end{frame}
 
@@ -329,14 +500,14 @@ University of Illinois Urbana-Champaign \\ % Your institution for the title page
     Case 1
         $$ \texttt{\textcolor{red}{A} = 0}$$
         $$ \texttt{\textcolor{blue}{{B} * C = E}} $$
-        $$ \texttt{\textcolor{red}B = 0 or \textcolor{red}D = 0}  $$ }%
+        $$ \texttt{\textcolor{red}B = 0 or \textcolor{violet}{D} = 0}  $$ }%
     \hspace{1cm}%
     \parbox[t]{5cm}{
     \centering
     Case 2
-        $$ \texttt{\textcolor{red}{C} = 0}$$
+        $$ \texttt{\textcolor{violet}{C} = 0}$$
         $$ \texttt{\textcolor{green}{{A} * D = E}} $$
-        $$ \texttt{\textcolor{red}B = 0 or \textcolor{red}D = 0}  $$ }%
+        $$ \texttt{\textcolor{red}B = 0 or \textcolor{violet}{D} = 0}  $$ }%
 
 
     Goal:
@@ -352,19 +523,99 @@ University of Illinois Urbana-Champaign \\ % Your institution for the title page
     \frametitle{(Sometimes needed) Step 4: Cleanup}
 
     \begin{itemize}
-        \item In real SNARKs there are sums over polynomials, but these can generally be treated as atoms.
         \item SNARKs are based on pairings so the preceding polynomials usually have degree 2.
-        \item The preceding steps generally close most goals - by design zeros keep popping up.
-        \item ... But usually there are a few critical cases that need to be solved by hand (4 in the case of Groth '16).
+        \item The preceding steps generally close most goals - by design zeros keep popping up. 37 recursive calls is enough for our Groth '16 formalization to solve the whole thing.
+        \item ... but usually there are a few critical cases that need to be solved by hand (only 1 in the case of Groth '16).
     \end{itemize}
 
 \end{frame}
 
 \begin{frame}
 
+    \frametitle{Additional Complications: Reappearing Sums}
+
+    In the example 
+
+    $$ \texttt{\textcolor{red}{A}}$$
+
+    In reality:
+
+    $$\texttt{\Sigma (x : fin (n\_var - 1)) in finset.fin\_range (n\_var - 1),}$$
+    $$\texttt{  polynomial.X \textasciicircum (x : nat) * t * polynomial.C (C\_h x)} $$
+
+    Luckily, the freedom over $C\_h$ means expressions like these can be treated as atoms.
+
+    We do need to extract CRS-associated polynomial variables out of these sums though.
+
+\end{frame}
+
+\begin{frame}
+
+    \frametitle{Additional Complications: Laurent Polynomials}
+
+    In the example:
+
+    $$ \texttt{\textcolor{red}{A}\textcolor{blue}{\alpha}+\textcolor{red}B\textcolor{blue}{β}} $$
+
+    In reality:
+
+    $$\texttt{\textcolor{red}{A}+\textcolor{red}B\textcolor{blue}{β}/\textcolor{blue}{\alpha}}$$
+
+    These are \textit{Laurent Polynomials} (polynomials with negative exponents) and the literature is full of them.
+
+    \vspace{0.5cm}
+
+    To formalize these, we multiply through by $\texttt{\textcolor{blue}{\alpha}}$, prove this is equivalent to the original theorem, then proceed.
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Two SNARKs Formalized and More on the Way}
+
+    We have implemented a proof of the knowledge-soundness of BabySNARK and the Type III Groth '16 described in Baghery et al. in the Algebraic Group model.
+
+    \vspace{0.5cm}
+
+
+    We are in the process of formalizing statements of other pairing-based SNARKs in the AGM:
+
+    \begin{itemize}
+        \item The original Groth '16 (amenable to all types of pairings)
+        \item GGPR
+        \item Pinocchio
+    \end{itemize}    
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Formal Proof Stack}
+
+    \begin{itemize}
+        \item Cairo is an interesting project: A SNARK-wrapped VM
+
+        \item Recently completed research of Avigad et al. formalizes the correctness of this VM in Lean (but not the soundness)
+    
+        \item Eventually, it might be nice to integrate all of this into one big verification of the entire stack. 
+        
+        \item Potentially with modularly-replaceable SNARK layer.
+    \end{itemize}
+     
+\end{frame}
+
+\begin{frame}
+
     \frametitle{Performance}
 
-    TODO create a table of the performance of different steps for different SNARKs 
+    As of last night the proof is down to about 
+    
+    \begin{itemize}
+        \item 20 seconds for the polynomial normalization.
+        \item 50 seconds for the recursive simplification.
+    \end{itemize}
+
+
+
+
 
 \end{frame}
 
