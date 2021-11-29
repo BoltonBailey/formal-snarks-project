@@ -73,7 +73,7 @@ def satisfying (a_stmt : fin n_stmt → F ) (a_wit : fin n_wit → F) :=
 run_cmd mk_simp_attr `crs
 run_cmd tactic.add_doc_string `simp_attr.crs "Attribute for defintions of CRS elements"
 
-/-- The crs elements 
+/-- The CRS elements 
 These funtions are actually multivariate Laurent polynomials of the toxic waste samples, 
 but we represent them here as functions on assignments of the variables to values.
 -/
@@ -157,9 +157,9 @@ def C (f : groth16.vars → F) : polynomial F  :=
 local notation `groth16polynomial` := mv_polynomial vars (polynomial F)
 
 
-/-- The modified crs elements 
+/-- The modified CRS elements 
 these are multivariate (non-Laurent!) polynomials of the toxic waste samples, 
-obtained by multiplying the Laurent polynomial forms of the CRS through by γδ. 
+obtained by multiplying the Laurent polynomial forms of the CRS through by γ * δ. 
 We will later prove that the laurent polynomial equation is equivalent to a similar equation of the modified crs elements, allowing us to construct a proof in terms of polynomials -/
 @[crs]
 def crs'_α  : groth16polynomial := X vars.α * X vars.γ * X vars.δ
@@ -171,7 +171,6 @@ def crs'_γ : groth16polynomial := X vars.γ * X vars.γ * X vars.δ
 def crs'_δ : groth16polynomial := X vars.δ * X vars.γ * X vars.δ
 @[crs]
 def crs'_powers_of_x (i : fin n_var) : (groth16polynomial) := mv_polynomial.C (polynomial.X ^ (i : ℕ)) * X vars.γ * X vars.δ
--- I define prodcuts of these crs elements without the division, then later claim identities. Is this right?
 @[crs]
 def crs'_l (i : fin n_stmt) : (groth16polynomial) := 
 (X vars.β * X vars.δ) * mv_polynomial.C (u_stmt i)
@@ -242,12 +241,18 @@ def verified' (a_stmt : fin n_stmt → F ) : Prop := A' * B' = crs'_α * crs'_β
 -- TODO use this for lots of profiling data
 -- set_option profiler true
 
+/--
+This lemma proves that the verification procedure succeeding on the unmodified (Laurent) CRS 
+elements implies that it succeeds with the modified (mv_polynomial) CRS elements. This lets us put 
+our hypotheses in terms of mv_polynomial equations.
+-/
 lemma modification_equivalence (a_stmt : fin n_stmt → F ) : 
   verified a_stmt -> verified' a_stmt
 :=
 begin
+  -- TODO a few conditions likely still need to be added, such as degree bounds and the values 
+  -- being nonzero.
   sorry,
-  -- -- TODO different now that we switch to mv_poly vars (poly F)
   -- rw verified,
   -- rw verified',
   -- intro h,
@@ -562,8 +567,8 @@ begin
 end
 
 /-- The main theorem for the soundness of the Groth '16 SNARK. 
-Show that if the adversary polynomials obey the equations, 
-then the coefficients give a satisfying witness. -/
+This shows that if the adversary polynomials obey the equations that the verification suggests,
+then the C_m coefficients give a satisfying witness. -/
 theorem soundness (a_stmt : fin n_stmt → F ) : 
   verified a_stmt
   -> (satisfying a_stmt C_m)
@@ -605,8 +610,10 @@ begin
     apply monic_of_product_form,
   },
 
+  -- Step 0: Modify the hypothesis to be an equation of mv_polynomials
   have eqn' := modification_equivalence a_stmt (eqn),
 
+  -- Step 1: Obtain the coefficient equations of the mv_polynomials
   have h0012 := coeff0012 a_stmt eqn',
   have h0021 := coeff0021 a_stmt eqn',
   have h0022 := coeff0022 a_stmt eqn',
@@ -622,7 +629,8 @@ begin
   have h1121 := coeff1121 a_stmt eqn',
   have h1122 := coeff1122 a_stmt eqn',
 
-  -- TODO the below alternative to the above doesn't run fast. Why?
+  -- The below alternative to the above which avoids the pre-stated lemmas doesn't run fast. 
+  -- TODO: Debug why.
   -- rw verified' at eqn',
   -- rw [A', B', C'] at eqn',
   -- simp only [] with crs at eqn',
@@ -651,22 +659,19 @@ begin
   -- done,
 
 
-  -- simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at *,
-  -- simp at *,
-  -- my_fail_tactic,
+  -- Step 2: Recursively simplify and case-analyze the equations
+  
   trace "Moving Cs right",
   simp only [simplifier1, simplifier2] at *,
 
   trace "Grouping distributivity",
   simp only [<-mul_add, <-add_mul, <-add_assoc, add_mul_distrib, add_mul_distrib'] at *,
 
-  trace "main simplification",
-  
-
-
+  trace "Main simplification",
   simp only [*] with integral_domain_simp at *,
   tactic.integral_domain_tactic_v4,
-  -- done,
+
+  -- Solve remaining four cases by hand
   { rw [<-h1022, <-h0122, <-h0022],
     simp only [B_β_mul],
     simp only [<-mul_assoc],
@@ -674,7 +679,6 @@ begin
     simp only [<-mul_assoc],
     rw h1122,
     ring, },
-  -- done,
   { rw [h1022, <-h0122, h0022],
     ring, },
   { rw [<-h1022, <-h0122, <-h0022],
@@ -686,7 +690,6 @@ begin
     ring, },
   { rw [h1022, <-h0122, h0022],
     ring, }, 
-  -- done,
 
 
 
