@@ -141,66 +141,68 @@ def satisfying (c_stmt : fin n_stmt → F) (c_wit : fin n_wit → F) :=
 /- Multivariable polynomial definititons and ultilities -/
 
 
-/-- Helper for converting mv_polynomial to single -/
--- @[simp]
--- def singlify : vars -> polynomial F
--- | vars.X := polynomial.X 
--- | vars.Alpha := 1
--- | vars.Beta := 1
--- | vars.Gamma := 1
--- | vars.Delta := 1
+
+
+run_cmd mk_simp_attr `poly
+run_cmd tactic.add_doc_string `simp_attr.poly "Attribute for defintions of poly elements"
 
 -- Helpers for representing vars as polynomials 
 
-def r_v_poly : mv_polynomial vars F := mv_polynomial.X vars.s
-def r_w_poly : mv_polynomial vars F := mv_polynomial.X vars.s
-def s_poly : mv_polynomial vars F := mv_polynomial.X vars.s
-def α_v_poly : mv_polynomial vars F := mv_polynomial.X vars.α_v
-def α_w_poly : mv_polynomial vars F := mv_polynomial.X vars.α_w
-def α_y_poly : mv_polynomial vars F := mv_polynomial.X vars.α_y
-def β_poly : mv_polynomial vars F := mv_polynomial.X vars.β
-def γ_poly : mv_polynomial vars F := mv_polynomial.X vars.γ
+@[poly] def r_v_poly : mv_polynomial vars (polynomial F) := mv_polynomial.X vars.r_v
+@[poly] def r_w_poly : mv_polynomial vars (polynomial F) := mv_polynomial.X vars.r_w
+@[poly] def s_poly : mv_polynomial vars (polynomial F) := mv_polynomial.C (polynomial.X)
+@[poly] def α_v_poly : mv_polynomial vars (polynomial F) := mv_polynomial.X vars.α_v
+@[poly] def α_w_poly : mv_polynomial vars (polynomial F) := mv_polynomial.X vars.α_w
+@[poly] def α_y_poly : mv_polynomial vars (polynomial F) := mv_polynomial.X vars.α_y
+@[poly] def β_poly : mv_polynomial vars (polynomial F) := mv_polynomial.X vars.β
+@[poly] def γ_poly : mv_polynomial vars (polynomial F) := mv_polynomial.X vars.γ
 
 /-- Additional variable defined in terms of others -/
-def r_y_poly : mv_polynomial vars F := r_v_poly * r_w_poly
+@[poly] def r_y_poly : mv_polynomial vars (polynomial F) := r_v_poly * r_w_poly
 
--- The crs elements as multivariate polynomials of the toxic waste samples: Evaluation key elements 
-def crs_v_wit_k (k : fin n_wit) : mv_polynomial vars F := r_v_poly * (v_wit k).eval₂ mv_polynomial.C s_poly
-def crs_w_wit_k (k : fin n_wit) : mv_polynomial vars F := r_w_poly * (w_wit k).eval₂ mv_polynomial.C s_poly
-def crs_y_wit_k (k : fin n_wit) : mv_polynomial vars F := r_y_poly * (y_wit k).eval₂ mv_polynomial.C s_poly
+-- The crs elements as multivariate polynomials of the toxic waste samples: Evaluation key elements
+@[poly] def crs_v_wit_k (k : fin n_wit) : mv_polynomial vars (polynomial F) := 
+  r_v_poly * mv_polynomial.C (v_wit k)
+@[poly] def crs_w_wit_k (k : fin n_wit) : mv_polynomial vars (polynomial F) := 
+  r_w_poly * mv_polynomial.C (w_wit k)
+@[poly] def crs_y_wit_k (k : fin n_wit) : mv_polynomial vars (polynomial F) := 
+  r_y_poly * mv_polynomial.C (y_wit k)
 
-def crs_α_v_wit_k (k : fin n_wit) : mv_polynomial vars F := α_v_poly * r_v_poly * (v_wit k).eval₂ mv_polynomial.C s_poly
-def crs_α_w_wit_k (k : fin n_wit) : mv_polynomial vars F := α_w_poly * r_w_poly * (w_wit k).eval₂ mv_polynomial.C s_poly
-def crs_α_y_wit_k (k : fin n_wit) : mv_polynomial vars F := α_y_poly * r_y_poly * (y_wit k).eval₂ mv_polynomial.C s_poly
+@[poly] def crs_α_v_wit_k (k : fin n_wit) : mv_polynomial vars (polynomial F) := 
+  α_v_poly * r_v_poly * mv_polynomial.C (v_wit k)
+@[poly] def crs_α_w_wit_k (k : fin n_wit) : mv_polynomial vars (polynomial F) := 
+  α_w_poly * r_w_poly * mv_polynomial.C (w_wit k)
+@[poly] def crs_α_y_wit_k (k : fin n_wit) : mv_polynomial vars (polynomial F) := 
+  α_y_poly * r_y_poly * mv_polynomial.C (y_wit k)
 
-def crs_powers (i : fin d) : (mv_polynomial vars F) := s_poly^(i : ℕ)
+@[poly] def crs_powers (i : fin d) : (mv_polynomial vars (polynomial F)) := mv_polynomial.C (polynomial.X ^ (i : ℕ))
 
-def crs_β_v_w_y_k (k : fin n_wit) : mv_polynomial vars F := 
-  β_poly * r_v_poly * (v_wit k).eval₂ mv_polynomial.C s_poly
-  + β_poly * r_w_poly * (w_wit k).eval₂ mv_polynomial.C s_poly
-  + β_poly * r_y_poly * (y_wit k).eval₂ mv_polynomial.C s_poly
+@[poly] def crs_β_v_w_y_k (k : fin n_wit) : mv_polynomial vars (polynomial F) := 
+  β_poly * r_v_poly * mv_polynomial.C (v_wit k)
+  + β_poly * r_w_poly * mv_polynomial.C (w_wit k)
+  + β_poly * r_y_poly * mv_polynomial.C (y_wit k)
 
 -- The crs elements as multivariate polynomials of the toxic waste samples: Verification key elements 
 
-def crs_α_v : mv_polynomial vars F := α_v_poly
-def crs_α_w : mv_polynomial vars F := α_w_poly
-def crs_α_y : mv_polynomial vars F := α_y_poly
-def crs_γ : mv_polynomial vars F := γ_poly
-def crs_βγ : mv_polynomial vars F := β_poly * γ_poly
-def crs_t : mv_polynomial vars F := 
-  r_y_poly * (t).eval₂ mv_polynomial.C s_poly
-def crs_v_0 : mv_polynomial vars F := 
-  r_v_poly * (v_0).eval₂ mv_polynomial.C s_poly
-def crs_w_0 : mv_polynomial vars F := 
-  r_w_poly * (w_0).eval₂ mv_polynomial.C s_poly
-def crs_y_0 : mv_polynomial vars F := 
-  r_y_poly * (y_0).eval₂ mv_polynomial.C s_poly
-def crs_v_stmt (i : fin n_stmt) : mv_polynomial vars F := 
-  r_v_poly * (v_stmt i).eval₂ mv_polynomial.C s_poly
-def crs_w_stmt (i : fin n_stmt) : mv_polynomial vars F := 
-  r_w_poly * (w_stmt i).eval₂ mv_polynomial.C s_poly
-def crs_y_stmt (i : fin n_stmt) : mv_polynomial vars F := 
-  r_y_poly * (y_stmt i).eval₂ mv_polynomial.C s_poly
+@[poly] def crs_α_v : mv_polynomial vars (polynomial F) := α_v_poly
+@[poly] def crs_α_w : mv_polynomial vars (polynomial F) := α_w_poly
+@[poly] def crs_α_y : mv_polynomial vars (polynomial F) := α_y_poly
+@[poly] def crs_γ : mv_polynomial vars (polynomial F) := γ_poly
+@[poly] def crs_βγ : mv_polynomial vars (polynomial F) := β_poly * γ_poly
+@[poly] def crs_t : mv_polynomial vars (polynomial F) := 
+  r_y_poly * mv_polynomial.C (t)
+@[poly] def crs_v_0 : mv_polynomial vars (polynomial F) := 
+  r_v_poly * mv_polynomial.C (v_0)
+@[poly] def crs_w_0 : mv_polynomial vars (polynomial F) := 
+  r_w_poly * mv_polynomial.C (w_0)
+@[poly] def crs_y_0 : mv_polynomial vars (polynomial F) := 
+  r_y_poly * mv_polynomial.C (y_0)
+@[poly] def crs_v_stmt (i : fin n_stmt) : mv_polynomial vars (polynomial F) := 
+  r_v_poly * mv_polynomial.C (v_stmt i)
+@[poly] def crs_w_stmt (i : fin n_stmt) : mv_polynomial vars (polynomial F) := 
+  r_w_poly * mv_polynomial.C (w_stmt i)
+@[poly] def crs_y_stmt (i : fin n_stmt) : mv_polynomial vars (polynomial F) := 
+  r_y_poly * mv_polynomial.C (y_stmt i)
 
 
 -- Coefficients of the CRS elements in the representation of the v_wit proof element in the AGM  
@@ -231,46 +233,46 @@ parameters {v_wit_comp_crs_y_stmt : fin n_stmt → F}
 
 
 /-- Polynomial form of the representation of the v_wit proof element in the AGM -/
-def proof_v_wit : mv_polynomial vars F := 
-  ∑ i in (finset.fin_range n_wit), (v_wit_comp_crs_v_wit_k i) • (crs_v_wit_k i)
+def proof_v_wit : mv_polynomial vars (polynomial F) := 
+  ∑ i in (finset.fin_range n_wit), (crs_v_wit_k i) * mv_polynomial.C (polynomial.C (v_wit_comp_crs_v_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (v_wit_comp_crs_y_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_y_wit_k i) * mv_polynomial.C (polynomial.C (v_wit_comp_crs_y_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (v_wit_comp_crs_w_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_w_wit_k i) * mv_polynomial.C (polynomial.C (v_wit_comp_crs_w_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (v_wit_comp_crs_α_v_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_α_v_wit_k i) * mv_polynomial.C (polynomial.C (v_wit_comp_crs_α_v_wit_k i))
   + 
-  ∑ i in (finset.fin_range n_wit), (v_wit_comp_crs_α_y_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_α_y_wit_k i) * mv_polynomial.C (polynomial.C (v_wit_comp_crs_α_y_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (v_wit_comp_crs_α_w_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_α_w_wit_k i) * mv_polynomial.C (polynomial.C (v_wit_comp_crs_α_w_wit_k i))
   +
-  ∑ i in (finset.fin_range d), (v_wit_comp_crs_powers i) • (crs_powers i)
+  ∑ i in (finset.fin_range d), (crs_powers i) * mv_polynomial.C (polynomial.C (v_wit_comp_crs_powers i))
   +
-  ∑ i in (finset.fin_range n_wit), (v_wit_comp_crs_β_v_w_y_k i) • (crs_β_v_w_y_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_β_v_w_y_k i) * mv_polynomial.C (polynomial.C (v_wit_comp_crs_β_v_w_y_k i))
   +
-  v_wit_comp_crs_α_v • crs_α_v
+  crs_α_v * mv_polynomial.C (polynomial.C (v_wit_comp_crs_α_v))
   +   
-  v_wit_comp_crs_α_w • crs_α_w
+  crs_α_w * mv_polynomial.C (polynomial.C (v_wit_comp_crs_α_w))
   +
-  v_wit_comp_crs_α_y • crs_α_y
+  crs_α_y * mv_polynomial.C (polynomial.C (v_wit_comp_crs_α_y))
   +
-  v_wit_comp_crs_γ • crs_γ
+  crs_γ * mv_polynomial.C (polynomial.C (v_wit_comp_crs_γ))
   +   
-  v_wit_comp_crs_βγ • crs_βγ
+  crs_βγ * mv_polynomial.C (polynomial.C (v_wit_comp_crs_βγ)) 
   +   
-  v_wit_comp_crs_t • crs_t
+  crs_t * mv_polynomial.C (polynomial.C (v_wit_comp_crs_t))
   +   
-  v_wit_comp_crs_v_0 • crs_v_0
+  crs_v_0 * mv_polynomial.C (polynomial.C (v_wit_comp_crs_v_0)) 
   +   
-  v_wit_comp_crs_w_0 • crs_w_0
+  crs_w_0 * mv_polynomial.C (polynomial.C (v_wit_comp_crs_w_0)) 
   +   
-  v_wit_comp_crs_y_0 • crs_y_0
+  crs_y_0 * mv_polynomial.C (polynomial.C (v_wit_comp_crs_y_0))
   +
-  ∑ i in (finset.fin_range n_stmt), (v_wit_comp_crs_v_stmt i) • (crs_v_stmt i)
+  ∑ i in (finset.fin_range n_stmt), (crs_v_stmt i) * mv_polynomial.C (polynomial.C (v_wit_comp_crs_v_stmt i))
   +
-  ∑ i in (finset.fin_range n_stmt), (v_wit_comp_crs_y_stmt i) • (crs_y_stmt i)
+  ∑ i in (finset.fin_range n_stmt), (crs_y_stmt i) * mv_polynomial.C (polynomial.C (v_wit_comp_crs_y_stmt i))
   +
-  ∑ i in (finset.fin_range n_stmt), (v_wit_comp_crs_w_stmt i) • (crs_w_stmt i)
+  ∑ i in (finset.fin_range n_stmt),  (crs_w_stmt i) * mv_polynomial.C (polynomial.C (v_wit_comp_crs_w_stmt i))
 
 -- Coefficients of the CRS elements in the representation of the w_wit proof element in the AGM  
 parameters {w_wit_comp_crs_v_wit_k : fin n_wit →  F}
@@ -300,46 +302,46 @@ parameters {w_wit_comp_crs_y_stmt : fin n_stmt → F}
 
 
 /-- Polynomial form of the representation of the w_wit proof element in the AGM -/
-def proof_w_wit : mv_polynomial vars F := 
-  ∑ i in (finset.fin_range n_wit), (w_wit_comp_crs_v_wit_k i) • (crs_v_wit_k i)
+def proof_w_wit : mv_polynomial vars (polynomial F) := 
+  ∑ i in (finset.fin_range n_wit), (crs_v_wit_k i) * mv_polynomial.C (polynomial.C (w_wit_comp_crs_v_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (w_wit_comp_crs_y_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_y_wit_k i) * mv_polynomial.C (polynomial.C (w_wit_comp_crs_y_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (w_wit_comp_crs_w_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_w_wit_k i) * mv_polynomial.C (polynomial.C (w_wit_comp_crs_w_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (w_wit_comp_crs_α_v_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_α_v_wit_k i) * mv_polynomial.C (polynomial.C (w_wit_comp_crs_α_v_wit_k i))
   + 
-  ∑ i in (finset.fin_range n_wit), (w_wit_comp_crs_α_y_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_α_y_wit_k i) * mv_polynomial.C (polynomial.C (w_wit_comp_crs_α_y_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (w_wit_comp_crs_α_w_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_α_w_wit_k i) * mv_polynomial.C (polynomial.C (w_wit_comp_crs_α_w_wit_k i))
   +
-  ∑ i in (finset.fin_range d), (w_wit_comp_crs_powers i) • (crs_powers i)
+  ∑ i in (finset.fin_range d), (crs_powers i) * mv_polynomial.C (polynomial.C (w_wit_comp_crs_powers i))
   +
-  ∑ i in (finset.fin_range n_wit), (w_wit_comp_crs_β_v_w_y_k i) • (crs_β_v_w_y_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_β_v_w_y_k i) * mv_polynomial.C (polynomial.C (w_wit_comp_crs_β_v_w_y_k i))
   +
-  w_wit_comp_crs_α_v • crs_α_v
+  crs_α_v * mv_polynomial.C (polynomial.C (w_wit_comp_crs_α_v))
   +   
-  w_wit_comp_crs_α_w • crs_α_w
+  crs_α_w * mv_polynomial.C (polynomial.C (w_wit_comp_crs_α_w))
   +
-  w_wit_comp_crs_α_y • crs_α_y
+  crs_α_y * mv_polynomial.C (polynomial.C (w_wit_comp_crs_α_y))
   +
-  w_wit_comp_crs_γ • crs_γ
+  crs_γ * mv_polynomial.C (polynomial.C (w_wit_comp_crs_γ))
   +   
-  w_wit_comp_crs_βγ • crs_βγ
+  crs_βγ * mv_polynomial.C (polynomial.C (w_wit_comp_crs_βγ)) 
   +   
-  w_wit_comp_crs_t • crs_t
+  crs_t * mv_polynomial.C (polynomial.C (w_wit_comp_crs_t))
   +   
-  w_wit_comp_crs_v_0 • crs_v_0
+  crs_v_0 * mv_polynomial.C (polynomial.C (w_wit_comp_crs_v_0)) 
   +   
-  w_wit_comp_crs_w_0 • crs_w_0
+  crs_w_0 * mv_polynomial.C (polynomial.C (w_wit_comp_crs_w_0)) 
   +   
-  w_wit_comp_crs_y_0 • crs_y_0
+  crs_y_0 * mv_polynomial.C (polynomial.C (w_wit_comp_crs_y_0))
   +
-  ∑ i in (finset.fin_range n_stmt), (w_wit_comp_crs_v_stmt i) • (crs_v_stmt i)
+  ∑ i in (finset.fin_range n_stmt), (crs_v_stmt i) * mv_polynomial.C (polynomial.C (w_wit_comp_crs_v_stmt i))
   +
-  ∑ i in (finset.fin_range n_stmt), (w_wit_comp_crs_y_stmt i) • (crs_y_stmt i)
+  ∑ i in (finset.fin_range n_stmt), (crs_y_stmt i) * mv_polynomial.C (polynomial.C (w_wit_comp_crs_y_stmt i))
   +
-  ∑ i in (finset.fin_range n_stmt), (w_wit_comp_crs_w_stmt i) • (crs_w_stmt i)
+  ∑ i in (finset.fin_range n_stmt),  (crs_w_stmt i) * mv_polynomial.C (polynomial.C (w_wit_comp_crs_w_stmt i))
 
 -- Coefficients of the CRS elements in the representation of the y_wit proof element in the AGM  
 parameters {y_wit_comp_crs_v_wit_k : fin n_wit →  F}
@@ -369,46 +371,46 @@ parameters {y_wit_comp_crs_y_stmt : fin n_stmt → F}
 
 
 /-- Polynomial form of the representation of the w_wit proof element in the AGM -/
-def proof_y_wit : mv_polynomial vars F := 
-  ∑ i in (finset.fin_range n_wit), (y_wit_comp_crs_v_wit_k i) • (crs_v_wit_k i)
+def proof_y_wit : mv_polynomial vars (polynomial F) := 
+  ∑ i in (finset.fin_range n_wit), (crs_v_wit_k i) * mv_polynomial.C (polynomial.C (y_wit_comp_crs_v_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (y_wit_comp_crs_y_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_y_wit_k i) * mv_polynomial.C (polynomial.C (y_wit_comp_crs_y_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (y_wit_comp_crs_w_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_w_wit_k i) * mv_polynomial.C (polynomial.C (y_wit_comp_crs_w_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (y_wit_comp_crs_α_v_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_α_v_wit_k i) * mv_polynomial.C (polynomial.C (y_wit_comp_crs_α_v_wit_k i))
   + 
-  ∑ i in (finset.fin_range n_wit), (y_wit_comp_crs_α_y_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_α_y_wit_k i) * mv_polynomial.C (polynomial.C (y_wit_comp_crs_α_y_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (y_wit_comp_crs_α_w_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_α_w_wit_k i) * mv_polynomial.C (polynomial.C (y_wit_comp_crs_α_w_wit_k i))
   +
-  ∑ i in (finset.fin_range d), (y_wit_comp_crs_powers i) • (crs_powers i)
+  ∑ i in (finset.fin_range d), (crs_powers i) * mv_polynomial.C (polynomial.C (y_wit_comp_crs_powers i))
   +
-  ∑ i in (finset.fin_range n_wit), (y_wit_comp_crs_β_v_w_y_k i) • (crs_β_v_w_y_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_β_v_w_y_k i) * mv_polynomial.C (polynomial.C (y_wit_comp_crs_β_v_w_y_k i))
   +
-  y_wit_comp_crs_α_v • crs_α_v
+  crs_α_v * mv_polynomial.C (polynomial.C (y_wit_comp_crs_α_v))
   +   
-  y_wit_comp_crs_α_w • crs_α_w
+  crs_α_w * mv_polynomial.C (polynomial.C (y_wit_comp_crs_α_w))
   +
-  y_wit_comp_crs_α_y • crs_α_y
+  crs_α_y * mv_polynomial.C (polynomial.C (y_wit_comp_crs_α_y))
   +
-  y_wit_comp_crs_γ • crs_γ
+  crs_γ * mv_polynomial.C (polynomial.C (y_wit_comp_crs_γ))
   +   
-  y_wit_comp_crs_βγ • crs_βγ
+  crs_βγ * mv_polynomial.C (polynomial.C (y_wit_comp_crs_βγ)) 
   +   
-  y_wit_comp_crs_t • crs_t
+  crs_t * mv_polynomial.C (polynomial.C (y_wit_comp_crs_t))
   +   
-  y_wit_comp_crs_v_0 • crs_v_0
+  crs_v_0 * mv_polynomial.C (polynomial.C (y_wit_comp_crs_v_0)) 
   +   
-  y_wit_comp_crs_w_0 • crs_w_0
+  crs_w_0 * mv_polynomial.C (polynomial.C (y_wit_comp_crs_w_0)) 
   +   
-  y_wit_comp_crs_y_0 • crs_y_0
+  crs_y_0 * mv_polynomial.C (polynomial.C (y_wit_comp_crs_y_0))
   +
-  ∑ i in (finset.fin_range n_stmt), (y_wit_comp_crs_v_stmt i) • (crs_v_stmt i)
+  ∑ i in (finset.fin_range n_stmt), (crs_v_stmt i) * mv_polynomial.C (polynomial.C (y_wit_comp_crs_v_stmt i))
   +
-  ∑ i in (finset.fin_range n_stmt), (y_wit_comp_crs_y_stmt i) • (crs_y_stmt i)
+  ∑ i in (finset.fin_range n_stmt), (crs_y_stmt i) * mv_polynomial.C (polynomial.C (y_wit_comp_crs_y_stmt i))
   +
-  ∑ i in (finset.fin_range n_stmt), (y_wit_comp_crs_w_stmt i) • (crs_w_stmt i)
+  ∑ i in (finset.fin_range n_stmt),  (crs_w_stmt i) * mv_polynomial.C (polynomial.C (y_wit_comp_crs_w_stmt i))
 
 -- Coefficients of the CRS elements in the representation of the h proof element in the AGM  
 parameters {h_comp_crs_v_wit_k : fin n_wit →  F}
@@ -438,46 +440,46 @@ parameters {h_comp_crs_y_stmt : fin n_stmt → F}
 
 
 /-- Polynomial form of the representation of the h proof element in the AGM -/
-def proof_h : mv_polynomial vars F := 
-  ∑ i in (finset.fin_range n_wit), (h_comp_crs_v_wit_k i) • (crs_v_wit_k i)
+def proof_h : mv_polynomial vars (polynomial F) := 
+  ∑ i in (finset.fin_range n_wit), (crs_v_wit_k i) * mv_polynomial.C (polynomial.C (h_comp_crs_v_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (h_comp_crs_y_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_y_wit_k i) * mv_polynomial.C (polynomial.C (h_comp_crs_y_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (h_comp_crs_w_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_w_wit_k i) * mv_polynomial.C (polynomial.C (h_comp_crs_w_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (h_comp_crs_α_v_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_α_v_wit_k i) * mv_polynomial.C (polynomial.C (h_comp_crs_α_v_wit_k i))
   + 
-  ∑ i in (finset.fin_range n_wit), (h_comp_crs_α_y_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_α_y_wit_k i) * mv_polynomial.C (polynomial.C (h_comp_crs_α_y_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (h_comp_crs_α_w_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_α_w_wit_k i) * mv_polynomial.C (polynomial.C (h_comp_crs_α_w_wit_k i))
   +
-  ∑ i in (finset.fin_range d), (h_comp_crs_powers i) • (crs_powers i)
+  ∑ i in (finset.fin_range d), (crs_powers i) * mv_polynomial.C (polynomial.C (h_comp_crs_powers i))
   +
-  ∑ i in (finset.fin_range n_wit), (h_comp_crs_β_v_w_y_k i) • (crs_β_v_w_y_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_β_v_w_y_k i) * mv_polynomial.C (polynomial.C (h_comp_crs_β_v_w_y_k i))
   +
-  h_comp_crs_α_v • crs_α_v
+  crs_α_v * mv_polynomial.C (polynomial.C (h_comp_crs_α_v))
   +   
-  h_comp_crs_α_w • crs_α_w
+  crs_α_w * mv_polynomial.C (polynomial.C (h_comp_crs_α_w))
   +
-  h_comp_crs_α_y • crs_α_y
+  crs_α_y * mv_polynomial.C (polynomial.C (h_comp_crs_α_y))
   +
-  h_comp_crs_γ • crs_γ
+  crs_γ * mv_polynomial.C (polynomial.C (h_comp_crs_γ))
   +   
-  h_comp_crs_βγ • crs_βγ
+  crs_βγ * mv_polynomial.C (polynomial.C (h_comp_crs_βγ)) 
   +   
-  h_comp_crs_t • crs_t
+  crs_t * mv_polynomial.C (polynomial.C (h_comp_crs_t))
   +   
-  h_comp_crs_v_0 • crs_v_0
+  crs_v_0 * mv_polynomial.C (polynomial.C (h_comp_crs_v_0)) 
   +   
-  h_comp_crs_w_0 • crs_w_0
+  crs_w_0 * mv_polynomial.C (polynomial.C (h_comp_crs_w_0)) 
   +   
-  h_comp_crs_y_0 • crs_y_0
+  crs_y_0 * mv_polynomial.C (polynomial.C (h_comp_crs_y_0))
   +
-  ∑ i in (finset.fin_range n_stmt), (h_comp_crs_v_stmt i) • (crs_v_stmt i)
+  ∑ i in (finset.fin_range n_stmt), (crs_v_stmt i) * mv_polynomial.C (polynomial.C (h_comp_crs_v_stmt i))
   +
-  ∑ i in (finset.fin_range n_stmt), (h_comp_crs_y_stmt i) • (crs_y_stmt i)
+  ∑ i in (finset.fin_range n_stmt), (crs_y_stmt i) * mv_polynomial.C (polynomial.C (h_comp_crs_y_stmt i))
   +
-  ∑ i in (finset.fin_range n_stmt), (h_comp_crs_w_stmt i) • (crs_w_stmt i)
+  ∑ i in (finset.fin_range n_stmt),  (crs_w_stmt i) * mv_polynomial.C (polynomial.C (h_comp_crs_w_stmt i))
 
 -- Coefficients of the CRS elements in the representation of the α_v_wit proof element in the AGM  
 parameters {α_v_wit_comp_crs_v_wit_k : fin n_wit →  F}
@@ -507,46 +509,46 @@ parameters {α_v_wit_comp_crs_y_stmt : fin n_stmt → F}
 
 
 /-- Polynomial form of the representation of the α_v_wit proof element in the AGM -/
-def proof_α_v_wit : mv_polynomial vars F := 
-  ∑ i in (finset.fin_range n_wit), (α_v_wit_comp_crs_v_wit_k i) • (crs_v_wit_k i)
+def proof_α_v_wit : mv_polynomial vars (polynomial F) := 
+  ∑ i in (finset.fin_range n_wit), (crs_v_wit_k i) * mv_polynomial.C (polynomial.C (α_v_wit_comp_crs_v_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (α_v_wit_comp_crs_y_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_y_wit_k i) * mv_polynomial.C (polynomial.C (α_v_wit_comp_crs_y_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (α_v_wit_comp_crs_w_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_w_wit_k i) * mv_polynomial.C (polynomial.C (α_v_wit_comp_crs_w_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (α_v_wit_comp_crs_α_v_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_α_v_wit_k i) * mv_polynomial.C (polynomial.C (α_v_wit_comp_crs_α_v_wit_k i))
   + 
-  ∑ i in (finset.fin_range n_wit), (α_v_wit_comp_crs_α_y_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_α_y_wit_k i) * mv_polynomial.C (polynomial.C (α_v_wit_comp_crs_α_y_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (α_v_wit_comp_crs_α_w_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_α_w_wit_k i) * mv_polynomial.C (polynomial.C (α_v_wit_comp_crs_α_w_wit_k i))
   +
-  ∑ i in (finset.fin_range d), (α_v_wit_comp_crs_powers i) • (crs_powers i)
+  ∑ i in (finset.fin_range d), (crs_powers i) * mv_polynomial.C (polynomial.C (α_v_wit_comp_crs_powers i))
   +
-  ∑ i in (finset.fin_range n_wit), (α_v_wit_comp_crs_β_v_w_y_k i) • (crs_β_v_w_y_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_β_v_w_y_k i) * mv_polynomial.C (polynomial.C (α_v_wit_comp_crs_β_v_w_y_k i))
   +
-  α_v_wit_comp_crs_α_v • crs_α_v
+  crs_α_v * mv_polynomial.C (polynomial.C (α_v_wit_comp_crs_α_v))
   +   
-  α_v_wit_comp_crs_α_w • crs_α_w
+  crs_α_w * mv_polynomial.C (polynomial.C (α_v_wit_comp_crs_α_w))
   +
-  α_v_wit_comp_crs_α_y • crs_α_y
+  crs_α_y * mv_polynomial.C (polynomial.C (α_v_wit_comp_crs_α_y))
   +
-  α_v_wit_comp_crs_γ • crs_γ
+  crs_γ * mv_polynomial.C (polynomial.C (α_v_wit_comp_crs_γ))
   +   
-  α_v_wit_comp_crs_βγ • crs_βγ
+  crs_βγ * mv_polynomial.C (polynomial.C (α_v_wit_comp_crs_βγ)) 
   +   
-  α_v_wit_comp_crs_t • crs_t
+  crs_t * mv_polynomial.C (polynomial.C (α_v_wit_comp_crs_t))
   +   
-  α_v_wit_comp_crs_v_0 • crs_v_0
+  crs_v_0 * mv_polynomial.C (polynomial.C (α_v_wit_comp_crs_v_0)) 
   +   
-  α_v_wit_comp_crs_w_0 • crs_w_0
+  crs_w_0 * mv_polynomial.C (polynomial.C (α_v_wit_comp_crs_w_0)) 
   +   
-  α_v_wit_comp_crs_y_0 • crs_y_0
+  crs_y_0 * mv_polynomial.C (polynomial.C (α_v_wit_comp_crs_y_0))
   +
-  ∑ i in (finset.fin_range n_stmt), (α_v_wit_comp_crs_v_stmt i) • (crs_v_stmt i)
+  ∑ i in (finset.fin_range n_stmt), (crs_v_stmt i) * mv_polynomial.C (polynomial.C (α_v_wit_comp_crs_v_stmt i))
   +
-  ∑ i in (finset.fin_range n_stmt), (α_v_wit_comp_crs_y_stmt i) • (crs_y_stmt i)
+  ∑ i in (finset.fin_range n_stmt), (crs_y_stmt i) * mv_polynomial.C (polynomial.C (α_v_wit_comp_crs_y_stmt i))
   +
-  ∑ i in (finset.fin_range n_stmt), (α_v_wit_comp_crs_w_stmt i) • (crs_w_stmt i)
+  ∑ i in (finset.fin_range n_stmt),  (crs_w_stmt i) * mv_polynomial.C (polynomial.C (α_v_wit_comp_crs_w_stmt i))
 
 -- Coefficients of the CRS elements in the representation of the α_w_wit proof element in the AGM  
 parameters {α_w_wit_comp_crs_v_wit_k : fin n_wit →  F}
@@ -576,46 +578,46 @@ parameters {α_w_wit_comp_crs_y_stmt : fin n_stmt → F}
 
 
 /-- Polynomial form of the representation of the α_w_wit proof element in the AGM -/
-def proof_α_w_wit : mv_polynomial vars F := 
-  ∑ i in (finset.fin_range n_wit), (α_w_wit_comp_crs_v_wit_k i) • (crs_v_wit_k i)
+def proof_α_w_wit : mv_polynomial vars (polynomial F) := 
+  ∑ i in (finset.fin_range n_wit), (crs_v_wit_k i) * mv_polynomial.C (polynomial.C (α_w_wit_comp_crs_v_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (α_w_wit_comp_crs_y_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_y_wit_k i) * mv_polynomial.C (polynomial.C (α_w_wit_comp_crs_y_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (α_w_wit_comp_crs_w_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_w_wit_k i) * mv_polynomial.C (polynomial.C (α_w_wit_comp_crs_w_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (α_w_wit_comp_crs_α_v_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_α_v_wit_k i) * mv_polynomial.C (polynomial.C (α_w_wit_comp_crs_α_v_wit_k i))
   + 
-  ∑ i in (finset.fin_range n_wit), (α_w_wit_comp_crs_α_y_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_α_y_wit_k i) * mv_polynomial.C (polynomial.C (α_w_wit_comp_crs_α_y_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (α_w_wit_comp_crs_α_w_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_α_w_wit_k i) * mv_polynomial.C (polynomial.C (α_w_wit_comp_crs_α_w_wit_k i))
   +
-  ∑ i in (finset.fin_range d), (α_w_wit_comp_crs_powers i) • (crs_powers i)
+  ∑ i in (finset.fin_range d), (crs_powers i) * mv_polynomial.C (polynomial.C (α_w_wit_comp_crs_powers i))
   +
-  ∑ i in (finset.fin_range n_wit), (α_w_wit_comp_crs_β_v_w_y_k i) • (crs_β_v_w_y_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_β_v_w_y_k i) * mv_polynomial.C (polynomial.C (α_w_wit_comp_crs_β_v_w_y_k i))
   +
-  α_w_wit_comp_crs_α_v • crs_α_v
+  crs_α_v * mv_polynomial.C (polynomial.C (α_w_wit_comp_crs_α_v))
   +   
-  α_w_wit_comp_crs_α_w • crs_α_w
+  crs_α_w * mv_polynomial.C (polynomial.C (α_w_wit_comp_crs_α_w))
   +
-  α_w_wit_comp_crs_α_y • crs_α_y
+  crs_α_y * mv_polynomial.C (polynomial.C (α_w_wit_comp_crs_α_y))
   +
-  α_w_wit_comp_crs_γ • crs_γ
+  crs_γ * mv_polynomial.C (polynomial.C (α_w_wit_comp_crs_γ))
   +   
-  α_w_wit_comp_crs_βγ • crs_βγ
+  crs_βγ * mv_polynomial.C (polynomial.C (α_w_wit_comp_crs_βγ)) 
   +   
-  α_w_wit_comp_crs_t • crs_t
+  crs_t * mv_polynomial.C (polynomial.C (α_w_wit_comp_crs_t))
   +   
-  α_w_wit_comp_crs_v_0 • crs_v_0
+  crs_v_0 * mv_polynomial.C (polynomial.C (α_w_wit_comp_crs_v_0)) 
   +   
-  α_w_wit_comp_crs_w_0 • crs_w_0
+  crs_w_0 * mv_polynomial.C (polynomial.C (α_w_wit_comp_crs_w_0)) 
   +   
-  α_w_wit_comp_crs_y_0 • crs_y_0
+  crs_y_0 * mv_polynomial.C (polynomial.C (α_w_wit_comp_crs_y_0))
   +
-  ∑ i in (finset.fin_range n_stmt), (α_w_wit_comp_crs_v_stmt i) • (crs_v_stmt i)
+  ∑ i in (finset.fin_range n_stmt), (crs_v_stmt i) * mv_polynomial.C (polynomial.C (α_w_wit_comp_crs_v_stmt i))
   +
-  ∑ i in (finset.fin_range n_stmt), (α_w_wit_comp_crs_y_stmt i) • (crs_y_stmt i)
+  ∑ i in (finset.fin_range n_stmt), (crs_y_stmt i) * mv_polynomial.C (polynomial.C (α_w_wit_comp_crs_y_stmt i))
   +
-  ∑ i in (finset.fin_range n_stmt), (α_w_wit_comp_crs_w_stmt i) • (crs_w_stmt i)
+  ∑ i in (finset.fin_range n_stmt),  (crs_w_stmt i) * mv_polynomial.C (polynomial.C (α_w_wit_comp_crs_w_stmt i))
 
 -- Coefficients of the CRS elements in the representation of the α_y_wit proof element in the AGM  
 parameters {α_y_wit_comp_crs_v_wit_k : fin n_wit →  F}
@@ -645,46 +647,46 @@ parameters {α_y_wit_comp_crs_y_stmt : fin n_stmt → F}
 
 
 /-- Polynomial form of the representation of the α_y_wit proof element in the AGM -/
-def proof_α_y_wit : mv_polynomial vars F := 
-  ∑ i in (finset.fin_range n_wit), (α_y_wit_comp_crs_v_wit_k i) • (crs_v_wit_k i)
+def proof_α_y_wit : mv_polynomial vars (polynomial F) := 
+  ∑ i in (finset.fin_range n_wit), (crs_v_wit_k i) * mv_polynomial.C (polynomial.C (α_y_wit_comp_crs_v_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (α_y_wit_comp_crs_y_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_y_wit_k i) * mv_polynomial.C (polynomial.C (α_y_wit_comp_crs_y_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (α_y_wit_comp_crs_w_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_w_wit_k i) * mv_polynomial.C (polynomial.C (α_y_wit_comp_crs_w_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (α_y_wit_comp_crs_α_v_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_α_v_wit_k i) * mv_polynomial.C (polynomial.C (α_y_wit_comp_crs_α_v_wit_k i))
   + 
-  ∑ i in (finset.fin_range n_wit), (α_y_wit_comp_crs_α_y_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_α_y_wit_k i) * mv_polynomial.C (polynomial.C (α_y_wit_comp_crs_α_y_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (α_y_wit_comp_crs_α_w_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_α_w_wit_k i) * mv_polynomial.C (polynomial.C (α_y_wit_comp_crs_α_w_wit_k i))
   +
-  ∑ i in (finset.fin_range d), (α_y_wit_comp_crs_powers i) • (crs_powers i)
+  ∑ i in (finset.fin_range d), (crs_powers i) * mv_polynomial.C (polynomial.C (α_y_wit_comp_crs_powers i))
   +
-  ∑ i in (finset.fin_range n_wit), (α_y_wit_comp_crs_β_v_w_y_k i) • (crs_β_v_w_y_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_β_v_w_y_k i) * mv_polynomial.C (polynomial.C (α_y_wit_comp_crs_β_v_w_y_k i))
   +
-  α_y_wit_comp_crs_α_v • crs_α_v
+  crs_α_v * mv_polynomial.C (polynomial.C (α_y_wit_comp_crs_α_v))
   +   
-  α_y_wit_comp_crs_α_w • crs_α_w
+  crs_α_w * mv_polynomial.C (polynomial.C (α_y_wit_comp_crs_α_w))
   +
-  α_y_wit_comp_crs_α_y • crs_α_y
+  crs_α_y * mv_polynomial.C (polynomial.C (α_y_wit_comp_crs_α_y))
   +
-  α_y_wit_comp_crs_γ • crs_γ
+  crs_γ * mv_polynomial.C (polynomial.C (α_y_wit_comp_crs_γ))
   +   
-  α_y_wit_comp_crs_βγ • crs_βγ
+  crs_βγ * mv_polynomial.C (polynomial.C (α_y_wit_comp_crs_βγ)) 
   +   
-  α_y_wit_comp_crs_t • crs_t
+  crs_t * mv_polynomial.C (polynomial.C (α_y_wit_comp_crs_t))
   +   
-  α_y_wit_comp_crs_v_0 • crs_v_0
+  crs_v_0 * mv_polynomial.C (polynomial.C (α_y_wit_comp_crs_v_0)) 
   +   
-  α_y_wit_comp_crs_w_0 • crs_w_0
+  crs_w_0 * mv_polynomial.C (polynomial.C (α_y_wit_comp_crs_w_0)) 
   +   
-  α_y_wit_comp_crs_y_0 • crs_y_0
+  crs_y_0 * mv_polynomial.C (polynomial.C (α_y_wit_comp_crs_y_0))
   +
-  ∑ i in (finset.fin_range n_stmt), (α_y_wit_comp_crs_v_stmt i) • (crs_v_stmt i)
+  ∑ i in (finset.fin_range n_stmt), (crs_v_stmt i) * mv_polynomial.C (polynomial.C (α_y_wit_comp_crs_v_stmt i))
   +
-  ∑ i in (finset.fin_range n_stmt), (α_y_wit_comp_crs_y_stmt i) • (crs_y_stmt i)
+  ∑ i in (finset.fin_range n_stmt), (crs_y_stmt i) * mv_polynomial.C (polynomial.C (α_y_wit_comp_crs_y_stmt i))
   +
-  ∑ i in (finset.fin_range n_stmt), (α_y_wit_comp_crs_w_stmt i) • (crs_w_stmt i)
+  ∑ i in (finset.fin_range n_stmt),  (crs_w_stmt i) * mv_polynomial.C (polynomial.C (α_y_wit_comp_crs_w_stmt i))
 
 -- Coefficients of the CRS elements in the representation of the Z proof element in the AGM  
 parameters {Z_comp_crs_v_wit_k : fin n_wit →  F}
@@ -714,46 +716,46 @@ parameters {Z_comp_crs_y_stmt : fin n_stmt → F}
 
 
 /-- Polynomial form of the representation of the Z proof element in the AGM -/
-def proof_Z : mv_polynomial vars F := 
-  ∑ i in (finset.fin_range n_wit), (Z_comp_crs_v_wit_k i) • (crs_v_wit_k i)
+def proof_Z : mv_polynomial vars (polynomial F) := 
+  ∑ i in (finset.fin_range n_wit), (crs_v_wit_k i) * mv_polynomial.C (polynomial.C (Z_comp_crs_v_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (Z_comp_crs_y_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_y_wit_k i) * mv_polynomial.C (polynomial.C (Z_comp_crs_y_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (Z_comp_crs_w_wit_k i) • (crs_v_wit_k i) -- TODO seems this should be crs_w_wit_k and this mistake is everywhere
+  ∑ i in (finset.fin_range n_wit), (crs_w_wit_k i) * mv_polynomial.C (polynomial.C (Z_comp_crs_w_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (Z_comp_crs_α_v_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_α_v_wit_k i) * mv_polynomial.C (polynomial.C (Z_comp_crs_α_v_wit_k i))
   + 
-  ∑ i in (finset.fin_range n_wit), (Z_comp_crs_α_y_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_α_y_wit_k i) * mv_polynomial.C (polynomial.C (Z_comp_crs_α_y_wit_k i))
   +
-  ∑ i in (finset.fin_range n_wit), (Z_comp_crs_α_w_wit_k i) • (crs_v_wit_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_α_w_wit_k i) * mv_polynomial.C (polynomial.C (Z_comp_crs_α_w_wit_k i))
   +
-  ∑ i in (finset.fin_range d), (Z_comp_crs_powers i) • (crs_powers i)
+  ∑ i in (finset.fin_range d), (crs_powers i) * mv_polynomial.C (polynomial.C (Z_comp_crs_powers i))
   +
-  ∑ i in (finset.fin_range n_wit), (Z_comp_crs_β_v_w_y_k i) • (crs_β_v_w_y_k i)
+  ∑ i in (finset.fin_range n_wit), (crs_β_v_w_y_k i) * mv_polynomial.C (polynomial.C (Z_comp_crs_β_v_w_y_k i))
   +
-  Z_comp_crs_α_v • crs_α_v
+  crs_α_v * mv_polynomial.C (polynomial.C (Z_comp_crs_α_v))
   +   
-  Z_comp_crs_α_w • crs_α_w
+  crs_α_w * mv_polynomial.C (polynomial.C (Z_comp_crs_α_w))
   +
-  Z_comp_crs_α_y • crs_α_y
+  crs_α_y * mv_polynomial.C (polynomial.C (Z_comp_crs_α_y))
   +
-  Z_comp_crs_γ • crs_γ
+  crs_γ * mv_polynomial.C (polynomial.C (Z_comp_crs_γ))
   +   
-  Z_comp_crs_βγ • crs_βγ
+  crs_βγ * mv_polynomial.C (polynomial.C (Z_comp_crs_βγ)) 
   +   
-  Z_comp_crs_t • crs_t
+  crs_t * mv_polynomial.C (polynomial.C (Z_comp_crs_t))
   +   
-  Z_comp_crs_v_0 • crs_v_0
+  crs_v_0 * mv_polynomial.C (polynomial.C (Z_comp_crs_v_0)) 
   +   
-  Z_comp_crs_w_0 • crs_w_0
+  crs_w_0 * mv_polynomial.C (polynomial.C (Z_comp_crs_w_0)) 
   +   
-  Z_comp_crs_y_0 • crs_y_0
+  crs_y_0 * mv_polynomial.C (polynomial.C (Z_comp_crs_y_0))
   +
-  ∑ i in (finset.fin_range n_stmt), (Z_comp_crs_v_stmt i) • (crs_v_stmt i)
+  ∑ i in (finset.fin_range n_stmt), (crs_v_stmt i) * mv_polynomial.C (polynomial.C (Z_comp_crs_v_stmt i))
   +
-  ∑ i in (finset.fin_range n_stmt), (Z_comp_crs_y_stmt i) • (crs_y_stmt i)
+  ∑ i in (finset.fin_range n_stmt), (crs_y_stmt i) * mv_polynomial.C (polynomial.C (Z_comp_crs_y_stmt i))
   +
-  ∑ i in (finset.fin_range n_stmt), (Z_comp_crs_w_stmt i) • (crs_w_stmt i)
+  ∑ i in (finset.fin_range n_stmt),  (crs_w_stmt i) * mv_polynomial.C (polynomial.C (Z_comp_crs_w_stmt i))
 
 -- Single variable form of V_wit
 def v_wit_sv (a_wit : fin n_wit → F) : polynomial F 
@@ -764,47 +766,103 @@ def v_stmt_sv (a_stmt : fin n_stmt → F) : polynomial F
 := ∑ i in (finset.fin_range n_stmt), a_stmt i • v_stmt i
 
 /-- V_stmt as a multivariable polynomial of vars.X -/
-def v_stmt_mv (a_stmt : fin n_stmt → F) : mv_polynomial vars F 
-:= (v_stmt_sv a_stmt).eval₂ mv_polynomial.C s_poly
+@[poly] def v_stmt_mv (a_stmt : fin n_stmt → F) : mv_polynomial vars (polynomial F) 
+:= mv_polynomial.C (v_stmt_sv a_stmt)
 
 /-- The statement polynomial that the verifier computes from the statement bits, as a single variable polynomial -/
 def y_stmt_sv (a_stmt : fin n_stmt → F) : polynomial F 
 := ∑ i in (finset.fin_range n_stmt), a_stmt i • y_stmt i
 
 /-- V_stmt as a multivariable polynomial of vars.X -/
-def y_stmt_mv (a_stmt : fin n_stmt → F) : mv_polynomial vars F 
-:= (y_stmt_sv a_stmt).eval₂ mv_polynomial.C s_poly
+@[poly] def y_stmt_mv (a_stmt : fin n_stmt → F) : mv_polynomial vars (polynomial F) 
+:= mv_polynomial.C (y_stmt_sv a_stmt)
 
 /-- The statement polynomial that the verifier computes from the statement bits, as a single variable polynomial -/
 def w_stmt_sv (a_stmt : fin n_stmt → F) : polynomial F 
 := ∑ i in (finset.fin_range n_stmt), a_stmt i • w_stmt i
 
 /-- V_stmt as a multivariable polynomial of vars.X -/
-def w_stmt_mv (a_stmt : fin n_stmt → F) : mv_polynomial vars F 
-:= (w_stmt_sv a_stmt).eval₂ mv_polynomial.C s_poly
+@[poly] def w_stmt_mv (a_stmt : fin n_stmt → F) : mv_polynomial vars (polynomial F) 
+:= mv_polynomial.C (w_stmt_sv a_stmt)
 
 -- /-- V as a multivariable polynomial -/
--- def proof_v (a_stmt : fin n_stmt → F) : mv_polynomial vars F 
+-- def proof_v (a_stmt : fin n_stmt → F) : mv_polynomial vars (polynomial F) 
 -- := v_stmt_mv a_stmt + proof_v_wit
 
 /-- Multivariable version of t -/
-def t_mv : mv_polynomial vars F := t.eval₂ mv_polynomial.C s_poly
+def t_mv : mv_polynomial vars (polynomial F) := mv_polynomial.C t
+
+
+-- Equations
+
+def eqnI (c_stmt : fin n_stmt → F ) : Prop := 
+  (crs_v_0 + v_stmt_mv c_stmt + proof_v_wit) * (crs_w_0 + w_stmt_mv c_stmt + proof_w_wit) = (proof_h * t_mv) + crs_y_0 + y_stmt_mv c_stmt + proof_y_wit
+
+def eqnII : Prop := 
+  proof_α_v_wit = proof_v_wit * crs_α_v
+
+def eqnIII : Prop := 
+  proof_α_w_wit = proof_w_wit * crs_α_w
+
+def eqnIV : Prop := 
+  proof_α_y_wit = proof_y_wit * crs_α_y
+
+def eqnV : Prop := 
+  proof_Z * crs_γ = (proof_v_wit + proof_w_wit + proof_y_wit) * crs_βγ
+
+-- Coefficients
+open finsupp
+
+lemma eqnIcoeffTODOchoose_good_coeffs (c_stmt : fin n_stmt → F) (eqnI_verified : eqnI c_stmt) :
+  1 = 0
+:=
+begin
+  rw [eqnI] at eqnI_verified,
+  rw [proof_v_wit, proof_w_wit, proof_y_wit, proof_h] at eqnI_verified,
+  simp only [] with poly at eqnI_verified,
+  -- simp only [] with polynomial_nf_3 at eqn,
+  -- simp only [mv_polynomial.smul_eq_C_mul] at eqnI_verified,
+  simp only [mv_polynomial.X, mv_polynomial.C_apply, mv_polynomial.monomial_mul, one_mul, mul_one, add_zero, zero_add, finset.sum_add_distrib, finset.sum_hom, mul_add, add_mul, mv_polynomial.sum_monomial_hom] at eqnI_verified,
+  have congr_coeff := congr_arg (mv_polynomial.coeff (single vars.r_v 1 + single vars.r_w 1)) eqnI_verified,
+  clear eqnI_verified,
+  simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff,
+  simp only [] with finsupp_simp at  congr_coeff,
+  exact congr_coeff,
+end
+
+lemma eqnIIcoeffTODOchoose_good_coeffs (eqnII_verified : eqnII) :
+  ∑ (x : fin n_wit) in finset.fin_range n_wit, v_wit x * polynomial.C (α_v_wit_comp_crs_α_v_wit_k x) = ∑ (x : fin n_wit) in finset.fin_range n_wit, v_wit x * polynomial.C (v_wit_comp_crs_v_wit_k x) + v_0 * polynomial.C v_wit_comp_crs_v_0 + ∑ (x : fin n_stmt) in finset.fin_range n_stmt, v_stmt x * polynomial.C (v_wit_comp_crs_v_stmt x)
+:=
+begin
+  rw [eqnII] at eqnII_verified,
+  rw [proof_v_wit, proof_α_v_wit] at eqnII_verified,
+  simp only [] with poly at eqnII_verified,
+  -- simp only [] with polynomial_nf_3 at eqn,
+  -- simp only [mv_polynomial.smul_eq_C_mul] at eqnII_verified,
+  simp only [mv_polynomial.X, mv_polynomial.C_apply, mv_polynomial.monomial_mul, one_mul, mul_one, add_zero, zero_add, finset.sum_add_distrib, finset.sum_hom, mul_add, add_mul, mv_polynomial.sum_monomial_hom] at eqnII_verified,
+  have congr_coeff := congr_arg (mv_polynomial.coeff (single vars.r_v 1 + single vars.α_v 1)) eqnII_verified,
+  clear eqnII_verified,
+  simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at congr_coeff,
+  simp only [] with finsupp_simp at  congr_coeff,
+  exact congr_coeff,
+end
+
 
 /-- Show that if the adversary polynomials obey the equations, 
 then the coefficients give a satisfying witness. 
 -/
 theorem soundness (c_stmt : fin n_stmt → F ) : 
   (0 < m)
-  -> (crs_v_0 + v_stmt_mv c_stmt + proof_v_wit) * (crs_w_0 + w_stmt_mv c_stmt + proof_w_wit) = (proof_h * t_mv) + crs_y_0 + y_stmt_mv c_stmt + proof_y_wit
-  -> proof_α_v_wit = proof_v_wit * crs_α_v
-  -> proof_α_w_wit = proof_w_wit * crs_α_w
-  -> proof_α_y_wit = proof_y_wit * crs_α_y
-  -> proof_Z * crs_γ = (proof_v_wit + proof_w_wit + proof_y_wit) * crs_βγ
+  -> eqnI c_stmt
+  -> eqnII
+  -> eqnIII
+  -> eqnIV
+  -> eqnV
   -> (satisfying c_stmt v_wit_comp_crs_v_wit_k) -- This shows that (a`+1, . . . , am) = (C`+1, . . . , Cm) is a witness for the statement (a1, . . . , a`)
 :=
 begin
-  intros hm eqnI eqnII eqnIII eqnIV eqnV,
-  have foo := congr_arg (mv_polynomial.coeff (finsupp.single vars.r_v 1)) eqnII,
+  intros hm eqnI_verified eqnII_verified eqnIII_verified eqnIV_verified eqnV_verified,
+  have foo := congr_arg (mv_polynomial.coeff (finsupp.single vars.r_v 1)) eqnII_verified,
   rw [proof_α_v_wit, proof_v_wit, crs_α_v] at foo,
   simp [crs_v_wit_k] at foo,
   simp only with coeff_simp at foo,

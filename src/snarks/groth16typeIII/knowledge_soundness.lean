@@ -25,6 +25,7 @@ open_locale big_operators classical
 
 section groth16
 
+-- TODO we open mv_polynomial, so we should be able to delete a lot of `mv_polynomial.`
 open mv_polynomial groth16
 
 noncomputable theory
@@ -279,6 +280,7 @@ open finsupp
 
 -- From page 9-10 of Baghery et al., we take the coefficients of the relevant monomials.
 
+-- TODO mv_polynomial.smul_eq_C_mul necessary?
 lemma coeff1122 (a_stmt : fin n_stmt → F) (eqn : verified' a_stmt) :
   polynomial.C A_α * polynomial.C B_β = 1
 :=
@@ -536,7 +538,6 @@ begin
   simp only [] with finsupp_simp at  congr_coeff0022,
   exact congr_coeff0022,
 end
-
 
 
 lemma A_α_mul (p : polynomial F) : p * polynomial.C A_α  = polynomial.C A_α * p := by ring
