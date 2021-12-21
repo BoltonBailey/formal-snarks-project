@@ -670,7 +670,7 @@ begin
 
   trace "Main simplification",
   simp only [*] with integral_domain_simp at *,
-  tactic.integral_domain_tactic_v5,
+  tactic.integral_domain_tactic_v4,
 
   -- Solve remaining four cases by hand
   { rw [<-h1022, <-h0122, <-h0022],
