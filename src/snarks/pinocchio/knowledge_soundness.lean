@@ -798,7 +798,7 @@ def w_stmt_sv (a_stmt : fin n_stmt → F) : polynomial F
 -- Equations
 
 def eqnI (c_stmt : fin n_stmt → F ) : Prop := 
-  (crs_v_0 + r_v_poly * v_stmt_mv c_stmt + proof_v_wit) * (crs_w_0 + r_v_poly * w_stmt_mv c_stmt + proof_w_wit) = (proof_h * t_mv) + crs_y_0 + r_v_poly * y_stmt_mv c_stmt + proof_y_wit
+  (crs_v_0 + r_v_poly * v_stmt_mv c_stmt + proof_v_wit) * (crs_w_0 + r_w_poly * w_stmt_mv c_stmt + proof_w_wit) = ((r_y_poly * t_mv) * proof_h) + (crs_y_0 + r_y_poly * y_stmt_mv c_stmt + proof_y_wit)
 
 def eqnII : Prop := 
   proof_v_wit' = proof_v_wit * crs_α_v
@@ -1105,8 +1105,20 @@ begin
   abel,
 end
 
+lemma polynomial.mul_mod_by_monic (t p : polynomial F) (mt : t.monic) : (t * p) %ₘ t = 0 :=
+begin
+  rw polynomial.dvd_iff_mod_by_monic_eq_zero,
+  apply dvd_mul_right,
+  exact mt,
+end
 
-lemma eqnVresults (c_stmt : fin n_stmt → F ) (eqnI_verified : eqnI c_stmt) 
+lemma move_C_left (p : polynomial F) (f : F) :
+  p * polynomial.C f = polynomial.C f * p :=
+begin
+  ring,
+end
+
+lemma soundness (c_stmt : fin n_stmt → F ) (eqnI_verified : eqnI c_stmt) 
   (eqnII_verified : eqnII) (eqnIII_verified : eqnIII) (eqnIV_verified : eqnIV) 
   (eqnV_verified : eqnV) : (satisfying c_stmt Z_comp_crs_β_v_w_y_k) :=
 begin
@@ -1175,9 +1187,24 @@ begin
 
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at h1eqnI,
   simp only [] with finsupp_simp at h1eqnI,
-  rw <-sub_eq_zero at h1eqnI,
+  rw <-sub_eq_iff_eq_add at h1eqnI,
+  -- rw <-sub_eq_zero at h1eqnI,
+  -- rw polynomial.dvd_iff_mod_by_monic_eq_zero,
 
   have h2eqnI := congr_arg (%ₘ t) h1eqnI,
+  simp only [polynomial.zero_mod_by_monic] at h2eqnI,
+  rw polynomial.mul_mod_by_monic at h2eqnI,
+  rw <- h2eqnI,
+  congr' 1,
+  simp_rw [v_stmt_sv, w_stmt_sv, y_stmt_sv, polynomial.smul_eq_C_mul],
+  simp only [add_mul, mul_add],
+  simp_rw [move_C_left],
+  -- congr' 1,
+  -- rw <-sub_eq_zero,
+
+  abel,
+
+  exact monic_t,
 
 end
 
