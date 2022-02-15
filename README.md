@@ -54,7 +54,28 @@ Here is a list of goals and dates for this project
     * [x] Proof
   * Groth '16
     * [x] Implementation
-    * [ ] Proof
+    * [x] Proof
   * Pinocchio
     * [x] Implementation
+    * [x] Proof
+  * GGPR
+    * [x] Implementation
+    * [x] Proof
+  * Lipmaa
+    * [ ] Implementation
     * [ ] Proof
+
+### SNARK Table
+
+Here is a table of the main properties of the SNARKs we formalized.
+
+| Name                              | # Toxic Samples | # Proof elements | # CRS Element Sets | # checks | # Equations (nontrivial) | # Equations (necessary) | Compile Time |
+| --------------------------------- | --------------- | ---------------- | ------------------ | -------- | ------------------------ | ----------------------- | ------------ |
+| GGPR                              | 5               | 7 (only need 6)  | 19                 | 5 (4)    |                          | 17                      | 140.61 s     |
+| Pinocchio (Requiring Strong QAP)  | TODO            | TODO             | TODO               | TODO     | TODO                     | TODO                    | TODO         |
+| Pinocchio                         | 8               | 8                | 21                 | 5        | TODO                     | 46                      | 342.89s      |
+| Groth '16                         | 5               | 3                | 8                  | 1        | TODO                     | 38 (need all? 2x check) | 13741.86s    |
+| Baghery et al. (Groth Type III )) | 5               | 3                | 7 and 4            | 1        | TODO                     | 14                      | 552.67s      |
+| BabySNARK                         | 3               | 3                | 4                  | 2        | TODO                     | ?                       | 74.98s       |
+| Lipmaa                            | 2               | 3                | 7 and 4 and 1      | 1        | 21                       | TODO                    | TODO         |
+| Lipmaa SE                         | 3               | 4                | 10 and 4 and 1     | 2        | TODO                     | TODO                    | TODO         |
