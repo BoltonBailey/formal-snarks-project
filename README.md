@@ -40,10 +40,10 @@ Some folks from CMU asked if we could expand the net to SNARKs like Marlin and A
 
 ### Planning timeline
 
-Here is a list of goals and dates for this project
+Here is a list of goals for this project
 
-* [x] Implement type class for proof systems/ SNARKs and formalize the correctness and knowledge-soundness (and perhaps ZK)
-* [x] Implement a `ring`-like/`library-search`-like tactic to automate simplification of statements about the coefficients of polynomials
+* [x] Implement type class for proof systems/ SNARKs
+* [x] Implement attributes for use with the `simp` tactic to automate simplification of statements about the coefficients of polynomials
 * [x] Implement a procedure to solve systems of equations of polynomials
 * Implement SNARKs
   * BabySNARK
