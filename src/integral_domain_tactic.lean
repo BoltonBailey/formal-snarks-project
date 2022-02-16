@@ -181,7 +181,7 @@ meta def integral_domain_tactic_v3 : tactic unit := do
 
 meta def integral_domain_tactic_v4 : tactic unit := do
   trace "Call to integral_domain_tactic_v4", 
-  trace_state, -- printf debugging
+  -- trace_state, -- printf debugging
   `[my_simp_only [*] with integral_domain_simp
     at * {fail_if_unchanged := ff}],
   try `[cases_type* true false],
@@ -196,7 +196,7 @@ meta def integral_domain_tactic_v4 : tactic unit := do
 -- In practice this seems to be slower, perhaps the optimization is not worth the code complexity.
 meta def integral_domain_tactic_v5 : tactic unit := do
   trace "Call to integral_domain_tactic_v5", 
-  trace_state, -- printf debugging
+  -- trace_state, -- printf debugging
   ctx <- tactic.interactive.context_prop_name_getter,
   if `found_zero ∈ ctx then tactic.interactive.mutually_simplify_one `found_zero else skip,
   try `[cases_type* true false],
