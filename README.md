@@ -3,7 +3,7 @@
 
 This repository implements a formal verification of a variety of SNARK proof systems, using the [Lean Theorem Prover](https://leanprover.github.io/), in the Algebraic Group Model. This is a work in progress.
 
-As of 10/14/2020 the knowledge soundness proofs for [babySNARK](https://github.com/initc3/babySNARK) and the Type III Groth '16 are complete. The full proofs of these theorems can be found at the end of `knowledge_soundness.lean` in their respective directories.
+As of now there are 6 complete soundness proofs. The full proofs of these theorems can be found at the end of `knowledge_soundness.lean` in their respective directories.
 
 ## Summary of the BabySNARK code
 
@@ -77,5 +77,5 @@ Here is a table of the main properties of the SNARKs we formalized.
 | Groth '16                         | 5               | 3                | 8                  | 1        | TODO                     | 38 (need all? 2x check) | 13741.86s    |
 | Baghery et al. (Groth Type III )) | 5               | 3                | 7 and 4            | 1        | TODO                     | 14                      | 552.67s      |
 | BabySNARK                         | 3               | 3                | 4                  | 2        | TODO                     | ?                       | 74.98s       |
-| Lipmaa                            | 2               | 3                | 7 and 4 and 1      | 1        | 21                       | TODO                    | TODO         |
+| Lipmaa                            | 2               | 3                | 7 and 4 and 1      | 1        | 21                       | 6?                      | TODO         |
 | Lipmaa SE                         | 3               | 4                | 10 and 4 and 1     | 2        | TODO                     | TODO                    | TODO         |
