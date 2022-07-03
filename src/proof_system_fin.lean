@@ -1,7 +1,9 @@
 
 import algebra.field
 import algebra.polynomial.big_operators -- correct import?
-import data.mv_polynomial.basic
+import data.mv_polynomial.comm_ring
+import data.equiv.fin -- name changed to logic equiv fin
+import data.mv_polynomial.rename
 
 open_locale big_operators
 
@@ -113,7 +115,7 @@ structure AGM_proof_system :=
   -- proof elements constructed from the statement that the verifier checks the construction of
   (proof_element_checks : proof_elems_index → option (STMT → (fin n_crs)  → F))
   -- Extracts the witness from an AGM
-  (extractor : (proof_elems_index → (fin n_crs)  → F) → WIT)
+  (extractor : (proof_elems_index → (fin n_crs) → F) → WIT)
   -- given an agm which makes a valid proof, the extractor must give a correct witness
   (soundness : 
     ∀ stmt : STMT, 
@@ -234,10 +236,170 @@ noncomputable def change_exponent (𝓟 : AGM_proof_system)
   end 
 }
 
--- def flatten (𝓟 : AGM_proof_system') 
+-- noncomputable def mv_polynomial.map_varset {σ τ : Type*} (f : σ → τ) {R : Type*} [comm_semiring R] : 
+--   mv_polynomial σ R →+* mv_polynomial τ R := mv_polynomial.eval₂_hom (mv_polynomial.C) (mv_polynomial.X ∘ f)
+
+@[simp] lemma mv_polynomial.eval_map_varset {σ τ : Type*} (f : σ → τ) {R : Type*} [comm_semiring R] (g : τ -> R) (p : mv_polynomial σ R) : mv_polynomial.eval g (mv_polynomial.rename f p) = mv_polynomial.eval (g ∘ f) p :=
+begin
+  unfold mv_polynomial.eval,
+  simp only [mv_polynomial.coe_eval₂_hom],
+  rw mv_polynomial.eval₂_rename,
+
+end
+ 
+
+-- maps an element of a fin of a sum of naturals, to an index into the sum, and an index into the value
+def fin_sum_to_fin_fin_1 (a : ℕ) (b : fin a -> ℕ) (i : fin (∑ ai : fin a, b ai)) : fin a := sorry
+def fin_sum_to_fin_fin_2 (a : ℕ) (b : fin a -> ℕ) (i : fin (∑ ai : fin a, b ai)) : fin (b (fin_sum_to_fin_fin_1 a b i)) := sorry
+
+def fin_fin_to_sum_fin (a : ℕ) (b : fin a -> ℕ) (ai : fin a) (bi : fin (b ai)) : fin (∑ ai : fin a, b ai) := sorry
+
+@[simp] lemma fin_sum_to_fin_fin_1_fin_fin_to_sum_fin (a : ℕ) (b : fin a -> ℕ) (ai : fin a) (bi : fin (b ai)) :
+  fin_sum_to_fin_fin_1 a b (fin_fin_to_sum_fin a b ai bi) = ai := sorry
+
+-- @[simp] lemma fin_sum_to_fin_fin_2_fin_fin_to_sum_fin (a : ℕ) (b : fin a -> ℕ) (ai : fin a) (bi : fin (b ai)) :
+--   fin_sum_to_fin_fin_2 a b (fin_fin_to_sum_fin a b ai bi) == bi := sorry
+
+lemma sum_of_fin_sum {S : Type*} [add_comm_monoid S] 
+  (a : ℕ) (b : fin a -> ℕ) (f : fin (∑ ai : fin a, b ai) -> S) : 
+  ∑ i : fin (∑ ai : fin a, b ai), f i 
+  = ∑ (ai : fin a), (∑ bi : fin (b ai), f (fin_fin_to_sum_fin a b ai bi))
+:= sorry
+
+def fin_add_of_fin_fin {S : Type*} {a b : ℕ} (f : fin a -> S ) (g : fin b -> S ) (x : fin (a + b)) :
+S := sorry
+
+@[simp] lemma fin_add_of_fin_fin_nat_add  {S : Type*} {a b : ℕ} (f : fin a -> S ) (g : fin b -> S ) (i : fin b) : 
+  fin_add_of_fin_fin f g (fin.nat_add a i) = g i := sorry
+
+@[simp] lemma fin_add_of_fin_fin_cast_add  {S : Type*} {a b : ℕ} (f : fin a -> S ) (g : fin b -> S ) (i : fin a) : 
+  fin_add_of_fin_fin f g (fin.cast_add b i) = f i := sorry
+
+@[simp] lemma fin_add_of_fin_fin_comp_cast_add  {S : Type*} {a b : ℕ} (f : fin a -> S ) (g : fin b -> S ) : 
+  (fin_add_of_fin_fin f g) ∘ (fin.cast_add b) = f := sorry
+
+-- Given a decomposition of each crs element into a collection of polynomials that sum to it
+-- we can construct a new proof system splitting those terms up
+-- Here, we assume all crs elements are decomposed into the same number of elements, but this need not be the case in principle.
+noncomputable def split_crs (𝓟 : AGM_proof_system) 
+  -- For each old crs element, a number of splits for it
+  (crs_splits : 
+   fin (𝓟.n_crs) -> ℕ)
+  -- For each split, a polynomial over the old sample elements
+  (split : 
+    Π crs_idx : fin 𝓟.n_crs, 
+      (fin (crs_splits crs_idx) -> mv_polynomial (fin 𝓟.n_sample) F) ) 
+  -- The sum of polynomials over a split must equal the old crs polynomial.
+  (sum_split : 
+    Π crs_idx : fin 𝓟.n_crs, 
+      ∑ split_idx : fin (crs_splits crs_idx), split crs_idx split_idx = 𝓟.crs_elems crs_idx)
+  -- A default element for each split
+  (default :
+    Π crs_idx : fin 𝓟.n_crs, fin (crs_splits crs_idx)
+  )
+      : AGM_proof_system :=
+{ relation := 𝓟.relation,
+  n_sample := 𝓟.n_sample + ∑ crs_idx : fin 𝓟.n_crs, crs_splits crs_idx,
+  n_crs := ∑ crs_idx : fin 𝓟.n_crs, crs_splits crs_idx,
+  crs_elems := λ idx, 
+    let old_crs_index : fin 𝓟.n_crs := fin_sum_to_fin_fin_1 𝓟.n_crs crs_splits idx in 
+    let split_index : fin (crs_splits old_crs_index) := fin_sum_to_fin_fin_2 𝓟.n_crs crs_splits idx in 
+      (mv_polynomial.rename (fin.cast_add _) (split old_crs_index split_index))
+      + mv_polynomial.X (fin.nat_add 𝓟.n_sample (idx))
+      - mv_polynomial.X (fin.nat_add 𝓟.n_sample (fin_fin_to_sum_fin 𝓟.n_crs crs_splits old_crs_index ((fin_rotate _) split_index)))
+      ,
+  proof_elems_index := 𝓟.proof_elems_index,
+  polynomial_checks := 𝓟.polynomial_checks,
+  proof_element_checks := λ proof_elem_idx, 
+    option.map 
+      (begin
+        intros old_map stmt idx,
+        exact old_map stmt (fin_sum_to_fin_fin_1 𝓟.n_crs crs_splits idx),
+      end ) 
+      (𝓟.proof_element_checks proof_elem_idx),
+  -- old_map stmt (fin_sum_to_fin_fin_1 𝓟.n_crs crs_splits idx)
+  extractor := begin
+    intro thing,
+    apply 𝓟.extractor,
+    intros proof_elems_idx old_crs_idx,
+    apply thing proof_elems_idx,
+    exact fin_fin_to_sum_fin 𝓟.n_crs crs_splits old_crs_idx (default old_crs_idx),
+  end,
+  soundness := begin
+    rintros stmt agm ⟨poly_checks_pass', proof_elem_checks_pass'⟩,
+    apply 𝓟.soundness,
+    -- TODO prove something about the agm
+    split,
+    { 
+      intros c in_checks f f_never_zero,
+
+      replace poly_checks_pass' := poly_checks_pass' c in_checks,
+      simp at *,      
+      replace poly_checks_pass' := poly_checks_pass' (@fin_add_of_fin_fin F 𝓟.n_sample _ f (λ x, 1)),
+      have : ∀ (s : fin (𝓟.n_sample + ∑ (crs_idx : fin 𝓟.n_crs), crs_splits crs_idx)), ¬fin_add_of_fin_fin f (λ (x : fin (∑ (crs_idx : fin 𝓟.n_crs), crs_splits crs_idx)), 1) s = 0,
+      {
+        sorry
+      },
+      replace poly_checks_pass' := poly_checks_pass' this,
+      simp at poly_checks_pass',
+      simp_rw [sum_of_fin_sum] at poly_checks_pass',
+      simp_rw [fin_sum_to_fin_fin_1_fin_fin_to_sum_fin] at poly_checks_pass',
+
+
+      convert poly_checks_pass',
+      funext pf_idx,
+      congr' 1,
+      funext ai,
+      have foo : (λ (ai : fin 𝓟.n_crs), crs_splits ai) = crs_splits,
+      {
+        funext, 
+        refl,
+      },
+      rw foo,
+      sorry,
+    },
+    {
+      sorry,
+    },
+    
+  end }
+
+-- -- Given a decomposition of each crs element into a collection of polynomials that sum to it
+-- -- we can construct a new proof system splitting those terms up
+-- def split_crs (𝓟 : AGM_proof_system) 
+
+--   (crs_numbering : 
+--    fin (new_n_crs) ->
+--     (Σ crs_idx : fin 𝓟.n_crs, 
+--       (fin (𝓟.crs_elems crs_idx).support.card) ) )
+--   (crs_numbering_inj : function.bijective crs_numbering)
 --   (monomial_numbering : 
---     Π crs_idx : 𝓟.crs_elems_index, 
---       fin (𝓟.crs_elems crs_idx).support.card → (𝓟.crs_elems_index →₀ ℕ)) : AGM_proof_system' :=
+--     Π crs_idx : fin 𝓟.n_crs, 
+--       (fin (𝓟.crs_elems crs_idx).support.card  -> (𝓟.crs_elems crs_idx).support) ) 
+--   (monomial_numbering_bijective : 
+--     ∀ crs_idx : fin 𝓟.n_crs, 
+--       function.bijective (monomial_numbering crs_idx)  ) 
+--       : AGM_proof_system :=
+-- { relation := 𝓟.relation,
+--   n_sample := 𝓟.n_sample + new_n_crs,
+--   n_crs := new_n_crs,
+--   crs_elems := λ idx,
+--   begin
+--     rcases crs_numbering idx with ⟨old_crs, old_crs_number⟩,
+--     clear crs_numbering_inj crs_numbering,
+--     replace monomial_numbering_bijective := monomial_numbering_bijective old_crs,
+--     clear monomial_numbering_bijective,
+--     replace monomial_numbering := monomial_numbering old_crs,
+--     exact (monomial_numbering old_crs_number + mv_polynomial.X (old_crs_number + 𝓟.n_sample) - mv_polynomial.X (old_crs_number.rotate + 𝓟.n_sample))
+--     -- + oldcrs number (with additional shift for generic samples) - old_crs number rotate (with additional shift for generic samples) + monomial 
+--   end,
+--   proof_elems_index := 𝓟.proof_elems_index,
+--   polynomial_checks := _,
+--   proof_element_checks := _,
+--   extractor := _,
+--   soundness := _ }
+
+
 -- { -- The relation the flattened SNARK checks is the same
 --   relation := 𝓟.relation,
 --   -- We have an additional sample for each support monomial of each crs element polynomial
