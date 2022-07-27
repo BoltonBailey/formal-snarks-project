@@ -112,8 +112,8 @@ structure AGM_proof_system :=
   -- (permissible_inclusion : proof_elems_index → crs_elems_index → bool) -- whether it is possible for a malicious prover to include a particular crs elem in a particular proof elem - used to represent distinction between G1 and G2
   -- mv_polynomials of proof elems that the verifier checks to be zero
   (polynomial_checks : list (mv_polynomial proof_elems_index F)) 
-  -- proof elements constructed from the statement that the verifier checks the construction of
-  (proof_element_checks : proof_elems_index → option (STMT → (fin n_crs)  → F))
+  -- proof elements constructed from the statement that the verifier checks the construction of (or, more simply, constructs themselves)
+  (proof_element_checks : proof_elems_index → option (STMT → (fin n_crs) → F))
   -- Extracts the witness from an AGM
   (extractor : (proof_elems_index → (fin n_crs) → F) → WIT)
   -- given an agm which makes a valid proof, the extractor must give a correct witness
@@ -122,17 +122,20 @@ structure AGM_proof_system :=
       ∀ agm : proof_elems_index → (fin n_crs)  → F,
         -- if all checks on the proof pass, the extracted witness must satisfy the relation
         (
-          (∀ c ∈ polynomial_checks, 
-          (∀ f : (fin n_sample) → F, 
-          (∀ s : fin n_sample, f s ≠ 0) →
-          (mv_polynomial.eval (λ pf_idx, ∑ crs_idx : (fin n_crs) , agm pf_idx crs_idx • (mv_polynomial.eval f (crs_elems crs_idx))) (c)) 
+          (∀ c ∈ polynomial_checks,
+          -- (∀ f : (fin n_sample) → F, 
+          -- (∀ s : fin n_sample, f s ≠ 0) →
+          (mv_polynomial.bind₁ 
+            (λ pf_idx,
+              ∑ crs_idx : (fin n_crs) , 
+                agm pf_idx crs_idx • ((crs_elems crs_idx))) 
+            (c)) 
             = 0
-            ))
+            )
             ∧
           (∀ idx : proof_elems_index, 
             ∀ val ∈ proof_element_checks idx, 
-              ((val : STMT → (fin n_crs)  → F) stmt = agm idx))
-        )
+              ((val : STMT → (fin n_crs)  → F) stmt = agm idx)))
           → relation stmt (extractor agm)) -- crs_elems proof check_polynomial
 
 lemma lambda_mul {A B : Type u} [has_mul A] (a : A) (b : B → A) : (λ (i : B), a * b i) = (λ i, a) * b :=
@@ -143,26 +146,22 @@ end
 
 -- def uniform_degree {σ F : Type*} [field F] (p : mv_polynomial σ F) (d : ℕ) : Prop :=
 
-
+-- TODO mathlib
 def uniform_degree {σ F : Type*} [field F] (p : mv_polynomial σ F) (d : ℕ) : Prop := 
-∀ (f : σ → F), ∀ (a : F), mv_polynomial.eval ((λ x, a) * f) p = a ^ d * mv_polynomial.eval (f) p
+∀ m ∈ p.support, finsupp.sum m (λ s k, k) = d
 
+-- todo mathlib
+lemma uniform_degree_implies_bind₁_uniformity {σ τ F : Type*} [field F] (p : mv_polynomial σ F) (d : ℕ) 
+  (h : uniform_degree p d) (f : σ → mv_polynomial τ F) (a):
+    mv_polynomial.bind₁ ((λ x, mv_polynomial.X a) * f) p = ((mv_polynomial.X a) ^ d) * mv_polynomial.bind₁ (f) p
+:= sorry
 
--- example (my_type my_type' F : Type) [field F] [fintype my_type'] (a c : F) 
---   (b : my_type -> my_type' -> F) : 
---   (λ (p : my_type), a * ∑ (x : my_type'), b p x * c) = 0 → false :=
--- begin
---   intro h,
---   -- have : (λ (p : my_type), a * ∑ (x : my_type'), b p x * c) = a * (λ (p : my_type), ∑ (x : my_type'), b p x * c), 
---   -- a has type F but is expected to have type my_type → F
---     have : (λ (p : my_type), a * ∑ (x : my_type'), b p x * c) = (λ x : my_type, a) * (λ (p : my_type), ∑ (x : my_type'), b p x * c), 
---     {
---       ext,
---       refl,
---     },
---     rw this at h,
 
 -- end
+
+-- todo mathlib
+lemma mv_polynomial.mul_X_pow_eq_zero {σ R : Type*} [comm_semiring R] {s : σ} (d : ℕ) (p : mv_polynomial σ R)(h : ((mv_polynomial.X s) ^ d) * p = 0) : p = 0 := sorry
+
 
 noncomputable def change_exponent (𝓟 : AGM_proof_system) 
   (sample : fin 𝓟.n_sample) (d : ℕ) 
@@ -182,9 +181,69 @@ noncomputable def change_exponent (𝓟 : AGM_proof_system)
     apply 𝓟.soundness,
     split,
     {
-      intros c in_checks f f_never_zero,
+      intros c in_checks, -- f, -- f_never_zero,
 
-      replace poly_checks_pass' := poly_checks_pass' c in_checks f f_never_zero,
+      replace poly_checks_pass' := poly_checks_pass' c in_checks,
+      simp at *,
+      have : ⇑(mv_polynomial.bind₁ (λ (pf_idx : 𝓟.proof_elems_index), ∑ (x : fin 𝓟.n_crs), agm pf_idx x • (mv_polynomial.X sample * 𝓟.crs_elems x))) c
+      = 
+      ((mv_polynomial.X sample) ^ d) * (⇑(mv_polynomial.bind₁ (λ (pf_idx : 𝓟.proof_elems_index), ∑ (x : fin 𝓟.n_crs), agm pf_idx x • (𝓟.crs_elems x))) c),
+      {
+        have funeq : (λ (pf_idx : 𝓟.proof_elems_index), ∑ (x : fin 𝓟.n_crs), agm pf_idx x • (mv_polynomial.X sample * 𝓟.crs_elems x))
+        =
+        (λ (pf_idx : 𝓟.proof_elems_index), ∑ (x : fin 𝓟.n_crs), mv_polynomial.X sample * agm pf_idx x • (𝓟.crs_elems x)),
+        {
+          funext,
+          congr,
+          funext,
+          simp_rw mv_polynomial.smul_eq_C_mul,
+          ring,
+          -- library_search, 
+        },
+        simp_rw funeq,
+        simp_rw <-finset.mul_sum,
+        apply uniform_degree_implies_bind₁_uniformity,
+        apply all_checks_uniform_degree,
+        apply in_checks,
+        -- sorry,
+      },
+      rw this at poly_checks_pass',
+      have foo := mv_polynomial.mul_X_pow_eq_zero _ _ poly_checks_pass',
+      exact foo,
+      -- rw mv_polynomial.eval
+      -- exact poly_checks_pass',
+      -- unfold function.comp at checks_give_zero ⊢,
+      -- simp at *,
+      -- simp_rw mv_polynomial.smul_eq_C_mul at *,
+    },
+    {
+      intros idx val val_in,
+      replace proof_elem_checks_pass' :=  proof_elem_checks_pass' idx val val_in,
+      exact proof_elem_checks_pass',
+    },
+  end 
+}
+
+-- Make toxic waste one element
+noncomputable def collapse_toxic_waste (𝓟 : AGM_proof_system) (single_variable_degrees : fin (𝓟.n_sample) → ℕ) : AGM_proof_system :=
+{ relation := 𝓟.relation,
+  n_sample := 1,
+  n_crs := 𝓟.n_crs,
+  crs_elems := (mv_polynomial.eval₂ (mv_polynomial.C) (λ x, ((mv_polynomial.X 0) ^ (single_variable_degrees x)))) ∘ 𝓟.crs_elems,  
+  proof_elems_index := 𝓟.proof_elems_index,
+  -- proof_crs_component := 𝓟.proof_crs_component,
+  polynomial_checks := 𝓟.polynomial_checks,
+  proof_element_checks := 𝓟.proof_element_checks,
+  extractor := 𝓟.extractor,
+  soundness :=
+  begin
+    rintros stmt agm ⟨poly_checks_pass', proof_elem_checks_pass'⟩,
+    apply 𝓟.soundness,
+    split,
+    {
+      intros c in_checks, 
+
+      replace poly_checks_pass' := poly_checks_pass' c in_checks, -- f f_never_zero,
       simp at *,
       simp_rw <-mul_assoc at poly_checks_pass',
       simp_rw [mul_comm _ (f sample)]  at poly_checks_pass',
@@ -249,21 +308,21 @@ end
  
 
 -- maps an element of a fin of a sum of naturals, to an index into the sum, and an index into the value
-def fin_sum_to_fin_fin_1 (a : ℕ) (b : fin a -> ℕ) (i : fin (∑ ai : fin a, b ai)) : fin a := sorry
-def fin_sum_to_fin_fin_2 (a : ℕ) (b : fin a -> ℕ) (i : fin (∑ ai : fin a, b ai)) : fin (b (fin_sum_to_fin_fin_1 a b i)) := sorry
+def fin_mul_to_fin_fin_1 (a : ℕ) (b : ℕ) (i : fin (a * b)) : fin a := sorry
+def fin_mul_to_fin_fin_2 (a : ℕ) (b : ℕ) (i : fin (a * b)) : fin b := sorry
 
-def fin_fin_to_sum_fin (a : ℕ) (b : fin a -> ℕ) (ai : fin a) (bi : fin (b ai)) : fin (∑ ai : fin a, b ai) := sorry
+def fin_fin_to_mul_fin (a : ℕ) (b : ℕ) (ai : fin a) (bi : fin b) : fin (a * b) := sorry
 
-@[simp] lemma fin_sum_to_fin_fin_1_fin_fin_to_sum_fin (a : ℕ) (b : fin a -> ℕ) (ai : fin a) (bi : fin (b ai)) :
-  fin_sum_to_fin_fin_1 a b (fin_fin_to_sum_fin a b ai bi) = ai := sorry
+@[simp] lemma fin_mul_to_fin_fin_1_fin_fin_to_mul_fin (a : ℕ) (b : ℕ) (ai : fin a) (bi : fin b) :
+  fin_mul_to_fin_fin_1 a b (fin_fin_to_mul_fin a b ai bi) = ai := sorry
 
--- @[simp] lemma fin_sum_to_fin_fin_2_fin_fin_to_sum_fin (a : ℕ) (b : fin a -> ℕ) (ai : fin a) (bi : fin (b ai)) :
---   fin_sum_to_fin_fin_2 a b (fin_fin_to_sum_fin a b ai bi) == bi := sorry
+@[simp] lemma fin_mul_to_fin_fin_2_fin_fin_to_mul_fin (a : ℕ) (b : ℕ) (ai : fin a) (bi : fin (b)) :
+  fin_mul_to_fin_fin_2 a b (fin_fin_to_mul_fin a b ai bi) = bi := sorry
 
-lemma sum_of_fin_sum {S : Type*} [add_comm_monoid S] 
-  (a : ℕ) (b : fin a -> ℕ) (f : fin (∑ ai : fin a, b ai) -> S) : 
-  ∑ i : fin (∑ ai : fin a, b ai), f i 
-  = ∑ (ai : fin a), (∑ bi : fin (b ai), f (fin_fin_to_sum_fin a b ai bi))
+lemma sum_of_fin_mul {S : Type*} [add_comm_monoid S] 
+  (a : ℕ) (b : ℕ) (f : fin (a * b) -> S) : 
+  ∑ i : fin (a * b), f i 
+  = ∑ (ai : fin a), (∑ bi : fin (b), f (fin_fin_to_mul_fin a b ai bi))
 := sorry
 
 def fin_add_of_fin_fin {S : Type*} {a b : ℕ} (f : fin a -> S ) (g : fin b -> S ) (x : fin (a + b)) :
@@ -283,30 +342,29 @@ S := sorry
 -- Here, we assume all crs elements are decomposed into the same number of elements, but this need not be the case in principle.
 noncomputable def split_crs (𝓟 : AGM_proof_system) 
   -- For each old crs element, a number of splits for it
-  (crs_splits : 
-   fin (𝓟.n_crs) -> ℕ)
+  (crs_splits : ℕ)
   -- For each split, a polynomial over the old sample elements
   (split : 
     Π crs_idx : fin 𝓟.n_crs, 
-      (fin (crs_splits crs_idx) -> mv_polynomial (fin 𝓟.n_sample) F) ) 
+      (fin (crs_splits) -> mv_polynomial (fin 𝓟.n_sample) F) ) 
   -- The sum of polynomials over a split must equal the old crs polynomial.
   (sum_split : 
     Π crs_idx : fin 𝓟.n_crs, 
-      ∑ split_idx : fin (crs_splits crs_idx), split crs_idx split_idx = 𝓟.crs_elems crs_idx)
+      ∑ split_idx : fin (crs_splits), split crs_idx split_idx = 𝓟.crs_elems crs_idx)
   -- A default element for each split
   (default :
-    Π crs_idx : fin 𝓟.n_crs, fin (crs_splits crs_idx)
+    Π crs_idx : fin 𝓟.n_crs, fin (crs_splits)
   )
       : AGM_proof_system :=
 { relation := 𝓟.relation,
-  n_sample := 𝓟.n_sample + ∑ crs_idx : fin 𝓟.n_crs, crs_splits crs_idx,
-  n_crs := ∑ crs_idx : fin 𝓟.n_crs, crs_splits crs_idx,
+  n_sample := 𝓟.n_sample + 𝓟.n_crs * crs_splits,
+  n_crs := 𝓟.n_crs * crs_splits,
   crs_elems := λ idx, 
-    let old_crs_index : fin 𝓟.n_crs := fin_sum_to_fin_fin_1 𝓟.n_crs crs_splits idx in 
-    let split_index : fin (crs_splits old_crs_index) := fin_sum_to_fin_fin_2 𝓟.n_crs crs_splits idx in 
+    let old_crs_index : fin 𝓟.n_crs := fin_mul_to_fin_fin_1 𝓟.n_crs crs_splits idx in 
+    let split_index : fin (crs_splits) := fin_mul_to_fin_fin_2 𝓟.n_crs crs_splits idx in 
       (mv_polynomial.rename (fin.cast_add _) (split old_crs_index split_index))
       + mv_polynomial.X (fin.nat_add 𝓟.n_sample (idx))
-      - mv_polynomial.X (fin.nat_add 𝓟.n_sample (fin_fin_to_sum_fin 𝓟.n_crs crs_splits old_crs_index ((fin_rotate _) split_index)))
+      - mv_polynomial.X (fin.nat_add 𝓟.n_sample (fin_fin_to_mul_fin 𝓟.n_crs crs_splits old_crs_index ((fin_rotate _) split_index)))
       ,
   proof_elems_index := 𝓟.proof_elems_index,
   polynomial_checks := 𝓟.polynomial_checks,
@@ -314,7 +372,7 @@ noncomputable def split_crs (𝓟 : AGM_proof_system)
     option.map 
       (begin
         intros old_map stmt idx,
-        exact old_map stmt (fin_sum_to_fin_fin_1 𝓟.n_crs crs_splits idx),
+        exact old_map stmt (fin_mul_to_fin_fin_1 𝓟.n_crs crs_splits idx),
       end ) 
       (𝓟.proof_element_checks proof_elem_idx),
   -- old_map stmt (fin_sum_to_fin_fin_1 𝓟.n_crs crs_splits idx)
@@ -323,40 +381,52 @@ noncomputable def split_crs (𝓟 : AGM_proof_system)
     apply 𝓟.extractor,
     intros proof_elems_idx old_crs_idx,
     apply thing proof_elems_idx,
-    exact fin_fin_to_sum_fin 𝓟.n_crs crs_splits old_crs_idx (default old_crs_idx),
+    exact fin_fin_to_mul_fin 𝓟.n_crs crs_splits old_crs_idx (default old_crs_idx),
   end,
   soundness := begin
     rintros stmt agm ⟨poly_checks_pass', proof_elem_checks_pass'⟩,
     apply 𝓟.soundness,
-    -- TODO prove something about the agm
+
     split,
     { 
-      intros c in_checks f f_never_zero,
+      intros c in_checks,
 
+      -- TODO: restructure defalut so that it equals 0?
+
+      
+
+      have same : ∀ (pr : 𝓟.proof_elems_index) (ai : fin 𝓟.n_crs) (bi : fin crs_splits), agm pr (fin_fin_to_mul_fin _ _ ai bi) = agm pr (fin_fin_to_mul_fin _ _ ai (default ai)),
+      {
+        clear proof_elem_checks_pass',
+        sorry
+      },
+      -- done,
       replace poly_checks_pass' := poly_checks_pass' c in_checks,
-      simp at *,      
+
+
+
+      simp only [mv_polynomial.eval_X, and_imp, ring_hom.map_sub, algebra.id.smul_eq_mul, ring_hom.map_add, ne.def,
+  mv_polynomial.eval_map_varset, option.mem_def, exists_imp_distrib, option.map_eq_some'] at *,      
       replace poly_checks_pass' := poly_checks_pass' (@fin_add_of_fin_fin F 𝓟.n_sample _ f (λ x, 1)),
-      have : ∀ (s : fin (𝓟.n_sample + ∑ (crs_idx : fin 𝓟.n_crs), crs_splits crs_idx)), ¬fin_add_of_fin_fin f (λ (x : fin (∑ (crs_idx : fin 𝓟.n_crs), crs_splits crs_idx)), 1) s = 0,
+      have : ∀ (s : fin (𝓟.n_sample + 𝓟.n_crs * crs_splits)), ¬fin_add_of_fin_fin f (λ (x : fin (𝓟.n_crs * crs_splits)), 1) s = 0,
       {
         sorry
       },
       replace poly_checks_pass' := poly_checks_pass' this,
-      simp at poly_checks_pass',
-      simp_rw [sum_of_fin_sum] at poly_checks_pass',
-      simp_rw [fin_sum_to_fin_fin_1_fin_fin_to_sum_fin] at poly_checks_pass',
+      simp only [fin_add_of_fin_fin_nat_add, add_sub_cancel, fin_add_of_fin_fin_comp_cast_add] at poly_checks_pass',
+      simp_rw [sum_of_fin_mul] at poly_checks_pass',
+      simp_rw [fin_mul_to_fin_fin_1_fin_fin_to_mul_fin] at poly_checks_pass',
+      simp_rw [fin_mul_to_fin_fin_2_fin_fin_to_mul_fin] at poly_checks_pass',
 
 
       convert poly_checks_pass',
       funext pf_idx,
       congr' 1,
       funext ai,
-      have foo : (λ (ai : fin 𝓟.n_crs), crs_splits ai) = crs_splits,
-      {
-        funext, 
-        refl,
-      },
-      rw foo,
-      sorry,
+      simp_rw [same],
+      rw <-finset.mul_sum,
+      rw finset.sum_hom,
+      rw sum_split ai,
     },
     {
       sorry,
