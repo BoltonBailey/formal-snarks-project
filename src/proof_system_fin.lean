@@ -17,7 +17,7 @@ This file contains classes for noninteractive proof systems.
 
 universe u
 /-- The finite field parameter of our SNARK -/
-parameter {F : Type u}
+parameter {F : Type}
 parameter [field F]
 
 -- The types of the statement and witness are assumed to be collections of n_stmt and n_wit field elements respectively.
@@ -224,6 +224,7 @@ noncomputable def change_exponent (𝓟 : AGM_proof_system)
   end 
 }
 
+
 -- Make toxic waste one element
 noncomputable def collapse_toxic_waste (𝓟 : AGM_proof_system) (single_variable_degrees : fin (𝓟.n_sample) → ℕ) : AGM_proof_system :=
 { relation := 𝓟.relation,
@@ -337,6 +338,26 @@ S := sorry
 @[simp] lemma fin_add_of_fin_fin_comp_cast_add  {S : Type*} {a b : ℕ} (f : fin a -> S ) (g : fin b -> S ) : 
   (fin_add_of_fin_fin f g) ∘ (fin.cast_add b) = f := sorry
 
+example  {S : Type*} [add_comm_monoid S]  {a : ℕ} (f : fin a -> S ) : 
+  (∑ i : fin a, (f i)) = ∑ i : fin a, f (fin_rotate a i) :=
+begin
+  refine (equiv.sum_comp (fin_rotate a) f).symm,
+end
+
+lemma rotate_cancel (crs_splits pncrs pnsample : ℕ) : ∀ x : fin pncrs, 
+            ∑ (x_1 : fin crs_splits),
+                @mv_polynomial.X F _ _ 
+                  ((fin.nat_add pnsample) (fin_fin_to_mul_fin pncrs crs_splits x ((fin_rotate crs_splits) x_1)))
+            =
+            ∑ (x_1 : fin crs_splits),
+                mv_polynomial.X
+                  ((fin.nat_add pnsample) (fin_fin_to_mul_fin pncrs crs_splits x x_1)) 
+                   :=
+begin
+  -- apply equiv.sum_comp,
+  sorry,
+end
+
 -- Given a decomposition of each crs element into a collection of polynomials that sum to it
 -- we can construct a new proof system splitting those terms up
 -- Here, we assume all crs elements are decomposed into the same number of elements, but this need not be the case in principle.
@@ -406,14 +427,65 @@ noncomputable def split_crs (𝓟 : AGM_proof_system)
 
 
       simp only [mv_polynomial.eval_X, and_imp, ring_hom.map_sub, algebra.id.smul_eq_mul, ring_hom.map_add, ne.def,
-  mv_polynomial.eval_map_varset, option.mem_def, exists_imp_distrib, option.map_eq_some'] at *,      
-      replace poly_checks_pass' := poly_checks_pass' (@fin_add_of_fin_fin F 𝓟.n_sample _ f (λ x, 1)),
-      have : ∀ (s : fin (𝓟.n_sample + 𝓟.n_crs * crs_splits)), ¬fin_add_of_fin_fin f (λ (x : fin (𝓟.n_crs * crs_splits)), 1) s = 0,
+  mv_polynomial.eval_map_varset, option.mem_def, exists_imp_distrib, option.map_eq_some'] at *,
+      simp_rw [add_sub_assoc] at poly_checks_pass',
+      simp_rw [mv_polynomial.smul_eq_C_mul] at poly_checks_pass',
+      simp_rw [mul_add] at poly_checks_pass',
+      simp_rw [finset.sum_add_distrib] at poly_checks_pass',
+      simp_rw [sum_of_fin_mul] at poly_checks_pass',
+      simp at poly_checks_pass',
+      simp_rw [same] at poly_checks_pass',
+      simp_rw [←finset.mul_sum] at poly_checks_pass',
+      simp_rw [finset.sum_sub_distrib] at poly_checks_pass', -- alias this lemma
+      -- have rotate_cancel : ∀ x : fin 𝓟.n_crs, 
+      --       ∑ (x_1 : fin crs_splits),
+      --           mv_polynomial.X
+      --             ((fin.nat_add 𝓟.n_sample) (fin_fin_to_mul_fin 𝓟.n_crs crs_splits x ((fin_rotate crs_splits) x_1)))
+      --       -
+      --       ∑ (x_1 : fin crs_splits),
+      --           mv_polynomial.X
+      --             ((fin.nat_add 𝓟.n_sample) (fin_fin_to_mul_fin 𝓟.n_crs crs_splits x x_1)) = 0,
+      -- {
+      --   sorry,
+      -- },
+
+
+      simp_rw [rotate_cancel] at poly_checks_pass',
+      simp [] at poly_checks_pass',
+      simp_rw [mv_polynomial.smul_eq_C_mul],    
+
+
+      have foobar : 
+          (mv_polynomial.bind₁ 
+            (λ (pf_idx : 𝓟.proof_elems_index), 
+              ∑ (x : fin 𝓟.n_crs), mv_polynomial.C (agm pf_idx (fin_fin_to_mul_fin 𝓟.n_crs crs_splits x (default x))) 
+                * ∑ (x_1 : fin crs_splits), (mv_polynomial.rename (fin.cast_add (𝓟.n_crs * crs_splits))) (split x x_1))) c
+          = 
+          (mv_polynomial.rename (fin.cast_add (𝓟.n_crs * crs_splits))) ((mv_polynomial.bind₁ 
+            (λ (pf_idx : 𝓟.proof_elems_index), 
+              ∑ (x : fin 𝓟.n_crs), mv_polynomial.C (agm pf_idx (fin_fin_to_mul_fin 𝓟.n_crs crs_splits x (default x))) 
+                * ∑ (x_1 : fin crs_splits), (split x x_1))) c),
       {
-        sorry
+        sorry,
       },
-      replace poly_checks_pass' := poly_checks_pass' this,
+      simp_rw foobar at poly_checks_pass',
+
+      simp_rw sum_split at poly_checks_pass',
+
+      have zero_eq_rename : 0 = mv_polynomial.rename (fin.cast_add (𝓟.n_crs * crs_splits)) 0, sorry,
+
+      rw zero_eq_rename at poly_checks_pass',
+
+      convert mv_polynomial.rename_injective (fin.cast_add (𝓟.n_crs * crs_splits)) _ poly_checks_pass',
+
+      sorry,
+
+      done,
+
+      
+
       simp only [fin_add_of_fin_fin_nat_add, add_sub_cancel, fin_add_of_fin_fin_comp_cast_add] at poly_checks_pass',
+      simp_rw [sum_of_fin_mul] at poly_checks_pass',
       simp_rw [sum_of_fin_mul] at poly_checks_pass',
       simp_rw [fin_mul_to_fin_fin_1_fin_fin_to_mul_fin] at poly_checks_pass',
       simp_rw [fin_mul_to_fin_fin_2_fin_fin_to_mul_fin] at poly_checks_pass',
