@@ -4,6 +4,7 @@ import algebra.polynomial.big_operators -- correct import?
 import data.mv_polynomial.comm_ring
 import data.equiv.fin -- name changed to logic equiv fin
 import data.mv_polynomial.rename
+import data.mv_polynomial.variables
 
 open_locale big_operators
 
@@ -99,6 +100,7 @@ structure AGM_proof_system'' :=
               ((val : STMT → crs_elems_index → F) stmt = agm idx))
         )
           → relation stmt (extractor agm)) -- crs_elems proof check_polynomial
+
 structure AGM_proof_system :=
   (relation : STMT → WIT → Prop)
   (n_sample : ℕ) -- a type of symbols to represent toxic waste elems
@@ -150,17 +152,73 @@ end
 def uniform_degree {σ F : Type*} [field F] (p : mv_polynomial σ F) (d : ℕ) : Prop := 
 ∀ m ∈ p.support, finsupp.sum m (λ s k, k) = d
 
+
+lemma mv_polynomial.bind₁_sum (T σ τ F : Type*) (S : finset T) [comm_semiring F] (f : σ → mv_polynomial τ F) (g : T -> mv_polynomial σ F) :
+  mv_polynomial.bind₁ f (∑ s in S, g s) = (∑ s in S, mv_polynomial.bind₁ f (g s)) :=
+begin
+  exact (mv_polynomial.bind₁ f).map_sum (λ (x : T), g x) S,
+end
+
+
+example (T σ τ F : Type*) (A B : finset T) (f g : T -> F) [comm_semiring F] (h :  ∀ a ∈ A, f a = g a ) : ∑ a in A, f a = ∑ a in A, g a := by refine finset.sum_congr rfl h
+
 -- todo mathlib
 lemma uniform_degree_implies_bind₁_uniformity {σ τ F : Type*} [field F] (p : mv_polynomial σ F) (d : ℕ) 
   (h : uniform_degree p d) (f : σ → mv_polynomial τ F) (a):
     mv_polynomial.bind₁ ((λ x, mv_polynomial.X a) * f) p = ((mv_polynomial.X a) ^ d) * mv_polynomial.bind₁ (f) p
-:= sorry
+:= 
+begin
+  rw mv_polynomial.as_sum p,
+  rw mv_polynomial.bind₁_sum,
+  rw mv_polynomial.bind₁_sum,
+  rw finset.mul_sum,
+  rw finset.sum_congr,
+  refl,
+  intros y y_mem_support,
+  unfold uniform_degree at h,
+  replace h := h y y_mem_support,
+  simp_rw mv_polynomial.bind₁_monomial,
+  simp only [pi.mul_apply],
+  simp_rw mul_pow,
+  rw finset.prod_mul_distrib,
+  simp_rw <-mul_assoc,
+  congr' 1,
+  rw mul_comm,
+  congr' 1,
+  rw <- h,
+  rw finset.prod_pow_eq_pow_sum,
+  congr' 1,
+  -- ring_nf,
+end
 
 
 -- end
 
+lemma mv_polynomial.mul_X_eq_zero {σ R : Type*} [comm_semiring R] (s : σ) (p : mv_polynomial σ R)(h : ((mv_polynomial.X s)) * p = 0) : p = 0 := 
+begin
+  rw mv_polynomial.ext_iff at h ⊢,
+  intros m,
+  replace h := h (m + finsupp.single s 1),
+  simp at h,
+  rw mul_comm at h,
+  rw mv_polynomial.coeff_mul_X at h, -- generalize to X_pow
+  simp [h],
+end
+
+
 -- todo mathlib
-lemma mv_polynomial.mul_X_pow_eq_zero {σ R : Type*} [comm_semiring R] {s : σ} (d : ℕ) (p : mv_polynomial σ R)(h : ((mv_polynomial.X s) ^ d) * p = 0) : p = 0 := sorry
+lemma mv_polynomial.mul_X_pow_eq_zero {σ R : Type*} [comm_semiring R] {s : σ} (d : ℕ) (p : mv_polynomial σ R)(h : ((mv_polynomial.X s) ^ d) * p = 0) : p = 0 := 
+begin
+  induction d,
+  simp at h,
+  exact h,
+  apply d_ih,
+  rw pow_succ at h,
+  apply mv_polynomial.mul_X_eq_zero s,
+  rw <-mul_assoc,
+  exact h,
+  
+end
 
 
 noncomputable def change_exponent (𝓟 : AGM_proof_system) 
@@ -225,8 +283,10 @@ noncomputable def change_exponent (𝓟 : AGM_proof_system)
 }
 
 
--- Make toxic waste one element
-noncomputable def collapse_toxic_waste (𝓟 : AGM_proof_system) (single_variable_degrees : fin (𝓟.n_sample) → ℕ) : AGM_proof_system :=
+-- Returns a SNARK where one fewer toxic waste element is actually used, replaced by sample_target ^ d
+noncomputable def collapse_toxic_waste (𝓟 : AGM_proof_system) (d : ℕ) (sample_removed sample_target : fin 𝓟.n_sample) 
+  (h : ∀ (crs_idx : fin 𝓟.n_crs), mv_polynomial.degree_of sample_target (𝓟.crs_elems crs_idx) < d) : 
+  AGM_proof_system :=
 { relation := 𝓟.relation,
   n_sample := 1,
   n_crs := 𝓟.n_crs,
@@ -308,11 +368,55 @@ begin
 end
  
 
--- maps an element of a fin of a sum of naturals, to an index into the sum, and an index into the value
-def fin_mul_to_fin_fin_1 (a : ℕ) (b : ℕ) (i : fin (a * b)) : fin a := sorry
-def fin_mul_to_fin_fin_2 (a : ℕ) (b : ℕ) (i : fin (a * b)) : fin b := sorry
+-- lemma mynat.div_lt_of_lt_mul (a b c : ℕ) (h : c < a * b) : c / a < b := 
+-- begin
+-- apply nat.div_lt_of_lt_mul,
+--   cases a,
+--   linarith,
+--   have : 0 < a.succ, exact nat.succ_pos a,
+--   rw <-mul_lt_mul_left this,
+--   apply lt_of_le_of_lt _ h,
+--   exact nat.mul_div_le c (nat.succ a),
+--   -- linarith,
+-- end
 
-def fin_fin_to_mul_fin (a : ℕ) (b : ℕ) (ai : fin a) (bi : fin b) : fin (a * b) := sorry
+-- maps an element of a fin of a sum of naturals, to an index into the sum, and an index into the value
+def fin_mul_to_fin_fin_1 (a : ℕ) (b : ℕ) (i : fin (a * b)) : fin a := 
+fin.mk ((i : ℕ) / b) 
+  (by { 
+    have : (i : ℕ) < a * b, exact fin.is_lt i,  
+    apply nat.div_lt_of_lt_mul,
+    simp_rw nat.mul_comm,
+    exact this,
+    })
+
+
+lemma pos_of_fin_inhabited (a : ℕ) ( i : fin a) : 0 < a := 
+begin
+  rcases i,
+  apply lt_of_le_of_lt _ i_property,
+  exact zero_le i_val,
+end
+
+def fin_mul_to_fin_fin_2 (a : ℕ) (b : ℕ) (i : fin (a * b)) : fin b := 
+fin.mk ((i : ℕ) % b) 
+  (by { 
+    apply nat.mod_lt,
+    have : 0 < a * b, exact pos_of_fin_inhabited _ i,
+    contrapose! this,
+    simp at this ⊢,
+    right,
+    exact this,
+    })
+
+def fin_fin_to_mul_fin (a : ℕ) (b : ℕ) (ai : fin a) (bi : fin b) : fin (a * b) := 
+fin.mk (b * ai + bi) 
+  (by { 
+    rcases ai,
+    rcases bi,
+    simp only [fin.coe_mk],
+    sorry,
+    })
 
 @[simp] lemma fin_mul_to_fin_fin_1_fin_fin_to_mul_fin (a : ℕ) (b : ℕ) (ai : fin a) (bi : fin b) :
   fin_mul_to_fin_fin_1 a b (fin_fin_to_mul_fin a b ai bi) = ai := sorry
@@ -356,6 +460,11 @@ lemma rotate_cancel (crs_splits pncrs pnsample : ℕ) : ∀ x : fin pncrs,
 begin
   -- apply equiv.sum_comp,
   sorry,
+end
+
+lemma rename_zero {σ τ : Type} (f : σ -> τ) : @mv_polynomial.rename σ τ F _ f 0 = 0 := 
+begin
+  simp only [alg_hom.map_zero],
 end
 
 -- Given a decomposition of each crs element into a collection of polynomials that sum to it
@@ -472,33 +581,22 @@ noncomputable def split_crs (𝓟 : AGM_proof_system)
 
       simp_rw sum_split at poly_checks_pass',
 
-      have zero_eq_rename : 0 = mv_polynomial.rename (fin.cast_add (𝓟.n_crs * crs_splits)) 0, sorry,
+      have zero_eq_rename : 0 = mv_polynomial.rename (fin.cast_add (𝓟.n_crs * crs_splits)) 0, 
+      {
+        symmetry,
+        rw rename_zero,
+      },
 
       rw zero_eq_rename at poly_checks_pass',
 
       convert mv_polynomial.rename_injective (fin.cast_add (𝓟.n_crs * crs_splits)) _ poly_checks_pass',
 
-      sorry,
+      exact rel_embedding.injective (fin.cast_add (𝓟.n_crs * crs_splits)),
+
 
       done,
 
       
-
-      simp only [fin_add_of_fin_fin_nat_add, add_sub_cancel, fin_add_of_fin_fin_comp_cast_add] at poly_checks_pass',
-      simp_rw [sum_of_fin_mul] at poly_checks_pass',
-      simp_rw [sum_of_fin_mul] at poly_checks_pass',
-      simp_rw [fin_mul_to_fin_fin_1_fin_fin_to_mul_fin] at poly_checks_pass',
-      simp_rw [fin_mul_to_fin_fin_2_fin_fin_to_mul_fin] at poly_checks_pass',
-
-
-      convert poly_checks_pass',
-      funext pf_idx,
-      congr' 1,
-      funext ai,
-      simp_rw [same],
-      rw <-finset.mul_sum,
-      rw finset.sum_hom,
-      rw sum_split ai,
     },
     {
       sorry,
