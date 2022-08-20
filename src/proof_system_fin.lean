@@ -288,7 +288,7 @@ noncomputable def collapse_toxic_waste (𝓟 : AGM_proof_system) (d : ℕ) (samp
   (h : ∀ (crs_idx : fin 𝓟.n_crs), mv_polynomial.degree_of sample_target (𝓟.crs_elems crs_idx) < d) : 
   AGM_proof_system :=
 { relation := 𝓟.relation,
-  n_sample := 1,
+  n_sample := 𝓟.n_sample,
   n_crs := 𝓟.n_crs,
   crs_elems := (mv_polynomial.eval₂ (mv_polynomial.C) (λ x, ((mv_polynomial.X 0) ^ (single_variable_degrees x)))) ∘ 𝓟.crs_elems,  
   proof_elems_index := 𝓟.proof_elems_index,
@@ -467,6 +467,13 @@ begin
   simp only [alg_hom.map_zero],
 end
 
+lemma rename_bind₁ {σ τ υ : Type} (f : τ → υ) (g : σ -> mv_polynomial τ F) (p : mv_polynomial σ F): 
+  mv_polynomial.rename f (mv_polynomial.bind₁ g p) = 
+  mv_polynomial.bind₁ ((mv_polynomial.rename f) ∘ g) p :=
+begin
+  sorry,
+end
+
 -- Given a decomposition of each crs element into a collection of polynomials that sum to it
 -- we can construct a new proof system splitting those terms up
 -- Here, we assume all crs elements are decomposed into the same number of elements, but this need not be the case in principle.
@@ -560,7 +567,7 @@ noncomputable def split_crs (𝓟 : AGM_proof_system)
 
 
       simp_rw [rotate_cancel] at poly_checks_pass',
-      simp [] at poly_checks_pass',
+      simp only [add_zero, finset.sum_const_zero, mul_zero, sub_self] at poly_checks_pass',
       simp_rw [mv_polynomial.smul_eq_C_mul],    
 
 
@@ -575,6 +582,8 @@ noncomputable def split_crs (𝓟 : AGM_proof_system)
               ∑ (x : fin 𝓟.n_crs), mv_polynomial.C (agm pf_idx (fin_fin_to_mul_fin 𝓟.n_crs crs_splits x (default x))) 
                 * ∑ (x_1 : fin crs_splits), (split x x_1))) c),
       {
+        simp_rw rename_bind₁,
+        -- congr' 1,
         sorry,
       },
       simp_rw foobar at poly_checks_pass',
