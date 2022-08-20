@@ -13,12 +13,12 @@ This file contains classes for noninteractive proof systems.
 
 universe u
 /-- The finite field parameter of our SNARK -/
-parameter {F : Type}
-parameter [field F]
+variable {F : Type}
+variable [field F]
 
 -- The types of the statement and witness are assumed to be collections of n_stmt and n_wit field elements respectively.
--- parameters {n_sample n_crs n_stmt n_wit n_proof : ℕ}
-parameters {n_stmt n_wit : ℕ}
+-- variables {n_sample n_crs n_stmt n_wit n_proof : ℕ}
+variables {n_stmt n_wit : ℕ}
 
 -- def STMT := fin n_stmt -> F
 -- def WIT := fin n_wit -> F
@@ -104,9 +104,9 @@ begin
 end
 
 
-noncomputable def change_exponent (𝓟 : AGM_proof_system) 
+noncomputable def change_exponent (𝓟 : AGM_proof_system F n_stmt n_wit) 
   (sample : fin 𝓟.n_sample) (d : ℕ) 
-  (all_checks_uniform_degree : ∀ c ∈ 𝓟.polynomial_checks, uniform_degree c d) : AGM_proof_system :=
+  (all_checks_uniform_degree : ∀ c ∈ 𝓟.polynomial_checks, uniform_degree c d) : AGM_proof_system F n_stmt n_wit :=
 { relation := 𝓟.relation,
   n_sample := 𝓟.n_sample,
   n_crs := 𝓟.n_crs,
@@ -118,6 +118,7 @@ noncomputable def change_exponent (𝓟 : AGM_proof_system)
   extractor := 𝓟.extractor,
   soundness :=
   begin
+  sorry,
     rintros stmt agm ⟨poly_checks_pass', proof_elem_checks_pass'⟩,
     apply 𝓟.soundness,
     split,
@@ -167,9 +168,9 @@ noncomputable def change_exponent (𝓟 : AGM_proof_system)
 
 
 -- Returns a SNARK where one fewer toxic waste element is actually used, replaced by sample_target ^ d
-noncomputable def collapse_toxic_waste (𝓟 : AGM_proof_system) (d : ℕ) (sample_removed sample_target : fin 𝓟.n_sample) 
+noncomputable def collapse_toxic_waste (𝓟 : AGM_proof_system F n_stmt n_wit) (d : ℕ) (sample_removed sample_target : fin 𝓟.n_sample) 
   (h : ∀ (crs_idx : fin 𝓟.n_crs), mv_polynomial.degree_of sample_target (𝓟.crs_elems crs_idx) < d) : 
-  AGM_proof_system :=
+  AGM_proof_system F n_stmt n_wit :=
 { relation := 𝓟.relation,
   n_sample := 𝓟.n_sample,
   n_crs := 𝓟.n_crs,
@@ -360,7 +361,7 @@ end
 -- Given a decomposition of each crs element into a collection of polynomials that sum to it
 -- we can construct a new proof system splitting those terms up
 -- Here, we assume all crs elements are decomposed into the same number of elements, but this need not be the case in principle.
-noncomputable def split_crs (𝓟 : AGM_proof_system) 
+noncomputable def split_crs (𝓟 : AGM_proof_system F n_stmt n_wit) 
   -- For each old crs element, a number of splits for it
   (crs_splits : ℕ)
   -- For each split, a polynomial over the old sample elements
@@ -375,7 +376,7 @@ noncomputable def split_crs (𝓟 : AGM_proof_system)
   (default :
     Π crs_idx : fin 𝓟.n_crs, fin (crs_splits)
   )
-      : AGM_proof_system :=
+      : AGM_proof_system F n_stmt n_wit :=
 { relation := 𝓟.relation,
   n_sample := 𝓟.n_sample + 𝓟.n_crs * crs_splits,
   n_crs := 𝓟.n_crs * crs_splits,
