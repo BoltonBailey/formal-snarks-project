@@ -1,5 +1,6 @@
 
 import .proof_system_fin
+import algebra.big_operators.basic
 
 open_locale big_operators
 
@@ -118,7 +119,7 @@ noncomputable def change_exponent (𝓟 : AGM_proof_system F n_stmt n_wit)
   extractor := 𝓟.extractor,
   soundness :=
   begin
-  sorry,
+  -- sorry,
     rintros stmt agm ⟨poly_checks_pass', proof_elem_checks_pass'⟩,
     apply 𝓟.soundness,
     split,
@@ -162,6 +163,115 @@ noncomputable def change_exponent (𝓟 : AGM_proof_system F n_stmt n_wit)
       intros idx val val_in,
       replace proof_elem_checks_pass' :=  proof_elem_checks_pass' idx val val_in,
       exact proof_elem_checks_pass',
+    },
+  end 
+}
+
+lemma sum_conditional {S R : Type} [fintype S] [comm_ring R] (f : S -> R) (p : S -> Prop) [decidable_pred p] : 
+  ∑ (s : S), f s = (∑ (s : S), ite (p s) (f s) 0) + (∑ (s : S), ite (p s) 0 (f s)) :=
+begin
+  sorry
+end
+
+example {S R : Type} [fintype S] [comm_ring R] (f : S -> R) (a : S) (p : Prop) [decidable p] : ite p a a = a := 
+begin
+  exact if_t_t p a
+end
+
+
+@[simp] lemma or_and_self_left (p q : Prop) : ((p ∨ q) ∧ q) ↔ q := by tauto
+@[simp] lemma or_and_self_right (p q : Prop) : ((p ∨ q) ∧ p) ↔ p := by tauto
+@[simp] lemma foobar1 (α : Type) (a b c : α) (h : b ≠ c) : ((a = b ∨ a = c) ∧ ¬ a = c) ↔ a = b := 
+begin
+  tidy,
+end
+@[simp] lemma foobar2 (α : Type) (a b c : α) (h : b ≠ c) : ((a = b ∨ a = c) ∧ ¬ a = b ∧ ¬ a = c) ↔ false := 
+begin
+  tidy,
+end
+
+/-- Adds one crs element to another and zeros out the added element. This might be useful in the case where in the given SNARK, this pair of CRS elements are always used with the same coefficient, in which case the resulting SNARK is complete. -/
+noncomputable def collapse_crs_element (𝓟 : AGM_proof_system F n_stmt n_wit) 
+  (twin1 twin2 : fin 𝓟.n_crs) (not_same : twin1 ≠ twin2)
+  (all_checks_uniform_degree : true) : AGM_proof_system F n_stmt n_wit :=
+{ relation := 𝓟.relation,
+  n_sample := 𝓟.n_sample,
+  n_crs := 𝓟.n_crs,
+  crs_elems := λ crs, 
+    if crs = twin1 
+      then 𝓟.crs_elems twin1 + 𝓟.crs_elems twin2 
+    else if crs = twin2 
+      then 0
+    else 𝓟.crs_elems crs,  
+  proof_elems_index := 𝓟.proof_elems_index,
+  polynomial_checks := 𝓟.polynomial_checks,
+  proof_element_checks := 𝓟.proof_element_checks,
+    -- λ idx, 
+    --   (𝓟.proof_element_checks idx).map 
+    --   (λ old stmt crs, (if crs = twin2 then old stmt twin1 else old stmt crs)) ,
+  -- When the extractor goes to read the component of the second twin, it should instead read the first
+  extractor := λ agm wit, 𝓟.extractor (λ proof_elem crs, agm proof_elem (if crs = twin2 then twin1 else crs)) wit,
+  soundness :=
+  begin
+  -- sorry,
+    rintros stmt agm ⟨poly_checks_pass', proof_elem_checks_pass'⟩,
+    apply 𝓟.soundness,
+    split,
+    {
+      intros c in_checks, -- f, -- f_never_zero,
+
+      replace poly_checks_pass' := poly_checks_pass' c in_checks,
+      -- simp at *,
+      rw <-poly_checks_pass',
+      apply congr, apply congr, refl, apply congr, refl, 
+      funext,
+      simp_rw [mv_polynomial.smul_eq_C_mul],
+      simp_rw [apply_ite (agm pf_idx)],
+      simp_rw [apply_ite (mv_polynomial.C)],
+      simp_rw ite_mul,
+      simp_rw mul_ite,
+      -- simp_rw [if_t_t p a],
+      rw sum_conditional _ (λ x, x = twin1 ∨ x = twin2),
+      nth_rewrite 2 sum_conditional _ (λ x, x = twin1 ∨ x = twin2),
+      congr' 1,
+      { -- simp,
+        sorry,
+        -- rw <-finset.sum_filter,
+        -- rw <-finset.sum_filter,
+        -- simp_rw finset.sum_ite,
+        -- simp,
+        -- simp_rw finset.sum_filter,
+        -- -- simp_rw finset.sum_ite_eq',
+        -- -- simp only [finset.mem_univ, if_true],
+        -- simp_rw ←ite_and,
+        -- simp [not_same],
+        -- ring, 
+      },
+      {
+        congr' 1,
+        funext s,
+        simp,
+        -- simp_rw finset.sum_ite_eq',
+        -- simp only [finset.mem_univ, if_true],
+        simp_rw ←ite_and,
+        split_ifs,
+        refl,
+        contrapose! not_same, 
+        rw [<-h_1, <-h_2],
+        contrapose! h, right, assumption, 
+        contrapose! h, left, assumption, 
+        refl,
+        -- tidy,
+      },
+      refl,
+    },
+    {
+      -- sorry,
+      intros idx val val_in, -- need to pass in a different val
+      replace proof_elem_checks_pass' :=  proof_elem_checks_pass' idx val val_in,
+      rw proof_elem_checks_pass',
+      funext,
+      split_ifs,
     },
   end 
 }
@@ -408,13 +518,16 @@ noncomputable def split_crs (𝓟 : AGM_proof_system F n_stmt n_wit)
     rintros stmt agm ⟨poly_checks_pass', proof_elem_checks_pass'⟩,
     apply 𝓟.soundness,
 
+    -- If, for some proof element, I give unequal weight to two new crs elements associated with the same old crs element, then there will be some new toxic waste sample which is nonzero in that proof element.
+
     split,
     { 
       intros c in_checks,
 
-      -- TODO: restructure defalut so that it equals 0?
 
-      
+      replace poly_checks_pass' := poly_checks_pass' c in_checks,
+
+      -- TODO: prove for rotate bi
 
       have same : ∀ (pr : 𝓟.proof_elems_index) (ai : fin 𝓟.n_crs) (bi : fin crs_splits), agm pr (fin_fin_to_mul_fin _ _ ai bi) = agm pr (fin_fin_to_mul_fin _ _ ai (default ai)),
       {
@@ -422,18 +535,15 @@ noncomputable def split_crs (𝓟 : AGM_proof_system F n_stmt n_wit)
         sorry
       },
       -- done,
-      replace poly_checks_pass' := poly_checks_pass' c in_checks,
 
 
 
       simp only [mv_polynomial.eval_X, and_imp, ring_hom.map_sub, algebra.id.smul_eq_mul, ring_hom.map_add, ne.def,
   mv_polynomial.eval_map_varset, option.mem_def, exists_imp_distrib, option.map_eq_some'] at *,
-      simp_rw [add_sub_assoc] at poly_checks_pass',
-      simp_rw [mv_polynomial.smul_eq_C_mul] at poly_checks_pass',
-      simp_rw [mul_add] at poly_checks_pass',
+      simp_rw [add_sub_assoc, mv_polynomial.smul_eq_C_mul, mul_add] at poly_checks_pass',
       simp_rw [finset.sum_add_distrib] at poly_checks_pass',
       simp_rw [sum_of_fin_mul] at poly_checks_pass',
-      simp at poly_checks_pass',
+      simp only [fin_mul_to_fin_fin_1_fin_fin_to_mul_fin, fin_mul_to_fin_fin_2_fin_fin_to_mul_fin] at poly_checks_pass',
       simp_rw [same] at poly_checks_pass',
       simp_rw [←finset.mul_sum] at poly_checks_pass',
       simp_rw [finset.sum_sub_distrib] at poly_checks_pass', -- alias this lemma

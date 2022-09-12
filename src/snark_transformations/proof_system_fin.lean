@@ -41,9 +41,6 @@ structure AGM_proof_system (F : Type) [field F] (n_stmt n_wit : ℕ) :=
   -- an index into proof elems
   -- To avoid nested indexing, we assume that the prover provides the values of any elements in the checks that the verifier would compute. In this formalism, the verifier makes two kinds of checks - checks that the polynomial evaluates to 0, and checks that the verifier proof elements are consistent with the statement.
   (proof_elems_index : Type) 
-  -- the coefficient of a particular crs elem in a particular proof elem for an honest prover (Not needed in soundness def)
-  -- (proof_crs_component : (fin n_stmt -> F) → WIT → proof_elems_index → crs_elems_index → F) 
-  -- (permissible_inclusion : proof_elems_index → crs_elems_index → bool) -- whether it is possible for a malicious prover to include a particular crs elem in a particular proof elem - used to represent distinction between G1 and G2
   -- mv_polynomials of proof elems that the verifier checks to be zero
   (polynomial_checks : list (mv_polynomial proof_elems_index F)) 
   -- proof elements constructed from the statement that the verifier checks the construction of (or, more simply, constructs themselves)
@@ -72,5 +69,9 @@ structure AGM_proof_system (F : Type) [field F] (n_stmt n_wit : ℕ) :=
               ((val : (fin n_stmt -> F) → (fin n_crs)  → F) stmt = agm idx)))
           → relation stmt (extractor agm)) -- crs_elems proof check_polynomial
 
+-- potential other components
+-- the coefficient of a particular crs elem in a particular proof elem for an honest prover (Not needed in soundness def)
+-- (proof_crs_component : (fin n_stmt -> F) → WIT → proof_elems_index → crs_elems_index → F) 
+-- (permissible_inclusion : proof_elems_index → crs_elems_index → bool) -- whether it is possible for a malicious prover to include a particular crs elem in a particular proof elem - used to represent distinction between G1 and G2
 
 end
