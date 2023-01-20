@@ -1,5 +1,5 @@
 /-
-Author: Bolton Bailey
+Author: <Redacted for anonymized submission>
 -/
 import data.mv_polynomial.basic
 import data.polynomial.div

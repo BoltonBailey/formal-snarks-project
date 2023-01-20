@@ -1,5 +1,5 @@
 /-
-Author: Bolton Bailey
+Author: <Redacted for anonymized submission>
 -/
 import snarks.groth16.declarations
 import ...attributes
