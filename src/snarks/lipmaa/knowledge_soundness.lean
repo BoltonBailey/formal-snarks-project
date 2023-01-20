@@ -320,9 +320,7 @@ lemma A_mod_comp_crs_P_γ_1_mul (p : polynomial F) : p * polynomial.C A_mod_comp
 lemma B_mod_comp_crs_V_δ_2_mul (p : polynomial F) : p * polynomial.C B_mod_comp_crs_V_δ_2  = polynomial.C B_mod_comp_crs_V_δ_2 * p := by ring
 
 
-/-- The main theorem for the soundness of the Groth '16 SNARK. 
-This shows that if the adversary polynomials obey the equations that the verification suggests,
-then the C_m coefficients give a satisfying witness. -/
+/-- The main theorem for the soundness of the Lipmaa SNARK. Due to the error in the number of necessary monomials, the proof doesn't go through. -/
 theorem soundness (a_stmt : fin n_stmt → F ) : 
   verified' a_stmt
   -> (satisfying a_stmt C_comp_crs'_P_all_wit_1)

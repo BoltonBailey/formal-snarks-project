@@ -317,6 +317,7 @@ noncomputable def collapse_crs_element (𝓟 : AGM_proof_system F n_stmt n_wit)
 noncomputable def zero_and_carry {A : Type} (x : A →₀ ℕ) (source target : A) (factor : ℕ) : A →₀ ℕ :=
   x.erase source + finsupp.single target (factor * x source)
 
+/-- This is the technical lemma on which the toxic waste collapse is based. We omit the proof. -/
 lemma commutable_zero_and_carry {F proof_elems_index: Type} [field F] (n_sample n_crs : ℕ)    
     (d d2 : ℕ)
     (sample_removed sample_target : fin n_sample) 

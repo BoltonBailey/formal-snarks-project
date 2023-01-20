@@ -13,7 +13,7 @@ import ...integral_domain_tactic
 /-!
 # Knowledge Soundness
 
-This file proves the knowledge-soundness property of the second, refined protocol described in the Pinocchio paper.
+This file proves the knowledge-soundness property of the second, refined protocol described in the GGPR paper.
 
 
 -/
