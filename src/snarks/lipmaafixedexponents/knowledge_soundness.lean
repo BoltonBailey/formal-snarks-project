@@ -18,7 +18,7 @@ import .vars
 
 This file proves the knowledge-soundness property of the Groth16 system for type III pairings, as 
 presented in "Another Look at Extraction and Randomization of Groth’s zk-SNARK" by 
-[Baghery et al.](https://eprint.iacr.org/2020/811.pdf).
+[Baghery et al.](https://eprint.iacr.org/2020/811.pdf), for the Lipmaa SNARK
 
 -/
 
@@ -321,9 +321,7 @@ lemma A_mod_comp_crs_P_γ_1_mul (p : polynomial F) : p * polynomial.C A_mod_comp
 lemma B_mod_comp_crs_V_δ_2_mul (p : polynomial F) : p * polynomial.C B_mod_comp_crs_V_δ_2  = polynomial.C B_mod_comp_crs_V_δ_2 * p := by ring
 
 
-/-- The main theorem for the soundness of the Groth '16 SNARK. 
-This shows that if the adversary polynomials obey the equations that the verification suggests,
-then the C_m coefficients give a satisfying witness. -/
+/-- The main theorem for the soundness of the Lipmaa SNARK. This fixed version does go through. -/
 theorem soundness (a_stmt : fin n_stmt → F ) : 
   verified' a_stmt
   -> (satisfying a_stmt C_comp_crs'_P_all_wit_1)
