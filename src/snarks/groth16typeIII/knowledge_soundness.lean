@@ -307,6 +307,8 @@ begin
   exact mt,
 end
 
+set_option trace.simp_lemmas true
+
 /-- The main theorem for the soundness of the Groth '16 SNARK. 
 This shows that if the adversary polynomials obey the equations that the verification suggests,
 then the C_m coefficients give a satisfying witness. -/
@@ -318,6 +320,7 @@ begin
   
   intros eqn,
   rw satisfying,
+  simp only [polynomial.smul_eq_C_mul, rearrange_constants_right_hard],
   suffices : 
     (∑ (i : fin n_stmt) in finset.univ, u_stmt i * polynomial.C (a_stmt i) + ∑ (i : fin n_wit) in finset.univ, u_wit i * polynomial.C (C_m i)) 
     * 
@@ -350,7 +353,6 @@ begin
     apply monic_of_product_form,
   },
 
-  simp only [polynomial.smul_eq_C_mul, rearrange_constants_right_hard],
 
 
   -- Step 0: Modify the hypothesis to be an equation of mv_polynomials
@@ -362,8 +364,7 @@ begin
   rw verified' at eqn',
   rw [A', B', C'] at eqn',
   simp only [] with crs at eqn',
-  -- simp only [] with polynomial_nf_3 at eqn',
-  simp only [mv_polynomial.X, C_apply, mv_polynomial.monomial_mul, one_mul, mul_one, add_zero, zero_add, finset.sum_add_distrib, finset.sum_hom, mul_add, add_mul, sum_monomial_hom] at eqn',
+  -- simp only [mv_polynomial.X, C_apply, mv_polynomial.monomial_mul, one_mul, mul_one, add_zero, zero_add, finset.sum_add_distrib, finset.sum_hom, mul_add, add_mul, sum_monomial_hom] at eqn',
 
   have h0012 := congr_arg (coeff (single vars.α 0 + single vars.β 0 + single vars.γ 1 + single vars.δ 2)) eqn',
   have h0021 := congr_arg (coeff (single vars.α 0 + single vars.β 0 + single vars.γ 2 + single vars.δ 1)) eqn',

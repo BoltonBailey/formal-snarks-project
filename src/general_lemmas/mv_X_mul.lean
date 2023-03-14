@@ -1,6 +1,7 @@
 
 
 import data.mv_polynomial.basic
+import data.polynomial.basic
 
 noncomputable theory
 
@@ -25,13 +26,6 @@ section decidable_eq
 variables [decidable_eq σ]
 
 
-lemma coeff_X_mul' (m) (s : σ) (p : mv_polynomial σ R) :
-  coeff m (X s * p) = if s ∈ m.support then coeff (m - finsupp.single s 1) p else 0 := 
-begin
-  rw mul_comm,
-  rw mv_polynomial.coeff_mul_X',
-end
-
 end decidable_eq
 
 lemma coeff_mul_X_pow (m) (n : ℕ) (s : σ) (p : mv_polynomial σ R) :
@@ -48,9 +42,6 @@ begin
   { rw [coeff_X_pow, if_neg H, mul_zero] },
 end
 
-lemma support_X_pow [nontrivial R] : (X n ^ e : mv_polynomial σ R).support = {single n e} :=
-by rw [X_pow_eq_single, support_monomial, if_neg]; exact one_ne_zero
-
 lemma coeff_mul_X_pow' (m) (n : ℕ) (s : σ) (p : mv_polynomial σ R) :
   coeff m (p * X s ^ n ) = if n ≤ m s then coeff (m - finsupp.single s n) p else 0 := 
 begin
@@ -59,7 +50,9 @@ begin
   { conv_rhs {rw ← coeff_mul_X_pow _ n s},
     congr' with  t,
     by_cases hj : s = t,
-    { subst t, simp only [nat_sub_apply, add_apply, single_eq_same], exact (nat.sub_eq_iff_eq_add h).mp rfl,
+    { subst t, 
+      -- simp [h],
+    simp only [tsub_apply, add_apply, single_eq_same], exact (nat.sub_eq_iff_eq_add h).mp rfl,
       },
     { simp [single_eq_of_ne hj] } },
   { rw ← not_mem_support_iff, intro hm, apply h,
@@ -94,29 +87,23 @@ begin
   rw finset.mul_sum,
 end
 
-lemma sum_C_hom {α : Type u} {r : finset α} {f : α -> R} : 
-  ((∑ x in r, C (f x)) : mv_polynomial σ R) = C (∑ x in r, f x)
-:= 
-begin
-  exact finset.sum_hom r C,
-end
 
--- TODO add to mathlib
-instance (s : σ →₀ ℕ) : is_add_monoid_hom (@monomial R σ _ s) := 
-{
-  map_add := begin
-    intros x y,
-    exact monomial_add.symm,
-  end,
-  map_zero := monomial_zero,
-}
+-- -- TODO add to mathlib
+-- instance (s : σ →₀ ℕ) : is_add_monoid_hom (@monomial R σ _ s) := 
+-- {
+--   map_add := begin
+--     intros x y,
+--     exact monomial_add.symm,
+--   end,
+--   map_zero := monomial_zero,
+-- }
 
-lemma sum_monomial_hom {α : Type u} {r : finset α} {f : α -> R}  (s : σ →₀ ℕ) : 
-  ((∑ x in r, monomial s (f x)) : mv_polynomial σ R) = monomial s (∑ x in r, f x)
-:= 
-begin
-  exact finset.sum_hom r (monomial s),
-end
+-- lemma sum_monomial_hom {α : Type u} {r : finset α} {f : α -> R}  (s : σ →₀ ℕ) : 
+--   ((∑ x in r, monomial s (f x)) : mv_polynomial σ R) = monomial s (∑ x in r, f x)
+-- := 
+-- begin
+--   exact finset.sum_hom r (monomial s),
+-- end
 
 
 
@@ -141,15 +128,15 @@ begin
   exact C_apply,
 end
 
--- FOr some reason, this lemma is actually useless https://leanprover.zulipchat.com/#narrow/stream/113488-general/topic/Extracting.20constant.20from.20sum
--- I expect many other lemmas in theis file may be useless as well
--- TODO investigate and clean up
-lemma finset_sum_C {α : Type u} {r : finset α} {f : α -> R} (e : R) : 
-  (∑ x in r, (C (f x) : mv_polynomial σ R)) = C (∑ x in r, f x)
-:= 
-begin
-  rw finset.sum_hom,
-end
+-- -- FOr some reason, this lemma is actually useless https://leanprover.zulipchat.com/#narrow/stream/113488-general/topic/Extracting.20constant.20from.20sum
+-- -- I expect many other lemmas in theis file may be useless as well
+-- -- TODO investigate and clean up
+-- lemma finset_sum_C {α : Type u} {r : finset α} {f : α -> R} (e : R) : 
+--   (∑ x in r, (C (f x) : mv_polynomial σ R)) = C (∑ x in r, f x)
+-- := 
+-- begin
+--   rw finset.sum_hom,
+-- end
 
 -- lemma rearrange1 (n : ℕ) (v1 v2 : σ) (p : mv_polynomial σ R) : (mv_polynomial.X v1 ^ n) * (mv_polynomial.X v2 * p) = mv_polynomial.X v2 * ((mv_polynomial.X v1 ^ n) * p) :=
 -- begin

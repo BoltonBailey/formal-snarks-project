@@ -19,7 +19,7 @@ parameter [field F]
 
 /-- t has degree m -/
 lemma nat_degree_product_form (m : ℕ) (f : fin m → F) : 
-  polynomial.nat_degree (∏ i in (finset.fin_range m), (polynomial.X - polynomial.C (f i))) = m :=
+  polynomial.nat_degree (∏ i : fin m in finset.univ, (polynomial.X - polynomial.C (f i))) = m :=
 begin
   -- rw t,
   rw polynomial.nat_degree_prod,
@@ -29,7 +29,7 @@ begin
 end
 
 lemma monic_of_product_form (m : ℕ) (f : fin m → F) : 
-  (∏ i in (finset.fin_range m), (polynomial.X - polynomial.C (f i))).monic :=
+  (∏ i : fin m in finset.univ, (polynomial.X - polynomial.C (f i))).monic :=
 begin
   apply polynomial.monic_prod_of_monic,
   intros i hi,
