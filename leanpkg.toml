@@ -1,8 +1,8 @@
 [package]
 name = "formal_baby_snark"
 version = "0.1"
-lean_version = "leanprover-community/lean:3.30.0"
+lean_version = "leanprover-community/lean:3.50.3"
 path = "src"
 
 [dependencies]
-mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "e70093ffea81db2c01cf6dbe91b2270b7a200167"}
+mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "bd1fc183335ea95a9519a1630bcf901fe9326d83"}
