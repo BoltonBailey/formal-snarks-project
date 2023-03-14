@@ -18,9 +18,8 @@ This file formalizes the knowledge-soundness property of the first protocol desc
 
 NOTE The implementation here is incomplete, since there seem to be a few problems with the definition that I could not resolve. In particular
 
-How do we check that the proof value of β_v v(s) + β_w w(s) + β_y y(s) is correct using "three pairings" Are we ment to use β_y γ for example?
+How do we check that the proof value of β_v v(s) + β_w w(s) + β_y y(s) is correct using "three pairings" Are we meant to use β_y γ for example?
 
-Why is v_io(s) added to v(s) in the final divisibility requirement - this seems wrong.
 
 -/
 

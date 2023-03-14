@@ -54,20 +54,20 @@ parameter {w_wit : fin n_wit → (polynomial F) }
 /-- The roots of the polynomial t -/
 parameter {r : fin n_wit → F} 
 /-- t is the polynomial divisibility by which is used to verify satisfaction of the SSP -/
-def t : polynomial F := ∏ i in (finset.fin_range n_wit), (polynomial.X - polynomial.C (r i))
+def t : polynomial F := ∏ i in (finset.univ : finset (fin n_wit)), (polynomial.X - polynomial.C (r i))
 -- TODO this could potentially be spun off into a mathlib definition
 
 
 /-- Checks whether a statement witness pair satisfies the SSP -/
 def satisfying (a_stmt : fin n_stmt → F ) (a_wit : fin n_wit → F) := 
-((∑ i in (finset.fin_range n_stmt), a_stmt i • u_stmt i
-  + (∑ i in (finset.fin_range n_wit), a_wit i • u_wit i))
+((∑ i in (finset.univ : finset (fin n_stmt)), a_stmt i • u_stmt i
+  + (∑ i in (finset.univ : finset (fin n_wit)), a_wit i • u_wit i))
   * 
-(∑ i in (finset.fin_range n_stmt), a_stmt i • v_stmt i
-  + (∑ i in (finset.fin_range n_wit), a_wit i • v_wit i))
+(∑ i in (finset.univ : finset (fin n_stmt)), a_stmt i • v_stmt i
+  + (∑ i in (finset.univ : finset (fin n_wit)), a_wit i • v_wit i))
   -
-(∑ i in (finset.fin_range n_stmt), a_stmt i • w_stmt i
-  + (∑ i in (finset.fin_range n_wit), a_wit i • w_wit i)))
+(∑ i in (finset.univ : finset (fin n_stmt)), a_stmt i • w_stmt i
+  + (∑ i in (finset.univ : finset (fin n_wit)), a_wit i • w_wit i)))
    %ₘ t = 0
 
 
@@ -122,13 +122,13 @@ def A (f : groth16.vars → F) : polynomial F :=
   +
   polynomial.C A_δ * crs_δ f
   +
-  ∑ i in (finset.fin_range n_var), polynomial.C (A_x i) * (crs_powers_of_x i f)
+  ∑ i in ((finset.univ : finset (fin n_var))), polynomial.C (A_x i) * (crs_powers_of_x i f)
   +
-  ∑ i in (finset.fin_range n_stmt), polynomial.C (A_l i) * (crs_l i f)
+  ∑ i in (finset.univ : finset (fin n_stmt)), polynomial.C (A_l i) * (crs_l i f)
   +
-  ∑ i in (finset.fin_range n_wit), polynomial.C (A_m i) * (crs_m i f)
+  ∑ i in (finset.univ : finset (fin n_wit)), polynomial.C (A_m i) * (crs_m i f)
   +
-  ∑ i in (finset.fin_range (n_var-1)), polynomial.C (A_h i) * (crs_n i f)
+  ∑ i in (finset.univ : finset (fin (n_var-1))), polynomial.C (A_h i) * (crs_n i f)
 
 def B (f : groth16.vars → F) : polynomial F  := 
   polynomial.C B_β * crs_β f
@@ -137,7 +137,7 @@ def B (f : groth16.vars → F) : polynomial F  :=
   +
   polynomial.C B_δ * crs_δ f
   +
-  ∑ i in (finset.fin_range n_var), polynomial.C (B_x i) * (crs_powers_of_x i f)
+  ∑ i in ((finset.univ : finset (fin n_var))), polynomial.C (B_x i) * (crs_powers_of_x i f)
 
 def C (f : groth16.vars → F) : polynomial F  := 
   polynomial.C C_α * crs_α f
@@ -146,13 +146,13 @@ def C (f : groth16.vars → F) : polynomial F  :=
   +
   polynomial.C C_δ * crs_δ f
   +
-  ∑ i in (finset.fin_range n_var), polynomial.C (C_x i) * (crs_powers_of_x i f)
+  ∑ i in ((finset.univ : finset (fin n_var))), polynomial.C (C_x i) * (crs_powers_of_x i f)
   +
-  ∑ i in (finset.fin_range n_stmt), polynomial.C (C_l i) * (crs_l i f)
+  ∑ i in (finset.univ : finset (fin n_stmt)), polynomial.C (C_l i) * (crs_l i f)
   +
-  ∑ i in (finset.fin_range n_wit), polynomial.C (C_m i) * (crs_m i f)
+  ∑ i in (finset.univ : finset (fin n_wit)), polynomial.C (C_m i) * (crs_m i f)
   +
-  ∑ i in (finset.fin_range (n_var-1)), polynomial.C (C_h i) * (crs_n i f)
+  ∑ i in (finset.univ : finset (fin (n_var-1))), polynomial.C (C_h i) * (crs_n i f)
 
 
 local notation `groth16polynomial` := mv_polynomial vars (polynomial F)
@@ -199,13 +199,13 @@ def A'  : groth16polynomial :=
   + 
   crs'_δ * mv_polynomial.C (polynomial.C (A_δ))
   +
-  X vars.γ * X vars.δ * mv_polynomial.C ∑ i in (finset.fin_range n_var), (polynomial.C (A_x i) * polynomial.X ^ (i : ℕ))
+  X vars.γ * X vars.δ * mv_polynomial.C ∑ i in ((finset.univ : finset (fin n_var))), (polynomial.C (A_x i) * polynomial.X ^ (i : ℕ))
   +
-  ∑ i in (finset.fin_range n_stmt), (crs'_l i) * mv_polynomial.C (polynomial.C (A_l i))
+  ∑ i in (finset.univ : finset (fin n_stmt)), (crs'_l i) * mv_polynomial.C (polynomial.C (A_l i))
   +
-  ∑ i in (finset.fin_range n_wit), (crs'_m i) * mv_polynomial.C (polynomial.C (A_m i))
+  ∑ i in (finset.univ : finset (fin n_wit)), (crs'_m i) * mv_polynomial.C (polynomial.C (A_m i))
   +
-  ∑ i in (finset.fin_range (n_var - 1)), (crs'_t i) * mv_polynomial.C (polynomial.C (A_h i))
+  ∑ i in (finset.univ : finset (fin (n_var-1))), (crs'_t i) * mv_polynomial.C (polynomial.C (A_h i))
 
 /-- Polynomial form of B in the adversary's proof representation -/
 def B'  : groth16polynomial := 
@@ -215,7 +215,7 @@ def B'  : groth16polynomial :=
   +
   crs'_δ * mv_polynomial.C (polynomial.C (B_δ))
   +
-  X vars.γ * X vars.δ * mv_polynomial.C ∑ i in (finset.fin_range n_var), (polynomial.C (B_x i) * polynomial.X ^ (i : ℕ))
+  X vars.γ * X vars.δ * mv_polynomial.C ∑ i in ((finset.univ : finset (fin n_var))), (polynomial.C (B_x i) * polynomial.X ^ (i : ℕ))
 
 /-- Polynomial form of C in the adversary's proof representation -/
 def C'  : groth16polynomial := 
@@ -225,19 +225,19 @@ def C'  : groth16polynomial :=
   + 
   crs'_δ * mv_polynomial.C (polynomial.C (C_δ))
   +
-  X vars.γ * X vars.δ * mv_polynomial.C ∑ i in (finset.fin_range n_var), (polynomial.C (C_x i) * polynomial.X ^ (i : ℕ))
+  X vars.γ * X vars.δ * mv_polynomial.C ∑ i in ((finset.univ : finset (fin n_var))), (polynomial.C (C_x i) * polynomial.X ^ (i : ℕ))
   +
-  ∑ i in (finset.fin_range n_stmt), (crs'_l i) * mv_polynomial.C (polynomial.C (C_l i))
+  ∑ i in (finset.univ : finset (fin n_stmt)), (crs'_l i) * mv_polynomial.C (polynomial.C (C_l i))
   +
-  ∑ i in (finset.fin_range n_wit), (crs'_m i) * mv_polynomial.C (polynomial.C (C_m i))
+  ∑ i in (finset.univ : finset (fin n_wit)), (crs'_m i) * mv_polynomial.C (polynomial.C (C_m i))
   +
-  ∑ i in (finset.fin_range (n_var - 1)), (crs'_t i) * mv_polynomial.C (polynomial.C (C_h i))
+  ∑ i in (finset.univ : finset (fin (n_var-1))), (crs'_t i) * mv_polynomial.C (polynomial.C (C_h i))
 
 
 
-def verified (a_stmt : fin n_stmt → F ) : Prop := A * B = crs_α * crs_β + (∑ i in finset.fin_range n_stmt, a_stmt i • crs_l i ) * crs_γ + C * crs_δ
+def verified (a_stmt : fin n_stmt → F ) : Prop := A * B = crs_α * crs_β + (∑ i in (finset.univ : finset (fin n_stmt)), a_stmt i • crs_l i ) * crs_γ + C * crs_δ
 
-def verified' (a_stmt : fin n_stmt → F ) : Prop := A' * B' = crs'_α * crs'_β + (∑ i in finset.fin_range n_stmt, mv_polynomial.C (polynomial.C (a_stmt i)) * crs'_l i ) * crs'_γ + C' * crs'_δ
+def verified' (a_stmt : fin n_stmt → F ) : Prop := A' * B' = crs'_α * crs'_β + (∑ i in (finset.univ : finset (fin n_stmt)), mv_polynomial.C (polynomial.C (a_stmt i)) * crs'_l i ) * crs'_γ + C' * crs'_δ
 
 -- TODO use this for lots of profiling data
 -- set_option profiler true
@@ -318,15 +318,14 @@ begin
   
   intros eqn,
   rw satisfying,
-  simp only [polynomial.smul_eq_C_mul, rearrange_constants_right_hard],
   suffices : 
-    (∑ (i : fin n_stmt) in finset.fin_range n_stmt, u_stmt i * polynomial.C (a_stmt i) + ∑ (i : fin n_wit) in finset.fin_range n_wit, u_wit i * polynomial.C (C_m i)) 
+    (∑ (i : fin n_stmt) in finset.univ, u_stmt i * polynomial.C (a_stmt i) + ∑ (i : fin n_wit) in finset.univ, u_wit i * polynomial.C (C_m i)) 
     * 
-    (∑ (i : fin n_stmt) in finset.fin_range n_stmt, v_stmt i * polynomial.C (a_stmt i) + ∑ (i : fin n_wit) in finset.fin_range n_wit, v_wit i * polynomial.C (C_m i)) 
+    (∑ (i : fin n_stmt) in finset.univ, v_stmt i * polynomial.C (a_stmt i) + ∑ (i : fin n_wit) in finset.univ, v_wit i * polynomial.C (C_m i)) 
     = 
-    (∑ (i : fin n_stmt) in finset.fin_range n_stmt, w_stmt i * polynomial.C (a_stmt i) + ∑ (i : fin n_wit) in finset.fin_range n_wit, w_wit i * polynomial.C (C_m i)) 
+    (∑ (i : fin n_stmt) in finset.univ, w_stmt i * polynomial.C (a_stmt i) + ∑ (i : fin n_wit) in finset.univ, w_wit i * polynomial.C (C_m i)) 
     +
-    ∑ (x : fin (n_var - 1)) in finset.fin_range (n_var - 1), polynomial.X ^ (x : ℕ) * t * polynomial.C (C_h x),
+    ∑ (x : fin (n_var - 1)) in finset.univ, polynomial.X ^ (x : ℕ) * t * polynomial.C (C_h x),
   {
     rw <-sub_eq_iff_eq_add' at this,
     have h := congr_arg (%ₘ t) this,
@@ -350,6 +349,9 @@ begin
     rw t,
     apply monic_of_product_form,
   },
+
+  simp only [polynomial.smul_eq_C_mul, rearrange_constants_right_hard],
+
 
   -- Step 0: Modify the hypothesis to be an equation of mv_polynomials
   have eqn' := modification_equivalence a_stmt (eqn),

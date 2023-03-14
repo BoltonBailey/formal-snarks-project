@@ -1,5 +1,5 @@
 import data.mv_polynomial.basic
-import data.finsupp.lattice
+-- import data.finsupp.lattice
 
 open mv_polynomial
 namespace mv_polynomial

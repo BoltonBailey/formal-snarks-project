@@ -1,6 +1,6 @@
 
 import data.finsupp.basic
-import data.finsupp.lattice
+-- import data.finsupp.lattice
 import data.finset.basic
 import data.finsupp.antidiagonal
 -- import ..vars
