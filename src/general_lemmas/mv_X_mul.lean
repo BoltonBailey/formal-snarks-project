@@ -98,12 +98,14 @@ end
 --   map_zero := monomial_zero,
 -- }
 
--- lemma sum_monomial_hom {α : Type u} {r : finset α} {f : α -> R}  (s : σ →₀ ℕ) : 
---   ((∑ x in r, monomial s (f x)) : mv_polynomial σ R) = monomial s (∑ x in r, f x)
--- := 
--- begin
---   exact finset.sum_hom r (monomial s),
--- end
+lemma sum_monomial_hom {α : Type*} {r : finset α} {f : α -> R}  (s : σ →₀ ℕ) : 
+  ((∑ x in r, monomial s (f x)) : mv_polynomial σ R) = monomial s (∑ x in r, f x)
+:= 
+begin
+  symmetry,
+  apply add_monoid_hom.map_sum,
+
+end
 
 
 

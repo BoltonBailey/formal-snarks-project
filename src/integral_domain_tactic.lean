@@ -231,10 +231,10 @@ parameters {R vars : Type u}
 -- parameter [ring R]
 
 
-lemma zero_eq_zero [integral_domain R] : (0 : R) = 0 ↔ true := 
-begin
-  simp only [eq_self_iff_true],
-end
+-- lemma zero_eq_zero [integral_domain R] : (0 : R) = 0 ↔ true := 
+-- begin
+--   simp only [eq_self_iff_true],
+-- end
 
 -- example [integral_domain R] (a b c d e f g h i : R) (h11 : ¬a = 0) (h12 : ¬b = 0)  (h2 : a * c = 0) (h3 : b * d = 0) (h4 : h * i = 0): c * e + f * d = h :=
 -- begin

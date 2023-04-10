@@ -26,7 +26,7 @@ open_locale big_operators classical
 section groth16
 
 -- TODO we open mv_polynomial, so we should be able to delete a lot of `mv_polynomial.`
-open mv_polynomial groth16
+open mv_polynomial polynomial groth16
 
 noncomputable theory
 
@@ -253,16 +253,22 @@ lemma modification_equivalence (a_stmt : fin n_stmt → F ) :
 begin
   -- TODO a few conditions likely still need to be added, such as degree bounds and the values 
   -- being nonzero.
+  -- sorry,
+  rw verified,
+  rw verified',
+  intro h,
   sorry,
-  -- rw verified,
-  -- rw verified',
-  -- intro h,
+  -- rw mv_polynomial.funext_iff,
   -- rw function.funext_iff at h,
+  -- intro vars_evaluation,
+  -- -- replace h := h vars_evaluation,
+
+
   -- -- Apply functional extensionality
   -- simp [A, B, C] at h,
+  --     done,
 
-  -- rw mv_polynomial.funext_iff,
-  -- intro vars_evaluation,
+
   -- simp [A', B', C'] with crs,
   -- -- apply polynomial.funext, -- TODO prove a version of this lemma for degree bounded polynomials on non infinite fields.
   -- -- intro x_evaluation,
@@ -364,7 +370,14 @@ begin
   rw verified' at eqn',
   rw [A', B', C'] at eqn',
   simp only [] with crs at eqn',
-  -- simp only [mv_polynomial.X, C_apply, mv_polynomial.monomial_mul, one_mul, mul_one, add_zero, zero_add, finset.sum_add_distrib, finset.sum_hom, mul_add, add_mul, sum_monomial_hom] at eqn',
+  simp only [mv_polynomial.X, C_apply, mv_polynomial.monomial_mul, one_mul, mul_one, add_zero, zero_add, finset.sum_add_distrib, mul_add, add_mul, sum_monomial_hom] at eqn',
+  -- simp only [] at eqn',
+
+
+  -- trace_state,
+  -- done,
+
+  -- simp only [mv_polynomial.X, C_apply, mv_polynomial.monomial_mul, one_mul, mul_one, add_zero, zero_add, finset.sum_add_distrib, finset.sum_hom, mul_add, add_mul, sum_monomial_hom] at eqn', -- finset.sum_hom has been broked by mathlib
 
   have h0012 := congr_arg (coeff (single vars.α 0 + single vars.β 0 + single vars.γ 1 + single vars.δ 2)) eqn',
   have h0021 := congr_arg (coeff (single vars.α 0 + single vars.β 0 + single vars.γ 2 + single vars.δ 1)) eqn',
@@ -386,6 +399,10 @@ begin
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at h0012 h0021 h0022 h0112 h0121 h0122 h0212 h0221 h0222 h1022 h1112 h1121 h1122,
   simp only [] with finsupp_simp at h0012 h0021 h0022 h0112 h0121 h0122 h0212 h0221 h0222 h1022 h1112 h1121 h1122,
 
+  trace_state,
+  done,
+
+
 
 
   -- Step 2: Recursively simplify and case-analyze the equations
@@ -404,6 +421,7 @@ begin
 
   -- done,
 
+  trace_state,
 
   -- Solve remaining cases by hand
   { rw [<-h1022, <-h0122, <-h0022],
@@ -415,6 +433,8 @@ begin
     ring, },
 
 
+
+  done,
 
 
 end 
