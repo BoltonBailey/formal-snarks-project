@@ -124,59 +124,6 @@ meta def mutually_simplify_one (nm : name) : tactic unit := do
 end interactive
 
 
--- Adapted from Mario's example
-meta def integral_domain_tactic : tactic unit := do
-  -- trace "\nCall to integral_domain_tactic", 
-  -- trace_state, -- printf debugging
-  `[my_simp_only [] with integral_domain_simp
-    at * {fail_if_unchanged := ff}],
-  try `[cases_type* true false],
-  _::_ ← get_goals | skip, 
-  cases_success <- try_core `[cases ‹_ ∨ _› with nm nm],
-  match cases_success with 
-  | some _ := all_goals' `[simp only [nm] at *, done <|> id { integral_domain_tactic }]
-  -- TODO, I need to change this so that, 
-  -- if rw found_zero fails the program stops and doesn't clear found_zero.
-  -- for now I remove the clear nm part
-  | none := skip
-  end
-
--- Broken version that tries to only simplify things when we know they have changed.
-meta def integral_domain_tactic_v2 : tactic unit := do
-  trace "\nCall to integral_domain_tactic_v2", 
-  -- trace_state, -- printf debugging
-  try `[cases_type* true false],
-  _::_ ← get_goals | skip, 
-  try `[clear found_zero],
-  cases_success <- try_core `[cases ‹_ ∨ _› with found_zero found_zero],
-  match cases_success with -- simplify everywhere might produce a simplification that can further help.
-  | some _ := all_goals' (do tactic.interactive.simplify_everywhere, done <|> integral_domain_tactic_v2)
-  | none := skip
-  end
-
--- Adapted from Mario's example
--- I screwed this one up and made the recursive call to integral_domain_tactic
--- instead of integral_domain_tactic_v3. Switching to _4 and leaving this for posterity.
--- _4 below seems to make this take 1 min instead of 30 min, which the amount of time
--- this has been taking the past few weeks.
--- :(
-meta def integral_domain_tactic_v3 : tactic unit := do
-  trace "\nCall to integral_domain_tactic_v3", 
-  -- trace_state, -- printf debugging
-  `[my_simp_only [*] with integral_domain_simp
-    at * {fail_if_unchanged := ff}],
-  try `[cases_type* true false],
-  _::_ ← get_goals | skip, 
-  try `[clear found_zero],
-  cases_success <- try_core `[cases ‹_ ∨ _› with found_zero found_zero],
-  match cases_success with 
-  | some _ := all_goals' `[done <|> id { integral_domain_tactic }]
-  -- TODO, I need to change this so that, 
-  -- if rw found_zero fails the program stops and doesn't clear found_zero.
-  -- for now I remove the clear found_zero part
-  | none := skip
-  end
-  
 
 
 meta def integral_domain_tactic_v4 : tactic unit := do
@@ -190,21 +137,6 @@ meta def integral_domain_tactic_v4 : tactic unit := do
   cases_success <- try_core `[cases ‹_ ∨ _› with found_zero found_zero],
   match cases_success with 
   | some _ := all_goals' `[done <|> id { integral_domain_tactic_v4 }]
-  | none := skip
-  end
-
--- In practice this seems to be slower, perhaps the optimization is not worth the code complexity.
-meta def integral_domain_tactic_v5 : tactic unit := do
-  trace "Call to integral_domain_tactic_v5", 
-  -- trace_state, -- printf debugging
-  ctx <- tactic.interactive.context_prop_name_getter,
-  if `found_zero ∈ ctx then tactic.interactive.mutually_simplify_one `found_zero else skip,
-  try `[cases_type* true false],
-  _::_ ← get_goals | skip, 
-  try `[clear found_zero],
-  cases_success <- try_core `[cases ‹_ ∨ _› with found_zero found_zero],
-  match cases_success with 
-  | some _ := all_goals' `[done <|> id { integral_domain_tactic_v5 }]
   | none := skip
   end
 
