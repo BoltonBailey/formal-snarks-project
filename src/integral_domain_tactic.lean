@@ -1,17 +1,6 @@
 
 
--- TODO a tactic for resolving statements in integral domain rings
 
--- This tactic should work as follows:
--- 1. Find all equality statements in the Euclidean ring in the statements (and goal)
--- 2. Break down either side of these equalities into a tree of add and mul operations (do not break down sums or prods)
--- 3. Identify all atoms of R from these, and put these equations in ring normal form
--- 4. Mutually simplify the equations by gaussian elimination. That is - check if subtracting off any statement equation from any other, or any statement from the goal,  "simplifies it" in terms of leaving less added terms. If so, perform this subtraction and resimplify. Repeat until we get through all pairs without a simplification.
--- 5. Check if any atom can be factored out of an equation, with zero on the other side. If so, simplify this to the disjunction of this atom being zero or the other factor being zero. Split on this disjunction, and repeat from step 4 on both sides of the split.
-
--- This is related to the Nullstellensatz. Specifically [Buchberger's Algorithm](https://en.wikipedia.org/wiki/Buchberger%27s_algorithm) is one way of doing what I do here. Not sure yet what the relation is - probably Buchberger is more general, but more time complex? See also the coq tactic [nsatz](https://coq.inria.fr/refman/addendum/nsatz.html).
-
--- What is the ["effective nullstellensatz"](https://en.wikipedia.org/wiki/Hilbert%27s_Nullstellensatz#Effective_Nullstellensatz) of these problems
 
 
 
@@ -20,6 +9,18 @@ import .general_lemmas.mv_X_mul
 import .general_lemmas.single_antidiagonal
 import tactic.abel
 import .attributes
+
+
+/-!
+# `integral_domain`: A tactic for resolving statements in integral domain rings
+
+This tactic works as follows:
+1. It applies the lemma `mul_eq_zero`, which simplifies statements of the form a * b = 0 to a = 0 ∨ b = 0 wherever possible.
+2. Enters subcases for either side of the disjuncts it finds.
+3. Mutually simplifies all resulting hypotheses
+4. Repeats until no more progress is made.
+-/
+
 
 open tactic
 
@@ -128,13 +129,17 @@ end interactive
 
 meta def integral_domain_tactic_v4 : tactic unit := do
   trace "Call to integral_domain_tactic_v4", 
-  -- trace_state, -- printf debugging
-  `[my_simp_only [*] with integral_domain_simp
+  -- Factor statements of the form a * b = 0 into a = 0 ∨ b = 0
+  -- and mutually simplify the resulting hypotheses.
+  `[simp only [*] with integral_domain_simp
     at * {fail_if_unchanged := ff}],
+  -- Eliminate true and false hypotheses, halt if done
   try `[cases_type* true false],
   _::_ ← get_goals | skip, 
+  -- Identify disjunctions
   try `[clear found_zero],
   cases_success <- try_core `[cases ‹_ ∨ _› with found_zero found_zero],
+  -- Do case work on disjunctions
   match cases_success with 
   | some _ := all_goals' `[done <|> id { integral_domain_tactic_v4 }]
   | none := skip
