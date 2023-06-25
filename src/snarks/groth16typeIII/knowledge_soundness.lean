@@ -25,7 +25,6 @@ open_locale big_operators classical
 
 section groth16
 
--- TODO we open mv_polynomial, so we should be able to delete a lot of `mv_polynomial.`
 open mv_polynomial polynomial groth16
 
 noncomputable theory
@@ -281,6 +280,7 @@ begin
 
 end
 
+example (P Q : Prop) : P ∨ Q := by tauto 
 
 open finsupp
 
@@ -399,8 +399,8 @@ begin
   simp only [finsupp_vars_eq_ext] with coeff_simp finsupp_eq at h0012 h0021 h0022 h0112 h0121 h0122 h0212 h0221 h0222 h1022 h1112 h1121 h1122,
   simp only [] with finsupp_simp at h0012 h0021 h0022 h0112 h0121 h0122 h0212 h0221 h0222 h1022 h1112 h1121 h1122,
 
-  trace_state,
-  done,
+  -- trace_state,
+  -- done,
 
 
 
