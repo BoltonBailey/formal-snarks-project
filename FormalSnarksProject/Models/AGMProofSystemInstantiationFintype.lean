@@ -27,22 +27,22 @@ structure AGMProofSystemInstantiation (F : Type) [Field F] where
   Stmt : Type
   /-- The type indexing toxic waste elements sampled -/
   Sample : Type
-  /-- The type indexing crs elements in group I, -/
-  CrsElements_Left : Type
-  [FintypeCrsElements_Left : Fintype CrsElements_Left]
+  /-- The type indexing SRS elements in group I, -/
+  SRSElements_G1 : Type
+  [FintypeSRSElements_G1 : Fintype SRSElements_G1]
   /-- Similarly -/
-  CrsElements_Right : Type
-  [FintypeCrsElements_Right : Fintype CrsElements_Right]
+  SRSElements_G2 : Type
+  [FintypeSRSElements_G2 : Fintype SRSElements_G2]
 
-  /-- The crs elements themselves, described as polynomials in the samples -/
-  crsElementValue_Left : (i : CrsElements_Left) → MvPolynomial (Sample) F
-  crsElementValue_Right : (i : CrsElements_Right) → MvPolynomial (Sample) F
+  /-- The SRS elements themselves, described as polynomials in the samples -/
+  SRSElementValue_G1 : (i : SRSElements_G1) → MvPolynomial (Sample) F
+  SRSElementValue_G2 : (i : SRSElements_G2) → MvPolynomial (Sample) F
 
   /-- A type indexing proof elements in each group -/
-  Proof_Left : Type
-  [FintypeProof_Left : Fintype Proof_Left]
-  Proof_Right : Type
-  [FintypeProof_Right : Fintype Proof_Right]
+  Proof_G1 : Type
+  [FintypeProof_G1 : Fintype Proof_G1]
+  Proof_G2 : Type
+  [FintypeProof_G2 : Fintype Proof_G2]
 
   /-- The type indexing equations the verifier checks -/
   EqualityChecks : Type
@@ -53,31 +53,31 @@ structure AGMProofSystemInstantiation (F : Type) [Field F] where
 
   [FintypePairings : (k : EqualityChecks) → Fintype (Pairings k)]
 
-  /-- The coefficient that the verifier uses for the jth element of the ith component of the CRSI
+  /-- The coefficient that the verifier uses for the jth element of the ith component of the SRSI
   in the left half of the lth paring of the kth equality check -/
-  verificationPairingCRSLeft : Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : CrsElements_Left) → F
-  /-- The coefficient that the verifier uses for the jth element of the ith component of the CRSII
+  verificationPairingSRS_G1 : Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : SRSElements_G1) → F
+  /-- The coefficient that the verifier uses for the jth element of the ith component of the SRSII
   in the right half of the lth paring of the kth equality check  -/
-  verificationPairingCRSRight : Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : CrsElements_Right) → F
-  /-- The coefficient that the verifier uses for the jth element of the ith component of the Proof_Left
+  verificationPairingSRS_G2 : Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : SRSElements_G2) → F
+  /-- The coefficient that the verifier uses for the jth element of the ith component of the Proof_G1
   in the left half of the lth paring of the kth equality check -/
-  verificationPairingProofLeft : Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : Proof_Left) → F
-  /-- The coefficient that the verifier uses for the jth element of the ith component of the Proof_Right
+  verificationPairingProof_G1 : Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : Proof_G1) → F
+  /-- The coefficient that the verifier uses for the jth element of the ith component of the Proof_G2
   in the right half of the lth paring of the kth equality check  -/
-  verificationPairingProofRight : Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : Proof_Right) → F
+  verificationPairingProof_G2 : Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : Proof_G2) → F
 
-attribute [instance] AGMProofSystemInstantiation.FintypeCrsElements_Left
-attribute [instance] AGMProofSystemInstantiation.FintypeCrsElements_Right
-attribute [instance] AGMProofSystemInstantiation.FintypeProof_Left
-attribute [instance] AGMProofSystemInstantiation.FintypeProof_Right
+attribute [instance] AGMProofSystemInstantiation.FintypeSRSElements_G1
+attribute [instance] AGMProofSystemInstantiation.FintypeSRSElements_G2
+attribute [instance] AGMProofSystemInstantiation.FintypeProof_G1
+attribute [instance] AGMProofSystemInstantiation.FintypeProof_G2
 attribute [instance] AGMProofSystemInstantiation.FintypePairings
 
 
 /-- The type of possible provers in the AGM model.
-A prover simply assigns, for each proof element and each crs element from the group of that proof element, a coefficient. -/
+A prover simply assigns, for each proof element and each SRS element from the group of that proof element, a coefficient. -/
 def AGMProofSystemInstantiation.Prover (F : Type) [Field F]
     (𝓟 : AGMProofSystemInstantiation F) : Type :=
-  (𝓟.Proof_Left -> 𝓟.CrsElements_Left -> F) × (𝓟.Proof_Right -> 𝓟.CrsElements_Right -> F)
+  (𝓟.Proof_G1 -> 𝓟.SRSElements_G1 -> F) × (𝓟.Proof_G2 -> 𝓟.SRSElements_G2 -> F)
 
 def AGMProofSystemInstantiation.verify {F : Type} [Field F]
     (𝓟 : AGMProofSystemInstantiation F) (prover : 𝓟.Prover) (stmt : 𝓟.Stmt) : Prop :=
@@ -86,34 +86,34 @@ def AGMProofSystemInstantiation.verify {F : Type} [Field F]
       ( -- LHS of pairing TODO double check this I was tired
         -- Proof component
         (
-          ∑ pf_elem : 𝓟.FintypeProof_Left.elems, -- Sum over all left proof components
-            C (𝓟.verificationPairingProofLeft stmt check_idx pairing pf_elem) -- Coefficient of that element
+          ∑ pf_elem : 𝓟.FintypeProof_G1.elems, -- Sum over all left proof components
+            C (𝓟.verificationPairingProof_G1 stmt check_idx pairing pf_elem) -- Coefficient of that element
             *
             -- Times the proof component itself TODO refactor this to be a function
-            ∑ crs_elem : 𝓟.FintypeCrsElements_Left.elems,
-              C (prover.fst pf_elem crs_elem) * (𝓟.crsElementValue_Left crs_elem)
+            ∑ SRS_elem : 𝓟.FintypeSRSElements_G1.elems,
+              C (prover.fst pf_elem SRS_elem) * (𝓟.SRSElementValue_G1 SRS_elem)
         )
         +
-        ( -- CRS component
-          ∑ crs_elem : 𝓟.FintypeCrsElements_Left.elems,
-            C (𝓟.verificationPairingCRSLeft stmt check_idx pairing crs_elem) * (𝓟.crsElementValue_Left crs_elem)
+        ( -- SRS component
+          ∑ SRS_elem : 𝓟.FintypeSRSElements_G1.elems,
+            C (𝓟.verificationPairingSRS_G1 stmt check_idx pairing SRS_elem) * (𝓟.SRSElementValue_G1 SRS_elem)
         )
       )
       *
       ( -- RHS of pairing
         -- Proof component
         (
-          ∑ pf_elem : 𝓟.FintypeProof_Right.elems, -- Sum over all right proof components
-            C (𝓟.verificationPairingProofRight stmt check_idx pairing pf_elem) -- Coefficient of that element
+          ∑ pf_elem : 𝓟.FintypeProof_G2.elems, -- Sum over all right proof components
+            C (𝓟.verificationPairingProof_G2 stmt check_idx pairing pf_elem) -- Coefficient of that element
             *
             -- Times the proof component itself TODO refactor this to be a function
-            ∑ crs_elem : 𝓟.FintypeCrsElements_Right.elems,
-              C (prover.snd pf_elem crs_elem) * (𝓟.crsElementValue_Right crs_elem)
+            ∑ SRS_elem : 𝓟.FintypeSRSElements_G2.elems,
+              C (prover.snd pf_elem SRS_elem) * (𝓟.SRSElementValue_G2 SRS_elem)
         )
         +
-        ( -- CRS component
-          ∑ crs_elem : 𝓟.FintypeCrsElements_Right.elems,
-            C (𝓟.verificationPairingCRSRight stmt check_idx pairing crs_elem) * (𝓟.crsElementValue_Right crs_elem)
+        ( -- SRS component
+          ∑ SRS_elem : 𝓟.FintypeSRSElements_G2.elems,
+            C (𝓟.verificationPairingSRS_G2 stmt check_idx pairing SRS_elem) * (𝓟.SRSElementValue_G2 SRS_elem)
         )
       )
     = 0

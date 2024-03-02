@@ -13,9 +13,9 @@ The `AGMProofSystemInstantiation` returned by this function has the following pr
 * the statment and witness types are vectors of field elements, where the length of the vectors is determined by the first and second elements of the list.
 * The sample space for toxic waste elements is an Option type
 * All some _ values appears to unbounded degree in the SRS elements
-* The index types into the left and right halves of the CRS are comprised of `Sum` types over components,
+* The index types into the left and right halves of the SRS are comprised of `Sum` types over components,
   * Each of these components is a Unit or Fin types
-  * Each corresponding component of the CRS has the form of a sum of MvPolynomials,
+  * Each corresponding component of the SRS has the form of a sum of MvPolynomials,
     * Each component of that sum consists of a product of
       * (some _) type toxic waste elements
       * Polynomials from the vectors provided in the circuit description (cast to MvPolynomials).
@@ -25,7 +25,7 @@ The `AGMProofSystemInstantiation` returned by this function has the following pr
 
 -/
 
--- TODO CRS vs SRS
+-- TODO SRS vs SRS
 
 structure StraightforwardAGMProofSystem where
   /-- Auxiliary data for the system -/
@@ -36,22 +36,22 @@ structure StraightforwardAGMProofSystem where
   degreeBound : Vars → ℕ
 
   /-- The number of components in left-group SRS -/
-  nCrsComponents_Left : ℕ
+  nSRSComponents_G1 : ℕ
   /-- The lengths of components of the SRS, in terms of the stmt and wit lengths and aux data -/
-  CrsElements_Left_Lengths : Fin nCrsComponents_Left -> ℕ -> ℕ -> Aux -> ℕ
+  SRSElements_G1_Lengths : Fin nSRSComponents_G1 -> ℕ -> ℕ -> Aux -> ℕ
   /-- Similarly -/
-  nCrsComponents_Right : ℕ
-  CrsElements_Right_Lengths : Fin nCrsComponents_Right -> ℕ -> ℕ -> Aux -> ℕ
+  nSRSComponents_G2 : ℕ
+  SRSElements_G2_Lengths : Fin nSRSComponents_G2 -> ℕ -> ℕ -> Aux -> ℕ
 
-  -- /-- The crs elements themselves, described as polynomials in the samples -/
-  -- crsElementValue_Left : (i : CrsElements_Left) → MvPolynomial (Sample) F
-  -- crsElementValue_Right : (i : CrsElements_Right) → MvPolynomial (Sample) F
+  -- /-- The SRS elements themselves, described as polynomials in the samples -/
+  -- SRSElementValue_G1 : (i : SRSElements_G1) → MvPolynomial (Sample) F
+  -- SRSElementValue_G2 : (i : SRSElements_G2) → MvPolynomial (Sample) F
 
   -- /-- A type indexing proof elements in each group -/
-  -- Proof_Left : Type
-  -- ListProof_Left : List Proof_Left
-  -- Proof_Right : Type
-  -- ListProof_Right : List Proof_Right
+  -- Proof_G1 : Type
+  -- ListProof_G1 : List Proof_G1
+  -- Proof_G2 : Type
+  -- ListProof_G2 : List Proof_G2
 
   -- /-- The type indexing equations the verifier checks -/
   -- EqualityChecks : Type
@@ -62,18 +62,18 @@ structure StraightforwardAGMProofSystem where
 
   -- ListPairings : (k : EqualityChecks) → List (Pairings k)
 
-  -- /-- The coefficient that the verifier uses for the jth element of the ith component of the CRSI
+  -- /-- The coefficient that the verifier uses for the jth element of the ith component of the SRSI
   -- in the left half of the lth paring of the kth equality check -/
-  -- verificationPairingCRSLeft : Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : CrsElements_Left) → F
-  -- /-- The coefficient that the verifier uses for the jth element of the ith component of the CRSII
+  -- verificationPairingSRS_G1 : Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : SRSElements_G1) → F
+  -- /-- The coefficient that the verifier uses for the jth element of the ith component of the SRSII
   -- in the right half of the lth paring of the kth equality check  -/
-  -- verificationPairingCRSRight : Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : CrsElements_Right) → F
-  -- /-- The coefficient that the verifier uses for the jth element of the ith component of the Proof_Left
+  -- verificationPairingSRS_G2 : Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : SRSElements_G2) → F
+  -- /-- The coefficient that the verifier uses for the jth element of the ith component of the Proof_G1
   -- in the left half of the lth paring of the kth equality check -/
-  -- verificationPairingProofLeft : Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : Proof_Left) → F
-  -- /-- The coefficient that the verifier uses for the jth element of the ith component of the Proof_Right
+  -- verificationPairingProof_G1 : Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : Proof_G1) → F
+  -- /-- The coefficient that the verifier uses for the jth element of the ith component of the Proof_G2
   -- in the right half of the lth paring of the kth equality check  -/
-  -- verificationPairingProofRight : Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : Proof_Right) → F
+  -- verificationPairingProof_G2 : Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : Proof_G2) → F
 
 /-- Maps [1, 2, 3] to
 [,
@@ -89,23 +89,23 @@ def StraightforwardAGMProofSystem.toAGMProofSystem (F : Type) [Field F] (n_stmt 
     (𝓟 : StraightforwardAGMProofSystem) (aux : 𝓟.Aux) : AGMProofSystemInstantiation F where
   Stmt := Fin n_stmt -> F
   Sample := Option 𝓟.Vars
-  CrsElements_Left := List.foldl Sum Empty ((𝓟.CrsElements_Left_Lengths n_stmt n_wit aux).map Fin)
-  ListCrsElements_Left := List.foldl List.append [] (_)
-  CrsElements_Right := _
-  ListCrsElements_Right := _
-  crsElementValue_Left := _
-  crsElementValue_Right := _
-  Proof_Left := _
-  ListProof_Left := _
-  Proof_Right := _
-  ListProof_Right := _
+  SRSElements_G1 := List.foldl Sum Empty ((𝓟.SRSElements_G1_Lengths n_stmt n_wit aux).map Fin)
+  ListSRSElements_G1 := List.foldl List.append [] (_)
+  SRSElements_G2 := _
+  ListSRSElements_G2 := _
+  SRSElementValue_G1 := _
+  SRSElementValue_G2 := _
+  Proof_G1 := _
+  ListProof_G1 := _
+  Proof_G2 := _
+  ListProof_G2 := _
   EqualityChecks := _
   Pairings := _
   ListPairings := _
-  verificationPairingCRSLeft := _
-  verificationPairingCRSRight := _
-  verificationPairingProofLeft := _
-  verificationPairingProofRight := _
+  verificationPairingSRS_G1 := _
+  verificationPairingSRS_G2 := _
+  verificationPairingProof_G1 := _
+  verificationPairingProof_G2 := _
 
 
 
@@ -113,18 +113,18 @@ def StraightforwardAGMProofSystem.toAGMProofSystem (F : Type) [Field F] (n_stmt 
 def StraightforwardAGMProofSystem.soundness (F : Type) [Field F] (n_stmt n_wit : ℕ)
     (𝓟 : StraightforwardAGMProofSystem F n_stmt n_wit) : Prop := sorry
     -- ∀ stmt : Fin n_stmt → F,
-    --   ∀ agm : proof_elems_index → Fin n_crs → F,
+    --   ∀ agm : proof_elems_index → Fin n_SRS → F,
     --     ((-- if all checks on the proof pass, the extracted witness must satisfy the relation
     --         -- (∀ f : (fin n_sample) → F,
     --         -- (∀ s : fin n_sample, f s ≠ 0) →
     --         ∀ c ∈ polynomial_checks,
     --           (MvPolynomial.bind₁
-    --               (fun pf_idx => ∑ crs_idx : Fin n_crs, agm pf_idx crs_idx • crs_elems crs_idx) :
+    --               (fun pf_idx => ∑ SRS_idx : Fin n_SRS, agm pf_idx SRS_idx • SRS_elems SRS_idx) :
     --               MvPolynomial proof_elems_index F -> MvPolynomial (Fin n_sample) F) c =
     --             0) ∧
     --         ∀ idx : proof_elems_index,
     --           ∀ val ∈ proof_element_checks idx,
-    --             (val : (Fin n_stmt → F) → Fin n_crs → F) stmt = agm idx) →
+    --             (val : (Fin n_stmt → F) → Fin n_SRS → F) stmt = agm idx) →
     --       relation stmt (extractor agm)
 
 
@@ -136,8 +136,8 @@ def StraightforwardAGMProofSystem.soundness (F : Type) [Field F] (n_stmt n_wit :
 
 --   relation : (Fin n_stmt → F) → (Fin n_wit → F) → Prop
 --   nSample : ℕ
---   nCrs : ℕ
---   crs_elems : Fin n_crs → MvPolynomial (Fin n_sample) F
+--   nSRS : ℕ
+--   SRS_elems : Fin n_SRS → MvPolynomial (Fin n_sample) F
 
 
 -- def StraightforwardAGMProofSystem.toAGMProofSystem

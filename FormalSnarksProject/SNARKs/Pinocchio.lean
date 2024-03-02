@@ -4,12 +4,13 @@ import FormalSnarksProject.ToMathlib.List
 import FormalSnarksProject.ToMathlib.OptionEquivRight
 import Mathlib.Data.MvPolynomial.Equiv
 import FormalSnarksProject.SoundnessTactic.SoundnessProver
+import FormalSnarksProject.ToMathlib.MulModByMonic
 
 open scoped BigOperators Classical
 
 section Pinocchio
 
-open MvPolynomial Option
+open MvPolynomial Option AGMProofSystemInstantiation
 
 namespace Pinocchio
 
@@ -51,18 +52,18 @@ lemma Vars.finsupp_eq_ext (f g : Vars →₀ ℕ) : f = g ↔
 -- Pinnochi is a Type I SNARK, so in theorey any proof element can be given on the left.
 -- The W_mid is the only proof element used on both sides.
 -- We later introduce an artificial equation to guarantee that the W_mid is the same on both sides.
-inductive Proof_Left_Idx : Type where
-  | V_mid : Proof_Left_Idx
-  | V_mid' : Proof_Left_Idx
-  | W_mid : Proof_Left_Idx
-  | W_mid' : Proof_Left_Idx
-  | Y_mid : Proof_Left_Idx
-  | Y_mid' : Proof_Left_Idx
-  | Z : Proof_Left_Idx
+inductive Proof_G1_Idx : Type where
+  | V_mid : Proof_G1_Idx
+  | V_mid' : Proof_G1_Idx
+  | W_mid : Proof_G1_Idx
+  | W_mid' : Proof_G1_Idx
+  | Y_mid : Proof_G1_Idx
+  | Y_mid' : Proof_G1_Idx
+  | Z : Proof_G1_Idx
 
-inductive Proof_Right_Idx : Type where
-  | W_mid : Proof_Right_Idx
-  | H : Proof_Right_Idx
+inductive Proof_G2_Idx : Type where
+  | W_mid : Proof_G2_Idx
+  | H : Proof_G2_Idx
 
 inductive ChecksIdx : Type where
   | CheckI : ChecksIdx
@@ -93,30 +94,30 @@ inductive PairingsV_Idx : Type where
   | rhs : PairingsV_Idx
 
 
-inductive CRS_Elements_Idx {n_stmt n_wit d : ℕ} : Type where
+inductive SRS_Elements_Idx {n_stmt n_wit d : ℕ} : Type where
   -- Evaluation key
-  | EK_v : Fin n_wit -> CRS_Elements_Idx
-  | EK_w : Fin n_wit -> CRS_Elements_Idx
-  | EK_y : Fin n_wit -> CRS_Elements_Idx
-  | EK_α_v : Fin n_wit -> CRS_Elements_Idx
-  | EK_α_w : Fin n_wit -> CRS_Elements_Idx
-  | EK_α_y : Fin n_wit -> CRS_Elements_Idx
-  | EK_s_pow : Fin d -> CRS_Elements_Idx
-  | EK_β_v_w_y : Fin n_wit -> CRS_Elements_Idx
+  | EK_v : Fin n_wit -> SRS_Elements_Idx
+  | EK_w : Fin n_wit -> SRS_Elements_Idx
+  | EK_y : Fin n_wit -> SRS_Elements_Idx
+  | EK_α_v : Fin n_wit -> SRS_Elements_Idx
+  | EK_α_w : Fin n_wit -> SRS_Elements_Idx
+  | EK_α_y : Fin n_wit -> SRS_Elements_Idx
+  | EK_s_pow : Fin d -> SRS_Elements_Idx
+  | EK_β_v_w_y : Fin n_wit -> SRS_Elements_Idx
   -- Verification key
-  | VK_1 : CRS_Elements_Idx
-  | VK_α_v : CRS_Elements_Idx
-  | VK_α_w : CRS_Elements_Idx
-  | VK_α_y : CRS_Elements_Idx
-  | VK_γ : CRS_Elements_Idx
-  | VK_βγ : CRS_Elements_Idx
-  | VK_t : CRS_Elements_Idx
-  | VK_v_0 : CRS_Elements_Idx
-  | VK_w_0 : CRS_Elements_Idx
-  | VK_y_0 : CRS_Elements_Idx
-  | VK_v_stmt : Fin n_stmt -> CRS_Elements_Idx
-  | VK_w_stmt : Fin n_stmt -> CRS_Elements_Idx
-  | VK_y_stmt : Fin n_stmt -> CRS_Elements_Idx
+  | VK_1 : SRS_Elements_Idx
+  | VK_α_v : SRS_Elements_Idx
+  | VK_α_w : SRS_Elements_Idx
+  | VK_α_y : SRS_Elements_Idx
+  | VK_γ : SRS_Elements_Idx
+  | VK_βγ : SRS_Elements_Idx
+  | VK_t : SRS_Elements_Idx
+  | VK_v_0 : SRS_Elements_Idx
+  | VK_w_0 : SRS_Elements_Idx
+  | VK_y_0 : SRS_Elements_Idx
+  | VK_v_stmt : Fin n_stmt -> SRS_Elements_Idx
+  | VK_w_stmt : Fin n_stmt -> SRS_Elements_Idx
+  | VK_y_stmt : Fin n_stmt -> SRS_Elements_Idx
 
 set_option maxHeartbeats 0 -- Disable heartbeats to prevent timeouts
 
@@ -145,95 +146,96 @@ noncomputable def Pinocchio
     {v_0 : Polynomial F }
     {w_0 : Polynomial F }
     {y_0 : Polynomial F }
-    /- The roots of the polynomial t -/
-    {r : Fin (n_wit) → F} :
+    /- t is the polynomial divisibility by which is used to verify satisfaction of the QAP -/
+    {t : Polynomial F}
+    -- t can also be expressed as follows, but this structure is not important for soundness
+    -- {r : Fin (n_wit) → F}
+    -- let t : Polynomial F := ∏ i : Fin n_wit in Fingeneralize.univ, (Polynomial.X - Polynomial.C (r i)
+    :
     AGMProofSystemInstantiation F :=
-
-  /- t is the polynomial divisibility by which is used to verify satisfaction of the QAP -/
-  let t : Polynomial F := ∏ i : Fin n_wit in Finset.univ, (Polynomial.X - Polynomial.C (r i));
   { Stmt := Fin n_stmt → F
     Sample := Option Vars
-    CrsElements_Left := @CRS_Elements_Idx n_stmt n_wit d
-    ListCrsElements_Left :=
-      ((List.finRange n_wit).map fun i => CRS_Elements_Idx.EK_v i)
-      ++ ((List.finRange n_wit).map fun i => CRS_Elements_Idx.EK_w i)
-      ++ ((List.finRange n_wit).map fun i => CRS_Elements_Idx.EK_y i)
-      ++ ((List.finRange n_wit).map fun i => CRS_Elements_Idx.EK_α_v i)
-      ++ ((List.finRange n_wit).map fun i => CRS_Elements_Idx.EK_α_w i)
-      ++ ((List.finRange n_wit).map fun i => CRS_Elements_Idx.EK_α_y i)
-      ++ ((List.finRange d).map fun i => CRS_Elements_Idx.EK_s_pow i)
-      ++ ((List.finRange n_wit).map fun i => CRS_Elements_Idx.EK_β_v_w_y i)
-      ++ [CRS_Elements_Idx.VK_1, CRS_Elements_Idx.VK_α_v, CRS_Elements_Idx.VK_α_w, CRS_Elements_Idx.VK_α_y, CRS_Elements_Idx.VK_γ, CRS_Elements_Idx.VK_βγ, CRS_Elements_Idx.VK_t, CRS_Elements_Idx.VK_v_0, CRS_Elements_Idx.VK_w_0, CRS_Elements_Idx.VK_y_0]
-      ++ ((List.finRange n_stmt).map fun i => CRS_Elements_Idx.VK_v_stmt i)
-      ++ ((List.finRange n_stmt).map fun i => CRS_Elements_Idx.VK_w_stmt i)
-      ++ ((List.finRange n_stmt).map fun i => CRS_Elements_Idx.VK_y_stmt i)
+    SRSElements_G1 := @SRS_Elements_Idx n_stmt n_wit d
+    ListSRSElements_G1 :=
+      ((List.finRange n_wit).map fun i => SRS_Elements_Idx.EK_v i)
+      ++ ((List.finRange n_wit).map fun i => SRS_Elements_Idx.EK_w i)
+      ++ ((List.finRange n_wit).map fun i => SRS_Elements_Idx.EK_y i)
+      ++ ((List.finRange n_wit).map fun i => SRS_Elements_Idx.EK_α_v i)
+      ++ ((List.finRange n_wit).map fun i => SRS_Elements_Idx.EK_α_w i)
+      ++ ((List.finRange n_wit).map fun i => SRS_Elements_Idx.EK_α_y i)
+      ++ ((List.finRange d).map fun i => SRS_Elements_Idx.EK_s_pow i)
+      ++ ((List.finRange n_wit).map fun i => SRS_Elements_Idx.EK_β_v_w_y i)
+      ++ [SRS_Elements_Idx.VK_1, SRS_Elements_Idx.VK_α_v, SRS_Elements_Idx.VK_α_w, SRS_Elements_Idx.VK_α_y, SRS_Elements_Idx.VK_γ, SRS_Elements_Idx.VK_βγ, SRS_Elements_Idx.VK_t, SRS_Elements_Idx.VK_v_0, SRS_Elements_Idx.VK_w_0, SRS_Elements_Idx.VK_y_0]
+      ++ ((List.finRange n_stmt).map fun i => SRS_Elements_Idx.VK_v_stmt i)
+      ++ ((List.finRange n_stmt).map fun i => SRS_Elements_Idx.VK_w_stmt i)
+      ++ ((List.finRange n_stmt).map fun i => SRS_Elements_Idx.VK_y_stmt i)
     -- Note that Pinochio is a Type I SNARK - all SRS elements appear in both groups of the pairing
-    CrsElements_Right := @CRS_Elements_Idx n_stmt n_wit d
-    ListCrsElements_Right :=
-      ((List.finRange n_wit).map fun i => CRS_Elements_Idx.EK_v i)
-      ++ ((List.finRange n_wit).map fun i => CRS_Elements_Idx.EK_w i)
-      ++ ((List.finRange n_wit).map fun i => CRS_Elements_Idx.EK_y i)
-      ++ ((List.finRange n_wit).map fun i => CRS_Elements_Idx.EK_α_v i)
-      ++ ((List.finRange n_wit).map fun i => CRS_Elements_Idx.EK_α_w i)
-      ++ ((List.finRange n_wit).map fun i => CRS_Elements_Idx.EK_α_y i)
-      ++ ((List.finRange d).map fun i => CRS_Elements_Idx.EK_s_pow i)
-      ++ ((List.finRange n_wit).map fun i => CRS_Elements_Idx.EK_β_v_w_y i)
-      ++ [CRS_Elements_Idx.VK_1, CRS_Elements_Idx.VK_α_v, CRS_Elements_Idx.VK_α_w, CRS_Elements_Idx.VK_α_y, CRS_Elements_Idx.VK_γ, CRS_Elements_Idx.VK_βγ, CRS_Elements_Idx.VK_t, CRS_Elements_Idx.VK_v_0, CRS_Elements_Idx.VK_w_0, CRS_Elements_Idx.VK_y_0]
-      ++ ((List.finRange n_stmt).map fun i => CRS_Elements_Idx.VK_v_stmt i)
-      ++ ((List.finRange n_stmt).map fun i => CRS_Elements_Idx.VK_w_stmt i)
-      ++ ((List.finRange n_stmt).map fun i => CRS_Elements_Idx.VK_y_stmt i)
+    SRSElements_G2 := @SRS_Elements_Idx n_stmt n_wit d
+    ListSRSElements_G2 :=
+      ((List.finRange n_wit).map fun i => SRS_Elements_Idx.EK_v i)
+      ++ ((List.finRange n_wit).map fun i => SRS_Elements_Idx.EK_w i)
+      ++ ((List.finRange n_wit).map fun i => SRS_Elements_Idx.EK_y i)
+      ++ ((List.finRange n_wit).map fun i => SRS_Elements_Idx.EK_α_v i)
+      ++ ((List.finRange n_wit).map fun i => SRS_Elements_Idx.EK_α_w i)
+      ++ ((List.finRange n_wit).map fun i => SRS_Elements_Idx.EK_α_y i)
+      ++ ((List.finRange d).map fun i => SRS_Elements_Idx.EK_s_pow i)
+      ++ ((List.finRange n_wit).map fun i => SRS_Elements_Idx.EK_β_v_w_y i)
+      ++ [SRS_Elements_Idx.VK_1, SRS_Elements_Idx.VK_α_v, SRS_Elements_Idx.VK_α_w, SRS_Elements_Idx.VK_α_y, SRS_Elements_Idx.VK_γ, SRS_Elements_Idx.VK_βγ, SRS_Elements_Idx.VK_t, SRS_Elements_Idx.VK_v_0, SRS_Elements_Idx.VK_w_0, SRS_Elements_Idx.VK_y_0]
+      ++ ((List.finRange n_stmt).map fun i => SRS_Elements_Idx.VK_v_stmt i)
+      ++ ((List.finRange n_stmt).map fun i => SRS_Elements_Idx.VK_w_stmt i)
+      ++ ((List.finRange n_stmt).map fun i => SRS_Elements_Idx.VK_y_stmt i)
 
-    crsElementValue_Left := fun crs_idx => match crs_idx with
-      | CRS_Elements_Idx.EK_v i => poly_r_v * to_MvPolynomial_Option Vars (v_wit i)
-      | CRS_Elements_Idx.EK_w i => poly_r_w * to_MvPolynomial_Option Vars (w_wit i)
-      | CRS_Elements_Idx.EK_y i => poly_r_v * poly_r_w * to_MvPolynomial_Option Vars (y_wit i)
-      | CRS_Elements_Idx.EK_α_v i => poly_r_v * poly_α_v * to_MvPolynomial_Option Vars (v_wit i)
-      | CRS_Elements_Idx.EK_α_w i => poly_r_w * poly_α_w * to_MvPolynomial_Option Vars (w_wit i)
-      | CRS_Elements_Idx.EK_α_y i => poly_r_v * poly_r_w * poly_α_y * to_MvPolynomial_Option Vars (y_wit i)
-      | CRS_Elements_Idx.EK_s_pow i => poly_s ^ (i : ℕ)
-      | CRS_Elements_Idx.EK_β_v_w_y i => poly_β * (poly_r_v * to_MvPolynomial_Option Vars (v_wit i) + poly_r_w * to_MvPolynomial_Option Vars (w_wit i) + poly_r_v * poly_r_w * to_MvPolynomial_Option Vars (y_wit i))
-      | CRS_Elements_Idx.VK_1 => 1
-      | CRS_Elements_Idx.VK_α_v => poly_α_v
-      | CRS_Elements_Idx.VK_α_w => poly_α_w
-      | CRS_Elements_Idx.VK_α_y => poly_α_y
-      | CRS_Elements_Idx.VK_γ => poly_γ
-      | CRS_Elements_Idx.VK_βγ => poly_β * poly_γ
-      | CRS_Elements_Idx.VK_t => poly_r_v * poly_r_w * to_MvPolynomial_Option Vars t
-      | CRS_Elements_Idx.VK_v_0 => poly_r_v * to_MvPolynomial_Option Vars v_0
-      | CRS_Elements_Idx.VK_w_0 => poly_r_w * to_MvPolynomial_Option Vars w_0
-      | CRS_Elements_Idx.VK_y_0 => poly_r_v * poly_r_w * to_MvPolynomial_Option Vars y_0
-      | CRS_Elements_Idx.VK_v_stmt i => poly_r_v * to_MvPolynomial_Option Vars (v_stmt i)
-      | CRS_Elements_Idx.VK_w_stmt i => poly_r_w * to_MvPolynomial_Option Vars (w_stmt i)
-      | CRS_Elements_Idx.VK_y_stmt i => poly_r_v * poly_r_w * to_MvPolynomial_Option Vars (y_stmt i)
+    SRSElementValue_G1 := fun SRS_idx => match SRS_idx with
+      | SRS_Elements_Idx.EK_v i => poly_r_v * to_MvPolynomial_Option Vars (v_wit i)
+      | SRS_Elements_Idx.EK_w i => poly_r_w * to_MvPolynomial_Option Vars (w_wit i)
+      | SRS_Elements_Idx.EK_y i => poly_r_v * poly_r_w * to_MvPolynomial_Option Vars (y_wit i)
+      | SRS_Elements_Idx.EK_α_v i => poly_r_v * poly_α_v * to_MvPolynomial_Option Vars (v_wit i)
+      | SRS_Elements_Idx.EK_α_w i => poly_r_w * poly_α_w * to_MvPolynomial_Option Vars (w_wit i)
+      | SRS_Elements_Idx.EK_α_y i => poly_r_v * poly_r_w * poly_α_y * to_MvPolynomial_Option Vars (y_wit i)
+      | SRS_Elements_Idx.EK_s_pow i => poly_s ^ (i : ℕ)
+      | SRS_Elements_Idx.EK_β_v_w_y i => poly_β * (poly_r_v * to_MvPolynomial_Option Vars (v_wit i) + poly_r_w * to_MvPolynomial_Option Vars (w_wit i) + poly_r_v * poly_r_w * to_MvPolynomial_Option Vars (y_wit i))
+      | SRS_Elements_Idx.VK_1 => 1
+      | SRS_Elements_Idx.VK_α_v => poly_α_v
+      | SRS_Elements_Idx.VK_α_w => poly_α_w
+      | SRS_Elements_Idx.VK_α_y => poly_α_y
+      | SRS_Elements_Idx.VK_γ => poly_γ
+      | SRS_Elements_Idx.VK_βγ => poly_β * poly_γ
+      | SRS_Elements_Idx.VK_t => poly_r_v * poly_r_w * to_MvPolynomial_Option Vars t
+      | SRS_Elements_Idx.VK_v_0 => poly_r_v * to_MvPolynomial_Option Vars v_0
+      | SRS_Elements_Idx.VK_w_0 => poly_r_w * to_MvPolynomial_Option Vars w_0
+      | SRS_Elements_Idx.VK_y_0 => poly_r_v * poly_r_w * to_MvPolynomial_Option Vars y_0
+      | SRS_Elements_Idx.VK_v_stmt i => poly_r_v * to_MvPolynomial_Option Vars (v_stmt i)
+      | SRS_Elements_Idx.VK_w_stmt i => poly_r_w * to_MvPolynomial_Option Vars (w_stmt i)
+      | SRS_Elements_Idx.VK_y_stmt i => poly_r_v * poly_r_w * to_MvPolynomial_Option Vars (y_stmt i)
 
 
-    crsElementValue_Right := fun crs_idx => match crs_idx with
-      | CRS_Elements_Idx.EK_v i => poly_r_v * to_MvPolynomial_Option Vars (v_wit i)
-      | CRS_Elements_Idx.EK_w i => poly_r_w * to_MvPolynomial_Option Vars (w_wit i)
-      | CRS_Elements_Idx.EK_y i => poly_r_v * poly_r_w * to_MvPolynomial_Option Vars (y_wit i)
-      | CRS_Elements_Idx.EK_α_v i => poly_r_v * poly_α_v * to_MvPolynomial_Option Vars (v_wit i)
-      | CRS_Elements_Idx.EK_α_w i => poly_r_w * poly_α_w * to_MvPolynomial_Option Vars (w_wit i)
-      | CRS_Elements_Idx.EK_α_y i => poly_r_v * poly_r_w * poly_α_y * to_MvPolynomial_Option Vars (y_wit i)
-      | CRS_Elements_Idx.EK_s_pow i => poly_s ^ (i : ℕ)
-      | CRS_Elements_Idx.EK_β_v_w_y i => poly_β * (poly_r_v * to_MvPolynomial_Option Vars (v_wit i) + poly_r_w * to_MvPolynomial_Option Vars (w_wit i) + poly_r_v * poly_r_w * to_MvPolynomial_Option Vars (y_wit i))
-      | CRS_Elements_Idx.VK_1 => 1
-      | CRS_Elements_Idx.VK_α_v => poly_α_v
-      | CRS_Elements_Idx.VK_α_w => poly_α_w
-      | CRS_Elements_Idx.VK_α_y => poly_α_y
-      | CRS_Elements_Idx.VK_γ => poly_γ
-      | CRS_Elements_Idx.VK_βγ => poly_β * poly_γ
-      | CRS_Elements_Idx.VK_t => poly_r_v * poly_r_w * to_MvPolynomial_Option Vars t
-      | CRS_Elements_Idx.VK_v_0 => poly_r_v * to_MvPolynomial_Option Vars v_0
-      | CRS_Elements_Idx.VK_w_0 => poly_r_w * to_MvPolynomial_Option Vars w_0
-      | CRS_Elements_Idx.VK_y_0 => poly_r_v * poly_r_w * to_MvPolynomial_Option Vars y_0
-      | CRS_Elements_Idx.VK_v_stmt i => poly_r_v * to_MvPolynomial_Option Vars (v_stmt i)
-      | CRS_Elements_Idx.VK_w_stmt i => poly_r_w * to_MvPolynomial_Option Vars (w_stmt i)
-      | CRS_Elements_Idx.VK_y_stmt i => poly_r_v * poly_r_w * to_MvPolynomial_Option Vars (y_stmt i)
+    SRSElementValue_G2 := fun SRS_idx => match SRS_idx with
+      | SRS_Elements_Idx.EK_v i => poly_r_v * to_MvPolynomial_Option Vars (v_wit i)
+      | SRS_Elements_Idx.EK_w i => poly_r_w * to_MvPolynomial_Option Vars (w_wit i)
+      | SRS_Elements_Idx.EK_y i => poly_r_v * poly_r_w * to_MvPolynomial_Option Vars (y_wit i)
+      | SRS_Elements_Idx.EK_α_v i => poly_r_v * poly_α_v * to_MvPolynomial_Option Vars (v_wit i)
+      | SRS_Elements_Idx.EK_α_w i => poly_r_w * poly_α_w * to_MvPolynomial_Option Vars (w_wit i)
+      | SRS_Elements_Idx.EK_α_y i => poly_r_v * poly_r_w * poly_α_y * to_MvPolynomial_Option Vars (y_wit i)
+      | SRS_Elements_Idx.EK_s_pow i => poly_s ^ (i : ℕ)
+      | SRS_Elements_Idx.EK_β_v_w_y i => poly_β * (poly_r_v * to_MvPolynomial_Option Vars (v_wit i) + poly_r_w * to_MvPolynomial_Option Vars (w_wit i) + poly_r_v * poly_r_w * to_MvPolynomial_Option Vars (y_wit i))
+      | SRS_Elements_Idx.VK_1 => 1
+      | SRS_Elements_Idx.VK_α_v => poly_α_v
+      | SRS_Elements_Idx.VK_α_w => poly_α_w
+      | SRS_Elements_Idx.VK_α_y => poly_α_y
+      | SRS_Elements_Idx.VK_γ => poly_γ
+      | SRS_Elements_Idx.VK_βγ => poly_β * poly_γ
+      | SRS_Elements_Idx.VK_t => poly_r_v * poly_r_w * to_MvPolynomial_Option Vars t
+      | SRS_Elements_Idx.VK_v_0 => poly_r_v * to_MvPolynomial_Option Vars v_0
+      | SRS_Elements_Idx.VK_w_0 => poly_r_w * to_MvPolynomial_Option Vars w_0
+      | SRS_Elements_Idx.VK_y_0 => poly_r_v * poly_r_w * to_MvPolynomial_Option Vars y_0
+      | SRS_Elements_Idx.VK_v_stmt i => poly_r_v * to_MvPolynomial_Option Vars (v_stmt i)
+      | SRS_Elements_Idx.VK_w_stmt i => poly_r_w * to_MvPolynomial_Option Vars (w_stmt i)
+      | SRS_Elements_Idx.VK_y_stmt i => poly_r_v * poly_r_w * to_MvPolynomial_Option Vars (y_stmt i)
 
-    Proof_Left := Proof_Left_Idx
-    ListProof_Left := [Proof_Left_Idx.V_mid, Proof_Left_Idx.V_mid', Proof_Left_Idx.W_mid, Proof_Left_Idx.W_mid', Proof_Left_Idx.Y_mid, Proof_Left_Idx.Y_mid', Proof_Left_Idx.Z]
-    Proof_Right := Proof_Right_Idx
-    ListProof_Right := [Proof_Right_Idx.W_mid, Proof_Right_Idx.H]
+    Proof_G1 := Proof_G1_Idx
+    ListProof_G1 := [Proof_G1_Idx.V_mid, Proof_G1_Idx.V_mid', Proof_G1_Idx.W_mid, Proof_G1_Idx.W_mid', Proof_G1_Idx.Y_mid, Proof_G1_Idx.Y_mid', Proof_G1_Idx.Z]
+    Proof_G2 := Proof_G2_Idx
+    ListProof_G2 := [Proof_G2_Idx.W_mid, Proof_G2_Idx.H]
     EqualityChecks := ChecksIdx
     Pairings := fun check_idx => match check_idx with
       | ChecksIdx.CheckI => PairingsI_Idx
@@ -247,124 +249,124 @@ noncomputable def Pinocchio
       | ChecksIdx.CheckIII => [PairingsIII_Idx.lhs, PairingsIII_Idx.rhs]
       | ChecksIdx.CheckIV => [PairingsIV_Idx.lhs, PairingsIV_Idx.rhs]
       | ChecksIdx.CheckV => [PairingsV_Idx.lhs, PairingsV_Idx.rhs]
-    verificationPairingCRSLeft := fun stmt check_idx i crs_idx => match check_idx with
+    verificationPairingSRS_G1 := fun stmt check_idx i SRS_idx => match check_idx with
       | ChecksIdx.CheckI => match i with
-        | PairingsI_Idx.lhs => match crs_idx with
-          | CRS_Elements_Idx.VK_v_0 => 1
-          | CRS_Elements_Idx.VK_v_stmt k => stmt k
+        | PairingsI_Idx.lhs => match SRS_idx with
+          | SRS_Elements_Idx.VK_v_0 => 1
+          | SRS_Elements_Idx.VK_v_stmt k => stmt k
           | _ => 0
-        | PairingsI_Idx.rhs1 => match crs_idx with
-          | CRS_Elements_Idx.VK_t => 1
+        | PairingsI_Idx.rhs1 => match SRS_idx with
+          | SRS_Elements_Idx.VK_t => 1
           | _ => 0
-        | PairingsI_Idx.rhs2 => match crs_idx with
-          | CRS_Elements_Idx.VK_y_0 => 1
-          | CRS_Elements_Idx.VK_y_stmt k => stmt k
+        | PairingsI_Idx.rhs2 => match SRS_idx with
+          | SRS_Elements_Idx.VK_y_0 => 1
+          | SRS_Elements_Idx.VK_y_stmt k => stmt k
           | _ => 0
       | ChecksIdx.CheckII => match i with
-        | PairingsII_Idx.lhs => match crs_idx with
+        | PairingsII_Idx.lhs => match SRS_idx with
           | _ => 0
-        | PairingsII_Idx.rhs => match crs_idx with
+        | PairingsII_Idx.rhs => match SRS_idx with
           | _ => 0
       | ChecksIdx.CheckIII => match i with
-        | PairingsIII_Idx.lhs => match crs_idx with
+        | PairingsIII_Idx.lhs => match SRS_idx with
           | _ => 0
-        | PairingsIII_Idx.rhs => match crs_idx with
+        | PairingsIII_Idx.rhs => match SRS_idx with
           | _ => 0
       | ChecksIdx.CheckIV => match i with
-        | PairingsIV_Idx.lhs => match crs_idx with
+        | PairingsIV_Idx.lhs => match SRS_idx with
           | _ => 0
-        | PairingsIV_Idx.rhs => match crs_idx with
+        | PairingsIV_Idx.rhs => match SRS_idx with
           | _ => 0
       | ChecksIdx.CheckV => match i with
-        | PairingsV_Idx.lhs => match crs_idx with
+        | PairingsV_Idx.lhs => match SRS_idx with
           | _ => 0
-        | PairingsV_Idx.rhs => match crs_idx with
+        | PairingsV_Idx.rhs => match SRS_idx with
           | _ => 0
-    verificationPairingCRSRight := fun stmt check_idx i crs_idx => match check_idx with
+    verificationPairingSRS_G2 := fun stmt check_idx i SRS_idx => match check_idx with
       | ChecksIdx.CheckI => match i with
-        | PairingsI_Idx.lhs => match crs_idx with
-          | CRS_Elements_Idx.VK_w_0 => 1
-          | CRS_Elements_Idx.VK_w_stmt k => stmt k
+        | PairingsI_Idx.lhs => match SRS_idx with
+          | SRS_Elements_Idx.VK_w_0 => 1
+          | SRS_Elements_Idx.VK_w_stmt k => stmt k
           | _ => 0
         | PairingsI_Idx.rhs1 => 0
-        | PairingsI_Idx.rhs2 => match crs_idx with
-          | CRS_Elements_Idx.VK_1 => -1 -- Negate the rhs Right elements to show they are moved to the left
+        | PairingsI_Idx.rhs2 => match SRS_idx with
+          | SRS_Elements_Idx.VK_1 => -1 -- Negate the rhs Right elements to show they are moved to the left
           | _ => 0
       | ChecksIdx.CheckII => match i with
-        | PairingsII_Idx.lhs => match crs_idx with
-          | CRS_Elements_Idx.VK_1 => 1
+        | PairingsII_Idx.lhs => match SRS_idx with
+          | SRS_Elements_Idx.VK_1 => 1
           | _ => 0
-        | PairingsII_Idx.rhs => match crs_idx with
-          | CRS_Elements_Idx.VK_α_v => -1 -- Negate the rhs Right elements to show they are moved to the left
+        | PairingsII_Idx.rhs => match SRS_idx with
+          | SRS_Elements_Idx.VK_α_v => -1 -- Negate the rhs Right elements to show they are moved to the left
           | _ => 0
       | ChecksIdx.CheckIII => match i with
-        | PairingsIII_Idx.lhs => match crs_idx with
-          | CRS_Elements_Idx.VK_1 => 1
+        | PairingsIII_Idx.lhs => match SRS_idx with
+          | SRS_Elements_Idx.VK_1 => 1
           | _ => 0
-        | PairingsIII_Idx.rhs => match crs_idx with
-          | CRS_Elements_Idx.VK_α_w => -1 -- Negate the rhs Right elements to show they are moved to the left
+        | PairingsIII_Idx.rhs => match SRS_idx with
+          | SRS_Elements_Idx.VK_α_w => -1 -- Negate the rhs Right elements to show they are moved to the left
           | _ => 0
       | ChecksIdx.CheckIV => match i with
-        | PairingsIV_Idx.lhs => match crs_idx with
-          | CRS_Elements_Idx.VK_1 => 1
+        | PairingsIV_Idx.lhs => match SRS_idx with
+          | SRS_Elements_Idx.VK_1 => 1
           | _ => 0
-        | PairingsIV_Idx.rhs => match crs_idx with
-          | CRS_Elements_Idx.VK_α_y => -1 -- Negate the rhs Right elements to show they are moved to the left
+        | PairingsIV_Idx.rhs => match SRS_idx with
+          | SRS_Elements_Idx.VK_α_y => -1 -- Negate the rhs Right elements to show they are moved to the left
           | _ => 0
       | ChecksIdx.CheckV => match i with
-        | PairingsV_Idx.lhs => match crs_idx with
-          | CRS_Elements_Idx.VK_γ => 1
+        | PairingsV_Idx.lhs => match SRS_idx with
+          | SRS_Elements_Idx.VK_γ => 1
           | _ => 0
-        | PairingsV_Idx.rhs => match crs_idx with
-          | CRS_Elements_Idx.VK_βγ => -1 -- Negate the rhs Right elements to show they are moved to the left
+        | PairingsV_Idx.rhs => match SRS_idx with
+          | SRS_Elements_Idx.VK_βγ => -1 -- Negate the rhs Right elements to show they are moved to the left
           | _ => 0
-    verificationPairingProofLeft := fun stmt check_idx i pf_idx => match check_idx with
+    verificationPairingProof_G1 := fun stmt check_idx i pf_idx => match check_idx with
       | ChecksIdx.CheckI => match i with
         | PairingsI_Idx.lhs => match pf_idx with
-          | Proof_Left_Idx.V_mid => 1
+          | Proof_G1_Idx.V_mid => 1
           | _ => 0
         | PairingsI_Idx.rhs1 => match pf_idx with
           | _ => 0
         | PairingsI_Idx.rhs2 => match pf_idx with
-          | Proof_Left_Idx.Y_mid => 1
+          | Proof_G1_Idx.Y_mid => 1
           | _ => 0
       | ChecksIdx.CheckII => match i with
         | PairingsII_Idx.lhs => match pf_idx with
-          | Proof_Left_Idx.V_mid' => 1
+          | Proof_G1_Idx.V_mid' => 1
           | _ => 0
         | PairingsII_Idx.rhs => match pf_idx with
-          | Proof_Left_Idx.V_mid => 1
+          | Proof_G1_Idx.V_mid => 1
           | _ => 0
       | ChecksIdx.CheckIII => match i with
         | PairingsIII_Idx.lhs => match pf_idx with
-          | Proof_Left_Idx.W_mid' => 1
+          | Proof_G1_Idx.W_mid' => 1
           | _ => 0
         | PairingsIII_Idx.rhs => match pf_idx with
-          | Proof_Left_Idx.W_mid => 1
+          | Proof_G1_Idx.W_mid => 1
           | _ => 0
       | ChecksIdx.CheckIV => match i with
         | PairingsIV_Idx.lhs => match pf_idx with
-          | Proof_Left_Idx.Y_mid' => 1
+          | Proof_G1_Idx.Y_mid' => 1
           | _ => 0
         | PairingsIV_Idx.rhs => match pf_idx with
-          | Proof_Left_Idx.Y_mid => 1
+          | Proof_G1_Idx.Y_mid => 1
           | _ => 0
       | ChecksIdx.CheckV => match i with
         | PairingsV_Idx.lhs => match pf_idx with
-          | Proof_Left_Idx.Z => 1
+          | Proof_G1_Idx.Z => 1
           | _ => 0
         | PairingsV_Idx.rhs => match pf_idx with
-          | Proof_Left_Idx.V_mid => 1
-          | Proof_Left_Idx.W_mid => 1
-          | Proof_Left_Idx.Y_mid => 1
+          | Proof_G1_Idx.V_mid => 1
+          | Proof_G1_Idx.W_mid => 1
+          | Proof_G1_Idx.Y_mid => 1
           | _ => 0
-    verificationPairingProofRight := fun stmt check_idx i pf_idx => match check_idx with
+    verificationPairingProof_G2 := fun stmt check_idx i pf_idx => match check_idx with
       | ChecksIdx.CheckI => match i with
         | PairingsI_Idx.lhs => match pf_idx with
-          | Proof_Right_Idx.W_mid => 1
+          | Proof_G2_Idx.W_mid => 1
           | _ => 0
         | PairingsI_Idx.rhs1 => match pf_idx with
-          | Proof_Right_Idx.H => -1 -- Negate the rhs Right elements to show they are moved to the left
+          | Proof_G2_Idx.H => -1 -- Negate the rhs Right elements to show they are moved to the left
           | _ => 0
         | PairingsI_Idx.rhs2 => match pf_idx with
           | _ => 0
@@ -372,7 +374,7 @@ noncomputable def Pinocchio
       | ChecksIdx.CheckIII => 0
       | ChecksIdx.CheckIV => 0
       | ChecksIdx.CheckV => 0
-    Identified_Proof_Elems := [(Proof_Left_Idx.W_mid, Proof_Right_Idx.W_mid)]
+    Identified_Proof_Elems := [(Proof_G1_Idx.W_mid, Proof_G2_Idx.W_mid)]
   }
 
 
@@ -388,17 +390,22 @@ lemma soundness
     {v_0 : Polynomial F }
     {w_0 : Polynomial F }
     {y_0 : Polynomial F }
-    {r : Fin (n_wit) → F} :
+    /- t is the polynomial divisibility by which is used to verify satisfaction of the QAP -/
+    {t : Polynomial F}
+    (tMonic : t.Monic)
+    -- t can also be expressed as follows, but this structure is not important for soundness
+    -- {r : Fin (n_wit) → F}
+    -- let t : Polynomial F := ∏ i : Fin n_wit in Fingeneralize.univ, (Polynomial.X - Polynomial.C (r i)
+    :
     (AGMProofSystemInstantiation.soundness
       F
       (@Pinocchio F _ n_stmt n_wit d
         v_stmt w_stmt y_stmt
         v_wit w_wit y_wit
         v_0 w_0 y_0
-        r)
+        t)
       (Fin n_wit → F)
       (fun (stmt : Fin n_stmt → F) (wit : Fin n_wit -> F) =>
-        let t : Polynomial F := ∏ i : Fin n_wit in Finset.univ, (Polynomial.X - Polynomial.C (r i));
         (-- Definition 2 from Pinocchio
           (v_0
             + (List.sum (List.map (fun i => Polynomial.C (stmt i) * v_stmt i) (List.finRange n_stmt)))
@@ -416,21 +423,58 @@ lemma soundness
           )
         )
           %ₘ t = 0)
-        ( fun prover i => prover.fst Proof_Left_Idx.Z (CRS_Elements_Idx.EK_β_v_w_y i) )
+        ( fun prover i => prover.fst Proof_G1_Idx.Z (SRS_Elements_Idx.EK_β_v_w_y i) )
     ) := by
-  unfold AGMProofSystemInstantiation.soundness AGMProofSystemInstantiation.verify AGMProofSystemInstantiation.proof_element_left_as_poly AGMProofSystemInstantiation.proof_element_right_as_poly
+  unfold soundness verify check_poly pairing_poly proof_element_G1_as_poly proof_element_G2_as_poly
   -- TODO namespcace AGMProofSystemInstantiation eliminate
   intros stmt prover eqns'
   rcases eqns' with ⟨eqns, eqnVI⟩
-  intro t
+  -- If t is provided via a let binding it should be introduced here by intro t
   have eqnI := eqns ChecksIdx.CheckI
   have eqnII := eqns ChecksIdx.CheckII
   have eqnIII := eqns ChecksIdx.CheckIII
   have eqnIV := eqns ChecksIdx.CheckIV
   have eqnV := eqns ChecksIdx.CheckV
-  clear eqns
+  clear eqns eqnVI
 
-  simp_rw [Pinocchio] at eqnI eqnII eqnIII eqnIV eqnV eqnVI
+  -- Simplify the equation
+  suffices
+      (
+          (v_0
+            + (List.sum (List.map (fun i => Polynomial.C (stmt i) * v_stmt i) (List.finRange n_stmt)))
+            + (List.sum (List.map (fun i => Polynomial.C (prover.fst Proof_G1_Idx.Z (SRS_Elements_Idx.EK_β_v_w_y i)) * v_wit i) (List.finRange n_wit)))
+          )
+        *
+          (w_0
+            + (List.sum (List.map (fun i => Polynomial.C (stmt i) * w_stmt i) (List.finRange n_stmt)))
+            + (List.sum (List.map (fun i => Polynomial.C (prover.fst Proof_G1_Idx.Z (SRS_Elements_Idx.EK_β_v_w_y i)) * w_wit i) (List.finRange n_wit)))
+          )
+        -
+          (y_0
+            + (List.sum (List.map (fun i => Polynomial.C (stmt i) * y_stmt i) (List.finRange n_stmt)))
+            + (List.sum (List.map (fun i => Polynomial.C (prover.fst Proof_G1_Idx.Z (SRS_Elements_Idx.EK_β_v_w_y i)) * y_wit i) (List.finRange n_wit)))
+          )
+      )
+      =
+      (List.sum (List.map (fun x : Fin d => Polynomial.C (prover.snd Proof_G2_Idx.H (SRS_Elements_Idx.EK_s_pow x)) * (Polynomial.X ^ (x : ℕ))) (List.finRange (d)))) * t by
+
+    -- rw [<-sub_eq_iff_eq_add'] at this
+    have h := congr_arg (fun x => x %ₘ t) this
+    simp only at h
+    simp
+    rw [h]
+    clear this h
+
+    simp only [mul_comm _ (t), <-mul_assoc]
+    -- simp only [mul_assoc, List.sum_map_mul_right, List.sum_map_mul_left]
+
+    apply Polynomial.mul_modByMonic t _ tMonic
+    done
+
+  -- done
+
+
+  simp_rw [Pinocchio] at eqnI eqnII eqnIII eqnIV eqnV
 
   -- All I want is a tactic that will apply the following simplifications to eqn in sequence.
   -- TODO can I write a tactic taking a nested list of simp lemmas?
@@ -440,9 +484,9 @@ lemma soundness
     List.sum_append, List.map_nil, List.sum_nil, add_zero, Sum.elim_lam_const_lam_const, map_one,
     one_mul, map_zero, zero_mul, map_neg, neg_mul, neg_add_rev, zero_add, mul_zero,
     -- Note: everything above is @simp tagged
-    Function.comp, List.sum_map_zero] at eqnI eqnII eqnIII eqnIV eqnV eqnVI
+    Function.comp, List.sum_map_zero] at eqnI eqnII eqnIII eqnIV eqnV
 
-  simp only [mul_add, add_mul, List.sum_map_add] at eqnI eqnII eqnIII eqnIV eqnV eqnVI
+  simp only [mul_add, add_mul, List.sum_map_add] at eqnI eqnII eqnIII eqnIV eqnV
 
   -- Move all the X (some _) terms to the left, and out of sums
   simp only [
@@ -454,23 +498,23 @@ lemma soundness
     -- Move negations to the bottom
     neg_mul, mul_neg,
     -- Move constant multiplications (which the X (some _) terms should be) out of sums
-    List.sum_map_mul_right, List.sum_map_mul_left] at eqnI eqnII eqnIII eqnIV eqnV eqnVI
+    List.sum_map_mul_right, List.sum_map_mul_left] at eqnI eqnII eqnIII eqnIV eqnV
 
   -- Apply MvPolynomial.optionEquivRight *here*, so that we can treat polynomials in Vars_X as constants
   trace "Converting to MvPolynomial over Polynomials"
   -- replace eqn := congr_arg (MvPolynomial.optionEquivRight F Vars) eqn
-  simp only [←(EquivLike.apply_eq_iff_eq (optionEquivRight _ _))] at eqnI eqnII eqnIII eqnIV eqnV eqnVI
+  simp only [←(EquivLike.apply_eq_iff_eq (optionEquivRight _ _))] at eqnI eqnII eqnIII eqnIV eqnV
   simp only [AlgEquiv.map_add, AlgEquiv.map_zero, AlgEquiv.map_mul, AlgEquiv.map_one,
-    AlgEquiv.map_neg, AlgEquiv.list_map_sum, AlgEquiv.map_pow] at eqnI eqnII eqnIII eqnIV eqnV eqnVI
-  simp only [optionEquivRight_C, optionEquivRight_X_none, optionEquivRight_X_some, optionEquivRight_to_MvPolynomial_Option] at eqnI eqnII eqnIII eqnIV eqnV eqnVI
+    AlgEquiv.map_neg, AlgEquiv.list_map_sum, AlgEquiv.map_pow] at eqnI eqnII eqnIII eqnIV eqnV
+  simp only [optionEquivRight_C, optionEquivRight_X_none, optionEquivRight_X_some, optionEquivRight_to_MvPolynomial_Option] at eqnI eqnII eqnIII eqnIV eqnV
 
   -- Move Cs back out so we can recognize the monomials
   simp only [←C_mul, ←C_pow, ←C_add,
-    sum_map_C] at eqnI eqnII eqnIII eqnIV eqnV eqnVI
+    sum_map_C] at eqnI eqnII eqnIII eqnIV eqnV
 
-  simp only [X, C_apply, monomial_mul, one_mul, mul_one, add_zero, zero_add, mul_add, add_mul] at eqnI eqnII eqnIII eqnIV eqnV eqnVI
+  simp only [X, C_apply, monomial_mul, one_mul, mul_one, add_zero, zero_add, mul_add, add_mul] at eqnI eqnII eqnIII eqnIV eqnV
 
-  save
+  -- done
 
   trace "Applying individual coefficients"
 
@@ -519,12 +563,130 @@ lemma soundness
   have h3eqnV := congr_arg (coeff (Finsupp.single Vars.r_w 1 + Finsupp.single Vars.β 1 + Finsupp.single Vars.γ 1)) eqnV
   have h4eqnV := congr_arg (coeff (Finsupp.single Vars.r_v 1 + Finsupp.single Vars.r_w 1 + Finsupp.single Vars.β 1 + Finsupp.single Vars.γ 1)) eqnV
 
+
   clear eqnI
   clear eqnII
   clear eqnIII
   clear eqnIV
   clear eqnV
 
+  trace "Distribute coefficient-taking over terms"
+  simp only [coeff_monomial, coeff_add, coeff_neg, coeff_zero] at h1eqnI h11eqnII h19eqnII h21eqnII h22eqnII h32eqnII h38eqnII h52eqnII h54eqnII h71eqnII h74eqnII h93eqnII h94eqnII h101eqnII h27eqnIII h32eqnIII h33eqnIII h34eqnIII h35eqnIII h53eqnIII h61eqnIII h75eqnIII h81eqnIII h88eqnIII h89eqnIII h96eqnIII h97eqnIII h98eqnIII h2eqnIV h4eqnIV h23eqnIV h25eqnIV h30eqnIV h37eqnIV h54eqnIV h55eqnIV h56eqnIV h57eqnIV h59eqnIV h89eqnIV h102eqnIV h2eqnV h3eqnV h4eqnV
+
+  trace "Simplifying coefficient expressions"
+  simp only [Vars.finsupp_eq_ext, Finsupp.single_apply, Finsupp.add_apply] at h1eqnI h11eqnII h19eqnII h21eqnII h22eqnII h32eqnII h38eqnII h52eqnII h54eqnII h71eqnII h74eqnII h93eqnII h94eqnII h101eqnII h27eqnIII h32eqnIII h33eqnIII h34eqnIII h35eqnIII h53eqnIII h61eqnIII h75eqnIII h81eqnIII h88eqnIII h89eqnIII h96eqnIII h97eqnIII h98eqnIII h2eqnIV h4eqnIV h23eqnIV h25eqnIV h30eqnIV h37eqnIV h54eqnIV h55eqnIV h56eqnIV h57eqnIV h59eqnIV h89eqnIV h102eqnIV h2eqnV h3eqnV h4eqnV
+
+  trace "Determine which coefficients are nonzero"
+  simp (config := {decide := true}) only [ite_false, ite_true] at h1eqnI h11eqnII h19eqnII h21eqnII h22eqnII h32eqnII h38eqnII h52eqnII h54eqnII h71eqnII h74eqnII h93eqnII h94eqnII h101eqnII h27eqnIII h32eqnIII h33eqnIII h34eqnIII h35eqnIII h53eqnIII h61eqnIII h75eqnIII h81eqnIII h88eqnIII h89eqnIII h96eqnIII h97eqnIII h98eqnIII h2eqnIV h4eqnIV h23eqnIV h25eqnIV h30eqnIV h37eqnIV h54eqnIV h55eqnIV h56eqnIV h57eqnIV h59eqnIV h89eqnIV h102eqnIV h2eqnV h3eqnV h4eqnV
+  trace "Remove zeros"
+  simp only [neg_zero, add_zero, zero_add, neg_eq_zero] at h1eqnI h11eqnII h19eqnII h21eqnII h22eqnII h32eqnII h38eqnII h52eqnII h54eqnII h71eqnII h74eqnII h93eqnII h94eqnII h101eqnII h27eqnIII h32eqnIII h33eqnIII h34eqnIII h35eqnIII h53eqnIII h61eqnIII h75eqnIII h81eqnIII h88eqnIII h89eqnIII h96eqnIII h97eqnIII h98eqnIII h2eqnIV h4eqnIV h23eqnIV h25eqnIV h30eqnIV h37eqnIV h54eqnIV h55eqnIV h56eqnIV h57eqnIV h59eqnIV h89eqnIV h102eqnIV h2eqnV h3eqnV h4eqnV
+
+  -- done
+  simp? [*, -map_eq_zero, -Polynomial.C_eq_zero] at *
+
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.V_mid (SRS_Elements_Idx.EK_w x)) * w_wit x) (List.finRange n_wit)) = sum_V_mid_w_wit at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.V_mid (SRS_Elements_Idx.EK_v x)) * v_wit x) (List.finRange n_wit)) = sum_V_mid_v_wit at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.2 Proof_G2_Idx.W_mid (SRS_Elements_Idx.EK_v x)) * v_wit x) (List.finRange n_wit)) = sum_W_mid_v_wit at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.2 Proof_G2_Idx.W_mid (SRS_Elements_Idx.EK_w x)) * w_wit x) (List.finRange n_wit)) = sum_W_mid_w_wit at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.V_mid (SRS_Elements_Idx.EK_s_pow x)) * Polynomial.X ^ (x : ℕ)) (List.finRange d)) = sum_V_mid_s_pow at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.2 Proof_G2_Idx.W_mid (SRS_Elements_Idx.EK_s_pow x)) * Polynomial.X ^ (x : ℕ)) (List.finRange d)) = sum_W_mid_s_pow at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.2 Proof_G2_Idx.H (SRS_Elements_Idx.EK_s_pow x)) * Polynomial.X ^ (x : ℕ)) (List.finRange d)) = sum_H_s_pow at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.Y_mid (SRS_Elements_Idx.EK_w x)) * w_wit x) (List.finRange n_wit)) = sum_Y_mid_w_wit at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.Y_mid (SRS_Elements_Idx.EK_v x)) * v_wit x) (List.finRange n_wit)) = sum_Y_mid_v_wit at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.Y_mid (SRS_Elements_Idx.EK_s_pow x)) * Polynomial.X ^ (x : ℕ)) (List.finRange d)) = sum_Y_mid_s_pow at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.V_mid (SRS_Elements_Idx.EK_β_v_w_y x)) * v_wit x) (List.finRange n_wit)) = sum_V_mid_EK_β_v_w_y at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.V_mid (SRS_Elements_Idx.EK_α_v x)) * v_wit x) (List.finRange n_wit)) = sum_V_mid_EK_α_v at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.V_mid (SRS_Elements_Idx.EK_y x)) * y_wit x) (List.finRange n_wit)) = sum_V_mid_EK_y at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.V_mid (SRS_Elements_Idx.VK_y_stmt x)) * y_stmt x) (List.finRange n_stmt)) = sum_V_mid_VK_y_stmt at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.V_mid (SRS_Elements_Idx.EK_α_w x)) * w_wit x) (List.finRange n_wit)) = sum_V_mid_EK_α_w at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.V_mid (SRS_Elements_Idx.EK_α_y x)) * y_wit x) (List.finRange n_wit)) = sum_V_mid_EK_α_y at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.2 Proof_G2_Idx.W_mid (SRS_Elements_Idx.EK_y x)) * y_wit x) (List.finRange n_wit)) = sum_W_mid_EK_y at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.2 Proof_G2_Idx.W_mid (SRS_Elements_Idx.VK_y_stmt x)) * y_stmt x) (List.finRange n_stmt)) = sum_W_mid_VK_y_stmt at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.W_mid' (SRS_Elements_Idx.EK_α_w x)) * w_wit x) (List.finRange n_wit)) = sum_W_mid'_EK_α_w at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.W_mid (SRS_Elements_Idx.EK_w x)) * w_wit x) (List.finRange n_wit)) = sum_W_mid_EK_w at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.W_mid (SRS_Elements_Idx.VK_w_stmt x)) * w_stmt x) (List.finRange n_stmt)) = sum_W_mid_VK_w_stmt at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.W_mid (SRS_Elements_Idx.EK_β_v_w_y x)) * w_wit x) (List.finRange n_wit)) = sum_W_mid_EK_β_v_w_y at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.W_mid (SRS_Elements_Idx.EK_α_y x)) * y_wit x) (List.finRange n_wit)) = sum_W_mid_EK_α_y at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.W_mid (SRS_Elements_Idx.EK_v x)) * v_wit x) (List.finRange n_wit)) = sum_W_mid_EK_v at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.2 Proof_G2_Idx.W_mid (SRS_Elements_Idx.VK_v_stmt x)) * v_stmt x) (List.finRange n_stmt)) = sum_W_mid_VK_v_stmt at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.W_mid (SRS_Elements_Idx.EK_α_w x)) * w_wit x) (List.finRange n_wit)) = sum_W_mid_EK_α_w at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.W_mid (SRS_Elements_Idx.EK_α_v x)) * v_wit x) (List.finRange n_wit)) = sum_W_mid_EK_α_v at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.Y_mid (SRS_Elements_Idx.EK_β_v_w_y x)) * v_wit x) (List.finRange n_wit)) = sum_Y_mid_EK_β_v_w_y at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.Y_mid (SRS_Elements_Idx.EK_α_v x)) * v_wit x) (List.finRange n_wit)) = sum_Y_mid_EK_α_v at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.Y_mid (SRS_Elements_Idx.EK_α_y x)) * y_wit x) (List.finRange n_wit)) = sum_Y_mid_EK_α_y at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.Y_mid (SRS_Elements_Idx.EK_α_w x)) * w_wit x) (List.finRange n_wit)) = sum_Y_mid_EK_α_w at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.Y_mid (SRS_Elements_Idx.EK_w x)) * w_wit x) (List.finRange n_wit)) = sum_Y_mid_EK_w at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.Y_mid (SRS_Elements_Idx.VK_w_stmt x)) * w_stmt x) (List.finRange n_stmt)) = sum_Y_mid_VK_w_stmt at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.Y_mid (SRS_Elements_Idx.EK_v x)) * v_wit x) (List.finRange n_wit)) = sum_Y_mid_EK_v at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.Y_mid (SRS_Elements_Idx.VK_v_stmt x)) * v_stmt x) (List.finRange n_stmt)) = sum_Y_mid_VK_v_stmt at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.Z (SRS_Elements_Idx.EK_β_v_w_y x)) * v_wit x) (List.finRange n_wit)) = sum_Z_EK_β_v_w_y_v_wit at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.Z (SRS_Elements_Idx.EK_β_v_w_y x)) * w_wit x) (List.finRange n_wit)) = sum_Z_EK_β_v_w_y_w_wit at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.Z (SRS_Elements_Idx.EK_β_v_w_y x)) * y_wit x) (List.finRange n_wit)) = sum_Z_EK_β_v_w_y_y_wit at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.V_mid (SRS_Elements_Idx.EK_β_v_w_y x)) * w_wit x) (List.finRange n_wit)) = sum_V_mid_EK_β_v_w_y_w_wit at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.V_mid (SRS_Elements_Idx.EK_β_v_w_y x)) * y_wit x) (List.finRange n_wit)) = sum_V_mid_EK_β_v_w_y_y_wit at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.W_mid (SRS_Elements_Idx.EK_y x)) * y_wit x) (List.finRange n_wit)) = sum_W_mid_EK_y_y_wit at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.Y_mid (SRS_Elements_Idx.EK_y x)) * y_wit x) (List.finRange n_wit)) = sum_Y_mid_EK_y at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.Y_mid (SRS_Elements_Idx.VK_y_stmt x)) * y_stmt x) (List.finRange n_stmt)) = sum_Y_mid_VK_y_stmt at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.V_mid (SRS_Elements_Idx.VK_v_stmt x)) * v_stmt x) (List.finRange n_stmt)) = sum_V_mid_VK_v_stmt at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.V_mid (SRS_Elements_Idx.VK_w_stmt x)) * w_stmt x) (List.finRange n_stmt)) = sum_V_mid_VK_w_stmt at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.W_mid (SRS_Elements_Idx.VK_y_stmt x)) * y_stmt x) (List.finRange n_stmt)) = sum_G1_W_mid_VK_y_stmt at *
+
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.W_mid (SRS_Elements_Idx.EK_β_v_w_y x)) * v_wit x) (List.finRange n_wit)) = sum_W_mid_EK_β_v_w_y_v_wit at *
+  generalize  List.sum
+    (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.W_mid (SRS_Elements_Idx.EK_β_v_w_y x)) * y_wit x)
+      (List.finRange n_wit)) = sum_W_mid_EK_β_v_w_y_y_wit at *
+  generalize  List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.Y_mid (SRS_Elements_Idx.EK_β_v_w_y x)) * w_wit x)
+      (List.finRange n_wit))  = sum_Y_mid_EK_β_v_w_y_w_wit at *
+  generalize  List.sum
+    (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.Y_mid (SRS_Elements_Idx.EK_β_v_w_y x)) * y_wit x)
+      (List.finRange n_wit)) = sum_Y_mid_EK_β_v_w_y_y_wit at *
+
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.V_mid SRS_Elements_Idx.VK_t) = V_mid_VK_t at *
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.V_mid SRS_Elements_Idx.VK_y_0) = V_mid_VK_y_0 at *
+  generalize Polynomial.C (prover.2 Proof_G2_Idx.W_mid SRS_Elements_Idx.VK_t) = G2_W_mid_VK_t at *
+  generalize Polynomial.C (prover.2 Proof_G2_Idx.W_mid SRS_Elements_Idx.VK_y_0) = G2_W_mid_VK_y_0 at *
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.W_mid SRS_Elements_Idx.VK_w_0) = W_mid_VK_w_0 at *
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.W_mid SRS_Elements_Idx.VK_v_0) = W_mid_VK_v_0 at *
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.Y_mid SRS_Elements_Idx.VK_w_0) = Y_mid_VK_w_0 at *
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.Y_mid SRS_Elements_Idx.VK_v_0) = Y_mid_VK_v_0 at *
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.Y_mid SRS_Elements_Idx.VK_t) = Y_mid_VK_t at *
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.Y_mid SRS_Elements_Idx.VK_y_0) = Y_mid_VK_y_0 at *
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.V_mid SRS_Elements_Idx.VK_v_0) = V_mid_VK_v_0 at *
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.V_mid SRS_Elements_Idx.VK_βγ) = V_mid_VK_βγ at *
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.V_mid SRS_Elements_Idx.VK_γ) = V_mid_VK_γ at *
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.V_mid SRS_Elements_Idx.VK_α_v) = V_mid_VK_α_v at *
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.V_mid SRS_Elements_Idx.VK_α_w) = V_mid_VK_α_w at *
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.V_mid SRS_Elements_Idx.VK_α_y) = V_mid_VK_α_y at *
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.W_mid SRS_Elements_Idx.VK_t) = G1_W_mid_VK_t at *
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.W_mid SRS_Elements_Idx.VK_y_0) = G1_W_mid_VK_y_0 at *
+
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.W_mid SRS_Elements_Idx.VK_α_v) = W_mid_VK_α_v at *
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.W_mid SRS_Elements_Idx.VK_βγ) = W_mid_VK_βγ at *
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.W_mid SRS_Elements_Idx.VK_γ) = W_mid_VK_γ at *
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.W_mid SRS_Elements_Idx.VK_α_y) = W_mid_VK_α_y at *
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.W_mid SRS_Elements_Idx.VK_α_w) = W_mid_VK_α_w at *
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.Y_mid SRS_Elements_Idx.VK_βγ) = Y_mid_VK_βγ at *
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.Y_mid SRS_Elements_Idx.VK_γ) = Y_mid_VK_γ at *
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.Y_mid SRS_Elements_Idx.VK_α_v) = Y_mid_VK_α_v at *
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.Y_mid SRS_Elements_Idx.VK_α_y) = Y_mid_VK_α_y at *
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.Y_mid SRS_Elements_Idx.VK_α_w) = Y_mid_VK_α_w at *
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.V_mid SRS_Elements_Idx.VK_w_0) * w_0 = V_mid_VK_w_0 at *
 
 
-  integral_domain_tactic
+  generalize List.sum (List.map (fun i => Polynomial.C (stmt i) * v_stmt i) (List.finRange n_stmt)) = sum_stmt_v_stmt at *
+  generalize List.sum (List.map (fun i => Polynomial.C (stmt i) * w_stmt i) (List.finRange n_stmt)) = sum_stmt_w_stmt at *
+  generalize List.sum (List.map (fun i => Polynomial.C (stmt i) * y_stmt i) (List.finRange n_stmt)) = sum_stmt_y_stmt at *
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.W_mid (SRS_Elements_Idx.VK_v_stmt x)) * v_stmt x) (List.finRange n_stmt)) = sum_W_mid_VK_v_stmt at *
+  generalize Polynomial.C (prover.2 Proof_G2_Idx.W_mid SRS_Elements_Idx.VK_1) = W_mid_VK_1 at *
+
+  clear  h11eqnII h19eqnII h22eqnII h32eqnII h54eqnII h32eqnIII h53eqnIII h61eqnIII h89eqnIII h96eqnIII h30eqnIV h37eqnIV h54eqnIV h59eqnIV h89eqnIV h74eqnII h52eqnII h94eqnII h101eqnII h88eqnIII h35eqnIII h97eqnIII h98eqnIII h57eqnIV h4eqnIV h23eqnIV h25eqnIV h21eqnII h38eqnII h34eqnIII h75eqnIII h2eqnIV h56eqnIV
+
+
+  clear tMonic
+
+  simp [this, -map_eq_zero, -Polynomial.C_eq_zero] at *
+  -- polyrith -- error: not in ideal
+  integral_domain_tactic <;> sorry
+  -- TODO there must be some kind of bug in the representation
+
+  done

@@ -4,6 +4,8 @@ import FormalSnarksProject.ToMathlib.List
 import FormalSnarksProject.ToMathlib.OptionEquivRight
 import Mathlib.Data.MvPolynomial.Equiv
 import FormalSnarksProject.SoundnessTactic.SoundnessProver
+import FormalSnarksProject.SoundnessTactic.ProofMode
+
 
 open scoped BigOperators Classical
 
@@ -42,16 +44,16 @@ lemma Vars.finsupp_eq_ext (f g : Vars →₀ ℕ) : f = g ↔
   · intro h x
     cases x <;> tauto
 
-inductive Proof_Left_Idx : Type where
-  | V_mid : Proof_Left_Idx
-  | V_mid' : Proof_Left_Idx
-  | W' : Proof_Left_Idx
-  | Y : Proof_Left_Idx
-  | H' : Proof_Left_Idx
+inductive Proof_G1_Idx : Type where
+  | V_mid : Proof_G1_Idx
+  | V_mid' : Proof_G1_Idx
+  | W' : Proof_G1_Idx
+  | Y : Proof_G1_Idx
+  | H' : Proof_G1_Idx
 
-inductive Proof_Right_Idx : Type where
-  | W : Proof_Right_Idx
-  | H : Proof_Right_Idx
+inductive Proof_G2_Idx : Type where
+  | W : Proof_G2_Idx
+  | H : Proof_G2_Idx
 
 inductive ChecksIdx : Type where
   | CheckI : ChecksIdx
@@ -82,27 +84,27 @@ inductive PairingsV_Idx : Type where
   | rhs2 : PairingsV_Idx
 
 
-inductive CRS_Elements_Idx {n_stmt n_wit m d : ℕ} : Type where
+inductive SRS_Elements_Idx {n_stmt n_wit m d : ℕ} : Type where
   -- Function universal
-  | EK_s_pow : Fin d -> CRS_Elements_Idx
-  | EK_α_s_pow : Fin d -> CRS_Elements_Idx
+  | EK_s_pow : Fin d -> SRS_Elements_Idx
+  | EK_α_s_pow : Fin d -> SRS_Elements_Idx
   -- Evaluation key
-  | EK_v : Fin n_wit -> CRS_Elements_Idx
-  | EK_w : Fin m -> CRS_Elements_Idx
-  | EK_α_v : Fin n_wit -> CRS_Elements_Idx
-  | EK_α_w : Fin m -> CRS_Elements_Idx
-  | EK_β_v : Fin n_wit -> CRS_Elements_Idx
-  | EK_β_w : Fin m -> CRS_Elements_Idx
+  | EK_v : Fin n_wit -> SRS_Elements_Idx
+  | EK_w : Fin m -> SRS_Elements_Idx
+  | EK_α_v : Fin n_wit -> SRS_Elements_Idx
+  | EK_α_w : Fin m -> SRS_Elements_Idx
+  | EK_β_v : Fin n_wit -> SRS_Elements_Idx
+  | EK_β_w : Fin m -> SRS_Elements_Idx
   -- Verification key
-  | VK_1 : CRS_Elements_Idx
-  | VK_α : CRS_Elements_Idx
-  | VK_γ : CRS_Elements_Idx
-  | VK_βv_γ : CRS_Elements_Idx
-  | VK_βw_γ : CRS_Elements_Idx
-  | VK_v_0 : CRS_Elements_Idx
-  | VK_w_0 : CRS_Elements_Idx
-  | VK_t : CRS_Elements_Idx
-  | VK_v_stmt : Fin n_stmt -> CRS_Elements_Idx
+  | VK_1 : SRS_Elements_Idx
+  | VK_α : SRS_Elements_Idx
+  | VK_γ : SRS_Elements_Idx
+  | VK_βv_γ : SRS_Elements_Idx
+  | VK_βw_γ : SRS_Elements_Idx
+  | VK_v_0 : SRS_Elements_Idx
+  | VK_w_0 : SRS_Elements_Idx
+  | VK_t : SRS_Elements_Idx
+  | VK_v_stmt : Fin n_stmt -> SRS_Elements_Idx
 
 set_option maxHeartbeats 0 -- Disable heartbeats to prevent timeouts
 
@@ -135,74 +137,74 @@ noncomputable def GGPR
   let t : Polynomial F := ∏ i : Fin n_wit in Finset.univ, (Polynomial.X - Polynomial.C (r i));
   { Stmt := Fin n_stmt → F
     Sample := Option Vars
-    CrsElements_Left := @CRS_Elements_Idx n_stmt n_wit m d
-    ListCrsElements_Left :=
-      ((List.finRange d).map fun i => CRS_Elements_Idx.EK_s_pow i)
-      ++ ((List.finRange d).map fun i => CRS_Elements_Idx.EK_α_s_pow i)
-      ++ ((List.finRange n_wit).map fun i => CRS_Elements_Idx.EK_v i)
-      ++ ((List.finRange m).map fun i => CRS_Elements_Idx.EK_w i)
-      ++ ((List.finRange n_wit).map fun i => CRS_Elements_Idx.EK_α_v i)
-      ++ ((List.finRange m).map fun i => CRS_Elements_Idx.EK_α_w i)
-      ++ ((List.finRange n_wit).map fun i => CRS_Elements_Idx.EK_β_v i)
-      ++ ((List.finRange m).map fun i => CRS_Elements_Idx.EK_β_w i)
-      ++ [CRS_Elements_Idx.VK_1, CRS_Elements_Idx.VK_α, CRS_Elements_Idx.VK_γ, CRS_Elements_Idx.VK_βv_γ, CRS_Elements_Idx.VK_βw_γ, CRS_Elements_Idx.VK_v_0, CRS_Elements_Idx.VK_w_0, CRS_Elements_Idx.VK_t]
-      ++ ((List.finRange n_stmt).map fun i => CRS_Elements_Idx.VK_v_stmt i)
+    SRSElements_G1 := @SRS_Elements_Idx n_stmt n_wit m d
+    ListSRSElements_G1 :=
+      ((List.finRange d).map fun i => SRS_Elements_Idx.EK_s_pow i)
+      ++ ((List.finRange d).map fun i => SRS_Elements_Idx.EK_α_s_pow i)
+      ++ ((List.finRange n_wit).map fun i => SRS_Elements_Idx.EK_v i)
+      ++ ((List.finRange m).map fun i => SRS_Elements_Idx.EK_w i)
+      ++ ((List.finRange n_wit).map fun i => SRS_Elements_Idx.EK_α_v i)
+      ++ ((List.finRange m).map fun i => SRS_Elements_Idx.EK_α_w i)
+      ++ ((List.finRange n_wit).map fun i => SRS_Elements_Idx.EK_β_v i)
+      ++ ((List.finRange m).map fun i => SRS_Elements_Idx.EK_β_w i)
+      ++ [SRS_Elements_Idx.VK_1, SRS_Elements_Idx.VK_α, SRS_Elements_Idx.VK_γ, SRS_Elements_Idx.VK_βv_γ, SRS_Elements_Idx.VK_βw_γ, SRS_Elements_Idx.VK_v_0, SRS_Elements_Idx.VK_w_0, SRS_Elements_Idx.VK_t]
+      ++ ((List.finRange n_stmt).map fun i => SRS_Elements_Idx.VK_v_stmt i)
     -- Note that GGPR is a Type I SNARK - all SRS elements appear in both groups of the pairing
-    CrsElements_Right := @CRS_Elements_Idx n_stmt n_wit m d
-    ListCrsElements_Right :=
-      ((List.finRange d).map fun i => CRS_Elements_Idx.EK_s_pow i)
-      ++ ((List.finRange d).map fun i => CRS_Elements_Idx.EK_α_s_pow i)
-      ++ ((List.finRange n_wit).map fun i => CRS_Elements_Idx.EK_v i)
-      ++ ((List.finRange m).map fun i => CRS_Elements_Idx.EK_w i)
-      ++ ((List.finRange n_wit).map fun i => CRS_Elements_Idx.EK_α_v i)
-      ++ ((List.finRange m).map fun i => CRS_Elements_Idx.EK_α_w i)
-      ++ ((List.finRange n_wit).map fun i => CRS_Elements_Idx.EK_β_v i)
-      ++ ((List.finRange m).map fun i => CRS_Elements_Idx.EK_β_w i)
-      ++ [CRS_Elements_Idx.VK_1, CRS_Elements_Idx.VK_α, CRS_Elements_Idx.VK_γ, CRS_Elements_Idx.VK_βv_γ, CRS_Elements_Idx.VK_βw_γ, CRS_Elements_Idx.VK_v_0, CRS_Elements_Idx.VK_w_0, CRS_Elements_Idx.VK_t]
-      ++ ((List.finRange n_stmt).map fun i => CRS_Elements_Idx.VK_v_stmt i)
+    SRSElements_G2 := @SRS_Elements_Idx n_stmt n_wit m d
+    ListSRSElements_G2 :=
+      ((List.finRange d).map fun i => SRS_Elements_Idx.EK_s_pow i)
+      ++ ((List.finRange d).map fun i => SRS_Elements_Idx.EK_α_s_pow i)
+      ++ ((List.finRange n_wit).map fun i => SRS_Elements_Idx.EK_v i)
+      ++ ((List.finRange m).map fun i => SRS_Elements_Idx.EK_w i)
+      ++ ((List.finRange n_wit).map fun i => SRS_Elements_Idx.EK_α_v i)
+      ++ ((List.finRange m).map fun i => SRS_Elements_Idx.EK_α_w i)
+      ++ ((List.finRange n_wit).map fun i => SRS_Elements_Idx.EK_β_v i)
+      ++ ((List.finRange m).map fun i => SRS_Elements_Idx.EK_β_w i)
+      ++ [SRS_Elements_Idx.VK_1, SRS_Elements_Idx.VK_α, SRS_Elements_Idx.VK_γ, SRS_Elements_Idx.VK_βv_γ, SRS_Elements_Idx.VK_βw_γ, SRS_Elements_Idx.VK_v_0, SRS_Elements_Idx.VK_w_0, SRS_Elements_Idx.VK_t]
+      ++ ((List.finRange n_stmt).map fun i => SRS_Elements_Idx.VK_v_stmt i)
 
-    crsElementValue_Left := fun crs_idx => match crs_idx with
-      | CRS_Elements_Idx.EK_s_pow i => poly_s ^ (i : ℕ)
-      | CRS_Elements_Idx.EK_α_s_pow i => poly_α * poly_s ^ (i : ℕ)
-      | CRS_Elements_Idx.EK_v i => to_MvPolynomial_Option Vars (v_wit i)
-      | CRS_Elements_Idx.EK_w i => to_MvPolynomial_Option Vars (w_wit i)
-      | CRS_Elements_Idx.EK_α_v i => poly_α * to_MvPolynomial_Option Vars (v_wit i)
-      | CRS_Elements_Idx.EK_α_w i => poly_α * to_MvPolynomial_Option Vars (w_wit i)
-      | CRS_Elements_Idx.EK_β_v i => poly_β_v * to_MvPolynomial_Option Vars (v_wit i)
-      | CRS_Elements_Idx.EK_β_w i => poly_β_w * to_MvPolynomial_Option Vars (w_wit i)
-      | CRS_Elements_Idx.VK_1 => 1
-      | CRS_Elements_Idx.VK_α => poly_α
-      | CRS_Elements_Idx.VK_γ => poly_γ
-      | CRS_Elements_Idx.VK_βv_γ => poly_β_v * poly_γ
-      | CRS_Elements_Idx.VK_βw_γ => poly_β_w * poly_γ
-      | CRS_Elements_Idx.VK_v_0 => to_MvPolynomial_Option Vars v_0
-      | CRS_Elements_Idx.VK_w_0 => to_MvPolynomial_Option Vars w_0
-      | CRS_Elements_Idx.VK_t => to_MvPolynomial_Option Vars t
-      | CRS_Elements_Idx.VK_v_stmt i => to_MvPolynomial_Option Vars (v_stmt i)
+    SRSElementValue_G1 := fun SRS_idx => match SRS_idx with
+      | SRS_Elements_Idx.EK_s_pow i => poly_s ^ (i : ℕ)
+      | SRS_Elements_Idx.EK_α_s_pow i => poly_α * poly_s ^ (i : ℕ)
+      | SRS_Elements_Idx.EK_v i => to_MvPolynomial_Option Vars (v_wit i)
+      | SRS_Elements_Idx.EK_w i => to_MvPolynomial_Option Vars (w_wit i)
+      | SRS_Elements_Idx.EK_α_v i => poly_α * to_MvPolynomial_Option Vars (v_wit i)
+      | SRS_Elements_Idx.EK_α_w i => poly_α * to_MvPolynomial_Option Vars (w_wit i)
+      | SRS_Elements_Idx.EK_β_v i => poly_β_v * to_MvPolynomial_Option Vars (v_wit i)
+      | SRS_Elements_Idx.EK_β_w i => poly_β_w * to_MvPolynomial_Option Vars (w_wit i)
+      | SRS_Elements_Idx.VK_1 => 1
+      | SRS_Elements_Idx.VK_α => poly_α
+      | SRS_Elements_Idx.VK_γ => poly_γ
+      | SRS_Elements_Idx.VK_βv_γ => poly_β_v * poly_γ
+      | SRS_Elements_Idx.VK_βw_γ => poly_β_w * poly_γ
+      | SRS_Elements_Idx.VK_v_0 => to_MvPolynomial_Option Vars v_0
+      | SRS_Elements_Idx.VK_w_0 => to_MvPolynomial_Option Vars w_0
+      | SRS_Elements_Idx.VK_t => to_MvPolynomial_Option Vars t
+      | SRS_Elements_Idx.VK_v_stmt i => to_MvPolynomial_Option Vars (v_stmt i)
 
-    crsElementValue_Right := fun crs_idx => match crs_idx with
-      | CRS_Elements_Idx.EK_s_pow i => poly_s ^ (i : ℕ)
-      | CRS_Elements_Idx.EK_α_s_pow i => poly_α * poly_s ^ (i : ℕ)
-      | CRS_Elements_Idx.EK_v i => to_MvPolynomial_Option Vars (v_wit i)
-      | CRS_Elements_Idx.EK_w i => to_MvPolynomial_Option Vars (w_wit i)
-      | CRS_Elements_Idx.EK_α_v i => poly_α * to_MvPolynomial_Option Vars (v_wit i)
-      | CRS_Elements_Idx.EK_α_w i => poly_α * to_MvPolynomial_Option Vars (w_wit i)
-      | CRS_Elements_Idx.EK_β_v i => poly_β_v * to_MvPolynomial_Option Vars (v_wit i)
-      | CRS_Elements_Idx.EK_β_w i => poly_β_w * to_MvPolynomial_Option Vars (w_wit i)
-      | CRS_Elements_Idx.VK_1 => 1
-      | CRS_Elements_Idx.VK_α => poly_α
-      | CRS_Elements_Idx.VK_γ => poly_γ
-      | CRS_Elements_Idx.VK_βv_γ => poly_β_v * poly_γ
-      | CRS_Elements_Idx.VK_βw_γ => poly_β_w * poly_γ
-      | CRS_Elements_Idx.VK_v_0 => to_MvPolynomial_Option Vars v_0
-      | CRS_Elements_Idx.VK_w_0 => to_MvPolynomial_Option Vars w_0
-      | CRS_Elements_Idx.VK_t => to_MvPolynomial_Option Vars t
-      | CRS_Elements_Idx.VK_v_stmt i => to_MvPolynomial_Option Vars (v_stmt i)
+    SRSElementValue_G2 := fun SRS_idx => match SRS_idx with
+      | SRS_Elements_Idx.EK_s_pow i => poly_s ^ (i : ℕ)
+      | SRS_Elements_Idx.EK_α_s_pow i => poly_α * poly_s ^ (i : ℕ)
+      | SRS_Elements_Idx.EK_v i => to_MvPolynomial_Option Vars (v_wit i)
+      | SRS_Elements_Idx.EK_w i => to_MvPolynomial_Option Vars (w_wit i)
+      | SRS_Elements_Idx.EK_α_v i => poly_α * to_MvPolynomial_Option Vars (v_wit i)
+      | SRS_Elements_Idx.EK_α_w i => poly_α * to_MvPolynomial_Option Vars (w_wit i)
+      | SRS_Elements_Idx.EK_β_v i => poly_β_v * to_MvPolynomial_Option Vars (v_wit i)
+      | SRS_Elements_Idx.EK_β_w i => poly_β_w * to_MvPolynomial_Option Vars (w_wit i)
+      | SRS_Elements_Idx.VK_1 => 1
+      | SRS_Elements_Idx.VK_α => poly_α
+      | SRS_Elements_Idx.VK_γ => poly_γ
+      | SRS_Elements_Idx.VK_βv_γ => poly_β_v * poly_γ
+      | SRS_Elements_Idx.VK_βw_γ => poly_β_w * poly_γ
+      | SRS_Elements_Idx.VK_v_0 => to_MvPolynomial_Option Vars v_0
+      | SRS_Elements_Idx.VK_w_0 => to_MvPolynomial_Option Vars w_0
+      | SRS_Elements_Idx.VK_t => to_MvPolynomial_Option Vars t
+      | SRS_Elements_Idx.VK_v_stmt i => to_MvPolynomial_Option Vars (v_stmt i)
 
-    Proof_Left := Proof_Left_Idx
-    ListProof_Left := [Proof_Left_Idx.V_mid, Proof_Left_Idx.V_mid', Proof_Left_Idx.W', Proof_Left_Idx.Y, Proof_Left_Idx.H']
-    Proof_Right := Proof_Right_Idx
-    ListProof_Right := [Proof_Right_Idx.W, Proof_Right_Idx.H]
+    Proof_G1 := Proof_G1_Idx
+    ListProof_G1 := [Proof_G1_Idx.V_mid, Proof_G1_Idx.V_mid', Proof_G1_Idx.W', Proof_G1_Idx.Y, Proof_G1_Idx.H']
+    Proof_G2 := Proof_G2_Idx
+    ListProof_G2 := [Proof_G2_Idx.W, Proof_G2_Idx.H]
     EqualityChecks := ChecksIdx
     Pairings := fun check_idx => match check_idx with
       | ChecksIdx.CheckI => PairingsI_Idx
@@ -222,117 +224,116 @@ noncomputable def GGPR
     -- III : W' * 1 - α * W = 0
     -- IV : H' * 1 -  α * H = 0
     -- V : Y * 1 - V_mid * (βv γ) - (β_w γ) * W = 0
-    verificationPairingCRSLeft := fun stmt check_idx i crs_idx => match check_idx with
+    verificationPairingSRS_G1 := fun stmt check_idx i SRS_idx => match check_idx with
       | ChecksIdx.CheckI => match i with
-        | PairingsI_Idx.lhs => match crs_idx with
-          | CRS_Elements_Idx.VK_v_0 => 1
-          | CRS_Elements_Idx.VK_v_stmt k => stmt k
+        | PairingsI_Idx.lhs => match SRS_idx with
+          | SRS_Elements_Idx.VK_v_0 => 1
+          | SRS_Elements_Idx.VK_v_stmt k => stmt k
           | _ => 0
-        | PairingsI_Idx.rhs => match crs_idx with
-          | CRS_Elements_Idx.VK_t => 1
+        | PairingsI_Idx.rhs => match SRS_idx with
+          | SRS_Elements_Idx.VK_t => 1
           | _ => 0
       | ChecksIdx.CheckII => match i with
-        | PairingsII_Idx.lhs => match crs_idx with
+        | PairingsII_Idx.lhs => match SRS_idx with
           | _ => 0
-        | PairingsII_Idx.rhs => match crs_idx with
-          | CRS_Elements_Idx.VK_α => 1
+        | PairingsII_Idx.rhs => match SRS_idx with
           | _ => 0
       | ChecksIdx.CheckIII => match i with
-        | PairingsIII_Idx.lhs => match crs_idx with
+        | PairingsIII_Idx.lhs => match SRS_idx with
           | _ => 0
-        | PairingsIII_Idx.rhs => match crs_idx with
-          | CRS_Elements_Idx.VK_α => 1
+        | PairingsIII_Idx.rhs => match SRS_idx with
+          | SRS_Elements_Idx.VK_α => 1
           | _ => 0
       | ChecksIdx.CheckIV => match i with
-        | PairingsIV_Idx.lhs => match crs_idx with
+        | PairingsIV_Idx.lhs => match SRS_idx with
           | _ => 0
-        | PairingsIV_Idx.rhs => match crs_idx with
-          | CRS_Elements_Idx.VK_α => 1
+        | PairingsIV_Idx.rhs => match SRS_idx with
+          | SRS_Elements_Idx.VK_α => 1
           | _ => 0
       | ChecksIdx.CheckV => match i with
-        | PairingsV_Idx.lhs => match crs_idx with
+        | PairingsV_Idx.lhs => match SRS_idx with
           | _ => 0
-        | PairingsV_Idx.rhs1 => match crs_idx with
+        | PairingsV_Idx.rhs1 => match SRS_idx with
           | _ => 0
-        | PairingsV_Idx.rhs2 => match crs_idx with
-          | CRS_Elements_Idx.VK_βw_γ => 1
+        | PairingsV_Idx.rhs2 => match SRS_idx with
+          | SRS_Elements_Idx.VK_βw_γ => 1
           | _ => 0
     -- I : (v_0(s) + v_in(s) + V_mid(s)) * (w_0(s) + W) - t * H = 0
     -- II : V_mid' * 1 - V_mid * α = 0
     -- III : W' * 1 - α * W = 0
     -- IV : H' * 1 -  α * H = 0
     -- V : Y * 1 - V_mid * (βv γ) - (β_w γ) * W = 0
-    verificationPairingCRSRight := fun stmt check_idx i crs_idx => match check_idx with
+    verificationPairingSRS_G2 := fun stmt check_idx i SRS_idx => match check_idx with
       | ChecksIdx.CheckI => match i with
-        | PairingsI_Idx.lhs => match crs_idx with
-          | CRS_Elements_Idx.VK_w_0 => 1
+        | PairingsI_Idx.lhs => match SRS_idx with
+          | SRS_Elements_Idx.VK_w_0 => 1
           | _ => 0
         | PairingsI_Idx.rhs => 0
       | ChecksIdx.CheckII => match i with
-        | PairingsII_Idx.lhs => match crs_idx with
-          | CRS_Elements_Idx.VK_1 => 1
+        | PairingsII_Idx.lhs => match SRS_idx with
+          | SRS_Elements_Idx.VK_1 => 1
           | _ => 0
-        | PairingsII_Idx.rhs => match crs_idx with
-          | CRS_Elements_Idx.VK_α => -1 -- Negate the rhs Right elements to show they are moved to the left
+        | PairingsII_Idx.rhs => match SRS_idx with
+          | SRS_Elements_Idx.VK_α => -1 -- Negate the rhs Right elements to show they are moved to the left
           | _ => 0
       | ChecksIdx.CheckIII => match i with
-        | PairingsIII_Idx.lhs => match crs_idx with
-          | CRS_Elements_Idx.VK_1 => 1
+        | PairingsIII_Idx.lhs => match SRS_idx with
+          | SRS_Elements_Idx.VK_1 => 1
           | _ => 0
-        | PairingsIII_Idx.rhs => match crs_idx with
+        | PairingsIII_Idx.rhs => match SRS_idx with
           | _ => 0
       | ChecksIdx.CheckIV => match i with
-        | PairingsIV_Idx.lhs => match crs_idx with
-          | CRS_Elements_Idx.VK_1 => 1
+        | PairingsIV_Idx.lhs => match SRS_idx with
+          | SRS_Elements_Idx.VK_1 => 1
           | _ => 0
-        | PairingsIV_Idx.rhs => match crs_idx with
+        | PairingsIV_Idx.rhs => match SRS_idx with
           | _ => 0
       | ChecksIdx.CheckV => match i with
-        | PairingsV_Idx.lhs => match crs_idx with
-          | CRS_Elements_Idx.VK_γ => 1
+        | PairingsV_Idx.lhs => match SRS_idx with
+          | SRS_Elements_Idx.VK_γ => 1
           | _ => 0
-        | PairingsV_Idx.rhs1 => match crs_idx with
-          | CRS_Elements_Idx.VK_βv_γ => -1 -- Negate the rhs Right elements to show they are moved to the left
+        | PairingsV_Idx.rhs1 => match SRS_idx with
+          | SRS_Elements_Idx.VK_βv_γ => -1 -- Negate the rhs Right elements to show they are moved to the left
           | _ => 0
-        | PairingsV_Idx.rhs2 => match crs_idx with
+        | PairingsV_Idx.rhs2 => match SRS_idx with
           | _ => 0
     -- I : (v_0(s) + v_in(s) + V_mid(s)) * (w_0(s) + W) - t * H = 0
     -- II : V_mid' * 1 - V_mid * α = 0
     -- III : W' * 1 - α * W = 0
     -- IV : H' * 1 -  α * H = 0
     -- V : Y * 1 - V_mid * (βv γ) - (β_w γ) * W = 0
-    verificationPairingProofLeft := fun stmt check_idx i pf_idx => match check_idx with
+    verificationPairingProof_G1 := fun stmt check_idx i pf_idx => match check_idx with
       | ChecksIdx.CheckI => match i with
         | PairingsI_Idx.lhs => match pf_idx with
-          | Proof_Left_Idx.V_mid => 1
+          | Proof_G1_Idx.V_mid => 1
           | _ => 0
         | PairingsI_Idx.rhs => match pf_idx with
           | _ => 0
       | ChecksIdx.CheckII => match i with
         | PairingsII_Idx.lhs => match pf_idx with
-          | Proof_Left_Idx.V_mid' => 1
+          | Proof_G1_Idx.V_mid' => 1
           | _ => 0
         | PairingsII_Idx.rhs => match pf_idx with
-          | Proof_Left_Idx.V_mid => 1
+          | Proof_G1_Idx.V_mid => 1
           | _ => 0
       | ChecksIdx.CheckIII => match i with
         | PairingsIII_Idx.lhs => match pf_idx with
-          | Proof_Left_Idx.W' => 1
+          | Proof_G1_Idx.W' => 1
           | _ => 0
         | PairingsIII_Idx.rhs => match pf_idx with
           | _ => 0
       | ChecksIdx.CheckIV => match i with
         | PairingsIV_Idx.lhs => match pf_idx with
-          | Proof_Left_Idx.H' => 1
+          | Proof_G1_Idx.H' => 1
           | _ => 0
         | PairingsIV_Idx.rhs => match pf_idx with
           | _ => 0
       | ChecksIdx.CheckV => match i with
         | PairingsV_Idx.lhs => match pf_idx with
-          | Proof_Left_Idx.Y => 1
+          | Proof_G1_Idx.Y => 1
           | _ => 0
         | PairingsV_Idx.rhs1 => match pf_idx with
-          | Proof_Left_Idx.V_mid => 1
+          | Proof_G1_Idx.V_mid => 1
           | _ => 0
         | PairingsV_Idx.rhs2 => match pf_idx with
           | _ => 0
@@ -341,26 +342,26 @@ noncomputable def GGPR
     -- III : W' * 1 - α * W = 0
     -- IV : H' * 1 -  α * H = 0
     -- V : Y * 1 - V_mid * (βv γ) - (β_w γ) * W = 0
-    verificationPairingProofRight := fun stmt check_idx i pf_idx => match check_idx with
+    verificationPairingProof_G2 := fun stmt check_idx i pf_idx => match check_idx with
       | ChecksIdx.CheckI => match i with
         | PairingsI_Idx.lhs => match pf_idx with
-          | Proof_Right_Idx.W => 1
+          | Proof_G2_Idx.W => 1
           | _ => 0
         | PairingsI_Idx.rhs => match pf_idx with
-          | Proof_Right_Idx.H => -1 -- Negate the rhs Right elements to show they are moved to the left
+          | Proof_G2_Idx.H => -1 -- Negate the rhs Right elements to show they are moved to the left
           | _ => 0
       | ChecksIdx.CheckII => 0
       | ChecksIdx.CheckIII => match i with
         | PairingsIII_Idx.lhs => match pf_idx with
           | _ => 0
         | PairingsIII_Idx.rhs => match pf_idx with
-          | Proof_Right_Idx.W => -1 -- Negate the rhs Right elements to show they are moved to the left
+          | Proof_G2_Idx.W => -1 -- Negate the rhs Right elements to show they are moved to the left
           | _ => 0
       | ChecksIdx.CheckIV => match i with
         | PairingsIV_Idx.lhs => match pf_idx with
           | _ => 0
         | PairingsIV_Idx.rhs => match pf_idx with
-          | Proof_Right_Idx.H => -1 -- Negate the rhs Right elements to show they are moved to the left
+          | Proof_G2_Idx.H => -1 -- Negate the rhs Right elements to show they are moved to the left
           | _ => 0
       | ChecksIdx.CheckV => match i with
         | PairingsV_Idx.lhs => match pf_idx with
@@ -368,7 +369,7 @@ noncomputable def GGPR
         | PairingsV_Idx.rhs1 => match pf_idx with
           | _ => 0
         | PairingsV_Idx.rhs2 => match pf_idx with
-          | Proof_Right_Idx.W => -1 -- Negate the rhs Right elements to show they are moved to the left
+          | Proof_G2_Idx.W => -1 -- Negate the rhs Right elements to show they are moved to the left
           | _ => 0
     Identified_Proof_Elems := []
   }
@@ -405,10 +406,10 @@ lemma soundness
         )
           %ₘ t = 0)
         ( fun prover =>
-           ⟨fun i => prover.snd Proof_Right_Idx.H (CRS_Elements_Idx.EK_β_v i ) ,
-            fun i => prover.snd Proof_Right_Idx.H (CRS_Elements_Idx.EK_β_w i ) ⟩ )
+           ⟨fun i => prover.snd Proof_G2_Idx.H (SRS_Elements_Idx.EK_β_v i ) ,
+            fun i => prover.snd Proof_G2_Idx.H (SRS_Elements_Idx.EK_β_w i ) ⟩ )
     ) := by
-  unfold AGMProofSystemInstantiation.soundness AGMProofSystemInstantiation.verify AGMProofSystemInstantiation.proof_element_left_as_poly AGMProofSystemInstantiation.proof_element_right_as_poly
+  unfold AGMProofSystemInstantiation.soundness AGMProofSystemInstantiation.verify AGMProofSystemInstantiation.proof_element_G1_as_poly AGMProofSystemInstantiation.proof_element_G2_as_poly
   -- TODO namespcace AGMProofSystemInstantiation eliminate
   intros stmt prover eqns'
   rcases eqns' with ⟨eqns, null⟩
@@ -422,20 +423,23 @@ lemma soundness
 
   simp_rw [GGPR] at eqnI eqnII eqnIII eqnIV eqnV
 
+  start_proof
+
+
   -- All I want is a tactic that will apply the following simplifications to eqn in sequence.
   -- TODO can I write a tactic taking a nested list of simp lemmas?
   -- Can I combine all of these?
-  simp only [monomial_zero', List.singleton_append, List.cons_append, List.append_assoc,
+## simp only [monomial_zero', List.singleton_append, List.cons_append, List.append_assoc,
     List.map_cons, Sum.elim_inl, Sum.elim_inr, List.map_append, List.map_map, List.sum_cons,
     List.sum_append, List.map_nil, List.sum_nil, add_zero, Sum.elim_lam_const_lam_const, map_one,
     one_mul, map_zero, zero_mul, map_neg, neg_mul, neg_add_rev, zero_add, mul_zero,
     -- Note: everything above is @simp tagged
     Function.comp, List.sum_map_zero] at eqnI eqnII eqnIII eqnIV eqnV
 
-  simp only [mul_add, add_mul, List.sum_map_add] at eqnI eqnII eqnIII eqnIV eqnV
+## simp only [mul_add, add_mul, List.sum_map_add] at eqnI eqnII eqnIII eqnIV eqnV
 
   -- Move all the X (some _) terms to the left, and out of sums
-  simp only [
+## simp only [
     -- Associativity to obtain a right-leaning tree
     mul_assoc,
     -- Commutativity lemmas to move X (some _) to the left
@@ -447,74 +451,63 @@ lemma soundness
     List.sum_map_mul_right, List.sum_map_mul_left] at eqnI eqnII eqnIII eqnIV eqnV
 
   -- Apply MvPolynomial.optionEquivRight *here*, so that we can treat polynomials in Vars_X as constants
-  trace "Converting to MvPolynomial over Polynomials"
+## trace "Converting to MvPolynomial over Polynomials"
   -- replace eqn := congr_arg (MvPolynomial.optionEquivRight F Vars) eqn
-  simp only [←(EquivLike.apply_eq_iff_eq (optionEquivRight _ _))] at eqnI eqnII eqnIII eqnIV eqnV
-  simp only [AlgEquiv.map_add, AlgEquiv.map_zero, AlgEquiv.map_mul, AlgEquiv.map_one,
+## simp only [←(EquivLike.apply_eq_iff_eq (optionEquivRight _ _))] at eqnI eqnII eqnIII eqnIV eqnV
+## simp only [AlgEquiv.map_add, AlgEquiv.map_zero, AlgEquiv.map_mul, AlgEquiv.map_one,
     AlgEquiv.map_neg, AlgEquiv.list_map_sum, AlgEquiv.map_pow] at eqnI eqnII eqnIII eqnIV eqnV
-  simp only [optionEquivRight_C, optionEquivRight_X_none, optionEquivRight_X_some, optionEquivRight_to_MvPolynomial_Option] at eqnI eqnII eqnIII eqnIV eqnV
+## simp only [optionEquivRight_C, optionEquivRight_X_none, optionEquivRight_X_some, optionEquivRight_to_MvPolynomial_Option] at eqnI eqnII eqnIII eqnIV eqnV
 
   -- Move Cs back out so we can recognize the monomials
-  simp only [←C_mul, ←C_pow, ←C_add,
-    sum_map_C] at eqnI eqnII eqnIII eqnIV eqnV
+## simp only [←C_mul, ←C_pow, ←C_add, sum_map_C] at eqnI eqnII eqnIII eqnIV eqnV
 
-  simp only [X, C_apply, monomial_mul, one_mul, mul_one, add_zero, zero_add, mul_add, add_mul] at eqnI eqnII eqnIII eqnIV eqnV
+## simp only [X, C_apply, monomial_mul, one_mul, mul_one, add_zero, zero_add, mul_add, add_mul] at eqnI eqnII eqnIII eqnIV eqnV
 
-  save
+## trace "Applying individual coefficients"
 
-  trace "Applying individual coefficients"
+## have h11eqnII := congr_arg (coeff (Finsupp.single Vars.α 1 + Finsupp.single Vars.β_v 1 + Finsupp.single Vars.γ 1)) eqnII
+## have h12eqnII := congr_arg (coeff (Finsupp.single Vars.α 1 + Finsupp.single Vars.β_w 1 + Finsupp.single Vars.γ 1)) eqnII
+## have h19eqnII := congr_arg (coeff (Finsupp.single Vars.α 1 + Finsupp.single Vars.γ 1)) eqnII
+## have h21eqnII := congr_arg (coeff (Finsupp.single Vars.α 1 + Finsupp.single Vars.β_v 1)) eqnII
+## have h22eqnII := congr_arg (coeff (Finsupp.single Vars.α 2)) eqnII
+## have h71eqnII := congr_arg (coeff (Finsupp.single Vars.α 1)) eqnII
+## have h74eqnII := congr_arg (coeff (Finsupp.single Vars.α 1 + Finsupp.single Vars.β_w 1)) eqnII
 
-  have h1eqnI    := congr_arg (coeff (Finsupp.single Vars.r_v 1 + Finsupp.single Vars.r_w 1)) eqnI
-  have h11eqnII  := congr_arg (coeff (Finsupp.single Vars.α_v 1 + Finsupp.single Vars.β 1 + Finsupp.single Vars.γ 1)) eqnII
-  have h19eqnII  := congr_arg (coeff (Finsupp.single Vars.α_v 1 + Finsupp.single Vars.γ 1)) eqnII
-  have h21eqnII  := congr_arg (coeff (Finsupp.single Vars.α_v 1 + Finsupp.single Vars.r_w 1 + Finsupp.single Vars.β 1)) eqnII
-  have h22eqnII  := congr_arg (coeff (Finsupp.single Vars.α_v 2)) eqnII
-  have h32eqnII  := congr_arg (coeff (Finsupp.single Vars.α_v 1 + Finsupp.single Vars.α_w 1)) eqnII
-  have h38eqnII  := congr_arg (coeff (Finsupp.single Vars.α_v 1 + Finsupp.single Vars.r_v 1 + Finsupp.single Vars.r_w 1 + Finsupp.single Vars.β 1)) eqnII
-  have h52eqnII  := congr_arg (coeff (Finsupp.single Vars.α_v 2 + Finsupp.single Vars.r_v 1)) eqnII
-  have h54eqnII  := congr_arg (coeff (Finsupp.single Vars.α_v 1 + Finsupp.single Vars.α_y 1)) eqnII
-  have h71eqnII  := congr_arg (coeff (Finsupp.single Vars.α_v 1 + Finsupp.single Vars.r_w 1)) eqnII
-  have h74eqnII  := congr_arg (coeff (Finsupp.single Vars.α_v 1 + Finsupp.single Vars.r_v 1 + Finsupp.single Vars.β 1)) eqnII
-  have h93eqnII  := congr_arg (coeff (Finsupp.single Vars.α_v 1 + Finsupp.single Vars.r_v 1 + Finsupp.single Vars.r_w 1)) eqnII
-  have h94eqnII := congr_arg (coeff (Finsupp.single Vars.α_w 1 + Finsupp.single Vars.r_w 1 + Finsupp.single Vars.α_v 1)) eqnII
-  have h101eqnII := congr_arg (coeff (Finsupp.single Vars.α_v 1 + Finsupp.single Vars.r_v 1 + Finsupp.single Vars.r_w 1 + Finsupp.single Vars.α_y 1)) eqnII
-  have h27eqnIII := congr_arg (coeff (Finsupp.single Vars.α_w 1 + Finsupp.single Vars.r_v 1 + Finsupp.single Vars.r_w 1)) eqnIII
-  have h32eqnIII := congr_arg (coeff (Finsupp.single Vars.α_w 1 + Finsupp.single Vars.α_v 1)) eqnIII
-  have h33eqnIII := congr_arg (coeff (Finsupp.single Vars.α_w 1 + Finsupp.single Vars.r_w 1)) eqnIII
-  have h34eqnIII := congr_arg (coeff (Finsupp.single Vars.r_v 1 + Finsupp.single Vars.α_w 1 + Finsupp.single Vars.β 1)) eqnIII
-  have h35eqnIII := congr_arg (coeff (Finsupp.single Vars.r_v 1 + Finsupp.single Vars.r_w 1 + Finsupp.single Vars.α_w 1 + Finsupp.single Vars.α_y 1)) eqnIII
-  have h53eqnIII := congr_arg (coeff (Finsupp.single Vars.α_w 1 + Finsupp.single Vars.β 1 + Finsupp.single Vars.γ 1)) eqnIII
-  have h61eqnIII := congr_arg (coeff (Finsupp.single Vars.α_w 1 + Finsupp.single Vars.γ 1)) eqnIII
-  have h75eqnIII := congr_arg (coeff (Finsupp.single Vars.r_v 1 + Finsupp.single Vars.r_w 1 + Finsupp.single Vars.α_w 1 + Finsupp.single Vars.β 1)) eqnIII
-  have h81eqnIII := congr_arg (coeff (Finsupp.single Vars.r_v 1 + Finsupp.single Vars.α_w 1)) eqnIII
-  have h88eqnIII := congr_arg (coeff (Finsupp.single Vars.r_w 1 + Finsupp.single Vars.α_w 1 + Finsupp.single Vars.β 1)) eqnIII
-  have h89eqnIII := congr_arg (coeff (Finsupp.single Vars.α_w 1 + Finsupp.single Vars.α_y 1)) eqnIII
-  have h96eqnIII := congr_arg (coeff (Finsupp.single Vars.α_w 2)) eqnIII
-  have h97eqnIII := congr_arg (coeff (Finsupp.single Vars.α_w 2 + Finsupp.single Vars.r_w 1)) eqnIII
-  have h98eqnIII := congr_arg (coeff (Finsupp.single Vars.α_w 1 + Finsupp.single Vars.α_v 1 + Finsupp.single Vars.r_v 1)) eqnIII
-  have h2eqnIV := congr_arg (coeff (Finsupp.single Vars.r_w 1 + Finsupp.single Vars.α_y 1 + Finsupp.single Vars.β 1)) eqnIV
-  have h4eqnIV := congr_arg (coeff (Finsupp.single Vars.r_v 1 + Finsupp.single Vars.α_v 1 + Finsupp.single Vars.α_y 1)) eqnIV
-  have h23eqnIV := congr_arg (coeff (Finsupp.single Vars.r_v 1 + Finsupp.single Vars.r_w 1 + Finsupp.single Vars.α_y 2)) eqnIV
-  have h25eqnIV := congr_arg (coeff (Finsupp.single Vars.r_w 1 + Finsupp.single Vars.α_w 1 + Finsupp.single Vars.α_y 1)) eqnIV
-  have h30eqnIV := congr_arg (coeff (Finsupp.single Vars.α_y 1 + Finsupp.single Vars.β 1 + Finsupp.single Vars.γ 1)) eqnIV
-  have h37eqnIV := congr_arg (coeff (Finsupp.single Vars.α_y 1 + Finsupp.single Vars.γ 1)) eqnIV
-  have h54eqnIV := congr_arg (coeff (Finsupp.single Vars.α_v 1 + Finsupp.single Vars.α_y 1)) eqnIV
-  have h55eqnIV := congr_arg (coeff (Finsupp.single Vars.r_w 1 + Finsupp.single Vars.α_y 1)) eqnIV
-  have h56eqnIV := congr_arg (coeff (Finsupp.single Vars.r_v 1 + Finsupp.single Vars.r_w 1 + Finsupp.single Vars.α_y 1 + Finsupp.single Vars.β 1)) eqnIV
-  have h57eqnIV := congr_arg (coeff (Finsupp.single Vars.r_v 1 + Finsupp.single Vars.α_y 1 + Finsupp.single Vars.β 1)) eqnIV
-  have h59eqnIV := congr_arg (coeff (Finsupp.single Vars.α_y 2)) eqnIV
-  have h89eqnIV := congr_arg (coeff (Finsupp.single Vars.α_w 1 + Finsupp.single Vars.α_y 1)) eqnIV
-  have h102eqnIV := congr_arg (coeff (Finsupp.single Vars.r_v 1 + Finsupp.single Vars.α_y 1)) eqnIV
-  have h2eqnV := congr_arg (coeff (Finsupp.single Vars.r_v 1 + Finsupp.single Vars.β 1 + Finsupp.single Vars.γ 1)) eqnV
-  have h3eqnV := congr_arg (coeff (Finsupp.single Vars.r_w 1 + Finsupp.single Vars.β 1 + Finsupp.single Vars.γ 1)) eqnV
-  have h4eqnV := congr_arg (coeff (Finsupp.single Vars.r_v 1 + Finsupp.single Vars.r_w 1 + Finsupp.single Vars.β 1 + Finsupp.single Vars.γ 1)) eqnV
+## have h11eqnIII := congr_arg (coeff (Finsupp.single Vars.α 1 + Finsupp.single Vars.β_v 1 + Finsupp.single Vars.γ 1)) eqnIII
+## have h12eqnIII := congr_arg (coeff (Finsupp.single Vars.α 1 + Finsupp.single Vars.β_w 1 + Finsupp.single Vars.γ 1)) eqnIII
+## have h19eqnIII := congr_arg (coeff (Finsupp.single Vars.α 1 + Finsupp.single Vars.γ 1)) eqnIII
+## have h21eqnIII := congr_arg (coeff (Finsupp.single Vars.α 1 + Finsupp.single Vars.β_v 1)) eqnIII
+## have h22eqnIII := congr_arg (coeff (Finsupp.single Vars.α 2)) eqnIII
+## have h71eqnIII := congr_arg (coeff (Finsupp.single Vars.α 1)) eqnIII
+## have h74eqnIII := congr_arg (coeff (Finsupp.single Vars.α 1 + Finsupp.single Vars.β_w 1)) eqnIII
 
-  clear eqnI
-  clear eqnII
-  clear eqnIII
-  clear eqnIV
-  clear eqnV
+## have h2eqnV := congr_arg (coeff (Finsupp.single Vars.β_v 1 + Finsupp.single Vars.γ 1)) eqnV
+## have h3eqnV := congr_arg (coeff (Finsupp.single Vars.β_w 1 + Finsupp.single Vars.γ 1)) eqnV
 
+## have h1eqnI := congr_arg (coeff 0) eqnI
 
+## clear eqnI
+## clear eqnII
+## clear eqnIII
+## clear eqnIV
+## clear eqnV
 
-  integral_domain_tactic
+## trace "Distribute coefficient-taking over terms"
+## simp only [coeff_monomial, coeff_add, coeff_neg, coeff_zero] at h11eqnII h12eqnII h19eqnII h21eqnII h22eqnII h71eqnII h74eqnII h11eqnIII h12eqnIII h19eqnIII h21eqnIII h22eqnIII h71eqnIII h74eqnIII h2eqnV h3eqnV h1eqnI
+
+## trace "Simplifying coefficient expressions"
+## simp only [Vars.finsupp_eq_ext, Finsupp.single_apply, Finsupp.add_apply] at h11eqnII h12eqnII h19eqnII h21eqnII h22eqnII h71eqnII h74eqnII h11eqnIII h12eqnIII h19eqnIII h21eqnIII h22eqnIII h71eqnIII h74eqnIII h2eqnV h3eqnV h1eqnI
+
+## trace "Determine which coefficients are nonzero"
+## simp (config := {decide := true}) only [ite_false, ite_true] at h11eqnII h12eqnII h19eqnII h21eqnII h22eqnII h71eqnII h74eqnII h11eqnIII h12eqnIII h19eqnIII h21eqnIII h22eqnIII h71eqnIII h74eqnIII h2eqnV h3eqnV h1eqnI
+## trace "Remove zeros"
+## simp only [neg_zero, add_zero, zero_add] at h11eqnII h12eqnII h19eqnII h21eqnII h22eqnII h71eqnII h74eqnII h11eqnIII h12eqnIII h19eqnIII h21eqnIII h22eqnIII h71eqnIII h74eqnIII h2eqnV h3eqnV h1eqnI
+
+## skip
+
+## integral_domain_tactic
+
+## done
+
+  sorry
+  -- TODO unfinished

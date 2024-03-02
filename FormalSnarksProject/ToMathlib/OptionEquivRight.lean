@@ -27,7 +27,6 @@ lemma MvPolynomial.optionEquivRight_C (R : Type u) (S₁ : Type v) [CommSemiring
   simp only [Option.elim, AlgEquiv.coe_mk, aeval_C]
   rfl
 
-
 /-- A ring hom from polynomials to multivariable polynomials over an option type -/
 noncomputable def to_MvPolynomial_Option {F : Type} [Field F] (V : Type) :
     Polynomial F →+* MvPolynomial (Option V) F
@@ -72,24 +71,18 @@ theorem Polynomial.hom_congr_vars {R : Type u} {S : Type v}
   exact congrFun (congrArg FunLike.coe hC) p
   exact hv
 
-
 lemma optionEquivRight_comp_to_MvPolynomial_Option {F V : Type} [Field F] :
     RingHom.comp (MvPolynomial.optionEquivRight F V).toRingEquiv.toRingHom (to_MvPolynomial_Option (F := F) V) = C := by
-
   apply Polynomial.hom_congr_vars
   · simp only [AlgEquiv.toRingEquiv_eq_coe, RingEquiv.toRingHom_eq_coe, AlgEquiv.toRingEquiv_toRingHom]
     rw [RingHom.comp_assoc]
     rw [@RingHom.ext_iff]
     intro x
     simp [to_MvPolynomial_Option_C]
-
-
   · simp only [AlgEquiv.toRingEquiv_eq_coe, RingEquiv.toRingHom_eq_coe,
       AlgEquiv.toRingEquiv_toRingHom, RingHom.coe_comp, RingHom.coe_coe, Function.comp_apply]
-    -- simp?
     rw [to_MvPolynomial_Option_X]
     simp only [MvPolynomial.optionEquivRight_X_none]
-
 
 -- Point-free, this becomes (MvPolynomial.optionEquivRight F Vars) ∘ to_MvPolynomial_Option = C
 lemma optionEquivRight_to_MvPolynomial_Option {F V : Type} [Field F] (p : Polynomial F) :
@@ -97,15 +90,12 @@ lemma optionEquivRight_to_MvPolynomial_Option {F V : Type} [Field F] (p : Polyno
   rw [<-FunLike.congr_fun optionEquivRight_comp_to_MvPolynomial_Option p]
   simp
 
-
 lemma MvPolynomial.sum_map_C {σ A R : Type} [CommSemiring R] (l : List A) (f : A → R) :
     (l.map (fun (x : A) => C (σ := σ) (f x))).sum = C ((l.map f).sum) := by
   -- sorry
   induction l with
   | nil => simp
   | cons hd tl ih => simp [ih]
-
-
 
 theorem AlgEquiv.list_map_sum {R : Type uR} {A₁ : Type uA₁} {A₂ : Type uA₂}
     [CommSemiring R] [Semiring A₁] [Semiring A₂] [Algebra R A₁] [Algebra R A₂]

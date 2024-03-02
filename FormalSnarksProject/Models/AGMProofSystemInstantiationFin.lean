@@ -20,18 +20,18 @@ section
 structure AGMProofSystemInstantiationFin (F : Type) [Field F] where
   /-- The number of toxic waste elements sampled -/
   nSample : ℕ
-  /-- The number of crs elements in group I, -/
-  nCrsElements_Left : ℕ
+  /-- The number of SRS elements in group I, -/
+  nSRSElements_G1 : ℕ
   /-- Similarly -/
-  nCrsElements_Right : ℕ
+  nSRSElements_G2 : ℕ
 
-  /-- The crs elements themselves, described as polynomials in the samples -/
-  crsElementValue_Left : (i : Fin nCrsElements_Left) → MvPolynomial (Fin nSample) F
-  crsElementValue_Right : (i : Fin nCrsElements_Right) → MvPolynomial (Fin nSample) F
+  /-- The SRS elements themselves, described as polynomials in the samples -/
+  SRSElementValue_G1 : (i : Fin nSRSElements_G1) → MvPolynomial (Fin nSample) F
+  SRSElementValue_G2 : (i : Fin nSRSElements_G2) → MvPolynomial (Fin nSample) F
 
   /-- A number of proof elements in each group -/
-  nProof_Left : ℕ
-  nProof_Right : ℕ
+  nProof_G1 : ℕ
+  nProof_G2 : ℕ
 
   /-- The number of equations the verifier checks -/
   nEqualityChecks : ℕ
@@ -40,21 +40,21 @@ structure AGMProofSystemInstantiationFin (F : Type) [Field F] where
   (each equation is treated as a sum of pairings, the result of which is compared to zero) -/
   nPairings : Fin nEqualityChecks → ℕ
 
-  /-- The coefficient that the verifier uses for the jth element of the ith component of the CRSI
+  /-- The coefficient that the verifier uses for the jth element of the ith component of the SRSI
   in the left half of the lth paring of the kth equality check -/
-  verificationPairingCRSLeft : (i : Fin nCrsElements_Left)
+  verificationPairingSRS_G1 : (i : Fin nSRSElements_G1)
                                 → (k : Fin nEqualityChecks) → (l : Fin (nPairings k)) → F
-  /-- The coefficient that the verifier uses for the jth element of the ith component of the CRSII
+  /-- The coefficient that the verifier uses for the jth element of the ith component of the SRSII
   in the right half of the lth paring of the kth equality check  -/
-  verificationPairingCRSRight : (i : Fin nCrsElements_Right)
+  verificationPairingSRS_G2 : (i : Fin nSRSElements_G2)
                                 → (k : Fin nEqualityChecks) → (l : Fin (nPairings k)) → F
-  /-- The coefficient that the verifier uses for the jth element of the ith component of the Proof_Left
+  /-- The coefficient that the verifier uses for the jth element of the ith component of the Proof_G1
   in the left half of the lth paring of the kth equality check -/
-  verificationPairingProofLeft : (i : Fin nProof_Left)
+  verificationPairingProof_G1 : (i : Fin nProof_G1)
                                 → (k : Fin nEqualityChecks) → (l : Fin (nPairings k)) → F
-  /-- The coefficient that the verifier uses for the jth element of the ith component of the Proof_Right
+  /-- The coefficient that the verifier uses for the jth element of the ith component of the Proof_G2
   in the right half of the lth paring of the kth equality check  -/
-  verificationPairingProofRight : (i : Fin nProof_Right)
+  verificationPairingProof_G2 : (i : Fin nProof_G2)
                                 → (k : Fin nEqualityChecks) → (l : Fin (nPairings k)) → F
 
 
@@ -68,18 +68,18 @@ structure AGMProofSystemInstantiationIndexForm (F : Type) [Field F] where
   Stmt : Type
   /-- The type indexing toxic waste elements sampled -/
   Sample : Type
-  /-- The type indexing crs elements in group I, -/
-  CrsElements_Left : Type
+  /-- The type indexing SRS elements in group I, -/
+  SRSElements_G1 : Type
   /-- Similarly -/
-  CrsElements_Right : Type
+  SRSElements_G2 : Type
 
-  /-- The crs elements themselves, described as polynomials in the samples -/
-  crsElementValue_Left : (i : CrsElements_Left) → MvPolynomial (Sample) F
-  crsElementValue_Right : (i : CrsElements_Right) → MvPolynomial (Sample) F
+  /-- The SRS elements themselves, described as polynomials in the samples -/
+  SRSElementValue_G1 : (i : SRSElements_G1) → MvPolynomial (Sample) F
+  SRSElementValue_G2 : (i : SRSElements_G2) → MvPolynomial (Sample) F
 
   /-- A type indexing proof elements in each group -/
-  Proof_Left : Type
-  Proof_Right : Type
+  Proof_G1 : Type
+  Proof_G2 : Type
 
   /-- The type indexing equations the verifier checks -/
   EqualityChecks : Type
@@ -88,15 +88,15 @@ structure AGMProofSystemInstantiationIndexForm (F : Type) [Field F] where
   (each equation is treated as a sum of pairings, the result of which is compared to zero) -/
   Pairings : EqualityChecks → Type
 
-  /-- The coefficient that the verifier uses for the jth element of the ith component of the CRSI
+  /-- The coefficient that the verifier uses for the jth element of the ith component of the SRSI
   in the left half of the lth paring of the kth equality check -/
-  verificationPairingCRSLeft : Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : CrsElements_Left) → F
-  /-- The coefficient that the verifier uses for the jth element of the ith component of the CRSII
+  verificationPairingSRS_G1 : Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : SRSElements_G1) → F
+  /-- The coefficient that the verifier uses for the jth element of the ith component of the SRSII
   in the right half of the lth paring of the kth equality check  -/
-  verificationPairingCRSRight : Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : CrsElements_Right) → F
-  /-- The coefficient that the verifier uses for the jth element of the ith component of the Proof_Left
+  verificationPairingSRS_G2 : Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : SRSElements_G2) → F
+  /-- The coefficient that the verifier uses for the jth element of the ith component of the Proof_G1
   in the left half of the lth paring of the kth equality check -/
-  verificationPairingProofLeft : Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : Proof_Left) → F
-  /-- The coefficient that the verifier uses for the jth element of the ith component of the Proof_Right
+  verificationPairingProof_G1 : Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : Proof_G1) → F
+  /-- The coefficient that the verifier uses for the jth element of the ith component of the Proof_G2
   in the right half of the lth paring of the kth equality check  -/
-  verificationPairingProofRight : Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : Proof_Right) → F
+  verificationPairingProof_G2 : Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : Proof_G2) → F

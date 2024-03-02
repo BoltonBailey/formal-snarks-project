@@ -83,16 +83,8 @@ macro_rules
         -- If we are done, halt
         | done
         -- If we have a hypothesis of the form a * b = 0, split into a = 0 ∨ b = 0, and recurse
-        | --try clear found_zero
-          cases_or _ ∨ _
+        | cases_or _ ∨ _
           all_goals integral_domain_tactic
-          -- 2
-          -- cases' ‹_ ∨ _› with found_zero found_zero
-          -- all_goals integral_domain_tactic
-          -- 3
-          -- cases ‹_ ∨ _› with -- this will fail if we can't split, passing us to the skip case below
-          -- | inl _ => integral_domain_tactic; skip
-          -- | inr _ => integral_domain_tactic; skip
         -- If we cannot split, we skip, leaving the goal unsolved for the user to resolve
         | skip
    )
@@ -134,6 +126,11 @@ example (a b c d e f g h i j : F)
     a = 0 ∨ c = 0 ∨ e = 0 ∨ g = 0 ∨ i = 0 ∨ j = 0  := by
   integral_domain_tactic -- TODO Should this really be 10 calls?
 
+example (a b c d e f g h i j : F)
+    (h1 : a * b = 0) (h2 : c * d + b = 0) (h3 : (d + e) * f = 0) (h4 : g * (f + h) = 0)
+    (h5 : h + i * j = 0) :
+    a * c * e * g * i * j = 0  := by
+  polyrith
 
 /-- This test case starts with negated premises
 -/

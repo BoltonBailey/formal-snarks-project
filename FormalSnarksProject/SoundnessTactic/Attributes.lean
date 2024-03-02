@@ -62,10 +62,10 @@ attribute [polynomial_nf_2] add_mul
 attribute [polynomial_nf_2] finset.sum_add_distrib
 attribute [polynomial_nf_2] sum_X_mul
 attribute [polynomial_nf_2] sum_C_mul
-attribute [polynomial_nf_2] rearrange_constants_right
-attribute [polynomial_nf_2] rearrange_constants_right_with_extra
-attribute [polynomial_nf_2] rearrange_sums_right
-attribute [polynomial_nf_2] rearrange_sums_right_with_extra
+attribute [polynomial_nf_2] rearrange_constants_G2
+attribute [polynomial_nf_2] rearrange_constants_G2_with_extra
+attribute [polynomial_nf_2] rearrange_sums_G2
+attribute [polynomial_nf_2] rearrange_sums_G2_with_extra
 attribute [polynomial_nf_2] C_mul_C
 -- attribute [polynomial_nf_2] finset.sum_hom
 attribute [polynomial_nf_2] mv_polynomial.smul_eq_C_mul
@@ -87,10 +87,10 @@ attribute [polynomial_nf_3] finset.sum_add_distrib
 -- attribute [polynomial_nf_3] sum_X_mul
 -- attribute [polynomial_nf_3] sum_C_mul
 attribute [polynomial_nf_3] mul_sum_symm
-attribute [polynomial_nf_3] rearrange_constants_right
-attribute [polynomial_nf_3] rearrange_constants_right_with_extra
-attribute [polynomial_nf_3] rearrange_sums_right
-attribute [polynomial_nf_3] rearrange_sums_right_with_extra
+attribute [polynomial_nf_3] rearrange_constants_G2
+attribute [polynomial_nf_3] rearrange_constants_G2_with_extra
+attribute [polynomial_nf_3] rearrange_sums_G2
+attribute [polynomial_nf_3] rearrange_sums_G2_with_extra
 attribute [polynomial_nf_3] C_mul_C
 -- attribute [polynomial_nf_3] finset.sum_hom
 attribute [polynomial_nf_3] mv_polynomial.smul_eq_C_mul
@@ -107,7 +107,7 @@ run_cmd tactic.add_doc_string `simp_attr.rearrange "TODO a few rearrangement lem
 
 -- attribute [rearrange] rearrange1
 -- attribute [rearrange] rearrange2
--- attribute [rearrange] rearrange_constants_right
+-- attribute [rearrange] rearrange_constants_G2
 -- attribute [rearrange] rearrange_smul_right
 
 

@@ -5,25 +5,13 @@ import FormalSnarksProject.ToMathlib.OptionEquivRight
 import Mathlib.Data.MvPolynomial.Equiv
 import FormalSnarksProject.SoundnessTactic.SoundnessProver
 import FormalSnarksProject.SoundnessTactic.ProofMode
-import FormalSnarksProject.ToMathlib.MulModByMonic
+import FormalSnarksProject.ToMathlib.PolynomialQuotient
 
 /-!
 
 # Groth16TypeIII
 
-This file contains the soundness proof for the Type III version of Groth16 presented in
-["Another Look at Extraction and Randomization of Groth's zk-SNARK" by Baghery et al.](https://eprint.iacr.org/2020/811).
-
-There are a couple of ways to check this file.
-
-1. Run `lake build FormalSnarksProject.SNARKs.Groth16TypeIII` from the project home directory.
-   This will run the soundness proof and print the result to the console.
-2. Open the file in VSCode and observe the proof in the InfoView pane.
-
-NOTE: If you try to run `lake build` on this file using polyrith, it fails, even though it works
-fine in the editor. This perhaps has to do with polyrith making external calls to Sage Web APIs.
-
-Currently the file contains the call to `linear_combination` that polyrith outputs to avoid this.
+This file contains a second proof of the soundness of the Groth16 SNARK, this time using the idea of casting all polynomialls to the quotient ring `F[X]/(t)` where `t` is the polynomial whose roots are the witness values. This avoids the need to determine the coefficient fo this value.
 
 -/
 
@@ -126,17 +114,16 @@ noncomputable def Groth16TypeIII
       n_stmt - the statement size,
       n_wit - the witness size -/
     {n_stmt n_wit n_var : ℕ}
+    /- u_stmt and u_wit are Fin-indexed collections of polynomials from the square span program -/
     {u_stmt : Fin n_stmt → (Polynomial F) }
     {u_wit : Fin n_wit → (Polynomial F) }
     {v_stmt : Fin n_stmt → (Polynomial F) }
     {v_wit : Fin n_wit → (Polynomial F) }
     {w_stmt : Fin n_stmt → (Polynomial F) }
     {w_wit : Fin n_wit → (Polynomial F) }
-    /- The roots of the polynomial t -/
-    {r : Fin n_wit → F} :
+    /- The polynomial t -/
+    {t : Polynomial F} :
     AGMProofSystemInstantiation F :=
-  let t : Polynomial F :=
-    ∏ i in (Finset.univ : Finset (Fin n_wit)), (Polynomial.X - Polynomial.C (r i));
   {
     Stmt := Fin n_stmt -> F
     Sample := Option Vars
@@ -266,10 +253,15 @@ noncomputable def Groth16TypeIII
 
 section soundness
 
+lemma Polynomial.mul_modByMonic {F : Type} [Field F] (t p : Polynomial F) (mt : t.Monic) : (t * p) %ₘ t = 0 := by
+  rw [Polynomial.dvd_iff_modByMonic_eq_zero]
+  apply dvd_mul_right
+  exact mt
+
 -- Remove heartbeat limit for upcoming long-running proof
 set_option maxHeartbeats 0 -- 0 means no limit
 
-lemma is_sound
+lemma is_sound_quotient_version
     {F : Type} [Field F]
     {n_stmt n_wit n_var : ℕ}
     {u_stmt : Fin n_stmt → (Polynomial F) }
@@ -278,17 +270,15 @@ lemma is_sound
     {v_wit : Fin n_wit → (Polynomial F) }
     {w_stmt : Fin n_stmt → (Polynomial F) }
     {w_wit : Fin n_wit → (Polynomial F) }
-    {r : Fin n_wit → F} :
+    {t : Polynomial F} :
     (soundness
       F
       (Groth16TypeIII
         (F := F) (n_stmt := n_stmt) (n_wit := n_wit) (n_var := n_var)
         (u_stmt := u_stmt) (u_wit := u_wit) (v_stmt := v_stmt)
-        (v_wit := v_wit) (w_stmt := w_stmt) (w_wit := w_wit) (r := r))
+        (v_wit := v_wit) (w_stmt := w_stmt) (w_wit := w_wit) (t := t))
       (Fin n_wit -> F)
       (fun (stmt : Fin n_stmt → F) (wit : Fin n_wit -> F) =>
-        let t : Polynomial F :=
-          ∏ i in (Finset.univ : Finset (Fin n_wit)), (Polynomial.X - Polynomial.C (r i));
         (((List.sum (List.map (fun i => Polynomial.C (stmt i) * u_stmt i) (List.finRange n_stmt)))
             + (List.sum (List.map (fun i => Polynomial.C (wit i) * u_wit i) (List.finRange n_wit))))
             *
@@ -306,38 +296,40 @@ lemma is_sound
   -- Introduce the arguments to the soundness definition
   intros stmt prover eqns'
   rcases eqns' with ⟨eqns, null⟩
-  intro t
+
   have eqn := eqns ()
   clear eqns null
 
-  -- Simplify the equation
-  suffices
-      ((List.sum (List.map (fun i => Polynomial.C (stmt i) * u_stmt i) (List.finRange n_stmt)))
-      + (List.sum (List.map (fun i => Polynomial.C (prover.fst Proof_G1_Idx.C (SRS_Elements_G1_Idx.q i)) * u_wit i) (List.finRange n_wit))))
-      *
-      ((List.sum (List.map (fun i => Polynomial.C (stmt i) * v_stmt i) (List.finRange n_stmt)))
-      + (List.sum (List.map (fun i => Polynomial.C (prover.fst Proof_G1_Idx.C (SRS_Elements_G1_Idx.q i)) * v_wit i) (List.finRange n_wit))))
-      =
-      ((List.sum (List.map (fun i => Polynomial.C (stmt i) * w_stmt i) (List.finRange n_stmt)))
-      + (List.sum (List.map (fun i => Polynomial.C (prover.fst Proof_G1_Idx.C (SRS_Elements_G1_Idx.q i)) * w_wit i) (List.finRange n_wit))))
-      +
-      List.sum (List.map (fun x : Fin (n_var - 1) => Polynomial.C (prover.fst Proof_G1_Idx.C (SRS_Elements_G1_Idx.x_pow_times_t x)) * (Polynomial.X ^ (x : ℕ) * t)) (List.finRange (n_var - 1))) by
+  -- done
 
-    rw [<-sub_eq_iff_eq_add'] at this
-    have h := congr_arg (fun x => x %ₘ t) this
-    simp only at h
-    simp
-    rw [h]
-    clear this h
+  -- -- Simplify the equation
+  -- suffices
+  --     ((List.sum (List.map (fun i => Polynomial.C (stmt i) * u_stmt i) (List.finRange n_stmt)))
+  --     + (List.sum (List.map (fun i => Polynomial.C (prover.fst Proof_G1_Idx.C (SRS_Elements_G1_Idx.q i)) * u_wit i) (List.finRange n_wit))))
+  --     *
+  --     ((List.sum (List.map (fun i => Polynomial.C (stmt i) * v_stmt i) (List.finRange n_stmt)))
+  --     + (List.sum (List.map (fun i => Polynomial.C (prover.fst Proof_G1_Idx.C (SRS_Elements_G1_Idx.q i)) * v_wit i) (List.finRange n_wit))))
+  --     =
+  --     ((List.sum (List.map (fun i => Polynomial.C (stmt i) * w_stmt i) (List.finRange n_stmt)))
+  --     + (List.sum (List.map (fun i => Polynomial.C (prover.fst Proof_G1_Idx.C (SRS_Elements_G1_Idx.q i)) * w_wit i) (List.finRange n_wit))))
+  --     +
+  --     List.sum (List.map (fun x : Fin (n_var - 1) => Polynomial.C (prover.fst Proof_G1_Idx.C (SRS_Elements_G1_Idx.x_pow_times_t x)) * (Polynomial.X ^ (x : ℕ) * t)) (List.finRange (n_var - 1))) by
 
-    simp only [mul_comm _ (t), <-mul_assoc]
-    simp only [mul_assoc, List.sum_map_mul_right, List.sum_map_mul_left]
+  --   rw [<-sub_eq_iff_eq_add'] at this
+  --   have h := congr_arg (fun x => x %ₘ t) this
+  --   simp only at h
+  --   simp
+  --   rw [h]
+  --   clear this h
 
-    apply Polynomial.mul_modByMonic
-    apply Polynomial.monic_prod_of_monic
-    intro i hi
-    exact Polynomial.monic_X_sub_C (r i)
-    done
+  --   simp only [mul_comm _ (t), <-mul_assoc]
+  --   simp only [mul_assoc, List.sum_map_mul_right, List.sum_map_mul_left]
+
+  --   apply Polynomial.mul_modByMonic
+  --   apply Polynomial.monic_prod_of_monic
+  --   intro i hi
+  --   exact Polynomial.monic_X_sub_C (r i)
+  --   done
 
 
 
@@ -410,78 +402,93 @@ lemma is_sound
   trace "Remove zeros"
   simp only [neg_zero, add_zero, zero_add] at h0012 h0021 h0022 h0112 h0121 h0122 h0212 h0221 h0222 h1022 h1112 h1121 h1122
 
-  save
 
   -- Step 2: Recursively simplify and case-analyze the equations
   -- dsimp only
+  replace h0012 := congr_arg ((Ideal.Quotient.mk (Ideal.span {t}))) h0012
+  replace h0021 := congr_arg ((Ideal.Quotient.mk (Ideal.span {t}))) h0021
+  replace h0022 := congr_arg ((Ideal.Quotient.mk (Ideal.span {t}))) h0022
+  replace h0112 := congr_arg ((Ideal.Quotient.mk (Ideal.span {t}))) h0112
+  replace h0121 := congr_arg ((Ideal.Quotient.mk (Ideal.span {t}))) h0121
+  replace h0122 := congr_arg ((Ideal.Quotient.mk (Ideal.span {t}))) h0122
+  replace h0212 := congr_arg ((Ideal.Quotient.mk (Ideal.span {t}))) h0212
+  replace h0221 := congr_arg ((Ideal.Quotient.mk (Ideal.span {t}))) h0221
+  replace h0222 := congr_arg ((Ideal.Quotient.mk (Ideal.span {t}))) h0222
+  replace h1022 := congr_arg ((Ideal.Quotient.mk (Ideal.span {t}))) h1022
+  replace h1112 := congr_arg ((Ideal.Quotient.mk (Ideal.span {t}))) h1112
+  replace h1121 := congr_arg ((Ideal.Quotient.mk (Ideal.span {t}))) h1121
+  replace h1122 := congr_arg ((Ideal.Quotient.mk (Ideal.span {t}))) h1122
 
+  rw [Polynomial.mod_eq_zero_iff_quotient_eq_zero]
+
+  simp? [map_add, map_neg, map_mul, map_zero, RingHom.list_map_sum (Ideal.Quotient.mk (Ideal.span {t}))] at h0012 h0021 h0022 h0112 h0121 h0122 h0212 h0221 h0222 h1022 h1112 h1121 h1122 ⊢
 
   -- Set statements so that the equations are easier to read
   -- Most are optional, but there are a few that are necessary due to a bug in polyrith that causes it not to properly transcribe casts in its output
   -- /-
-  set sum_u_stmt := (List.sum (List.map (fun i => Polynomial.C (stmt i) * u_stmt i) (List.finRange n_stmt)))
-  set sum_v_stmt := (List.sum (List.map (fun i => Polynomial.C (stmt i) * v_stmt i) (List.finRange n_stmt)))
-  set sum_w_stmt := (List.sum (List.map (fun i => Polynomial.C (stmt i) * w_stmt i) (List.finRange n_stmt)))
+  set sum_u_stmt := (List.sum (List.map (fun i => (Ideal.Quotient.mk (Ideal.span {t})) (Polynomial.C (stmt i)) *  (Ideal.Quotient.mk (Ideal.span {t})) (u_stmt i)) (List.finRange n_stmt)))
+  set sum_v_stmt := (List.sum (List.map (fun i => (Ideal.Quotient.mk (Ideal.span {t})) (Polynomial.C (stmt i)) * (Ideal.Quotient.mk (Ideal.span {t})) (v_stmt i)) (List.finRange n_stmt)))
+  set sum_w_stmt := (List.sum (List.map (fun i => (Ideal.Quotient.mk (Ideal.span {t})) (Polynomial.C (stmt i)) * (Ideal.Quotient.mk (Ideal.span {t})) (w_stmt i)) (List.finRange n_stmt)))
 
-  set A_1 := Polynomial.C (prover.1 Proof_G1_Idx.A SRS_Elements_G1_Idx.α)
-  set A_2 := Polynomial.C (prover.1 Proof_G1_Idx.A SRS_Elements_G1_Idx.β)
-  set A_3 := Polynomial.C (prover.1 Proof_G1_Idx.A SRS_Elements_G1_Idx.δ)
+  set A_1 := (Ideal.Quotient.mk (Ideal.span {t})) (Polynomial.C (prover.1 Proof_G1_Idx.A SRS_Elements_G1_Idx.α))
+  set A_2 := (Ideal.Quotient.mk (Ideal.span {t})) (Polynomial.C (prover.1 Proof_G1_Idx.A SRS_Elements_G1_Idx.β))
+  set A_3 := (Ideal.Quotient.mk (Ideal.span {t})) (Polynomial.C (prover.1 Proof_G1_Idx.A SRS_Elements_G1_Idx.δ))
   set sum_A_x := List.sum
         (List.map
           (fun x =>
-            Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.x_pow x)) * Polynomial.X ^ (x : ℕ))
+            (Ideal.Quotient.mk (Ideal.span {t})) (Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.x_pow x))) * (Ideal.Quotient.mk (Ideal.span {t})) Polynomial.X ^ (x : ℕ))
           (List.finRange n_var))
 
   set sum_A_u_stmt := List.sum
         (List.map
           (fun x =>
-            Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.y x)) *
-              u_stmt x)
+            (Ideal.Quotient.mk (Ideal.span {t})) (Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.y x))) *
+              (Ideal.Quotient.mk (Ideal.span {t})) (u_stmt x))
           (List.finRange n_stmt))
   set sum_A_v_stmt := List.sum
         (List.map
           (fun x =>
-            Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.y x)) *
-              v_stmt x)
+            (Ideal.Quotient.mk (Ideal.span {t})) (Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.y x))) *
+              (Ideal.Quotient.mk (Ideal.span {t})) (v_stmt x))
           (List.finRange n_stmt))
   set sum_A_w_stmt := List.sum
         (List.map
           (fun x =>
-            Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.y x)) *
-              w_stmt x)
+            (Ideal.Quotient.mk (Ideal.span {t})) (Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.y x))) *
+              (Ideal.Quotient.mk (Ideal.span {t})) (w_stmt x))
           (List.finRange n_stmt))
   set sum_A_u_wit := List.sum
         (List.map
           (fun x =>
-            Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.q x)) *
-              u_wit x)
+            (Ideal.Quotient.mk (Ideal.span {t})) (Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.q x))) *
+              (Ideal.Quotient.mk (Ideal.span {t})) (u_wit x))
           (List.finRange n_wit))
   set sum_A_v_wit := List.sum
         (List.map
           (fun x =>
-            Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.q x)) *
-              v_wit x)
+            (Ideal.Quotient.mk (Ideal.span {t})) (Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.q x))) *
+              (Ideal.Quotient.mk (Ideal.span {t})) (v_wit x))
           (List.finRange n_wit))
   set sum_A_w_wit := List.sum
         (List.map
           (fun x =>
-            Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.q x)) *
-              w_wit x)
+            (Ideal.Quotient.mk (Ideal.span {t})) (Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.q x))) *
+              (Ideal.Quotient.mk (Ideal.span {t})) (w_wit x))
           (List.finRange n_wit))
   set sum_A_x_t := (List.sum
                   (List.map
                     (fun x =>
-                      Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.x_pow_times_t x)) *
-                        (Polynomial.X ^ (x : ℕ) * ∏ i : Fin n_wit, (Polynomial.X - Polynomial.C (r i))))
+                      (Ideal.Quotient.mk (Ideal.span {t})) (Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.x_pow_times_t x))) *
+                        ((Ideal.Quotient.mk (Ideal.span {t})) (Polynomial.X ^ (x : ℕ)) * (Ideal.Quotient.mk (Ideal.span {t})) t))
                     (List.finRange (n_var - 1))))
-  set B_1 := Polynomial.C (prover.2 Proof_G2_Idx.B (SRS_Elements_G2_Idx.β))
-  set B_2 := Polynomial.C (prover.2 Proof_G2_Idx.B (SRS_Elements_G2_Idx.γ))
-  set B_3 := Polynomial.C (prover.2 Proof_G2_Idx.B (SRS_Elements_G2_Idx.δ))
+  set B_1 := (Ideal.Quotient.mk (Ideal.span {t})) (Polynomial.C (prover.2 Proof_G2_Idx.B (SRS_Elements_G2_Idx.β)))
+  set B_2 := (Ideal.Quotient.mk (Ideal.span {t})) (Polynomial.C (prover.2 Proof_G2_Idx.B (SRS_Elements_G2_Idx.γ)))
+  set B_3 := (Ideal.Quotient.mk (Ideal.span {t})) (Polynomial.C (prover.2 Proof_G2_Idx.B (SRS_Elements_G2_Idx.δ)))
 
   set sum_B_x := List.sum
                     (List.map
                       (fun x =>
-                        Polynomial.C (prover.2 Proof_G2_Idx.B (SRS_Elements_G2_Idx.x_pow x)) * Polynomial.X ^ (x : ℕ))
+                        (Ideal.Quotient.mk (Ideal.span {t})) (Polynomial.C (prover.2 Proof_G2_Idx.B (SRS_Elements_G2_Idx.x_pow x))) * (Ideal.Quotient.mk (Ideal.span {t})) Polynomial.X ^ (x : ℕ))
                       (List.finRange n_var))
 
   set C_1 := Polynomial.C (prover.1 Proof_G1_Idx.C SRS_Elements_G1_Idx.α)
@@ -490,48 +497,37 @@ lemma is_sound
   set sum_C_u_wit := List.sum
         (List.map
           (fun x =>
-            Polynomial.C (prover.1 Proof_G1_Idx.C (SRS_Elements_G1_Idx.q x)) *
+            (Ideal.Quotient.mk (Ideal.span {t})) (Polynomial.C (prover.1 Proof_G1_Idx.C (SRS_Elements_G1_Idx.q x))) *
               u_wit x)
           (List.finRange n_wit))
   set sum_C_v_wit := List.sum
         (List.map
           (fun x =>
-            Polynomial.C (prover.1 Proof_G1_Idx.C (SRS_Elements_G1_Idx.q x)) *
+            (Ideal.Quotient.mk (Ideal.span {t})) (Polynomial.C (prover.1 Proof_G1_Idx.C (SRS_Elements_G1_Idx.q x))) *
               v_wit x)
           (List.finRange n_wit))
   set sum_C_w_wit := List.sum
         (List.map
           (fun x =>
-            Polynomial.C (prover.1 Proof_G1_Idx.C (SRS_Elements_G1_Idx.q x)) *
-              w_wit x)
+            (Ideal.Quotient.mk (Ideal.span {t})) (Polynomial.C (prover.1 Proof_G1_Idx.C (SRS_Elements_G1_Idx.q x))) *
+              (Ideal.Quotient.mk (Ideal.span {t})) (w_wit x))
           (List.finRange n_wit))
   set sum_C_x_t := List.sum
         (List.map
           (fun x : Fin (n_var - 1) =>
-            Polynomial.C (prover.1 Proof_G1_Idx.C (SRS_Elements_G1_Idx.x_pow_times_t x)) * (Polynomial.X ^ (x : ℕ) * ∏ i : Fin n_wit, (Polynomial.X - Polynomial.C (r i))))
+            Polynomial.C (prover.1 Proof_G1_Idx.C (SRS_Elements_G1_Idx.x_pow_times_t x)) * ((Ideal.Quotient.mk (Ideal.span {t})) Polynomial.X ^ (x : ℕ) * t))
           (List.finRange (n_var - 1)))
 
   -- clear_value sum_A_x sum_A_x_t sum_B_x sum_C_x_t
   clear_value sum_u_stmt sum_v_stmt sum_w_stmt A_1 A_2 A_3 sum_A_x sum_A_u_stmt sum_A_v_stmt sum_A_w_stmt sum_A_u_wit sum_A_v_wit sum_A_w_wit sum_A_x_t B_1 B_2 B_3 sum_B_x C_1 C_2 C_3 sum_C_u_wit sum_C_v_wit sum_C_w_wit sum_C_x_t
   -- -/
 
+  -- done
 
-  integral_domain_tactic
+  haveI : NoZeroDivisors (Polynomial F ⧸ Ideal.span {t}) := by sorry
 
-  save
+  integral_domain_tactic -- fails here due to not deriving NoZeroDivisors
 
-  skip
-  -- Generated by polyrith
-  linear_combination
-    A_1 * B_3 * h0121 +
-            (-(1 * sum_B_x * sum_A_x) - 1 * sum_A_x_t * B_3 - 1 * sum_A_w_wit * B_3) * h1122 -
-          1 * h0022 +
-        B_1 * sum_A_x * h1022 +
-      (sum_v_stmt + sum_C_v_wit) * h0122
-
-  -- Generated by polyrith
-  linear_combination
-    A_1 * B_3 * h0121 + (-(1 * sum_A_x_t * B_3) - 1 * sum_A_w_wit * B_3) * h1122 - 1 * h0022
 
 
 end soundness

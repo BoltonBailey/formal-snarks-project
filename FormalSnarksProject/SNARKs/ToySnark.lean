@@ -19,15 +19,14 @@ inductive Vars : Type where
 deriving Repr, BEq
 
 inductive StmtEntries : Type where
-  | C : StmtEntries
-  | D : StmtEntries
-  | E : StmtEntries
+  | x : StmtEntries
+  | y : StmtEntries
+  | z : StmtEntries
 deriving Repr, BEq
 
 inductive WitEntries : Type where
   | A : WitEntries
   | B : WitEntries
-  | I : WitEntries
 deriving Repr, BEq
 
 local notation "Vars_α" => some Vars.α
@@ -47,16 +46,16 @@ lemma Vars.finsupp_eq_ext (f g : Vars →₀ ℕ) : f = g ↔
 
 
 -- One left proof
-inductive Proof_Left_Idx : Type where
-  | Pf : Proof_Left_Idx
+inductive Proof_G1_Idx : Type where
+  | Pf : Proof_G1_Idx
 
-instance : Fintype Proof_Left_Idx :=
-  ⟨⟨[Proof_Left_Idx.Pf], by simp⟩, fun x => by cases x <;> simp⟩
+instance : Fintype Proof_G1_Idx :=
+  ⟨⟨[Proof_G1_Idx.Pf], by simp⟩, fun x => by cases x <;> simp⟩
 
 -- No right proof
-def Proof_Right_Idx : Type := Empty
+def Proof_G2_Idx : Type := Empty
 
-instance : Fintype Proof_Right_Idx := inferInstanceAs (Fintype Empty)
+instance : Fintype Proof_G2_Idx := inferInstanceAs (Fintype Empty)
 
 inductive PairingsIdx : Type where
   | lhs : PairingsIdx
@@ -66,6 +65,13 @@ instance : Fintype PairingsIdx :=
   ⟨⟨[PairingsIdx.lhs, PairingsIdx.rhs], by simp⟩,
     fun x => by cases x <;> simp⟩
 
+inductive SRS_Elements_G1_Idx : Type where
+  | α : SRS_Elements_G1_Idx
+  | β : SRS_Elements_G1_Idx
+
+inductive SRS_Elements_G2_Idx : Type where
+  | α : SRS_Elements_G2_Idx
+  | β : SRS_Elements_G2_Idx
 
 
 /--
@@ -78,51 +84,43 @@ noncomputable def ToySnark
   {
     Stmt := StmtEntries -> F
     Sample := Option Vars
-    CrsElements_Left := Unit ⊕ Unit ⊕ Unit -- Representing α, β, αβ
-    ListCrsElements_Left :=
-      [.inl ()] ++ [.inr (.inl ())] ++ [.inr (.inr ())]
-    CrsElements_Right := Unit ⊕ Unit ⊕ Unit -- Representing α, β, 1
-    ListCrsElements_Right :=
-      [.inl ()] ++ [.inr (.inl ())] ++ [.inr (.inr ())]
-    crsElementValue_Left :=
-      Sum.elim (fun _ => MvPolynomial.X Vars_α) <|
-      Sum.elim (fun _ => MvPolynomial.X Vars_β) <|
-               (fun _ => MvPolynomial.X Vars_α * MvPolynomial.X Vars_β)
-    crsElementValue_Right :=
-      Sum.elim (fun _ => MvPolynomial.X Vars_α) <|
-      Sum.elim (fun _ => MvPolynomial.X Vars_β) <|
-               (fun _ => 1)
-    Proof_Left := Proof_Left_Idx
-    ListProof_Left := [Proof_Left_Idx.Pf]
-    Proof_Right := Proof_Right_Idx
-    ListProof_Right := []
+    SRSElements_G1 := SRS_Elements_G1_Idx
+    ListSRSElements_G1 :=
+      [.α, .β]
+    SRSElements_G2 := SRS_Elements_G2_Idx
+    ListSRSElements_G2 :=
+      [.α, .β]
+    SRSElementValue_G1 := fun SRS_idx => match SRS_idx with
+      | SRS_Elements_G1_Idx.α => MvPolynomial.X Vars_α
+      | SRS_Elements_G1_Idx.β => MvPolynomial.X Vars_β
+    SRSElementValue_G2 := fun SRS_idx => match SRS_idx with
+      | SRS_Elements_G2_Idx.α => MvPolynomial.X Vars_α
+      | SRS_Elements_G2_Idx.β => MvPolynomial.X Vars_β
+    Proof_G1 := Proof_G1_Idx
+    ListProof_G1 := [Proof_G1_Idx.Pf]
+    Proof_G2 := Proof_G2_Idx
+    ListProof_G2 := []
     EqualityChecks := Unit
     Pairings := fun _ => PairingsIdx
     ListPairings := fun _ => [PairingsIdx.lhs, PairingsIdx.rhs]
-    verificationPairingCRSLeft := fun stmt _ i => match i with
-      | PairingsIdx.lhs =>
-          Sum.elim (fun _ => 0) <|
-          Sum.elim (fun _ => 0) <|
-                   (fun _ => 0)
-      | PairingsIdx.rhs =>
-          Sum.elim (fun _ => 0) <|
-          Sum.elim (fun _ => 0) <|
-                   (fun _ => stmt StmtEntries.E)
-    verificationPairingCRSRight := fun stmt _ i => match i with
-      | PairingsIdx.lhs =>
-          Sum.elim (fun _ => stmt StmtEntries.C) <|
-          Sum.elim (fun _ => stmt StmtEntries.D) <|
-                   (fun _ => 0)
-      | PairingsIdx.rhs =>
-          Sum.elim (fun _ => 0) <|
-          Sum.elim (fun _ => 0) <|
-                   (fun _ => -1) -- the 1s component of the right group of the right pairing is -1 to convey that it is on the rhs of the equation
-    verificationPairingProofLeft := fun stmt _ i pf => match i with
+    verificationPairingSRS_G1 := fun stmt _ i SRS_idx => match i with
+      | PairingsIdx.lhs => 0
+      | PairingsIdx.rhs => match SRS_idx with
+        | SRS_Elements_G1_Idx.α => stmt StmtEntries.z
+        | SRS_Elements_G1_Idx.β => 0
+    verificationPairingSRS_G2 := fun stmt _ i SRS_idx => match i with
+      | PairingsIdx.lhs => match SRS_idx with
+        | SRS_Elements_G2_Idx.α => stmt StmtEntries.x
+        | SRS_Elements_G2_Idx.β => stmt StmtEntries.y
+      | PairingsIdx.rhs => match SRS_idx with
+        | SRS_Elements_G2_Idx.α => 0
+        | SRS_Elements_G2_Idx.β => -1
+    verificationPairingProof_G1 := fun stmt _ i pf => match i with
       | PairingsIdx.lhs => match pf with
-        | Proof_Left_Idx.Pf => 1 -- The left group side of the left-hand pairing is the proof
+        | Proof_G1_Idx.Pf => 1
       | PairingsIdx.rhs => match pf with
-        | Proof_Left_Idx.Pf => 0 -- The left group side of the right pairing has no proof
-    verificationPairingProofRight := fun stmt _ i pf => 0
+        | Proof_G1_Idx.Pf => 0
+    verificationPairingProof_G2 := fun stmt _ i pf => 0
   }
 
 
@@ -141,17 +139,18 @@ lemma soundness
         (F := F))
       (WitEntries -> F)
       (fun (stmt : StmtEntries → F) (wit : WitEntries -> F) =>
-        wit WitEntries.A * stmt StmtEntries.D = stmt StmtEntries.E -- - wit WitEntries.I
+        wit WitEntries.A * stmt StmtEntries.y = stmt StmtEntries.z -- - wit WitEntries.I
         ∨
-        wit WitEntries.B * stmt StmtEntries.C = stmt StmtEntries.E -- - wit WitEntries.I
+        wit WitEntries.B * stmt StmtEntries.x = stmt StmtEntries.z -- - wit WitEntries.I
       )
-      (fun prover i => prover.fst Proof_Left_Idx.Pf (if i = WitEntries.A then Sum.inl () else Sum.inr (.inl ())))
+      (fun prover i => prover.fst Proof_G1_Idx.Pf (if i = WitEntries.A then .α else .β))
 
     ) := by
-  unfold AGMProofSystemInstantiation.soundness AGMProofSystemInstantiation.verify
-  intros stmt prover eqns
+  unfold AGMProofSystemInstantiation.soundness AGMProofSystemInstantiation.verify AGMProofSystemInstantiation.proof_element_G1_as_poly AGMProofSystemInstantiation.proof_element_G2_as_poly
+  intros stmt prover eqns'
+  rcases eqns' with ⟨eqns, null⟩
   have eqn := eqns ()
-  clear eqns
+  clear eqns null
 
   -- Step 1: Obtain the coefficient equations of the mv_polynomials
   simp_rw [ToySnark] at eqn
