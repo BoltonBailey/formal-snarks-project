@@ -11,3 +11,4 @@ presentation/presentation.vrb
 presentation/alice.jpeg
 presentation/bob.jpeg
 *.DS_Store
+**/.lake/**
