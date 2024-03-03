@@ -8,6 +8,7 @@ section Groth16TypeIII
 
 open MvPolynomial Finsupp Option
 
+-- https://github.com/leanprover-community/mathlib4/pull/11114
 @[simp]
 lemma MvPolynomial.optionEquivRight_X_some (R : Type u) (S₁ : Type v) [CommSemiring R] (x : S₁) :
     (MvPolynomial.optionEquivRight R S₁) (X (some x)) = X x := by
@@ -92,7 +93,6 @@ lemma optionEquivRight_to_MvPolynomial_Option {F V : Type} [Field F] (p : Polyno
 
 lemma MvPolynomial.sum_map_C {σ A R : Type} [CommSemiring R] (l : List A) (f : A → R) :
     (l.map (fun (x : A) => C (σ := σ) (f x))).sum = C ((l.map f).sum) := by
-  -- sorry
   induction l with
   | nil => simp
   | cons hd tl ih => simp [ih]
