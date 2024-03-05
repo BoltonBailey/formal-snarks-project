@@ -183,100 +183,61 @@ lemma is_sound
   -- Set statements so that the equations are easier to read
   -- Most are optional, but there are a few that are necessary due to a bug in polyrith that causes it not to properly transcribe casts in its output
   -- /-
-  set sum_u_stmt := (List.sum (List.map (fun i => Polynomial.C (stmt i) * u_stmt i) (List.finRange n_stmt)))
-  set sum_v_stmt := (List.sum (List.map (fun i => Polynomial.C (stmt i) * v_stmt i) (List.finRange n_stmt)))
-  set sum_w_stmt := (List.sum (List.map (fun i => Polynomial.C (stmt i) * w_stmt i) (List.finRange n_stmt)))
 
-  set A_1 := Polynomial.C (prover.1 Proof_G1_Idx.A SRS_Elements_G1_Idx.α)
-  set A_2 := Polynomial.C (prover.1 Proof_G1_Idx.A SRS_Elements_G1_Idx.β)
-  set A_3 := Polynomial.C (prover.1 Proof_G1_Idx.A SRS_Elements_G1_Idx.δ)
-  set sum_A_x := List.sum
-        (List.map
-          (fun x =>
-            Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.x_pow x)) * Polynomial.X ^ (x : ℕ))
-          (List.finRange n_var))
+  generalize (List.sum (List.map (fun i => Polynomial.C (stmt i) * u_stmt i) (List.finRange n_stmt))) = sum_u_stmt at *
 
-  set sum_A_u_stmt := List.sum
-        (List.map
-          (fun x =>
-            Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.y x)) *
-              u_stmt x)
-          (List.finRange n_stmt))
-  set sum_A_v_stmt := List.sum
-        (List.map
-          (fun x =>
-            Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.y x)) *
-              v_stmt x)
-          (List.finRange n_stmt))
-  set sum_A_w_stmt := List.sum
-        (List.map
-          (fun x =>
-            Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.y x)) *
-              w_stmt x)
-          (List.finRange n_stmt))
-  set sum_A_u_wit := List.sum
-        (List.map
-          (fun x =>
-            Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.q x)) *
-              u_wit x)
-          (List.finRange n_wit))
-  set sum_A_v_wit := List.sum
-        (List.map
-          (fun x =>
-            Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.q x)) *
-              v_wit x)
-          (List.finRange n_wit))
-  set sum_A_w_wit := List.sum
-        (List.map
-          (fun x =>
-            Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.q x)) *
-              w_wit x)
-          (List.finRange n_wit))
-  set sum_A_x_t := (List.sum
-                  (List.map
-                    (fun x =>
-                      Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.x_pow_times_t x)) *
-                        (Polynomial.X ^ (x : ℕ) * ∏ i : Fin n_wit, (Polynomial.X - Polynomial.C (r i))))
-                    (List.finRange (n_var - 1))))
-  set B_1 := Polynomial.C (prover.2 Proof_G2_Idx.B (SRS_Elements_G2_Idx.β))
-  set B_2 := Polynomial.C (prover.2 Proof_G2_Idx.B (SRS_Elements_G2_Idx.γ))
-  set B_3 := Polynomial.C (prover.2 Proof_G2_Idx.B (SRS_Elements_G2_Idx.δ))
+  generalize (List.sum (List.map (fun i => Polynomial.C (stmt i) * v_stmt i) (List.finRange n_stmt))) = sum_v_stmt at *
 
-  set sum_B_x := List.sum
-                    (List.map
-                      (fun x =>
-                        Polynomial.C (prover.2 Proof_G2_Idx.B (SRS_Elements_G2_Idx.x_pow x)) * Polynomial.X ^ (x : ℕ))
-                      (List.finRange n_var))
+  generalize (List.sum (List.map (fun i => Polynomial.C (stmt i) * w_stmt i) (List.finRange n_stmt))) = sum_w_stmt at *
 
-  set C_1 := Polynomial.C (prover.1 Proof_G1_Idx.C SRS_Elements_G1_Idx.α)
-  set C_2 := Polynomial.C (prover.1 Proof_G1_Idx.C SRS_Elements_G1_Idx.β)
-  set C_3 := Polynomial.C (prover.1 Proof_G1_Idx.C SRS_Elements_G1_Idx.δ)
-  set sum_C_u_wit := List.sum
-        (List.map
-          (fun x =>
-            Polynomial.C (prover.1 Proof_G1_Idx.C (SRS_Elements_G1_Idx.q x)) *
-              u_wit x)
-          (List.finRange n_wit))
-  set sum_C_v_wit := List.sum
-        (List.map
-          (fun x =>
-            Polynomial.C (prover.1 Proof_G1_Idx.C (SRS_Elements_G1_Idx.q x)) *
-              v_wit x)
-          (List.finRange n_wit))
-  set sum_C_w_wit := List.sum
-        (List.map
-          (fun x =>
-            Polynomial.C (prover.1 Proof_G1_Idx.C (SRS_Elements_G1_Idx.q x)) *
-              w_wit x)
-          (List.finRange n_wit))
-  set sum_C_x_t := List.sum
-        (List.map
-          (fun x : Fin (n_var - 1) =>
-            Polynomial.C (prover.1 Proof_G1_Idx.C (SRS_Elements_G1_Idx.x_pow_times_t x)) * (Polynomial.X ^ (x : ℕ) * ∏ i : Fin n_wit, (Polynomial.X - Polynomial.C (r i))))
-          (List.finRange (n_var - 1)))
+
+  generalize (Polynomial.C (prover.1 Proof_G1_Idx.A SRS_Elements_G1_Idx.α)) = A_1 at *
+
+  generalize (Polynomial.C (prover.1 Proof_G1_Idx.A SRS_Elements_G1_Idx.β)) = A_2 at *
+
+  generalize (Polynomial.C (prover.1 Proof_G1_Idx.A SRS_Elements_G1_Idx.δ)) = A_3 at *
+
+  generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.x_pow x)) * Polynomial.X ^ (x : ℕ)) (List.finRange n_var))) = sum_A_x at *
+
+
+  generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.y x)) * u_stmt x) (List.finRange n_stmt))) = sum_A_u_stmt at *
+
+  generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.y x)) * v_stmt x) (List.finRange n_stmt))) = sum_A_v_stmt at *
+
+  generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.y x)) * w_stmt x) (List.finRange n_stmt))) = sum_A_w_stmt at *
+
+  generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.q x)) * u_wit x) (List.finRange n_wit))) = sum_A_u_wit at *
+
+  generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.q x)) * v_wit x) (List.finRange n_wit))) = sum_A_v_wit at *
+
+  generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.q x)) * w_wit x) (List.finRange n_wit))) = sum_A_w_wit at *
+
+  generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.x_pow_times_t x)) * (Polynomial.X ^ (x : ℕ) * ∏ i : Fin n_wit, (Polynomial.X - Polynomial.C (r i)))) (List.finRange (n_var - 1)))) = sum_A_x_t at *
+
+  generalize Polynomial.C (prover.2 Proof_G2_Idx.B (SRS_Elements_G2_Idx.β)) = B_1 at *
+
+  generalize Polynomial.C (prover.2 Proof_G2_Idx.B (SRS_Elements_G2_Idx.γ)) = B_2 at *
+
+  generalize Polynomial.C (prover.2 Proof_G2_Idx.B (SRS_Elements_G2_Idx.δ)) = B_3 at *
+
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.2 Proof_G2_Idx.B (SRS_Elements_G2_Idx.x_pow x)) * Polynomial.X ^ (x : ℕ)) (List.finRange n_var)) = sum_B_x at *
+
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.C SRS_Elements_G1_Idx.α) = C_1 at *
+
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.C SRS_Elements_G1_Idx.β) = C_2 at *
+
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.C SRS_Elements_G1_Idx.δ) = C_3 at *
+
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.C (SRS_Elements_G1_Idx.q x)) * u_wit x) (List.finRange n_wit)) = sum_C_u_wit at *
+
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.C (SRS_Elements_G1_Idx.q x)) * v_wit x) (List.finRange n_wit)) = sum_C_v_wit at *
+
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.C (SRS_Elements_G1_Idx.q x)) * w_wit x) (List.finRange n_wit)) = sum_C_w_wit at *
+
+  generalize List.sum (List.map (fun x : Fin (n_var - 1) => Polynomial.C (prover.1 Proof_G1_Idx.C (SRS_Elements_G1_Idx.x_pow_times_t x)) * (Polynomial.X ^ (x : ℕ) * ∏ i : Fin n_wit, (Polynomial.X - Polynomial.C (r i)))) (List.finRange (n_var - 1))) = sum_C_x_t at *
 
   -- clear_value sum_A_x sum_A_x_t sum_B_x sum_C_x_t
-  clear_value sum_u_stmt sum_v_stmt sum_w_stmt A_1 A_2 A_3 sum_A_x sum_A_u_stmt sum_A_v_stmt sum_A_w_stmt sum_A_u_wit sum_A_v_wit sum_A_w_wit sum_A_x_t B_1 B_2 B_3 sum_B_x C_1 C_2 C_3 sum_C_u_wit sum_C_v_wit sum_C_w_wit sum_C_x_t
+  -- clear_value sum_u_stmt sum_v_stmt sum_w_stmt A_1 A_2 A_3 sum_A_x sum_A_u_stmt sum_A_v_stmt sum_A_w_stmt sum_A_u_wit sum_A_v_wit sum_A_w_wit sum_A_x_t B_1 B_2 B_3 sum_B_x C_1 C_2 C_3 sum_C_u_wit sum_C_v_wit sum_C_w_wit sum_C_x_t
   -- -/
 
 
