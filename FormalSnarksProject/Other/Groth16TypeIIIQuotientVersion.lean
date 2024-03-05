@@ -419,7 +419,7 @@ lemma is_sound_quotient_version
   replace h1121 := congr_arg ((Ideal.Quotient.mk (Ideal.span {t}))) h1121
   replace h1122 := congr_arg ((Ideal.Quotient.mk (Ideal.span {t}))) h1122
 
-  rw [Polynomial.mod_eq_zero_iff_quotient_eq_zero]
+  rw [Polynomial.modByMonic_eq_zero_iff_quotient_eq_zero]
 
   simp? [map_add, map_neg, map_mul, map_zero, RingHom.list_map_sum (Ideal.Quotient.mk (Ideal.span {t}))] at h0012 h0021 h0022 h0112 h0121 h0122 h0212 h0221 h0222 h1022 h1112 h1121 h1122 ⊢
 
