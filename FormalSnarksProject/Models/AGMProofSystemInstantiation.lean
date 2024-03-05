@@ -75,26 +75,28 @@ structure AGMProofSystemInstantiation (F : Type) [Field F] where
   side of the pairing to the other. It defaults to empty. -/
   Identified_Proof_Elems : List (Proof_G1 × Proof_G2) := []
 
+namespace AGMProofSystemInstantiation
+
 /-- The type of possible provers in the AGM model.
 A prover simply assigns, for each proof element and each SRS element from the group of that proof element, a coefficient. -/
-def AGMProofSystemInstantiation.Prover (F : Type) [Field F]
+def Prover (F : Type) [Field F]
     (𝓟 : AGMProofSystemInstantiation F) : Type :=
   (𝓟.Proof_G1 -> 𝓟.SRSElements_G1 -> F) × (𝓟.Proof_G2 -> 𝓟.SRSElements_G2 -> F)
 
-noncomputable def AGMProofSystemInstantiation.proof_element_G1_as_poly {F : Type} [Field F]
+noncomputable def proof_element_G1_as_poly {F : Type} [Field F]
     (𝓟 : AGMProofSystemInstantiation F) (prover : 𝓟.Prover) (pf_elem : 𝓟.Proof_G1) :
     MvPolynomial (𝓟.Sample) F :=
   (𝓟.ListSRSElements_G1.map fun SRS_elem =>
           MvPolynomial.C (prover.fst pf_elem SRS_elem) * (𝓟.SRSElementValue_G1 SRS_elem)).sum
 
-noncomputable def AGMProofSystemInstantiation.proof_element_G2_as_poly {F : Type} [Field F]
+noncomputable def proof_element_G2_as_poly {F : Type} [Field F]
     (𝓟 : AGMProofSystemInstantiation F) (prover : 𝓟.Prover) (pf_elem : 𝓟.Proof_G2) :
     MvPolynomial (𝓟.Sample) F :=
   (𝓟.ListSRSElements_G2.map fun SRS_elem =>
           MvPolynomial.C (prover.snd pf_elem SRS_elem) * (𝓟.SRSElementValue_G2 SRS_elem)).sum
 
 /-- The pairing evaluation, represented as a MvPolynomial in the samples -/
-noncomputable def AGMProofSystemInstantiation.pairing_poly {F : Type} [Field F]
+noncomputable def pairing_poly {F : Type} [Field F]
     (𝓟 : AGMProofSystemInstantiation F) (prover : 𝓟.Prover) (stmt : 𝓟.Stmt) (check_idx : 𝓟.EqualityChecks) (pairing : 𝓟.Pairings check_idx) :
     MvPolynomial 𝓟.Sample F :=
   (
@@ -134,7 +136,7 @@ noncomputable def AGMProofSystemInstantiation.pairing_poly {F : Type} [Field F]
 /-- The value that the verifier checks to be equal to 0 for a given equality check, as a
 MvPolynomial in the samples.
 -/
-noncomputable def AGMProofSystemInstantiation.check_poly {F : Type} [Field F]
+noncomputable def check_poly {F : Type} [Field F]
     (𝓟 : AGMProofSystemInstantiation F) (prover : 𝓟.Prover) (stmt : 𝓟.Stmt) (check_idx : 𝓟.EqualityChecks) :
     MvPolynomial 𝓟.Sample F :=
   (
@@ -143,7 +145,7 @@ noncomputable def AGMProofSystemInstantiation.check_poly {F : Type} [Field F]
   ).sum
 
 
-def AGMProofSystemInstantiation.verify {F : Type} [Field F]
+def verify {F : Type} [Field F]
     (𝓟 : AGMProofSystemInstantiation F) (prover : 𝓟.Prover) (stmt : 𝓟.Stmt) : Prop :=
   (
     ∀ check_idx : 𝓟.EqualityChecks, 𝓟.check_poly prover stmt check_idx = 0
@@ -153,12 +155,23 @@ def AGMProofSystemInstantiation.verify {F : Type} [Field F]
     𝓟.proof_element_G1_as_poly prover pfs.fst = 𝓟.proof_element_G2_as_poly prover pfs.snd
 
 
-def AGMProofSystemInstantiation.soundness (F : Type) [Field F]
+def soundness (F : Type) [Field F]
     (𝓟 : AGMProofSystemInstantiation F)
     (Wit : Type) (relation : 𝓟.Stmt -> Wit -> Prop)
     (extractor : 𝓟.Prover -> Wit) : Prop :=
    ∀ stmt : 𝓟.Stmt,
     ∀ prover : 𝓟.Prover,
       𝓟.verify prover stmt -> relation stmt (extractor prover)
+
+
+def completeness (F : Type) [Field F]
+    (𝓟 : AGMProofSystemInstantiation F) (Wit : Type)
+    (relation : 𝓟.Stmt -> Wit -> Prop)
+    (prover : 𝓟.Stmt -> Wit -> 𝓟.Prover) : Prop :=
+   ∀ stmt : 𝓟.Stmt,
+    ∀ wit : Wit,
+      relation stmt wit -> 𝓟.verify (prover stmt wit) stmt
+
+end AGMProofSystemInstantiation
 
 end
