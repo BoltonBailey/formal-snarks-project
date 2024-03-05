@@ -394,8 +394,6 @@ lemma is_sound
   trace "Remove zeros"
   simp only [neg_zero, add_zero, zero_add] at hI_00 hI_01 hI_02 hI_10 hI_11 hI_12 hI_20 hI_21 hI_22 hII_00 hII_01 hII_02 hII_10 hII_11 hII_12 hII_20 hII_21 hII_22 hH_00 hH_01 hH_02 hH_10 hH_11 hH_12 hH_20 hH_21 hH_22 hV_00 hV_01 hV_02 hV_10 hV_11 hV_12 hV_20 hV_21 hV_22 hB_00 hB_01 hB_02 hB_10 hB_11 hB_12 hB_20 hB_21 hB_22
 
-  integral_domain_tactic
-
   set sum_B_1_τ_pow := List.sum
     (List.map (fun x => Polynomial.C (prover.2 Proof_Idx.B (SRS_Elements_Idx.τ_pow x)) * Polynomial.X ^ (x : ℕ))
       (List.finRange n_var))
@@ -415,16 +413,11 @@ lemma is_sound
     (List.map (fun x => Polynomial.C (prover.2 Proof_Idx.H (SRS_Elements_Idx.τ_pow x)) * Polynomial.X ^ (x : ℕ))
       (List.finRange n_var))
 
-
   integral_domain_tactic
   · simp [ht, Polynomial.Monic.ne_zero ht0] at *
     rw [pow_two]
     sorry
   · simp [ht, Polynomial.Monic.ne_zero ht0] at *
-
-
-
-
 
 end soundness
 
