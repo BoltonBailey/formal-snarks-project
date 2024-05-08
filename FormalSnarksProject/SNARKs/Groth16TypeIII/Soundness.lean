@@ -110,17 +110,9 @@ lemma is_sound
   -- All I want is a tactic that will apply the following simplifications to eqn in sequence.
   -- TODO can I write a tactic taking a nested list of simp lemmas?
   -- Can I combine all of these?
-  simp only [monomial_zero', List.singleton_append, List.cons_append, List.append_assoc,
-    List.map_cons, Sum.elim_inl, Sum.elim_inr, List.map_append, List.map_map, List.sum_cons,
-    List.sum_append, List.map_nil, List.sum_nil, add_zero, Sum.elim_lam_const_lam_const, map_one,
-    one_mul, map_zero, zero_mul, map_neg, neg_mul, neg_add_rev, zero_add, mul_zero,
-    -- Note: everything above is @simp tagged
-    Function.comp, List.sum_map_zero] at eqn
-
-  simp only [mul_add, add_mul, List.sum_map_add] at eqn
-
-  -- Move all the X (some _) terms to the left, and out of sums
-  simp only [
+  simp [
+    Function.comp, List.sum_map_zero,
+    mul_add, add_mul, List.sum_map_add,
     -- Associativity to obtain a right-leaning tree
     mul_assoc,
     -- Commutativity lemmas to move X (some _) to the left

@@ -253,7 +253,4 @@ noncomputable def Groth16TypeIII
         | Proof_G2_Idx.B => 0
   }
 
-
-
-
 end Groth16TypeIII
