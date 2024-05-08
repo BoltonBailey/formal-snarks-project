@@ -1,11 +1,11 @@
 import FormalSnarksProject.Models.AGMProofSystemInstantiation
-import Mathlib.Data.Polynomial.Div
-import FormalSnarksProject.ToMathlib.List
+import Mathlib.Algebra.Polynomial.Div
+-- import FormalSnarksProject.ToMathlib.List
 import FormalSnarksProject.ToMathlib.OptionEquivRight
-import Mathlib.Data.MvPolynomial.Equiv
+import Mathlib.Algebra.MvPolynomial.Equiv
 import FormalSnarksProject.SoundnessTactic.SoundnessProver
 import FormalSnarksProject.SoundnessTactic.ProofMode
-import FormalSnarksProject.ToMathlib.MulModByMonic
+-- import FormalSnarksProject.ToMathlib.MulModByMonic
 
 /-!
 
@@ -36,7 +36,7 @@ local notation "Vars_τ" => none
 lemma Vars.finsupp_eq_ext (f g : Vars →₀ ℕ) : f = g ↔
     f Vars.β = g Vars.β
     ∧ f Vars.γ = g Vars.γ := by
-  rw [FunLike.ext_iff]
+  rw [DFunLike.ext_iff]
   constructor
   · intro h
     simp_rw [h]
@@ -289,7 +289,7 @@ lemma is_sound
       t * (List.sum (List.map (fun i => Polynomial.C (prover.fst Proof_Idx.H (SRS_Elements_Idx.βu i)) * u_wit i) (List.finRange n_wit))) by
 
     rw [this]
-    apply Polynomial.mul_modByMonic
+    apply Polynomial.mul_self_modByMonic
     assumption
 
   -- Step 1: Obtain the coefficient equations of the mv_polynomials

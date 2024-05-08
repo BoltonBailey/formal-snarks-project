@@ -1,6 +1,6 @@
-import Mathlib.Data.Polynomial.Div
-import FormalSnarksProject.ToMathlib.List
-import Mathlib.Data.MvPolynomial.Equiv
+import Mathlib.Algebra.Polynomial.Div
+import Mathlib.Algebra.MvPolynomial.Equiv
+import Mathlib.Data.FunLike.Basic
 
 open scoped BigOperators Classical
 
@@ -69,7 +69,8 @@ theorem Polynomial.hom_congr_vars {R : Type u} {S : Type v}
     (hv : f₁ (Polynomial.X) = f₂ (Polynomial.X)) :
     f₁ = f₂ := by
   ext p
-  exact congrFun (congrArg FunLike.coe hC) p
+  exact congrFun (congrArg DFunLike.coe hC) p
+  -- exact congrFun (congrArg DFunLike.coe hC) p
   exact hv
 
 lemma optionEquivRight_comp_to_MvPolynomial_Option {F V : Type} [Field F] :
@@ -88,7 +89,7 @@ lemma optionEquivRight_comp_to_MvPolynomial_Option {F V : Type} [Field F] :
 -- Point-free, this becomes (MvPolynomial.optionEquivRight F Vars) ∘ to_MvPolynomial_Option = C
 lemma optionEquivRight_to_MvPolynomial_Option {F V : Type} [Field F] (p : Polynomial F) :
     (MvPolynomial.optionEquivRight F V) (to_MvPolynomial_Option V p) = C p := by
-  rw [<-FunLike.congr_fun optionEquivRight_comp_to_MvPolynomial_Option p]
+  rw [<-DFunLike.congr_fun optionEquivRight_comp_to_MvPolynomial_Option p]
   simp
 
 lemma MvPolynomial.sum_map_C {σ A R : Type} [CommSemiring R] (l : List A) (f : A → R) :

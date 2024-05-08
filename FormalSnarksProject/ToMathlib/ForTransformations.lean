@@ -1,6 +1,6 @@
 
 import Mathlib.RingTheory.Polynomial.Basic
-import Mathlib.Data.MvPolynomial.Monad
+import Mathlib.Algebra.MvPolynomial.Monad
 
 section
 
@@ -15,14 +15,6 @@ universe u
 variable {F : Type}
 
 variable [Field F]
-
--- https://github.com/leanprover-community/mathlib4/pull/11071
-@[simp]
-lemma MvPolynomial.X_ne_zero {σ R : Type _} [Field R] (s : σ) :
-    MvPolynomial.X (R := R) s ≠ 0 := by
-  intro h
-  have h' := congr_arg (fun p => p.coeff (Finsupp.single s 1)) h
-  simp only [coeff_X, coeff_zero, one_ne_zero] at h'
 
 -- Additive version. TODO use @[to_additive] instead
 lemma List.sum_map_ite_eq {A B : Type} [DecidableEq A] [CommRing B] (f g : A → B) (a : A) (l : List A) :
@@ -45,14 +37,6 @@ lemma List.sum_map_ite_eq {A B : Type} [DecidableEq A] [CommRing B] (f g : A →
     · simp only [hx, ite_false, ne_comm.mp hx, add_zero]
       ring
 
--- https://github.com/leanprover-community/mathlib4/pull/11073
-theorem MvPolynomial.degreeOf_C_mul_le {R σ : Type} [CommSemiring R] (j : σ)
-    (c : R) (f : MvPolynomial σ R) :
-    MvPolynomial.degreeOf j (MvPolynomial.C c * f) ≤ MvPolynomial.degreeOf j f := by
-  unfold degreeOf
-  have := degrees_mul (C c) f
-  simp [MvPolynomial.degrees_C] at this
-  convert Multiset.count_le_of_le j this
 
 -- https://github.com/leanprover-community/mathlib4/pull/11106
 theorem MvPolynomial.degreeOf_C_mul {σ R : Type} [Field R] (j : σ)
@@ -60,8 +44,8 @@ theorem MvPolynomial.degreeOf_C_mul {σ R : Type} [Field R] (j : σ)
     MvPolynomial.degreeOf j (MvPolynomial.C c * f) = MvPolynomial.degreeOf j f := by
   rw [Nat.eq_iff_le_and_ge]
   constructor
-  · convert MvPolynomial.degreeOf_C_mul_le j c f
-  · have := MvPolynomial.degreeOf_C_mul_le j (1/c) (C (c) * f)
+  · convert MvPolynomial.degreeOf_C_mul_le f j c
+  · have := MvPolynomial.degreeOf_C_mul_le (C (c) * f) j (1/c)
     rw [<-mul_assoc] at this
     rw [←C_mul] at this
     simp only [one_div, ne_eq, hc, not_false_eq_true, inv_mul_cancel, map_one, one_mul] at this
@@ -105,24 +89,13 @@ lemma MvPolynomial.remove_ite_for_casing {σ F : Type} [Field F] [DecidableEq σ
   · simp only [h, Finsupp.mem_support_iff, ne_eq, not_not, pow_zero, one_mul, ite_self]
   · simp only [h, Finsupp.mem_support_iff, ne_eq, not_not, ite_false]
 
--- https://github.com/leanprover-community/mathlib4/pull/11109
-lemma MvPolynomial.prod_X_pow_eq_monomial {σ F : Type} [Field F] [DecidableEq σ]
-  (x : σ →₀ ℕ) :
-    (Finset.prod (x.support) fun x_1 => X x_1 ^ x x_1)
-      =
-    (monomial x) (1 : F) := by
-  rw [MvPolynomial.monomial_eq]
-  simp
-  unfold Finsupp.prod
-  simp
-
 lemma MvPolynomial.prod_neq_pow_eq_monomial_erase {σ F : Type} [Field F] [DecidableEq σ]
   (sample_removed : σ)
   (x : σ →₀ ℕ) :
     (Finset.prod (Finset.filter (fun y => ¬y = sample_removed) x.support) fun x_1 => X x_1 ^ x x_1)
       =
     (monomial (x.erase sample_removed)) (1 : F) := by
-  rw [← MvPolynomial.prod_X_pow_eq_monomial (F := F) (x.erase sample_removed)]
+  rw [← MvPolynomial.prod_X_pow_eq_monomial]
   simp only [Finsupp.mem_support_iff, ne_eq, not_not, Finsupp.support_erase]
   rw [Finset.prod_erase]
   · rw [Finset.prod_filter]
@@ -183,8 +156,8 @@ lemma MvPolynomial.bind_ite_filter_aux {σ F : Type} [Field F] [DecidableEq σ]
       (fun a : σ →₀ ℕ =>
         ((a sample_removed : ℕ) * d ≤ m sample_target + d * m sample_removed )∧
         (Finsupp.erase sample_removed a =
-            (Finsupp.erase sample_removed m + fun₀ | sample_target => d * m sample_removed) -
-              fun₀ | sample_target => a sample_removed * d))
+            (Finsupp.erase sample_removed m + Finsupp.single (sample_target) (d * m sample_removed)) -
+              Finsupp.single sample_target (a sample_removed * d)))
       (support p))
       =
     (Finset.filter
@@ -270,7 +243,6 @@ lemma MvPolynomial.bind₁_ite_pow_eq_zero_of {σ F : Type} [Field F] [Decidable
         tauto
       · have h''' : (if m ∈ support p then ({m} : Finset (σ →₀ ℕ)) else ∅) = (∅ : Finset (σ →₀ ℕ)) := by
           simp [h']
-          exact coeff_zero_of_not_mem_support p m h'
         rw [h''']
         simp [coeff_zero_of_not_mem_support p m h']
     rw [this]

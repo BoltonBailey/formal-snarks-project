@@ -1,6 +1,6 @@
 
-import Mathlib.Data.MvPolynomial.Basic
-import Mathlib.Data.Polynomial.Eval
+import Mathlib.Algebra.MvPolynomial.Basic
+import Mathlib.Algebra.Polynomial.Eval
 import FormalSnarksProject.SoundnessTactic.DeclareAttributes
 -- import .general_lemmas.mv_X_mul
 -- import .general_lemmas.single_antidiagonal

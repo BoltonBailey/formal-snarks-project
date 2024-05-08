@@ -1,5 +1,5 @@
 
-import Mathlib.Data.Polynomial.Basic
+import Mathlib.Algebra.Polynomial.Basic
 import Mathlib.Tactic.ComputeDegree
 
 section Tactic

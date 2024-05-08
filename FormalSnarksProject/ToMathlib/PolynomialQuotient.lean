@@ -1,10 +1,10 @@
 import Mathlib.RingTheory.Polynomial.Quotient
-import Mathlib.Data.Polynomial.FieldDivision
+import Mathlib.Algebra.Polynomial.FieldDivision
 
 -- https://github.com/leanprover-community/mathlib4/pull/11116
 lemma Polynomial.modByMonic_eq_zero_iff_quotient_eq_zero {R : Type*} [CommRing R] (p q : Polynomial R) (hq : q.Monic) :
     p %ₘ q = 0 ↔ (p : Polynomial R ⧸ Ideal.span {q}) = 0 := by
-  rw [Polynomial.dvd_iff_modByMonic_eq_zero hq, Ideal.Quotient.eq_zero_iff_dvd]
+  rw [Polynomial.modByMonic_eq_zero_iff_dvd hq, Ideal.Quotient.eq_zero_iff_dvd]
 
 -- https://github.com/leanprover-community/mathlib4/pull/11116
 @[simp]

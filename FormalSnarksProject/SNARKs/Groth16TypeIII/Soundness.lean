@@ -65,6 +65,8 @@ lemma is_sound
       )
       (fun prover i => prover.fst Proof_G1_Idx.C (SRS_Elements_G1_Idx.q i))
     ) := by
+
+
   -- Unfold the soundness definition fully
   unfold soundness verify check_poly pairing_poly proof_element_G1_as_poly proof_element_G2_as_poly
   -- Introduce the arguments to the soundness definition
@@ -73,6 +75,8 @@ lemma is_sound
   intro t
   have eqn := eqns ()
   clear eqns null
+
+
 
   -- Simplify the equation
   suffices
@@ -97,22 +101,37 @@ lemma is_sound
     simp only [mul_comm _ (t), <-mul_assoc]
     simp only [mul_assoc, List.sum_map_mul_right, List.sum_map_mul_left]
 
-    apply Polynomial.mul_modByMonic
+    apply Polynomial.self_mul_modByMonic
     apply Polynomial.monic_prod_of_monic
     intro i hi
     exact Polynomial.monic_X_sub_C (r i)
     done
 
 
-
   -- Step 1: Obtain the coefficient equations of the mv_polynomials
   simp_rw [Groth16TypeIII] at eqn
+
+
   -- All I want is a tactic that will apply the following simplifications to eqn in sequence.
   -- TODO can I write a tactic taking a nested list of simp lemmas?
   -- Can I combine all of these?
-  simp [
+
+
+  simp only [
     Function.comp, List.sum_map_zero,
     mul_add, add_mul, List.sum_map_add,
+    List.map_append, List.map_map, List.map_cons, List.map_nil,
+    -- List.sum_append, List.sum_nil, List.sum_cons
+    ] at eqn
+  -- done
+  simp only [map_one, List.singleton_append, List.cons_append, map_prod, map_sub, List.append_assoc,
+    List.sum_cons, List.sum_append, List.sum_map_add, one_mul, map_zero, zero_mul, List.sum_nil,
+    add_zero, map_neg, neg_mul, neg_add_rev, List.map_const', List.length_finRange,
+    List.sum_replicate, smul_zero, mul_zero, zero_add] at eqn
+
+  -- done
+
+  simp only [
     -- Associativity to obtain a right-leaning tree
     mul_assoc,
     -- Commutativity lemmas to move X (some _) to the left
@@ -122,6 +141,9 @@ lemma is_sound
     neg_mul, mul_neg,
     -- Move constant multiplications (which the X (some _) terms should be) out of sums
     List.sum_map_mul_right, List.sum_map_mul_left] at eqn
+
+
+  -- done
 
   -- Apply MvPolynomial.optionEquivRight *here*, so that we can treat polynomials in Vars_X as constants
   trace "Converting to MvPolynomial over Polynomials"
@@ -136,6 +158,10 @@ lemma is_sound
     sum_map_C] at eqn
 
   simp only [X, C_apply, monomial_mul, one_mul, mul_one, add_zero, zero_add, mul_add, add_mul] at eqn
+
+  -- done
+
+  -- done
 
   trace "Applying individual coefficients"
 
@@ -166,7 +192,7 @@ lemma is_sound
   trace "Remove zeros"
   simp only [neg_zero, add_zero, zero_add] at h0012 h0021 h0022 h0112 h0121 h0122 h0212 h0221 h0222 h1022 h1112 h1121 h1122
 
-  save
+  -- done
 
   -- Step 2: Recursively simplify and case-analyze the equations
   -- dsimp only

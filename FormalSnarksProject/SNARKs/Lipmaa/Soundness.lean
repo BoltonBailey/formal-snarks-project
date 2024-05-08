@@ -11,7 +11,7 @@ namespace Lipmaa
 
 section soundness
 
-lemma Polynomial.mul_modByMonic {F : Type} [Field F] (t p : Polynomial F) (mt : t.Monic) : (t * p) %ₘ t = 0 := by
+lemma Polynomial.mul_self_modByMonic {F : Type} [Field F] (t p : Polynomial F) (mt : t.Monic) : (t * p) %ₘ t = 0 := by
   rw [Polynomial.dvd_iff_modByMonic_eq_zero]
   apply dvd_mul_right
   exact mt
@@ -88,7 +88,7 @@ lemma soundness
     simp only [mul_comm _ (t), <-mul_assoc]
     simp only [mul_assoc, List.sum_map_mul_right, List.sum_map_mul_left]
 
-    apply Polynomial.mul_modByMonic
+    apply Polynomial.mul_self_modByMonic
     apply Polynomial.monic_prod_of_monic
     intro i hi
     exact Polynomial.monic_X_sub_C (r i)

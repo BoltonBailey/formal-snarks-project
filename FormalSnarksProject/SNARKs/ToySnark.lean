@@ -1,8 +1,8 @@
 import FormalSnarksProject.Models.AGMProofSystemInstantiation
-import Mathlib.Data.Polynomial.Div
-import FormalSnarksProject.ToMathlib.List
+import Mathlib.Algebra.Polynomial.Div
+-- import FormalSnarksProject.ToMathlib.List
 import FormalSnarksProject.ToMathlib.OptionEquivRight
-import Mathlib.Data.MvPolynomial.Equiv
+import Mathlib.Algebra.MvPolynomial.Equiv
 import FormalSnarksProject.SoundnessTactic.SoundnessProver
 
 open scoped BigOperators Classical
@@ -36,7 +36,7 @@ local notation "Vars_x" => none
 lemma Vars.finsupp_eq_ext (f g : Vars →₀ ℕ) : f = g ↔
     f Vars.α = g Vars.α
     ∧ f Vars.β = g Vars.β := by
-  rw [FunLike.ext_iff]
+  rw [DFunLike.ext_iff]
   constructor
   · intro h
     simp_rw [h]

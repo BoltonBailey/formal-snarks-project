@@ -1,12 +1,11 @@
 import Mathlib.Algebra.Field.Basic
 import Mathlib.Algebra.Polynomial.BigOperators
-import Mathlib.Data.MvPolynomial.CommRing
+import Mathlib.Algebra.MvPolynomial.CommRing
 import Mathlib.Logic.Equiv.Fin
-import Mathlib.Data.MvPolynomial.Rename
-import Mathlib.Data.MvPolynomial.Variables
-import Mathlib.Data.MvPolynomial.Monad
+import Mathlib.Algebra.MvPolynomial.Rename
+import Mathlib.Algebra.MvPolynomial.Variables
+import Mathlib.Algebra.MvPolynomial.Monad
 import Mathlib.Algebra.BigOperators.Basic
-import Mathlib.Data.List.BigOperators.Basic
 
 
 open scoped BigOperators Classical

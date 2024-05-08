@@ -1,10 +1,10 @@
 import FormalSnarksProject.Models.AGMProofSystemInstantiation
-import Mathlib.Data.Polynomial.Div
-import FormalSnarksProject.ToMathlib.List
+import Mathlib.Algebra.Polynomial.Div
+-- import FormalSnarksProject.ToMathlib.List
 import FormalSnarksProject.ToMathlib.OptionEquivRight
-import Mathlib.Data.MvPolynomial.Equiv
+import Mathlib.Algebra.MvPolynomial.Equiv
 import FormalSnarksProject.SoundnessTactic.SoundnessProver
-import FormalSnarksProject.ToMathlib.MulModByMonic
+-- import FormalSnarksProject.ToMathlib.MulModByMonic
 
 open scoped BigOperators Classical
 
@@ -41,7 +41,7 @@ lemma Vars.finsupp_eq_ext (f g : Vars →₀ ℕ) : f = g ↔
     ∧ f Vars.α_y = g Vars.α_y
     ∧ f Vars.β = g Vars.β
     ∧ f Vars.γ = g Vars.γ := by
-  rw [FunLike.ext_iff]
+  rw [DFunLike.ext_iff]
   constructor
   · intro h
     simp_rw [h]
@@ -468,7 +468,7 @@ lemma soundness
     simp only [mul_comm _ (t), <-mul_assoc]
     -- simp only [mul_assoc, List.sum_map_mul_right, List.sum_map_mul_left]
 
-    apply Polynomial.mul_modByMonic t _ tMonic
+    apply Polynomial.mul_self_modByMonic t _ tMonic
     done
 
   -- done

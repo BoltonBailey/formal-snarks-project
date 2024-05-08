@@ -1,8 +1,8 @@
 import FormalSnarksProject.Models.AGMProofSystemInstantiation
-import Mathlib.Data.Polynomial.Div
-import FormalSnarksProject.ToMathlib.List
+import Mathlib.Algebra.Polynomial.Div
+-- import FormalSnarksProject.ToMathlib.List
 import FormalSnarksProject.ToMathlib.OptionEquivRight
-import Mathlib.Data.MvPolynomial.Equiv
+import Mathlib.Algebra.MvPolynomial.Equiv
 import FormalSnarksProject.SoundnessTactic.SoundnessProver
 import FormalSnarksProject.SoundnessTactic.ProofMode
 import FormalSnarksProject.ToMathlib.PolynomialQuotient
@@ -41,7 +41,7 @@ lemma Vars.finsupp_eq_ext (f g : Vars →₀ ℕ) : f = g ↔
     ∧ f Vars.β = g Vars.β
     ∧ f Vars.γ = g Vars.γ
     ∧ f Vars.δ = g Vars.δ := by
-  rw [FunLike.ext_iff]
+  rw [DFunLike.ext_iff]
   constructor
   · intro h
     simp_rw [h]
@@ -253,7 +253,7 @@ noncomputable def Groth16TypeIII
 
 section soundness
 
-lemma Polynomial.mul_modByMonic {F : Type} [Field F] (t p : Polynomial F) (mt : t.Monic) : (t * p) %ₘ t = 0 := by
+lemma Polynomial.mul_self_modByMonic {F : Type} [Field F] (t p : Polynomial F) (mt : t.Monic) : (t * p) %ₘ t = 0 := by
   rw [Polynomial.dvd_iff_modByMonic_eq_zero]
   apply dvd_mul_right
   exact mt
@@ -325,7 +325,7 @@ lemma is_sound_quotient_version
   --   simp only [mul_comm _ (t), <-mul_assoc]
   --   simp only [mul_assoc, List.sum_map_mul_right, List.sum_map_mul_left]
 
-  --   apply Polynomial.mul_modByMonic
+  --   apply Polynomial.mul_self_modByMonic
   --   apply Polynomial.monic_prod_of_monic
   --   intro i hi
   --   exact Polynomial.monic_X_sub_C (r i)

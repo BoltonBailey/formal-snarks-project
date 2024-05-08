@@ -1,11 +1,11 @@
 import FormalSnarksProject.Models.AGMProofSystemInstantiation
-import Mathlib.Data.Polynomial.Div
-import FormalSnarksProject.ToMathlib.List
+import Mathlib.Algebra.Polynomial.Div
+-- import FormalSnarksProject.ToMathlib.List
 import FormalSnarksProject.ToMathlib.OptionEquivRight
-import Mathlib.Data.MvPolynomial.Equiv
+import Mathlib.Algebra.MvPolynomial.Equiv
 import FormalSnarksProject.SoundnessTactic.SoundnessProver
 import FormalSnarksProject.SoundnessTactic.ProofMode
-import FormalSnarksProject.ToMathlib.MulModByMonic
+-- import FormalSnarksProject.ToMathlib.MulModByMonic
 
 /-!
 
@@ -42,7 +42,7 @@ lemma Vars.finsupp_eq_ext (f g : Vars →₀ ℕ) : f = g ↔
     ∧ f Vars.β = g Vars.β
     ∧ f Vars.γ = g Vars.γ
     ∧ f Vars.δ = g Vars.δ := by
-  rw [FunLike.ext_iff]
+  rw [DFunLike.ext_iff]
   constructor
   · intro h
     simp_rw [h]
