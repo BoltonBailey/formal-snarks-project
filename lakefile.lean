@@ -6,7 +6,7 @@ package «formalSnarksProject» {
 }
 
 require mathlib from git
-  "https://github.com/leanprover-community/mathlib4.git"
+  "https://github.com/leanprover-community/mathlib4.git" @ "incr-tactic-fixes-toolchain"
 
 @[default_target]
 lean_lib «FormalSnarksProject» {
