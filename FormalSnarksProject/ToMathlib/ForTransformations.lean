@@ -82,9 +82,9 @@ lemma MvPolynomial.coeff_single_X {R : Type} {σ : Type u_1} [CommSemiring R] [D
     (j : σ) (n : ℕ)
     (x : σ) :
     MvPolynomial.coeff (R := R) (Finsupp.single j n) (MvPolynomial.X x) = if n = 1 ∧ j = x then 1 else 0  := by
-  rw [MvPolynomial.X, MvPolynomial.coeff_monomial]
+  simp_rw [MvPolynomial.X, MvPolynomial.coeff_monomial, Finsupp.single_eq_single_iff]
   congr
-  simp [Finsupp.single_eq_single_iff]
+  simp_rw [eq_iff_iff]
   tauto
 
 @[simp]
@@ -94,7 +94,7 @@ lemma MvPolynomial.coeff_single_X_pow {R : Type} {σ : Type u_1} [CommSemiring R
     MvPolynomial.coeff (R := R) (Finsupp.single j n) (MvPolynomial.X x ^ k) = if n = k ∧ j = x ∨ k = 0 ∧ n = 0 then 1 else 0  := by
   rw [MvPolynomial.X_pow_eq_monomial, MvPolynomial.coeff_monomial]
   congr
-  simp [Finsupp.single_eq_single_iff]
+  simp only [Finsupp.single_eq_single_iff, eq_iff_iff]
   tauto
 
 lemma MvPolynomial.remove_ite_for_casing {σ F : Type} [Field F] [DecidableEq σ]
@@ -129,8 +129,8 @@ lemma MvPolynomial.prod_neq_pow_eq_monomial_erase {σ F : Type} [Field F] [Decid
     funext x_1
     simp
     by_cases h : x_1 = sample_removed
-    · simp [h]
-    · simp [h]
+    · simp only [h, ↓reduceIte, Finsupp.erase_same, pow_zero]
+    · simp only [h, ↓reduceIte, ne_eq, not_false_eq_true, Finsupp.erase_ne]
   simp
 
 @[simp]
@@ -165,7 +165,7 @@ lemma near_mods (a b d : ℕ) (c : ℤ) (ha : a < d) (hb : b < d) (habcd : a = b
   rw [mod_cast_eq_cast_mod] at h
   rw [mod_cast_eq_cast_mod] at h
   rw [Int.ofNat_inj] at h
-  simp [ha,hb, Nat.mod_eq_of_lt]  at h -- Why isn't the lemma simp tagged?
+  simp only [ha, Nat.mod_eq_of_lt, hb] at h -- Why isn't the lemma simp tagged?
   rw [h] at habcd
   simp at habcd
   cases habcd <;> linarith
@@ -197,7 +197,8 @@ lemma MvPolynomial.bind_ite_filter_aux {σ F : Type} [Field F] [DecidableEq σ]
   constructor
   · intro ⟨h', h''⟩
     have h''_t := congr_arg (fun p => p sample_target) h''
-    simp [hsa] at h''_t
+    simp only [ne_eq, hsa, not_false_eq_true, Finsupp.erase_ne, Finsupp.coe_tsub, Finsupp.coe_add,
+      Pi.sub_apply, Pi.add_apply, Finsupp.single_eq_same] at h''_t
     zify [h'] at h''_t
     rw [add_sub_assoc] at h''_t
     rw [<-sub_mul] at h''_t
@@ -217,10 +218,11 @@ lemma MvPolynomial.bind_ite_filter_aux {σ F : Type} [Field F] [DecidableEq σ]
       rw [nm]
     have h''_v := congr_arg (fun p => p val) h''
     clear h''
-    simp [h''', h'''', Finsupp.single_apply, Finsupp.erase] at h''_v
+    simp only [Finsupp.erase, Finsupp.coe_mk, h'''', ↓reduceIte, Finsupp.coe_tsub, Finsupp.coe_add,
+      Pi.sub_apply, Pi.add_apply, Finsupp.single_apply] at h''_v
     rw [eq_comm] at h'''
     rw [eq_comm] at h''''
-    simp [h''', h'''', Finsupp.single_apply, Finsupp.erase] at h''_v
+    simp only [h''', ↓reduceIte, add_zero, tsub_zero] at h''_v
     rw [h''_v]
   · intro hxm
     rw [hxm] at *
@@ -249,28 +251,31 @@ lemma MvPolynomial.bind₁_ite_pow_eq_zero_of {σ F : Type} [Field F] [Decidable
       unfold MvPolynomial.bind₁
       nth_rewrite 2 [<-MvPolynomial.support_sum_monomial_coeff p]
       simp_rw [aeval_sum, aeval_monomial, ite_pow, algebraMap_eq, coeff_sum, coeff_C_mul, Finsupp.prod, Finset.prod_ite, Finset.filter_eq', Finsupp.mem_support_iff, ne_eq, ite_not,apply_ite Finset.prod, ite_apply, Finset.prod_empty, Finset.prod_singleton, ite_mul, one_mul, MvPolynomial.remove_ite_for_casing, X, MvPolynomial.monomial_pow,MvPolynomial.coeff_monomial_mul']
-      simp?
+      simp only [Finsupp.smul_single, smul_eq_mul, mul_one, Finsupp.single_le_iff, Finsupp.coe_add,
+        Pi.add_apply, Finsupp.single_eq_same, one_pow, one_mul, mul_ite, mul_zero]
       simp_rw [Finset.sum_ite]
-      simp?
-      simp [hsa]
+      simp only [not_le, Finset.sum_const_zero, add_zero]
+      simp only [ne_eq, hsa, not_false_eq_true, Finsupp.erase_ne]
       simp_rw [←MvPolynomial.X_pow_eq_monomial]
       simp_rw [MvPolynomial.prod_neq_pow_eq_monomial_erase sample_removed]
-      simp?
+      simp only [coeff_monomial, mul_ite, mul_one, mul_zero]
       simp_rw [Finset.sum_ite]
-      simp?
+      simp only [Finset.sum_const_zero, add_zero]
       rw [eq_comm]
       rw [MvPolynomial.degreeOf_lt_iff hd] at hdegree
       rw [Finset.filter_filter]
       rw [MvPolynomial.bind_ite_filter_aux (σ := σ) p sample_removed sample_target hsa d hd hdegree m m_sample_target_bound]
-      simp [Finset.filter_eq'] -- why is this lemma not simp tagged?
+      simp only [Finset.filter_eq', mem_support_iff, ne_eq]
+      -- why is Finset.filter_eq' not simp tagged?
       by_cases h' : m ∈ p.support
       · convert Finset.sum_singleton (p.coeff) m
         simp only [ite_eq_left_iff]
         tauto
       · have h''' : (if m ∈ support p then ({m} : Finset (σ →₀ ℕ)) else ∅) = (∅ : Finset (σ →₀ ℕ)) := by
-          simp [h']
+          simp only [h', ↓reduceIte]
         rw [h''']
-        simp [coeff_zero_of_not_mem_support p m h']
+        simp only [Finset.sum_empty, mem_support_iff, coeff_zero_of_not_mem_support p m h', ne_eq,
+          not_true_eq_false, not_false_eq_true, coeff_zero_of_not_mem_support]
     rw [this]
     rw [h]
     simp
@@ -285,7 +290,7 @@ lemma AlgHom.list_map_sum {R : Type u} {A : Type v} {B : Type w}
   | nil =>
     simp
   | cons x xs ih =>
-    simp [ih]
+    simp only [List.map_cons, List.sum_cons, map_add, ih]
 
 
 end
