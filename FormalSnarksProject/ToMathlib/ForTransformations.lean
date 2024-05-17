@@ -16,7 +16,33 @@ variable {F : Type}
 
 variable [Field F]
 
--- Additive version. TODO use @[to_additive] instead
+@[to_additive]
+lemma List.prod_map_ite_eq' {A B : Type} [DecidableEq A] [CommGroup B] (f g : A → B) (a : A) (l : List A) :
+    List.prod (List.map (fun x => ite (x = a) (f x) (g x)) l)
+      =
+    (f a / g a) ^ (List.count a l) * List.prod (List.map g l)  :=
+  by
+  induction l with
+  | nil =>
+    simp
+  | cons x xs ih =>
+    simp only [map_cons, prod_cons, nodup_cons, ne_eq, mem_cons] at ih ⊢
+    rw [ih]
+    clear ih
+    rw [List.count_cons]
+    by_cases hx : x = a
+    · simp [hx, ite_true, pow_add]
+      -- TODO replace with `abel`
+      simp only [mul_assoc, mul_comm (f a / g a) _, mul_comm (f a) _]
+      simp only [mul_right_inj]
+      simp only [mul_assoc, mul_comm (g a) _]
+      simp only [mul_right_inj]
+      simp only [div_mul_cancel]
+    · simp only [hx, ite_false, ne_comm.mp hx, add_zero]
+      simp only [mul_assoc, mul_comm (g x) _]
+
+
+-- Additive version. TODO use @[to_additive] above instead
 lemma List.sum_map_ite_eq {A B : Type} [DecidableEq A] [CommRing B] (f g : A → B) (a : A) (l : List A) :
     List.sum (List.map (fun x => ite (x = a) (f x) (g x)) l)
       =
