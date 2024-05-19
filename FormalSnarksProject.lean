@@ -1,1 +1,1 @@
-def hello := "world"
+import FormalSnarksProject.ToMathlib.PolynomialQuotient
