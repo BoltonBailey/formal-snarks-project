@@ -77,28 +77,10 @@ lemma MvPolynomial.coeff_single_X_pow {R : Type} {σ : Type u_1} [CommSemiring R
   simp only [Finsupp.single_eq_single_iff, eq_iff_iff]
   tauto
 
-lemma MvPolynomial.remove_ite_for_casing {σ F : Type} [Field F] [DecidableEq σ]
-    (d : ℕ)
-    (sample_removed sample_target : σ)
-    (x : σ →₀ ℕ) :
-    ((if x sample_removed = 0
-      then
-        (Finset.prod (Finset.filter (fun y => ¬y = sample_removed) x.support) fun x_1 => X x_1 ^ x x_1 : MvPolynomial σ F)
-      else
-        (X sample_target ^ d) ^ x sample_removed *
-          Finset.prod (Finset.filter (fun x => ¬x = sample_removed) x.support) fun x_1 => X x_1 ^ x x_1)
-      =
-    ((X sample_target ^ d) ^ x sample_removed *
-          Finset.prod (Finset.filter (fun x => ¬x = sample_removed) x.support) fun x_1 => X x_1 ^ x x_1)
-    ) := by
-  by_cases h : x sample_removed = 0
-  · simp only [h, Finsupp.mem_support_iff, ne_eq, not_not, pow_zero, one_mul, ite_self]
-  · simp only [h, Finsupp.mem_support_iff, ne_eq, not_not, ite_false]
-
 lemma MvPolynomial.prod_neq_pow_eq_monomial_erase {σ F : Type} [Field F] [DecidableEq σ]
   (sample_removed : σ)
   (x : σ →₀ ℕ) :
-    (Finset.prod (Finset.filter (fun y => ¬y = sample_removed) x.support) fun x_1 => X x_1 ^ x x_1)
+    ((x.support.filter (fun y => ¬y = sample_removed)).prod fun x_1 => X x_1 ^ x x_1)
       =
     (monomial (x.erase sample_removed)) (1 : F) := by
   rw [← MvPolynomial.prod_X_pow_eq_monomial]
@@ -113,13 +95,13 @@ lemma MvPolynomial.prod_neq_pow_eq_monomial_erase {σ F : Type} [Field F] [Decid
     · simp only [h, ↓reduceIte, ne_eq, not_false_eq_true, Finsupp.erase_ne]
   simp
 
+-- https://github.com/leanprover-community/mathlib4/pull/13026
 @[simp]
-lemma MvPolynomial.coeff_zero_of_not_mem_support {σ F : Type} [Field F] [DecidableEq σ]
+lemma MvPolynomial.coeff_zero_of_not_mem_support {σ F : Type} [Field F]
     (p : MvPolynomial σ F)
     (m : σ →₀ ℕ)
     (h : m ∉ p.support) :
-    coeff m p = 0 := by
-  exact not_mem_support_iff.mp h
+    coeff m p = 0 := not_mem_support_iff.mp h
 
 lemma MvPolynomial.not_mem_support_of_degreeOf {σ F : Type} [Field F] [DecidableEq σ]
     (p : MvPolynomial σ F)
@@ -208,6 +190,25 @@ lemma MvPolynomial.bind_ite_filter_aux {σ F : Type} [Field F] [DecidableEq σ]
     rw [hxm] at *
     simp only [le_add_iff_nonneg_left, zero_le, Finsupp.mem_support_iff, ne_eq, not_not, ge_iff_le,
       add_le_iff_nonpos_left, nonpos_iff_eq_zero, add_tsub_cancel_right, and_self]
+
+
+lemma MvPolynomial.remove_ite_for_casing {σ F : Type} [Field F] [DecidableEq σ]
+    (d : ℕ)
+    (sample_removed sample_target : σ)
+    (x : σ →₀ ℕ) :
+    ((if x sample_removed = 0
+      then
+        (Finset.prod (Finset.filter (fun y => ¬y = sample_removed) x.support) fun x_1 => X x_1 ^ x x_1 : MvPolynomial σ F)
+      else
+        (X sample_target ^ d) ^ x sample_removed *
+          Finset.prod (Finset.filter (fun x => ¬x = sample_removed) x.support) fun x_1 => X x_1 ^ x x_1)
+      =
+    ((X sample_target ^ d) ^ x sample_removed *
+          Finset.prod (Finset.filter (fun x => ¬x = sample_removed) x.support) fun x_1 => X x_1 ^ x x_1)
+    ) := by
+  by_cases h : x sample_removed = 0
+  · simp only [h, Finsupp.mem_support_iff, ne_eq, not_not, pow_zero, one_mul, ite_self]
+  · simp only [h, Finsupp.mem_support_iff, ne_eq, not_not, ite_false]
 
 lemma MvPolynomial.bind₁_ite_pow_eq_zero_of {σ F : Type} [Field F] [DecidableEq σ]
     (p : MvPolynomial σ F)
