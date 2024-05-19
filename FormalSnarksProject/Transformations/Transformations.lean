@@ -136,9 +136,11 @@ lemma collapseSRSElement_G1_soundness (𝓟 : AGMProofSystemInstantiation F)
       funext proof_elem
       congr 1
       replace interchangeable := interchangeable proof_elem agm.1
-      simp [List.sum_map_ite_eq, hcount1, hcount2, not_same, interchangeable]
+      simp [List.sum_map_ite_eq]
+      simp [hcount1, hcount2, not_same, interchangeable]
       ring
-    · simp [List.sum_map_ite_eq, hcount1, hcount2, not_same, interchangeable]
+    · simp [List.sum_map_ite_eq]
+      simp [hcount1, hcount2, not_same, interchangeable]
       rw [mul_add]
       simp_rw [interchangeable']
       ring
