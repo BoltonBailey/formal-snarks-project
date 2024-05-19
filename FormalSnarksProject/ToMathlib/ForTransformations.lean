@@ -103,18 +103,6 @@ lemma MvPolynomial.coeff_zero_of_not_mem_support {σ F : Type} [Field F]
     (h : m ∉ p.support) :
     coeff m p = 0 := not_mem_support_iff.mp h
 
-lemma MvPolynomial.lt_of_degreeOf_lt_mem_support {σ F : Type} [Field F] [DecidableEq σ]
-    (p : MvPolynomial σ F)
-    (m : σ →₀ ℕ)
-    (d : ℕ)
-    (sample_target : σ)
-    (hdegree: degreeOf sample_target p < d)
-    (m_mem_support: m ∈ support p) :
-    m sample_target < d := by
-  have hd : 0 < d := by linarith
-  rw [MvPolynomial.degreeOf_lt_iff hd] at hdegree
-  exact hdegree m m_mem_support
-
 lemma mod_cast_eq_cast_mod (a b : ℕ) : ((a : ℤ) % (b : ℤ)) = ((a % b : ℕ): ℤ) := by
   exact rfl
 
@@ -261,7 +249,7 @@ lemma MvPolynomial.bind₁_ite_pow_eq_zero_of {σ F : Type} [Field F] [Decidable
     simp
   · apply MvPolynomial.coeff_zero_of_not_mem_support
     contrapose! m_sample_target_bound
-    exact lt_of_degreeOf_lt_mem_support p m d sample_target hdegree m_sample_target_bound
+    exact lt_of_le_of_lt (monomial_le_degreeOf sample_target m_sample_target_bound) hdegree
 
 lemma AlgHom.list_map_sum {R : Type u} {A : Type v} {B : Type w}
     [CommSemiring R] [Semiring A] [Semiring B] [Algebra R A] [Algebra R B]
