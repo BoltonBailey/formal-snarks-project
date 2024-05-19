@@ -16,6 +16,7 @@ variable {F : Type}
 
 variable [Field F]
 
+-- https://github.com/leanprover-community/mathlib4/pull/13023
 @[to_additive]
 lemma List.prod_map_ite_eq {A B : Type} [DecidableEq A] [CommGroup B] (f g : A → B) (a : A) (l : List A) :
     List.prod (List.map (fun x => ite (x = a) (f x) (g x)) l)
@@ -40,8 +41,6 @@ lemma List.prod_map_ite_eq {A B : Type} [DecidableEq A] [CommGroup B] (f g : A �
       simp only [div_mul_cancel]
     · simp only [hx, ite_false, ne_comm.mp hx, add_zero]
       simp only [mul_assoc, mul_comm (g x) _]
-
-
 
 -- https://github.com/leanprover-community/mathlib4/pull/11106
 theorem MvPolynomial.degreeOf_C_mul {σ R : Type} [Field R] (j : σ)
