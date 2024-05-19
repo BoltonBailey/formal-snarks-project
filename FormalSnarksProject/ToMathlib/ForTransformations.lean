@@ -106,17 +106,29 @@ lemma MvPolynomial.coeff_zero_of_not_mem_support {σ F : Type} [Field F]
 lemma mod_cast_eq_cast_mod (a b : ℕ) : ((a : ℤ) % (b : ℤ)) = ((a % b : ℕ): ℤ) := by
   exact rfl
 
+lemma Int.near_mods (a b c d : ℤ) (ha' : 0 ≤ a) (hb' : 0 ≤ b)
+    (ha : a < d) (hb : b < d) (habcd : a = b + c * d) :
+    c = 0 := by
+  -- TODO reprove with `Int.eq_zero_of_abs_lt_dvd`?
+  -- TODO reprove below with this lemma
+
+  have h := congr_arg (fun p => p % (d : ℤ)) habcd
+  simp_rw [Int.add_mul_emod_self] at h
+  rw [emod_eq_of_lt ha', emod_eq_of_lt hb'] at h
+  simp [h] at *
+
+  cases habcd <;> linarith
+  exact hb
+  exact ha
+
+
 -- Junyan from Zulip mentions Nat.ModEq.eq_of_lt_of_lt for this
 lemma near_mods (a b d : ℕ) (c : ℤ) (ha : a < d) (hb : b < d) (habcd : a = b + c * d) :
     c = 0 := by
   have h := congr_arg (fun p => p % (d : ℤ)) habcd
-  simp at h
-  rw [mod_cast_eq_cast_mod] at h
-  rw [mod_cast_eq_cast_mod] at h
-  rw [Int.ofNat_inj] at h
-  simp only [ha, Nat.mod_eq_of_lt, hb] at h -- Why isn't the lemma simp tagged?
-  rw [h] at habcd
-  simp at habcd
+  simp_rw [Int.add_mul_emod_self, mod_cast_eq_cast_mod, Int.ofNat_inj] at h
+  simp only [ha, Nat.mod_eq_of_lt, hb] at h
+  rw [h, self_eq_add_right, mul_eq_zero, Nat.cast_eq_zero] at habcd
   cases habcd <;> linarith
 
 lemma MvPolynomial.bind_ite_filter_aux {σ F : Type} [Field F] [DecidableEq σ]
