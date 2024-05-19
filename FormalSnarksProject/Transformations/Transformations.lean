@@ -57,7 +57,7 @@ lemma changeExponent_soundness {𝓟 : AGMProofSystemInstantiation F} (sample : 
   · intro check_idx
     replace poly_checks_pass := poly_checks_pass check_idx
     unfold changeExponent_G1 at poly_checks_pass
-    simp at poly_checks_pass
+    simp only at poly_checks_pass
     simp only [
       mul_comm _ (MvPolynomial.X sample ^ d),
       mul_left_comm _ (MvPolynomial.X sample ^ d),
@@ -68,7 +68,7 @@ lemma changeExponent_soundness {𝓟 : AGMProofSystemInstantiation F} (sample : 
     cases poly_checks_pass with
     | inl poly_checks_pass =>
       exfalso
-      simp at poly_checks_pass
+      simp only [pow_eq_zero_iff', MvPolynomial.X_ne_zero, ne_eq, false_and] at poly_checks_pass
     | inr poly_checks_pass =>
       exact poly_checks_pass
   · rw [hTypeIII]
@@ -125,7 +125,7 @@ lemma collapseSRSElement_G1_soundness (𝓟 : AGMProofSystemInstantiation F)
   · intro check_idx
     replace poly_checks_pass := poly_checks_pass check_idx
     unfold collapseSRSElement_G1 at poly_checks_pass
-    simp at poly_checks_pass
+    simp only [mul_ite, mul_zero] at poly_checks_pass
     rw [←poly_checks_pass]
     clear poly_checks_pass
     congr
@@ -136,11 +136,11 @@ lemma collapseSRSElement_G1_soundness (𝓟 : AGMProofSystemInstantiation F)
       funext proof_elem
       congr 1
       replace interchangeable := interchangeable proof_elem agm.1
-      simp [List.sum_map_ite_eq]
-      simp [hcount1, hcount2, not_same, interchangeable]
+      simp only [List.sum_map_ite_eq, nsmul_eq_mul, zero_sub, smul_neg]
+      simp only [hcount1, Nat.cast_one, interchangeable, not_same, ↓reduceIte, one_mul, hcount2]
       ring
-    · simp [List.sum_map_ite_eq]
-      simp [hcount1, hcount2, not_same, interchangeable]
+    · simp only [List.sum_map_ite_eq, nsmul_eq_mul, zero_sub, smul_neg]
+      simp only [hcount1, Nat.cast_one, not_same, ↓reduceIte, one_mul, hcount2]
       rw [mul_add]
       simp_rw [interchangeable']
       ring
@@ -189,7 +189,7 @@ lemma collapseToxicWaste_check_poly (𝓟 : AGMProofSystemInstantiation F) (d : 
         (AGMProofSystemInstantiation.check_poly 𝓟 agm stmt check_idx) := by
   intros agm stmt check_idx
   unfold collapseToxicWaste AGMProofSystemInstantiation.check_poly AGMProofSystemInstantiation.pairing_poly AGMProofSystemInstantiation.proof_element_G1_as_poly AGMProofSystemInstantiation.proof_element_G2_as_poly
-  simp [AlgHom.list_map_sum]
+  simp only [AlgHom.list_map_sum, map_mul, map_add, MvPolynomial.algHom_C]
 
 lemma collapseToxicWaste_soundness (𝓟 : AGMProofSystemInstantiation F) (d : ℕ) (hd : 0 < d)
     [DecidableEq 𝓟.Sample]
