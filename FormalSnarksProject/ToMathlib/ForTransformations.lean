@@ -55,6 +55,7 @@ theorem MvPolynomial.degreeOf_C_mul {σ R : Type} [Field R] (j : σ)
     simp only [one_div, ne_eq, hc, not_false_eq_true, inv_mul_cancel, map_one, one_mul] at this
     convert this
 
+-- https://github.com/leanprover-community/mathlib4/pull/13024
 @[simp]
 lemma MvPolynomial.coeff_single_X {R : Type} {σ : Type u_1} [CommSemiring R] [DecidableEq σ]
     (j : σ) (n : ℕ)
@@ -65,6 +66,7 @@ lemma MvPolynomial.coeff_single_X {R : Type} {σ : Type u_1} [CommSemiring R] [D
   simp_rw [eq_iff_iff]
   tauto
 
+-- https://github.com/leanprover-community/mathlib4/pull/13024
 @[simp]
 lemma MvPolynomial.coeff_single_X_pow {R : Type} {σ : Type u_1} [CommSemiring R] [DecidableEq σ]
     (j : σ) (n k : ℕ)
