@@ -5,7 +5,7 @@ import Mathlib.Logic.Equiv.Fin
 import Mathlib.Algebra.MvPolynomial.Rename
 import Mathlib.Algebra.MvPolynomial.Variables
 import Mathlib.Algebra.MvPolynomial.Monad
-import Mathlib.Algebra.BigOperators.Basic
+-- import Mathlib.Algebra.BigOperators.Basic
 
 
 open scoped BigOperators Classical

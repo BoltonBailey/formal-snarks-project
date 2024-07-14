@@ -8,25 +8,25 @@ section Groth16TypeIII
 
 open MvPolynomial Finsupp Option
 
--- https://github.com/leanprover-community/mathlib4/pull/11114
-@[simp]
-lemma MvPolynomial.optionEquivRight_X_some (R : Type u) (S₁ : Type v) [CommSemiring R] (x : S₁) :
-    (MvPolynomial.optionEquivRight R S₁) (X (some x)) = X x := by
-  unfold optionEquivRight AlgEquiv.ofAlgHom
-  simp only [AlgEquiv.coe_mk, aeval_X, Option.elim]
+-- -- https://github.com/leanprover-community/mathlib4/pull/11114
+-- @[simp]
+-- lemma MvPolynomial.optionEquivRight_X_some (R : Type u) (S₁ : Type v) [CommSemiring R] (x : S₁) :
+--     (MvPolynomial.optionEquivRight R S₁) (X (some x)) = X x := by
+--   unfold optionEquivRight AlgEquiv.ofAlgHom
+--   simp only [AlgEquiv.coe_mk, aeval_X, Option.elim]
 
-@[simp]
-lemma MvPolynomial.optionEquivRight_X_none (R : Type u) (S₁ : Type v) [CommSemiring R] :
-    (MvPolynomial.optionEquivRight R S₁) (X (none)) = C (Polynomial.X) := by
-  unfold optionEquivRight AlgEquiv.ofAlgHom
-  simp only [AlgEquiv.coe_mk, aeval_X, Option.elim]
+-- @[simp]
+-- lemma MvPolynomial.optionEquivRight_X_none (R : Type u) (S₁ : Type v) [CommSemiring R] :
+--     (MvPolynomial.optionEquivRight R S₁) (X (none)) = C (Polynomial.X) := by
+--   unfold optionEquivRight AlgEquiv.ofAlgHom
+--   simp only [AlgEquiv.coe_mk, aeval_X, Option.elim]
 
-@[simp]
-lemma MvPolynomial.optionEquivRight_C (R : Type u) (S₁ : Type v) [CommSemiring R] (r : R) :
-    (MvPolynomial.optionEquivRight R S₁) (C r) = C (Polynomial.C r) := by
-  unfold optionEquivRight AlgEquiv.ofAlgHom
-  simp only [Option.elim, AlgEquiv.coe_mk, aeval_C]
-  rfl
+-- @[simp]
+-- lemma MvPolynomial.optionEquivRight_C (R : Type u) (S₁ : Type v) [CommSemiring R] (r : R) :
+--     (MvPolynomial.optionEquivRight R S₁) (C r) = C (Polynomial.C r) := by
+--   unfold optionEquivRight AlgEquiv.ofAlgHom
+--   simp only [Option.elim, AlgEquiv.coe_mk, aeval_C]
+  -- rfl
 
 /-- A ring hom from polynomials to multivariable polynomials over an option type -/
 noncomputable def to_MvPolynomial_Option {F : Type} [Field F] (V : Type) :

@@ -30,33 +30,6 @@ namespace Groth16TypeIII
 
 section soundness
 
-example : True := by
-  sleep 1000
-  suffices True by
-    sleep 1000
-    trivial
-  sleep 1000
-  sleep 1000
-  sleep 1000
-  sleep 1000
-  sleep 1000
-  sleep 1000
-  sleep 1000
-  sleep 1000
-  sleep 1000
-  sleep 1000
-  sleep 1000
-  sleep 1000
-  sleep 1000
-  sleep 1000
-  sleep 1000
-  sleep 1000
-  sleep 1000
-  sleep 1000
-  sleep 1000
-  sleep 1000
-  trivial
-
 
 -- Remove heartbeat limit for upcoming long-running proof
 -- set_option maxHeartbeats 0 -- 0 means no limit
