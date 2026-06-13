@@ -1,10 +1,4 @@
-import Mathlib.Algebra.Field.Basic
-import Mathlib.Algebra.Polynomial.BigOperators
-import Mathlib.Algebra.MvPolynomial.CommRing
-import Mathlib.Logic.Equiv.Fin
-import Mathlib.Algebra.MvPolynomial.Rename
-import Mathlib.Algebra.MvPolynomial.Variables
-import Mathlib.Algebra.MvPolynomial.Monad
+import Mathlib
 -- import Mathlib.Algebra.BigOperators.Basic
 
 
@@ -55,16 +49,25 @@ structure AGMProofSystemInstantiation (F : Type) [Field F] where
 
   /-- The coefficient that the verifier uses for the jth element of the ith component of the SRSI
   in the left half of the lth paring of the kth equality check -/
-  verificationPairingSRS_G1 : Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : SRSElements_G1) → F
+  verificationPairingSRS_G1 :
+    Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : SRSElements_G1) → F
   /-- The coefficient that the verifier uses for the jth element of the ith component of the SRSII
-  in the right half of the lth paring of the kth equality check  -/
-  verificationPairingSRS_G2 : Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : SRSElements_G2) → F
-  /-- The coefficient that the verifier uses for the jth element of the ith component of the Proof_G1
-  in the left half of the lth paring of the kth equality check -/
-  verificationPairingProof_G1 : Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : Proof_G1) → F
-  /-- The coefficient that the verifier uses for the jth element of the ith component of the Proof_G2
-  in the right half of the lth paring of the kth equality check  -/
-  verificationPairingProof_G2 : Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : Proof_G2) → F
+  in the right half of the lth paring of the kth equality check
+  -/
+  verificationPairingSRS_G2 :
+    Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : SRSElements_G2) → F
+  /-- The coefficient that the verifier uses
+  for the jth element of the ith component of the Proof_G1
+  in the left half of the lth paring of the kth equality check
+  -/
+  verificationPairingProof_G1 :
+    Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : Proof_G1) → F
+  /-- The coefficient that the verifier uses
+  for the jth element of the ith component of the Proof_G2
+  in the right half of the lth paring of the kth equality check
+  -/
+  verificationPairingProof_G2 :
+    Stmt -> (k : EqualityChecks) → (l : (Pairings k)) → (i : Proof_G2) → F
 
 attribute [instance] AGMProofSystemInstantiation.FintypeSRSElements_G1
 attribute [instance] AGMProofSystemInstantiation.FintypeSRSElements_G2
