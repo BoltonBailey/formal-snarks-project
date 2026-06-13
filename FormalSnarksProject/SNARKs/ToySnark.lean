@@ -50,7 +50,7 @@ inductive Proof_G1_Idx : Type where
   | Pf : Proof_G1_Idx
 
 instance : Fintype Proof_G1_Idx :=
-  ⟨⟨[Proof_G1_Idx.Pf], by simp⟩, fun x => by cases x <;> simp⟩
+  ⟨⟨[Proof_G1_Idx.Pf], by simp⟩, fun x => by cases x; simp⟩
 
 -- No right proof
 def Proof_G2_Idx : Type := Empty
@@ -115,12 +115,12 @@ noncomputable def ToySnark
       | PairingsIdx.rhs => match SRS_idx with
         | SRS_Elements_G2_Idx.α => 0
         | SRS_Elements_G2_Idx.β => -1
-    verificationPairingProof_G1 := fun stmt _ i pf => match i with
+    verificationPairingProof_G1 := fun _stmt _ i pf => match i with
       | PairingsIdx.lhs => match pf with
         | Proof_G1_Idx.Pf => 1
       | PairingsIdx.rhs => match pf with
         | Proof_G1_Idx.Pf => 0
-    verificationPairingProof_G2 := fun stmt _ i pf => 0
+    verificationPairingProof_G2 := fun _ _ _ _ => 0
   }
 
 
@@ -129,8 +129,7 @@ section soundness
 
 
 -- Remove time-out
-set_option maxHeartbeats 0 -- 0 means no limit
-
+set_option maxHeartbeats 0 in -- 0 means no limit
 lemma soundness
     {F : Type} [Field F] :
     (AGMProofSystemInstantiation.soundness
@@ -178,7 +177,6 @@ lemma soundness
 
   -- I apply MvPolynomial.optionEquivRight *here*,
   -- so that we can treat polynomials in Vars_X as constants
-  trace "Converting to MvPolynomial over Polynomials"
   replace eqn := congr_arg (MvPolynomial.optionEquivRight F Vars) eqn
   simp only [map_add, map_zero, map_mul, map_one,
     map_neg, AlgEquiv.list_map_sum, map_pow] at eqn
@@ -189,19 +187,14 @@ lemma soundness
 
   simp only [MvPolynomial.X, C_apply, MvPolynomial.monomial_mul, one_mul, mul_one, add_zero, zero_add, mul_add, add_mul] at eqn
 
-  trace "Applying individual coefficients"
-
-
   have h20 := congr_arg (coeff (Finsupp.single Vars.α 2 + Finsupp.single Vars.β 0)) eqn
   have h11 := congr_arg (coeff (Finsupp.single Vars.α 1 + Finsupp.single Vars.β 1)) eqn
   have h02 := congr_arg (coeff (Finsupp.single Vars.α 0 + Finsupp.single Vars.β 2)) eqn
 
   clear eqn
 
-  trace "Distribute coefficient-taking over terms"
   simp only [coeff_monomial, coeff_add, coeff_neg, coeff_zero] at h20 h11 h02
 
-  trace "Simplifying coefficient expressions"
   simp only [Vars.finsupp_eq_ext, Finsupp.single_apply, Finsupp.add_apply] at h20 h11 h02
 
   simp [ite_true, ite_self, add_zero, ite_false, and_self, zero_add,
@@ -220,5 +213,7 @@ end soundness
 
 
 -- TODO I'm using lists rather than finsets now, so I think I can get rid of all the finset lemmas
+
+end ToySnark
 
 end ToySnark

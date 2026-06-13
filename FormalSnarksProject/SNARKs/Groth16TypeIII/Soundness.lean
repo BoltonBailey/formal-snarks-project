@@ -32,19 +32,18 @@ section soundness
 
 
 -- Remove heartbeat limit for upcoming long-running proof
-set_option maxHeartbeats 0 -- 0 means no limit
+set_option maxHeartbeats 0 in -- 0 means no limit
 -- The final `linear_combination`/`ring` step recurses deeply on the large polynomial expressions
-set_option maxRecDepth 4000
-
+set_option maxRecDepth 4000 in
 lemma is_sound
     {F : Type} [Field F]
     {n_stmt n_wit n_var : ℕ}
-    {u_stmt : Fin n_stmt → (Polynomial F) }
-    {u_wit : Fin n_wit → (Polynomial F) }
-    {v_stmt : Fin n_stmt → (Polynomial F) }
-    {v_wit : Fin n_wit → (Polynomial F) }
-    {w_stmt : Fin n_stmt → (Polynomial F) }
-    {w_wit : Fin n_wit → (Polynomial F) }
+    {u_stmt : Fin n_stmt → (Polynomial F)}
+    {u_wit : Fin n_wit → (Polynomial F)}
+    {v_stmt : Fin n_stmt → (Polynomial F)}
+    {v_wit : Fin n_wit → (Polynomial F)}
+    {w_stmt : Fin n_stmt → (Polynomial F)}
+    {w_wit : Fin n_wit → (Polynomial F)}
     {r : Fin n_wit → F} :
     (soundness
       F
@@ -78,7 +77,6 @@ lemma is_sound
   intro t
   have eqn := eqns ()
   clear eqns null
-  sleep 4000
 
 
   -- Simplify the equation
@@ -108,7 +106,6 @@ lemma is_sound
     apply Polynomial.monic_prod_of_monic
     intro i hi
     exact Polynomial.monic_X_sub_C (r i)
-    done
 
 
   -- Step 1: Obtain the coefficient equations of the mv_polynomials
@@ -149,16 +146,11 @@ lemma is_sound
   -- done
 
   -- Apply MvPolynomial.optionEquivRight *here*, so that we can treat polynomials in Vars_X as constants
-  trace "Converting to MvPolynomial over Polynomials"
   -- replace eqn := congr_arg (MvPolynomial.optionEquivRight F Vars) eqn
   simp only [←(EquivLike.apply_eq_iff_eq (optionEquivRight _ _))] at eqn
   simp only [map_add, map_zero, map_mul, map_one,
     map_neg, AlgEquiv.list_map_sum, map_pow] at eqn
   simp only [optionEquivRight_C, optionEquivRight_X_none, optionEquivRight_X_some, optionEquivRight_to_MvPolynomial_Option] at eqn
-
-  -- Move Cs back out so we can recognize the monomials
-  simp (config := { failIfUnchanged := false }) only [←C_mul, ←C_pow, ←C_add,
-    sum_map_C] at eqn
 
   simp only [X, C_apply, monomial_mul, one_mul, mul_one, add_zero, zero_add, mul_add, add_mul] at eqn
 
@@ -166,8 +158,6 @@ lemma is_sound
 
 
   -- done
-
-  trace "Applying individual coefficients"
 
   have h0012 := congr_arg (coeff (Finsupp.single Vars.α 0 + Finsupp.single Vars.β 0 + Finsupp.single Vars.γ 1 + Finsupp.single Vars.δ 2)) eqn
   have h0021 := congr_arg (coeff (Finsupp.single Vars.α 0 + Finsupp.single Vars.β 0 + Finsupp.single Vars.γ 2 + Finsupp.single Vars.δ 1)) eqn
@@ -185,15 +175,11 @@ lemma is_sound
 
   clear eqn
 
-  trace "Distribute coefficient-taking over terms"
   simp only [coeff_monomial, coeff_add, coeff_neg, coeff_zero] at h0012 h0021 h0022 h0112 h0121 h0122 h0212 h0221 h0222 h1022 h1112 h1121 h1122
 
-  trace "Simplifying coefficient expressions"
   simp only [Vars.finsupp_eq_ext, Finsupp.single_apply, Finsupp.add_apply] at h0012 h0021 h0022 h0112 h0121 h0122 h0212 h0221 h0222 h1022 h1112 h1121 h1122
 
-  trace "Determine which coefficients are nonzero"
   simp (config := {decide := true}) only [ite_false, ite_true] at h0012 h0021 h0022 h0112 h0121 h0122 h0212 h0221 h0222 h1022 h1112 h1121 h1122
-  trace "Remove zeros"
   simp only [neg_zero, add_zero, zero_add] at h0012 h0021 h0022 h0112 h0121 h0122 h0212 h0221 h0222 h1022 h1112 h1121 h1122
 
   -- done
@@ -282,3 +268,5 @@ lemma is_sound
 
 
 end soundness
+
+end Groth16TypeIII

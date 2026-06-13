@@ -63,8 +63,8 @@ noncomputable def wit_prover (F : Type) [Field F]
             | SRS_Elements_G1_Idx.δ => 0
             | SRS_Elements_G1_Idx.x_pow i => (u_sum u_stmt u_wit stmt wit).coeff i
             | SRS_Elements_G1_Idx.x_pow_times_t _ => 0
-            | SRS_Elements_G1_Idx.y i => 0
-            | SRS_Elements_G1_Idx.q i => 0
+            | SRS_Elements_G1_Idx.y _ => 0
+            | SRS_Elements_G1_Idx.q _ => 0
           | Proof_G1_Idx.C =>
             match srs_elem with
             | SRS_Elements_G1_Idx.α => 0
@@ -74,7 +74,7 @@ noncomputable def wit_prover (F : Type) [Field F]
             | SRS_Elements_G1_Idx.x_pow_times_t i =>
               let t : Polynomial F := ∏ i ∈ (Finset.univ : Finset (Fin n_wit)), (Polynomial.X - Polynomial.C (r i));
               (((u_sum u_stmt u_wit stmt wit) * (v_sum v_stmt v_wit stmt wit) - (w_sum w_stmt w_wit stmt wit)) /ₘ t).coeff i
-            | SRS_Elements_G1_Idx.y i => 0
+            | SRS_Elements_G1_Idx.y _ => 0
             | SRS_Elements_G1_Idx.q i => wit i
         snd pf_elem srs_elem := match pf_elem with
           | Proof_G2_Idx.B => match srs_elem with
@@ -87,12 +87,12 @@ noncomputable def wit_prover (F : Type) [Field F]
 def is_complete
     {F : Type} [Field F]
     {n_stmt n_wit n_var : ℕ}
-    {u_stmt : Fin n_stmt → (Polynomial F) }
-    {u_wit : Fin n_wit → (Polynomial F) }
-    {v_stmt : Fin n_stmt → (Polynomial F) }
-    {v_wit : Fin n_wit → (Polynomial F) }
-    {w_stmt : Fin n_stmt → (Polynomial F) }
-    {w_wit : Fin n_wit → (Polynomial F) }
+    {u_stmt : Fin n_stmt → (Polynomial F)}
+    {u_wit : Fin n_wit → (Polynomial F)}
+    {v_stmt : Fin n_stmt → (Polynomial F)}
+    {v_wit : Fin n_wit → (Polynomial F)}
+    {w_stmt : Fin n_stmt → (Polynomial F)}
+    {w_wit : Fin n_wit → (Polynomial F)}
     {r : Fin n_wit → F} :
     (completeness
       F
@@ -131,3 +131,5 @@ def is_complete
   · sorry
 
 end completeness
+
+end Groth16TypeIII

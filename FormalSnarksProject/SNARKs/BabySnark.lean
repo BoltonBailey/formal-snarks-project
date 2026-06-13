@@ -76,8 +76,8 @@ noncomputable def BabySNARK
     {F : Type} [Field F]
     {n_stmt n_wit n_var : ℕ}
     /- u_stmt and u_wit are Fin-indexed collections of polynomials from the square span program -/
-    {u_stmt : Fin n_stmt → (Polynomial F) }
-    {u_wit : Fin n_wit → (Polynomial F) }
+    {u_stmt : Fin n_stmt → (Polynomial F)}
+    {u_wit : Fin n_wit → (Polynomial F)}
     {t : Polynomial F} :
     AGMProofSystemInstantiation F :=
   {
@@ -172,7 +172,7 @@ noncomputable def BabySNARK
           | SRS_Elements_Idx.γ => 0
           | SRS_Elements_Idx.γβ => 0
           | SRS_Elements_Idx.βu _ => 0
-    verificationPairingProof_G1 := fun stmt check_idx i pf => match check_idx with
+    verificationPairingProof_G1 := fun _stmt check_idx i pf => match check_idx with
       | ChecksIdx.CheckI => match i with
         | PairingsI_Idx.ht => match pf with
           | Proof_Idx.H => 1
@@ -195,7 +195,7 @@ noncomputable def BabySNARK
           | Proof_Idx.H => 0
           | Proof_Idx.V => 0
           | Proof_Idx.B => 0
-    verificationPairingProof_G2 := fun stmt check_idx i pf => match check_idx with
+    verificationPairingProof_G2 := fun _stmt check_idx i pf => match check_idx with
       | ChecksIdx.CheckI => match i with
         | PairingsI_Idx.ht => match pf with
           | Proof_Idx.H => 0
@@ -224,8 +224,8 @@ noncomputable def BabySNARK
 lemma identified_proof_elems_def
     {F : Type} [Field F]
     {n_stmt n_wit n_var : ℕ}
-    {u_stmt : Fin n_stmt → (Polynomial F) }
-    {u_wit : Fin n_wit → (Polynomial F) }
+    {u_stmt : Fin n_stmt → (Polynomial F)}
+    {u_wit : Fin n_wit → (Polynomial F)}
     {t : Polynomial F} :
     (BabySNARK
         (F := F) (n_stmt := n_stmt) (n_wit := n_wit) (n_var := n_var)
@@ -234,17 +234,16 @@ lemma identified_proof_elems_def
 section soundness
 
 -- Remove heartbeat limit for upcoming long-running proof
-set_option maxHeartbeats 0 -- 0 means no limit
-
+set_option maxHeartbeats 0 in -- 0 means no limit
 lemma is_sound
     {F : Type} [Field F]
     {n_stmt n_wit n_var : ℕ}
-    {u_stmt : Fin n_stmt → (Polynomial F) }
-    {u_wit : Fin n_wit → (Polynomial F) }
-    {v_stmt : Fin n_stmt → (Polynomial F) }
-    {v_wit : Fin n_wit → (Polynomial F) }
-    {w_stmt : Fin n_stmt → (Polynomial F) }
-    {w_wit : Fin n_wit → (Polynomial F) }
+    {u_stmt : Fin n_stmt → (Polynomial F)}
+    {u_wit : Fin n_wit → (Polynomial F)}
+    {v_stmt : Fin n_stmt → (Polynomial F)}
+    {v_wit : Fin n_wit → (Polynomial F)}
+    {w_stmt : Fin n_stmt → (Polynomial F)}
+    {w_wit : Fin n_wit → (Polynomial F)}
     {t : Polynomial F}
     (ht : List.sum (List.map (fun (x : Fin n_var) => Polynomial.C (Polynomial.coeff t (x : ℕ)) * Polynomial.X ^ (x : ℕ)) (List.finRange n_var)) = t)
     (ht0 : t.Monic) :
@@ -317,7 +316,6 @@ lemma is_sound
     List.sum_map_mul_right, List.sum_map_mul_left] at eqnI eqnII eqnH eqnV eqnB
 
   -- Apply MvPolynomial.optionEquivRight *here*, so that we can treat polynomials in Vars_X as constants
-  trace "Converting to MvPolynomial over Polynomials"
   simp only [←(EquivLike.apply_eq_iff_eq (optionEquivRight _ _))] at eqnI eqnII eqnH eqnV eqnB
   simp only [map_add, map_zero, map_mul, map_one,
     map_neg, AlgEquiv.list_map_sum, map_pow] at eqnI eqnII eqnH eqnV eqnB
@@ -328,8 +326,6 @@ lemma is_sound
     sum_map_C] at eqnI eqnII eqnH eqnV eqnB
 
   simp only [X, C_apply, monomial_mul, one_mul, mul_one, add_zero, zero_add, mul_add, add_mul] at eqnI eqnII eqnH eqnV eqnB
-
-  trace "Applying individual coefficients"
 
   have hI_00 := congr_arg (coeff (Finsupp.single Vars.β 0 + Finsupp.single Vars.γ 0)) eqnI
   have hI_01 := congr_arg (coeff (Finsupp.single Vars.β 0 + Finsupp.single Vars.γ 1)) eqnI
@@ -383,15 +379,11 @@ lemma is_sound
 
   clear eqnI eqnII eqnH eqnV eqnB
 
-  trace "Distribute coefficient-taking over terms"
   simp only [coeff_monomial, coeff_add, coeff_neg, coeff_zero] at hI_00 hI_01 hI_02 hI_10 hI_11 hI_12 hI_20 hI_21 hI_22 hII_00 hII_01 hII_02 hII_10 hII_11 hII_12 hII_20 hII_21 hII_22 hH_00 hH_01 hH_02 hH_10 hH_11 hH_12 hH_20 hH_21 hH_22 hV_00 hV_01 hV_02 hV_10 hV_11 hV_12 hV_20 hV_21 hV_22 hB_00 hB_01 hB_02 hB_10 hB_11 hB_12 hB_20 hB_21 hB_22
 
-  trace "Simplifying coefficient expressions"
   simp only [Vars.finsupp_eq_ext, Finsupp.single_apply, Finsupp.add_apply] at hI_00 hI_01 hI_02 hI_10 hI_11 hI_12 hI_20 hI_21 hI_22 hII_00 hII_01 hII_02 hII_10 hII_11 hII_12 hII_20 hII_21 hII_22 hH_00 hH_01 hH_02 hH_10 hH_11 hH_12 hH_20 hH_21 hH_22 hV_00 hV_01 hV_02 hV_10 hV_11 hV_12 hV_20 hV_21 hV_22 hB_00 hB_01 hB_02 hB_10 hB_11 hB_12 hB_20 hB_21 hB_22
 
-  trace "Determine which coefficients are nonzero"
   simp (config := {decide := true}) only [ite_false, ite_true] at hI_00 hI_01 hI_02 hI_10 hI_11 hI_12 hI_20 hI_21 hI_22 hII_00 hII_01 hII_02 hII_10 hII_11 hII_12 hII_20 hII_21 hII_22 hH_00 hH_01 hH_02 hH_10 hH_11 hH_12 hH_20 hH_21 hH_22 hV_00 hV_01 hV_02 hV_10 hV_11 hV_12 hV_20 hV_21 hV_22 hB_00 hB_01 hB_02 hB_10 hB_11 hB_12 hB_20 hB_21 hB_22
-  trace "Remove zeros"
   simp only [neg_zero, add_zero, zero_add] at hI_00 hI_01 hI_02 hI_10 hI_11 hI_12 hI_20 hI_21 hI_22 hII_00 hII_01 hII_02 hII_10 hII_11 hII_12 hII_20 hII_21 hII_22 hH_00 hH_01 hH_02 hH_10 hH_11 hH_12 hH_20 hH_21 hH_22 hV_00 hV_01 hV_02 hV_10 hV_11 hV_12 hV_20 hV_21 hV_22 hB_00 hB_01 hB_02 hB_10 hB_11 hB_12 hB_20 hB_21 hB_22
 
   set sum_B_1_τ_pow := List.sum
@@ -418,5 +410,7 @@ lemma is_sound
   all_goals sorry
 
 end soundness
+
+end BabySNARK
 
 end BabySNARK

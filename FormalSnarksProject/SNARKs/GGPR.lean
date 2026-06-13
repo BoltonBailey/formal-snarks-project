@@ -106,8 +106,6 @@ inductive SRS_Elements_Idx {n_stmt n_wit m d : ℕ} : Type where
   | VK_t : SRS_Elements_Idx
   | VK_v_stmt : Fin n_stmt -> SRS_Elements_Idx
 
-set_option maxHeartbeats 0 -- Disable heartbeats to prevent timeouts
-
 noncomputable def GGPR
     /- The finite field parameter of our SNARK -/
     {F : Type} [Field F]
@@ -124,15 +122,14 @@ noncomputable def GGPR
     -- def n_wit := n_mid
     -- def m := n_stmt + n_wit
     /- fin-indexed collections of polynomials from the quadratic arithmetic program -/
-    {v_stmt : Fin n_stmt → Polynomial F }
-    {v_wit : Fin n_wit → Polynomial F }
-    {w_wit : Fin m → Polynomial F }
-    {v_0 : Polynomial F }
-    {w_0 : Polynomial F }
+    {v_stmt : Fin n_stmt → Polynomial F}
+    {v_wit : Fin n_wit → Polynomial F}
+    {w_wit : Fin m → Polynomial F}
+    {v_0 : Polynomial F}
+    {w_0 : Polynomial F}
     /- The roots of the polynomial t -/
     {r : Fin (n_wit) → F} :
     AGMProofSystemInstantiation F :=
-
   /- t is the polynomial divisibility by which is used to verify satisfaction of the QAP -/
   let t : Polynomial F := ∏ i ∈ (Finset.univ : Finset (Fin n_wit)), (Polynomial.X - Polynomial.C (r i));
   { Stmt := Fin n_stmt → F
@@ -263,7 +260,7 @@ noncomputable def GGPR
     -- III : W' * 1 - α * W = 0
     -- IV : H' * 1 -  α * H = 0
     -- V : Y * 1 - V_mid * (βv γ) - (β_w γ) * W = 0
-    verificationPairingSRS_G2 := fun stmt check_idx i SRS_idx => match check_idx with
+    verificationPairingSRS_G2 := fun _stmt check_idx i SRS_idx => match check_idx with
       | ChecksIdx.CheckI => match i with
         | PairingsI_Idx.lhs => match SRS_idx with
           | SRS_Elements_Idx.VK_w_0 => 1
@@ -302,7 +299,7 @@ noncomputable def GGPR
     -- III : W' * 1 - α * W = 0
     -- IV : H' * 1 -  α * H = 0
     -- V : Y * 1 - V_mid * (βv γ) - (β_w γ) * W = 0
-    verificationPairingProof_G1 := fun stmt check_idx i pf_idx => match check_idx with
+    verificationPairingProof_G1 := fun _stmt check_idx i pf_idx => match check_idx with
       | ChecksIdx.CheckI => match i with
         | PairingsI_Idx.lhs => match pf_idx with
           | Proof_G1_Idx.V_mid => 1
@@ -342,7 +339,7 @@ noncomputable def GGPR
     -- III : W' * 1 - α * W = 0
     -- IV : H' * 1 -  α * H = 0
     -- V : Y * 1 - V_mid * (βv γ) - (β_w γ) * W = 0
-    verificationPairingProof_G2 := fun stmt check_idx i pf_idx => match check_idx with
+    verificationPairingProof_G2 := fun _stmt check_idx i pf_idx => match check_idx with
       | ChecksIdx.CheckI => match i with
         | PairingsI_Idx.lhs => match pf_idx with
           | Proof_G2_Idx.W => 1
@@ -375,14 +372,15 @@ noncomputable def GGPR
   }
 
 
+set_option maxHeartbeats 0 in -- Disable heartbeats to prevent timeouts
 lemma soundness
     {F : Type} [Field F]
     {n_stmt n_wit m d : ℕ}
-    {v_stmt : Fin n_stmt → Polynomial F }
-    {v_wit : Fin n_wit → Polynomial F }
-    {w_wit : Fin m → Polynomial F }
-    {v_0 : Polynomial F }
-    {w_0 : Polynomial F }
+    {v_stmt : Fin n_stmt → Polynomial F}
+    {v_wit : Fin n_wit → Polynomial F}
+    {w_wit : Fin m → Polynomial F}
+    {v_0 : Polynomial F}
+    {w_0 : Polynomial F}
     {r : Fin (n_wit) → F} :
     (AGMProofSystemInstantiation.soundness
       F
@@ -450,7 +448,6 @@ lemma soundness
     List.sum_map_mul_right, List.sum_map_mul_left] at eqnI eqnII eqnIII eqnIV eqnV
 
   -- Apply MvPolynomial.optionEquivRight *here*, so that we can treat polynomials in Vars_X as constants
-  trace "Converting to MvPolynomial over Polynomials"
   -- replace eqn := congr_arg (MvPolynomial.optionEquivRight F Vars) eqn
   simp only [←(EquivLike.apply_eq_iff_eq (optionEquivRight _ _))] at eqnI eqnII eqnIII eqnIV eqnV
   simp only [map_add, map_zero, map_mul, map_one,
@@ -461,8 +458,6 @@ lemma soundness
   simp only [←C_mul, ←C_pow, ←C_add, sum_map_C] at eqnI eqnII eqnIII eqnIV eqnV
 
   simp only [X, C_apply, monomial_mul, one_mul, mul_one, add_zero, zero_add, mul_add, add_mul] at eqnI eqnII eqnIII eqnIV eqnV
-
-  trace "Applying individual coefficients"
 
   have h11eqnII := congr_arg (coeff (Finsupp.single Vars.α 1 + Finsupp.single Vars.β_v 1 + Finsupp.single Vars.γ 1)) eqnII
   have h12eqnII := congr_arg (coeff (Finsupp.single Vars.α 1 + Finsupp.single Vars.β_w 1 + Finsupp.single Vars.γ 1)) eqnII
@@ -491,20 +486,18 @@ lemma soundness
   clear eqnIV
   clear eqnV
 
-  trace "Distribute coefficient-taking over terms"
   simp only [coeff_monomial, coeff_add, coeff_neg, coeff_zero] at h11eqnII h12eqnII h19eqnII h21eqnII h22eqnII h71eqnII h74eqnII h11eqnIII h12eqnIII h19eqnIII h21eqnIII h22eqnIII h71eqnIII h74eqnIII h2eqnV h3eqnV h1eqnI
 
-  trace "Simplifying coefficient expressions"
   simp only [Vars.finsupp_eq_ext, Finsupp.single_apply, Finsupp.add_apply] at h11eqnII h12eqnII h19eqnII h21eqnII h22eqnII h71eqnII h74eqnII h11eqnIII h12eqnIII h19eqnIII h21eqnIII h22eqnIII h71eqnIII h74eqnIII h2eqnV h3eqnV h1eqnI
 
-  trace "Determine which coefficients are nonzero"
   simp (config := {decide := true}) only [ite_false, ite_true] at h11eqnII h12eqnII h19eqnII h21eqnII h22eqnII h71eqnII h74eqnII h11eqnIII h12eqnIII h19eqnIII h21eqnIII h22eqnIII h71eqnIII h74eqnIII h2eqnV h3eqnV h1eqnI
-  trace "Remove zeros"
   simp only [neg_zero, add_zero, zero_add] at h11eqnII h12eqnII h19eqnII h21eqnII h22eqnII h71eqnII h74eqnII h11eqnIII h12eqnIII h19eqnIII h21eqnIII h22eqnIII h71eqnIII h74eqnIII h2eqnV h3eqnV h1eqnI
-
-  skip
 
   integral_domain_tactic
 
   sorry
   -- TODO unfinished
+
+end GGPR
+
+end GGPR

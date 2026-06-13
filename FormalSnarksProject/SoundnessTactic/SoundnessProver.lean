@@ -38,18 +38,15 @@ macro_rules
       neg_mul, mul_neg,
       -- Move constant multiplications (which the X (some _) terms should be) out of sums
       List.sum_map_mul_right, List.sum_map_mul_left] at eqn;
-
     -- Apply MvPolynomial.optionEquivRight *here*, so that we can treat polynomials in Vars_X as constants
     trace "Converting to MvPolynomial over Polynomials";
     replace eqn := congr_arg (MvPolynomial.optionEquivRight F Vars) eqn;
     simp only [map_add, map_zero, map_mul, map_one,
       map_neg, AlgEquiv.list_map_sum, map_pow] at eqn;
     simp only [MvPolynomial.optionEquivRight_C, MvPolynomial.optionEquivRight_X_none, MvPolynomial.optionEquivRight_X_some, optionEquivRight_to_MvPolynomial_Option] at eqn;
-
     -- Move Cs back out so we can recognize the monomials
     simp only [←MvPolynomial.C_mul, ←MvPolynomial.C_pow, ←MvPolynomial.C_add,
       MvPolynomial.sum_map_C] at eqn;
-
     simp only [MvPolynomial.X, C_apply, MvPolynomial.monomial_mul, one_mul, mul_one, add_zero, zero_add, mul_add, add_mul] at eqn
   )
 

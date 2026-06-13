@@ -56,12 +56,10 @@ lemma Int.near_mods (a b c d : ℤ) (ha' : 0 ≤ a) (hb' : 0 ≤ b)
     c = 0 := by
   -- TODO reprove with `Int.eq_zero_of_abs_lt_dvd`?
   -- TODO reprove below with this lemma
-
   have h := congr_arg (fun p => p % (d : ℤ)) habcd
   simp_rw [Int.add_mul_emod_self_right] at h
   rw [emod_eq_of_lt ha', emod_eq_of_lt hb'] at h
   simp [h] at *
-
   cases habcd <;> linarith
   exact hb
   exact ha
@@ -77,8 +75,8 @@ lemma MvPolynomial.bind_ite_filter_aux {σ F : Type} [Field F] [DecidableEq σ]
     (p : MvPolynomial σ F)
     (sample_removed sample_target : σ)
     (hsa : sample_target ≠ sample_removed)
-    (d : ℕ) (hd : 0 < d)
-    (hdegree: ∀ a ∈ support p, a sample_target < d)
+    (d : ℕ) (_hd : 0 < d)
+    (hdegree : ∀ a ∈ support p, a sample_target < d)
     (m : σ →₀ ℕ)
     (m_sample_target_bound : m sample_target < d) :
     (Finset.filter
@@ -153,7 +151,7 @@ lemma MvPolynomial.remove_ite_for_casing {σ F : Type} [Field F] [DecidableEq σ
 
 lemma MvPolynomial.bind₁_ite_pow_eq_zero_of {σ F : Type} [Field F] [DecidableEq σ]
     (p : MvPolynomial σ F)
-    (d : ℕ)  (hd : 0 < d)
+    (d : ℕ) (hd : 0 < d)
     (sample_removed sample_target : σ)
     (hsa : sample_target ≠ sample_removed)
     (h : MvPolynomial.bind₁

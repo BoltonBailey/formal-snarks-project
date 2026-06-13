@@ -105,7 +105,6 @@ Some comments on the implementation:
 n from the paper = n_var
 l from the paper = n_stmt
 m - l from the paper = n_wit
-
 -/
 noncomputable def Groth16TypeIII
     /- The finite field parameter of our SNARK -/
@@ -206,8 +205,8 @@ noncomputable def Groth16TypeIII
         | SRS_Elements_G1_Idx.x_pow _ => 0
         | SRS_Elements_G1_Idx.x_pow_times_t _ => 0
         | SRS_Elements_G1_Idx.y _ => 0
-        | SRS_Elements_G1_Idx.q i => 0
-    verificationPairingSRS_G2 := fun stmt _ i SRS_idx => match i with
+        | SRS_Elements_G1_Idx.q _ => 0
+    verificationPairingSRS_G2 := fun _stmt _ i SRS_idx => match i with
       | PairingsIdx.ab => match SRS_idx with
         | SRS_Elements_G2_Idx.β => 0
         | SRS_Elements_G2_Idx.γ => 0
@@ -228,7 +227,7 @@ noncomputable def Groth16TypeIII
         | SRS_Elements_G2_Idx.γ => 0
         | SRS_Elements_G2_Idx.δ => 1
         | SRS_Elements_G2_Idx.x_pow _ => 0
-    verificationPairingProof_G1 := fun stmt _ i pf => match i with
+    verificationPairingProof_G1 := fun _stmt _ i pf => match i with
       | PairingsIdx.ab => match pf with
         | Proof_G1_Idx.A => 1
         | Proof_G1_Idx.C => 0
@@ -241,7 +240,7 @@ noncomputable def Groth16TypeIII
       | PairingsIdx.cδ => match pf with
         | Proof_G1_Idx.A => 0
         | Proof_G1_Idx.C => 1
-    verificationPairingProof_G2 := fun stmt _ i pf => match i with
+    verificationPairingProof_G2 := fun _stmt _ i pf => match i with
       | PairingsIdx.ab => match pf with
         | Proof_G2_Idx.B => -1
       | PairingsIdx.αβ => match pf with
@@ -251,5 +250,7 @@ noncomputable def Groth16TypeIII
       | PairingsIdx.cδ => match pf with
         | Proof_G2_Idx.B => 0
   }
+
+end Groth16TypeIII
 
 end Groth16TypeIII

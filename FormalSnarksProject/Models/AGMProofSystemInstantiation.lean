@@ -53,13 +53,13 @@ structure AGMProofSystemInstantiation (F : Type) [Field F] where
   in the left half of the lth paring of the kth equality check -/
   verificationPairingSRS_G1 : Stmt -> (k : EqualityChecks) → Pairings k → SRSElements_G1 → F
   /-- The coefficient that the verifier uses for the jth element of the ith component of the SRSII
-  in the right half of the lth paring of the kth equality check  -/
+  in the right half of the lth paring of the kth equality check -/
   verificationPairingSRS_G2 : Stmt -> (k : EqualityChecks) → Pairings k → SRSElements_G2 → F
   /-- The coefficient that the verifier uses for the jth element of the ith component of the Proof_G1
   in the left half of the lth paring of the kth equality check -/
   verificationPairingProof_G1 : Stmt -> (k : EqualityChecks) → Pairings k → Proof_G1 → F
   /-- The coefficient that the verifier uses for the jth element of the ith component of the Proof_G2
-  in the right half of the lth paring of the kth equality check  -/
+  in the right half of the lth paring of the kth equality check -/
   verificationPairingProof_G2 : Stmt -> (k : EqualityChecks) → Pairings k → Proof_G2 → F
 
   /-- Identified Proof elements that are the same on the left and right. This is sometimes

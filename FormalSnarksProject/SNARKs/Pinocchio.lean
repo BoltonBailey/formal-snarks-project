@@ -119,8 +119,6 @@ inductive SRS_Elements_Idx {n_stmt n_wit d : ℕ} : Type where
   | VK_w_stmt : Fin n_stmt -> SRS_Elements_Idx
   | VK_y_stmt : Fin n_stmt -> SRS_Elements_Idx
 
-set_option maxHeartbeats 0 -- Disable heartbeats to prevent timeouts
-
 noncomputable def Pinocchio
     /- The finite field parameter of our SNARK -/
     {F : Type} [Field F]
@@ -137,15 +135,15 @@ noncomputable def Pinocchio
     -- def n_wit := n_mid
     -- def m := n_stmt + n_wit
     /- fin-indexed collections of polynomials from the quadratic arithmetic program -/
-    {v_stmt : Fin n_stmt → Polynomial F }
-    {w_stmt : Fin n_stmt → Polynomial F }
-    {y_stmt : Fin n_stmt → Polynomial F }
-    {v_wit : Fin n_wit → Polynomial F }
-    {w_wit : Fin n_wit → Polynomial F }
-    {y_wit : Fin n_wit → Polynomial F }
-    {v_0 : Polynomial F }
-    {w_0 : Polynomial F }
-    {y_0 : Polynomial F }
+    {v_stmt : Fin n_stmt → Polynomial F}
+    {w_stmt : Fin n_stmt → Polynomial F}
+    {y_stmt : Fin n_stmt → Polynomial F}
+    {v_wit : Fin n_wit → Polynomial F}
+    {w_wit : Fin n_wit → Polynomial F}
+    {y_wit : Fin n_wit → Polynomial F}
+    {v_0 : Polynomial F}
+    {w_0 : Polynomial F}
+    {y_0 : Polynomial F}
     /- t is the polynomial divisibility by which is used to verify satisfaction of the QAP -/
     {t : Polynomial F}
     -- t can also be expressed as follows, but this structure is not important for soundness
@@ -320,7 +318,7 @@ noncomputable def Pinocchio
         | PairingsV_Idx.rhs => match SRS_idx with
           | SRS_Elements_Idx.VK_βγ => -1 -- Negate the rhs Right elements to show they are moved to the left
           | _ => 0
-    verificationPairingProof_G1 := fun stmt check_idx i pf_idx => match check_idx with
+    verificationPairingProof_G1 := fun _stmt check_idx i pf_idx => match check_idx with
       | ChecksIdx.CheckI => match i with
         | PairingsI_Idx.lhs => match pf_idx with
           | Proof_G1_Idx.V_mid => 1
@@ -360,7 +358,7 @@ noncomputable def Pinocchio
           | Proof_G1_Idx.W_mid => 1
           | Proof_G1_Idx.Y_mid => 1
           | _ => 0
-    verificationPairingProof_G2 := fun stmt check_idx i pf_idx => match check_idx with
+    verificationPairingProof_G2 := fun _stmt check_idx i pf_idx => match check_idx with
       | ChecksIdx.CheckI => match i with
         | PairingsI_Idx.lhs => match pf_idx with
           | Proof_G2_Idx.W_mid => 1
@@ -378,18 +376,19 @@ noncomputable def Pinocchio
   }
 
 
+set_option maxHeartbeats 0 in -- Disable heartbeats to prevent timeouts
 lemma soundness
     {F : Type} [Field F]
     {n_stmt n_wit d : ℕ}
-    {v_stmt : Fin n_stmt → Polynomial F }
-    {w_stmt : Fin n_stmt → Polynomial F }
-    {y_stmt : Fin n_stmt → Polynomial F }
-    {v_wit : Fin n_wit → Polynomial F }
-    {w_wit : Fin n_wit → Polynomial F }
-    {y_wit : Fin n_wit → Polynomial F }
-    {v_0 : Polynomial F }
-    {w_0 : Polynomial F }
-    {y_0 : Polynomial F }
+    {v_stmt : Fin n_stmt → Polynomial F}
+    {w_stmt : Fin n_stmt → Polynomial F}
+    {y_stmt : Fin n_stmt → Polynomial F}
+    {v_wit : Fin n_wit → Polynomial F}
+    {w_wit : Fin n_wit → Polynomial F}
+    {y_wit : Fin n_wit → Polynomial F}
+    {v_0 : Polynomial F}
+    {w_0 : Polynomial F}
+    {y_0 : Polynomial F}
     /- t is the polynomial divisibility by which is used to verify satisfaction of the QAP -/
     {t : Polynomial F}
     (tMonic : t.Monic)
@@ -470,7 +469,6 @@ lemma soundness
 
     rw [mul_comm]
     apply Polynomial.mul_self_modByMonic tMonic
-    done
 
   -- done
 
@@ -502,7 +500,6 @@ lemma soundness
     List.sum_map_mul_right, List.sum_map_mul_left] at eqnI eqnII eqnIII eqnIV eqnV
 
   -- Apply MvPolynomial.optionEquivRight *here*, so that we can treat polynomials in Vars_X as constants
-  trace "Converting to MvPolynomial over Polynomials"
   -- replace eqn := congr_arg (MvPolynomial.optionEquivRight F Vars) eqn
   simp only [←(EquivLike.apply_eq_iff_eq (optionEquivRight _ _))] at eqnI eqnII eqnIII eqnIV eqnV
   simp only [map_add, map_zero, map_mul, map_one,
@@ -516,8 +513,6 @@ lemma soundness
   simp only [X, C_apply, monomial_mul, one_mul, mul_one, add_zero, zero_add, mul_add, add_mul] at eqnI eqnII eqnIII eqnIV eqnV
 
   -- done
-
-  trace "Applying individual coefficients"
 
   have h1eqnI    := congr_arg (coeff (Finsupp.single Vars.r_v 1 + Finsupp.single Vars.r_w 1)) eqnI
   have h11eqnII  := congr_arg (coeff (Finsupp.single Vars.α_v 1 + Finsupp.single Vars.β 1 + Finsupp.single Vars.γ 1)) eqnII
@@ -571,15 +566,11 @@ lemma soundness
   clear eqnIV
   clear eqnV
 
-  trace "Distribute coefficient-taking over terms"
   simp only [coeff_monomial, coeff_add, coeff_neg, coeff_zero] at h1eqnI h11eqnII h19eqnII h21eqnII h22eqnII h32eqnII h38eqnII h52eqnII h54eqnII h71eqnII h74eqnII h93eqnII h94eqnII h101eqnII h27eqnIII h32eqnIII h33eqnIII h34eqnIII h35eqnIII h53eqnIII h61eqnIII h75eqnIII h81eqnIII h88eqnIII h89eqnIII h96eqnIII h97eqnIII h98eqnIII h2eqnIV h4eqnIV h23eqnIV h25eqnIV h30eqnIV h37eqnIV h54eqnIV h55eqnIV h56eqnIV h57eqnIV h59eqnIV h89eqnIV h102eqnIV h2eqnV h3eqnV h4eqnV
 
-  trace "Simplifying coefficient expressions"
   simp only [Vars.finsupp_eq_ext, Finsupp.single_apply, Finsupp.add_apply] at h1eqnI h11eqnII h19eqnII h21eqnII h22eqnII h32eqnII h38eqnII h52eqnII h54eqnII h71eqnII h74eqnII h93eqnII h94eqnII h101eqnII h27eqnIII h32eqnIII h33eqnIII h34eqnIII h35eqnIII h53eqnIII h61eqnIII h75eqnIII h81eqnIII h88eqnIII h89eqnIII h96eqnIII h97eqnIII h98eqnIII h2eqnIV h4eqnIV h23eqnIV h25eqnIV h30eqnIV h37eqnIV h54eqnIV h55eqnIV h56eqnIV h57eqnIV h59eqnIV h89eqnIV h102eqnIV h2eqnV h3eqnV h4eqnV
 
-  trace "Determine which coefficients are nonzero"
   simp (config := {decide := true}) only [ite_false, ite_true] at h1eqnI h11eqnII h19eqnII h21eqnII h22eqnII h32eqnII h38eqnII h52eqnII h54eqnII h71eqnII h74eqnII h93eqnII h94eqnII h101eqnII h27eqnIII h32eqnIII h33eqnIII h34eqnIII h35eqnIII h53eqnIII h61eqnIII h75eqnIII h81eqnIII h88eqnIII h89eqnIII h96eqnIII h97eqnIII h98eqnIII h2eqnIV h4eqnIV h23eqnIV h25eqnIV h30eqnIV h37eqnIV h54eqnIV h55eqnIV h56eqnIV h57eqnIV h59eqnIV h89eqnIV h102eqnIV h2eqnV h3eqnV h4eqnV
-  trace "Remove zeros"
   simp only [neg_zero, add_zero, zero_add, neg_eq_zero] at h1eqnI h11eqnII h19eqnII h21eqnII h22eqnII h32eqnII h38eqnII h52eqnII h54eqnII h71eqnII h74eqnII h93eqnII h94eqnII h101eqnII h27eqnIII h32eqnIII h33eqnIII h34eqnIII h35eqnIII h53eqnIII h61eqnIII h75eqnIII h81eqnIII h88eqnIII h89eqnIII h96eqnIII h97eqnIII h98eqnIII h2eqnIV h4eqnIV h23eqnIV h25eqnIV h30eqnIV h37eqnIV h54eqnIV h55eqnIV h56eqnIV h57eqnIV h59eqnIV h89eqnIV h102eqnIV h2eqnV h3eqnV h4eqnV
 
   -- done
@@ -685,9 +676,10 @@ lemma soundness
 
   clear tMonic
 
-  simp (config := { failIfUnchanged := false }) [-map_eq_zero, -Polynomial.C_eq_zero] at *
   -- polyrith -- error: not in ideal
-  integral_domain_tactic <;> sorry
+  integral_domain_tactic; sorry
   -- TODO there must be some kind of bug in the representation
 
-  done
+end Pinocchio
+
+end Pinocchio

@@ -111,7 +111,7 @@ lemma collapseSRSElement_G1_soundness (𝓟 : AGMProofSystemInstantiation F)
       ∀ (idx : 𝓟.Proof_G1)
         (agm : 𝓟.Proof_G1 → 𝓟.SRSElements_G1 → F),
         agm idx twin1 = agm idx twin2)
-    (interchangeable' : ∀ (stmt : 𝓟.Stmt) (check_idx : 𝓟.EqualityChecks) (pairing : 𝓟.Pairings check_idx),  𝓟.verificationPairingSRS_G1 stmt check_idx pairing twin1 = 𝓟.verificationPairingSRS_G1 stmt check_idx pairing twin2 )
+    (interchangeable' : ∀ (stmt : 𝓟.Stmt) (check_idx : 𝓟.EqualityChecks) (pairing : 𝓟.Pairings check_idx), 𝓟.verificationPairingSRS_G1 stmt check_idx pairing twin1 = 𝓟.verificationPairingSRS_G1 stmt check_idx pairing twin2)
     (Wit : Type)
     (relation : 𝓟.Stmt -> Wit -> Prop) (extractor : 𝓟.Prover -> Wit)
     (h_sound : 𝓟.soundness F Wit relation extractor) :

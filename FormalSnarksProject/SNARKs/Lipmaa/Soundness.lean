@@ -18,17 +18,16 @@ lemma Polynomial.mul_self_modByMonic {F : Type} [Field F] (t p : Polynomial F) (
 
 
 -- Remove heartbeat limit for upcoming long-running proof
-set_option maxHeartbeats 0 -- 0 means no limit
-
+set_option maxHeartbeats 0 in -- 0 means no limit
 lemma soundness
     {F : Type} [Field F]
     {n_stmt n_wit n_var : ℕ}
-    {u_stmt : Fin n_stmt → (Polynomial F) }
-    {u_wit : Fin n_wit → (Polynomial F) }
-    {v_stmt : Fin n_stmt → (Polynomial F) }
-    {v_wit : Fin n_wit → (Polynomial F) }
-    {w_stmt : Fin n_stmt → (Polynomial F) }
-    {w_wit : Fin n_wit → (Polynomial F) }
+    {u_stmt : Fin n_stmt → (Polynomial F)}
+    {u_wit : Fin n_wit → (Polynomial F)}
+    {v_stmt : Fin n_stmt → (Polynomial F)}
+    {v_wit : Fin n_wit → (Polynomial F)}
+    {w_stmt : Fin n_stmt → (Polynomial F)}
+    {w_wit : Fin n_wit → (Polynomial F)}
     {r : Fin n_wit → F} :
     (AGMProofSystemInstantiation.soundness
       F
@@ -91,7 +90,6 @@ lemma soundness
     apply Polynomial.monic_prod_of_monic
     intro i hi
     exact Polynomial.monic_X_sub_C (r i)
-    done
 
 
 
@@ -125,7 +123,6 @@ lemma soundness
     List.sum_map_mul_right, List.sum_map_mul_left] at eqn
 
   -- Apply MvPolynomial.optionEquivRight *here*, so that we can treat polynomials in Vars_X as constants
-  trace "Converting to MvPolynomial over Polynomials"
   -- replace eqn := congr_arg (MvPolynomial.optionEquivRight F Vars) eqn
   simp only [←(EquivLike.apply_eq_iff_eq (optionEquivRight _ _))] at eqn
   simp only [map_add, map_zero, map_mul, map_one,
@@ -137,8 +134,6 @@ lemma soundness
     sum_map_C] at eqn
 
   simp only [X, C_apply, monomial_mul, monomial_pow, one_mul, mul_one, add_zero, zero_add, mul_add, add_mul] at eqn
-
-  trace "Applying individual coefficients"
 
   have h0012 := congr_arg (coeff (Finsupp.single Vars.y (75 * 0 + 25 * 0 + 5 * 1 + 1 * 2))) eqn
   have h0021 := congr_arg (coeff (Finsupp.single Vars.y (75 * 0 + 25 * 0 + 5 * 2 + 1 * 1))) eqn
@@ -159,17 +154,13 @@ lemma soundness
 
   clear eqn
 
-  trace "Distribute coefficient-taking over terms"
   simp only [coeff_monomial, coeff_add, coeff_neg, coeff_zero] at h0012 h0021 h0022 h0112 h0121 h0122 h0212 h0221 h0222 h1022 h1112 h1121 h1122
 
   -- done
 
-  trace "Simplifying coefficient expressions"
   simp only [Vars.finsupp_eq_ext, Finsupp.smul_single', Finsupp.single_apply, Finsupp.add_apply] at h0012 h0021 h0022 h0112 h0121 h0122 h0212 h0221 h0222 h1022 h1112 h1121 h1122
 
-  trace "Determine which coefficients are nonzero"
   simp (config := {decide := true}) only [ite_false, ite_true] at h0012 h0021 h0022 h0112 h0121 h0122 h0212 h0221 h0222 h1022 h1112 h1121 h1122
-  trace "Remove zeros"
   simp only [neg_zero, add_zero, zero_add, one_pow, mul_one, one_mul] at h0012 h0021 h0022 h0112 h0121 h0122 h0212 h0221 h0222 h1022 h1112 h1121 h1122
 
 
@@ -284,3 +275,7 @@ lemma soundness
   all_goals sorry
 
 end soundness
+
+end Lipmaa
+
+end Lipmaa

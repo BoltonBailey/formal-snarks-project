@@ -2,7 +2,7 @@ import Mathlib.Algebra.Polynomial.Div
 import Mathlib.Algebra.MvPolynomial.Equiv
 import Mathlib.Data.FunLike.Basic
 
-open scoped BigOperators Classical
+open scoped BigOperators
 
 section Groth16TypeIII
 
@@ -60,9 +60,8 @@ theorem Polynomial.hom_congr_vars {R : Type u} {S : Type v}
     (hv : f₁ (Polynomial.X) = f₂ (Polynomial.X)) :
     f₁ = f₂ := by
   ext p
-  exact congrFun (congrArg DFunLike.coe hC) p
-  -- exact congrFun (congrArg DFunLike.coe hC) p
-  exact hv
+  · exact congrFun (congrArg DFunLike.coe hC) p
+  · exact hv
 
 lemma optionEquivRight_comp_to_MvPolynomial_Option {F V : Type} [Field F] :
     RingHom.comp (MvPolynomial.optionEquivRight F V).toRingEquiv.toRingHom (to_MvPolynomial_Option (F := F) V) = C := by
@@ -96,3 +95,5 @@ theorem AlgEquiv.list_map_sum {R : Type*} {A₁ : Type*} {A₂ : Type*}
   induction l with
   | nil => simp
   | cons hd tl ih => simp [ih]
+
+end Groth16TypeIII

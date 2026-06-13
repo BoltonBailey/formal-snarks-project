@@ -82,12 +82,12 @@ noncomputable def Groth16TypeI
       n_wit - the witness size -/
     {n_stmt n_wit n_var : ℕ}
     /- u_stmt and u_wit are Fin-indexed collections of polynomials from the square span program -/
-    {u_stmt : Fin n_stmt → (Polynomial F) }
-    {u_wit : Fin n_wit → (Polynomial F) }
-    {v_stmt : Fin n_stmt → (Polynomial F) }
-    {v_wit : Fin n_wit → (Polynomial F) }
-    {w_stmt : Fin n_stmt → (Polynomial F) }
-    {w_wit : Fin n_wit → (Polynomial F) }
+    {u_stmt : Fin n_stmt → (Polynomial F)}
+    {u_wit : Fin n_wit → (Polynomial F)}
+    {v_stmt : Fin n_stmt → (Polynomial F)}
+    {v_wit : Fin n_wit → (Polynomial F)}
+    {w_stmt : Fin n_stmt → (Polynomial F)}
+    {w_wit : Fin n_wit → (Polynomial F)}
     /- The roots of the polynomial t -/
     {r : Fin n_wit → F} :
     AGMProofSystemInstantiation F :=
@@ -194,8 +194,8 @@ noncomputable def Groth16TypeI
         | SRS_Elements_Idx.x_pow _ => 0
         | SRS_Elements_Idx.x_pow_times_t _ => 0
         | SRS_Elements_Idx.y _ => 0
-        | SRS_Elements_Idx.q i => 0
-    verificationPairingSRS_G2 := fun stmt _ i SRS_idx => match i with
+        | SRS_Elements_Idx.q _ => 0
+    verificationPairingSRS_G2 := fun _stmt _ i SRS_idx => match i with
       | PairingsIdx.ab => match SRS_idx with
         | SRS_Elements_Idx.β => 0
         | SRS_Elements_Idx.γ => 0
@@ -220,7 +220,7 @@ noncomputable def Groth16TypeI
         | SRS_Elements_Idx.δ => 1
         | SRS_Elements_Idx.x_pow _ => 0
         | _ => 0
-    verificationPairingProof_G1 := fun stmt _ i pf => match i with
+    verificationPairingProof_G1 := fun _stmt _ i pf => match i with
       | PairingsIdx.ab => match pf with
         | Proof_Idx.A => 1
         | Proof_Idx.B => 0
@@ -237,7 +237,7 @@ noncomputable def Groth16TypeI
         | Proof_Idx.A => 0
         | Proof_Idx.B => 0
         | Proof_Idx.C => 1
-    verificationPairingProof_G2 := fun stmt _ i pf => match i with
+    verificationPairingProof_G2 := fun _stmt _ i pf => match i with
       | PairingsIdx.ab => match pf with
         | Proof_Idx.A => 0
         | Proof_Idx.B => -1
@@ -260,12 +260,12 @@ noncomputable def Groth16TypeI
 lemma identified_proof_elems_def
     {F : Type} [Field F]
     {n_stmt n_wit n_var : ℕ}
-    {u_stmt : Fin n_stmt → (Polynomial F) }
-    {u_wit : Fin n_wit → (Polynomial F) }
-    {v_stmt : Fin n_stmt → (Polynomial F) }
-    {v_wit : Fin n_wit → (Polynomial F) }
-    {w_stmt : Fin n_stmt → (Polynomial F) }
-    {w_wit : Fin n_wit → (Polynomial F) }
+    {u_stmt : Fin n_stmt → (Polynomial F)}
+    {u_wit : Fin n_wit → (Polynomial F)}
+    {v_stmt : Fin n_stmt → (Polynomial F)}
+    {v_wit : Fin n_wit → (Polynomial F)}
+    {w_stmt : Fin n_stmt → (Polynomial F)}
+    {w_wit : Fin n_wit → (Polynomial F)}
     {r : Fin n_wit → F} :
     (Groth16TypeI
         (F := F) (n_stmt := n_stmt) (n_wit := n_wit) (n_var := n_var)
@@ -275,17 +275,16 @@ lemma identified_proof_elems_def
 section soundness
 
 -- Remove heartbeat limit for upcoming long-running proof
-set_option maxHeartbeats 0 -- 0 means no limit
-
+set_option maxHeartbeats 0 in -- 0 means no limit
 lemma is_sound
     {F : Type} [Field F]
     {n_stmt n_wit n_var : ℕ}
-    {u_stmt : Fin n_stmt → (Polynomial F) }
-    {u_wit : Fin n_wit → (Polynomial F) }
-    {v_stmt : Fin n_stmt → (Polynomial F) }
-    {v_wit : Fin n_wit → (Polynomial F) }
-    {w_stmt : Fin n_stmt → (Polynomial F) }
-    {w_wit : Fin n_wit → (Polynomial F) }
+    {u_stmt : Fin n_stmt → (Polynomial F)}
+    {u_wit : Fin n_wit → (Polynomial F)}
+    {v_stmt : Fin n_stmt → (Polynomial F)}
+    {v_wit : Fin n_wit → (Polynomial F)}
+    {w_stmt : Fin n_stmt → (Polynomial F)}
+    {w_wit : Fin n_wit → (Polynomial F)}
     {r : Fin n_wit → F} :
     (soundness
       F
@@ -353,7 +352,6 @@ lemma is_sound
     apply Polynomial.monic_prod_of_monic
     intro i hi
     exact Polynomial.monic_X_sub_C (r i)
-    done
 
 
 
@@ -382,7 +380,6 @@ lemma is_sound
     List.sum_map_mul_right, List.sum_map_mul_left] at eqn eqnA eqnB eqnC
 
   -- Apply MvPolynomial.optionEquivRight *here*, so that we can treat polynomials in Vars_X as constants
-  trace "Converting to MvPolynomial over Polynomials"
   simp only [←(EquivLike.apply_eq_iff_eq (optionEquivRight _ _))] at eqn eqnA eqnB eqnC
   simp only [map_add, map_zero, map_mul, map_one,
     map_neg, AlgEquiv.list_map_sum, map_pow] at eqn eqnA eqnB eqnC
@@ -393,8 +390,6 @@ lemma is_sound
     sum_map_C] at eqn eqnA eqnB eqnC
 
   simp only [X, C_apply, monomial_mul, one_mul, mul_one, add_zero, zero_add, mul_add, add_mul] at eqn eqnA eqnB eqnC
-
-  trace "Applying individual coefficients"
 
   have h0012 := congr_arg (coeff (Finsupp.single Vars.α 0 + Finsupp.single Vars.β 0 + Finsupp.single Vars.γ 1 + Finsupp.single Vars.δ 2)) eqn
   have h0021 := congr_arg (coeff (Finsupp.single Vars.α 0 + Finsupp.single Vars.β 0 + Finsupp.single Vars.γ 2 + Finsupp.single Vars.δ 1)) eqn
@@ -448,15 +443,11 @@ lemma is_sound
 
   clear eqn eqnA eqnB eqnC
 
-  trace "Distribute coefficient-taking over terms"
   simp only [coeff_monomial, coeff_add, coeff_neg, coeff_zero] at h0012 h0021 h0022 h0112 h0121 h0122 h0212 h0221 h0222 h1022 h1112 h1121 h1122 hA1011 hA0111 hA0012 hA0011 hA0010 hA0101 hA1001 hA0001 hA0110 hA1010 hA0021 hB1011 hB0111 hB0012 hB0011 hB0010 hB0101 hB1001 hB0001 hB0110 hB1010 hB0021 hC1011 hC0111 hC0012 hC0011 hC0010 hC0101 hC1001 hC0001 hC0110 hC1010 hC0021
 
-  trace "Simplifying coefficient expressions"
   simp only [Vars.finsupp_eq_ext, Finsupp.single_apply, Finsupp.add_apply] at h0012 h0021 h0022 h0112 h0121 h0122 h0212 h0221 h0222 h1022 h1112 h1121 h1122 hA1011 hA0111 hA0012 hA0011 hA0010 hA0101 hA1001 hA0001 hA0110 hA1010 hA0021 hB1011 hB0111 hB0012 hB0011 hB0010 hB0101 hB1001 hB0001 hB0110 hB1010 hB0021 hC1011 hC0111 hC0012 hC0011 hC0010 hC0101 hC1001 hC0001 hC0110 hC1010 hC0021
 
-  trace "Determine which coefficients are nonzero"
   simp (config := {decide := true}) only [ite_false, ite_true] at h0012 h0021 h0022 h0112 h0121 h0122 h0212 h0221 h0222 h1022 h1112 h1121 h1122 hA1011 hA0111 hA0012 hA0011 hA0010 hA0101 hA1001 hA0001 hA0110 hA1010 hA0021 hB1011 hB0111 hB0012 hB0011 hB0010 hB0101 hB1001 hB0001 hB0110 hB1010 hB0021 hC1011 hC0111 hC0012 hC0011 hC0010 hC0101 hC1001 hC0001 hC0110 hC1010 hC0021
-  trace "Remove zeros"
   simp only [neg_zero, add_zero, zero_add] at h0012 h0021 h0022 h0112 h0121 h0122 h0212 h0221 h0222 h1022 h1112 h1121 h1122 hA1011 hA0111 hA0012 hA0011 hA0010 hA0101 hA1001 hA0001 hA0110 hA1010 hA0021 hB1011 hB0111 hB0012 hB0011 hB0010 hB0101 hB1001 hB0001 hB0110 hB1010 hB0021 hC1011 hC0111 hC0012 hC0011 hC0010 hC0101 hC1001 hC0001 hC0110 hC1010 hC0021
 
 
@@ -571,5 +562,7 @@ lemma is_sound
 
 
 end soundness
+
+end Groth16TypeI
 
 end Groth16TypeI

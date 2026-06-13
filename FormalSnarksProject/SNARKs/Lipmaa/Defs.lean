@@ -31,7 +31,7 @@ lemma Vars.finsupp_eq_ext (f g : Vars →₀ ℕ) : f = g ↔
   · intro h
     simp_rw [h]
   · intro h x
-    cases x <;> tauto
+    cases x; tauto
 
 
 inductive Proof_G1_Idx : Type where
@@ -77,7 +77,6 @@ inductive SRS_Elements_G2_Idx {n_stmt n_wit n_var : ℕ} : Type where
 
 /--
 TODO
-
 -/
 noncomputable def Lipmaa
     /- The finite field parameter of our SNARK -/
@@ -179,8 +178,8 @@ noncomputable def Lipmaa
         | SRS_Elements_G1_Idx.x_pow _ => 0
         | SRS_Elements_G1_Idx.x_pow_times_t _ => 0
         | SRS_Elements_G1_Idx.y _ => 0
-        | SRS_Elements_G1_Idx.q i => 0
-    verificationPairingSRS_G2 := fun stmt _ i SRS_idx => match i with
+        | SRS_Elements_G1_Idx.q _ => 0
+    verificationPairingSRS_G2 := fun _stmt _ i SRS_idx => match i with
       | PairingsIdx.ab => match SRS_idx with
         | SRS_Elements_G2_Idx.β => 0
         | SRS_Elements_G2_Idx.γ => 0
@@ -201,7 +200,7 @@ noncomputable def Lipmaa
         | SRS_Elements_G2_Idx.γ => 0
         | SRS_Elements_G2_Idx.δ => 1
         | SRS_Elements_G2_Idx.x_pow _ => 0
-    verificationPairingProof_G1 := fun stmt _ i pf => match i with
+    verificationPairingProof_G1 := fun _stmt _ i pf => match i with
       | PairingsIdx.ab => match pf with
         | Proof_G1_Idx.A => 1
         | Proof_G1_Idx.C => 0
@@ -214,7 +213,7 @@ noncomputable def Lipmaa
       | PairingsIdx.cδ => match pf with
         | Proof_G1_Idx.A => 0
         | Proof_G1_Idx.C => 1
-    verificationPairingProof_G2 := fun stmt _ i pf => match i with
+    verificationPairingProof_G2 := fun _stmt _ i pf => match i with
       | PairingsIdx.ab => match pf with
         | Proof_G2_Idx.B => -1
       | PairingsIdx.αβ => match pf with
@@ -226,5 +225,7 @@ noncomputable def Lipmaa
   }
 
 
+
+end Lipmaa
 
 end Lipmaa

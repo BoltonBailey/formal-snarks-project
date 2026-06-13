@@ -9,7 +9,7 @@ example [Nonempty U] {f : U → U → U} {a b c d : U}
   smt [h0, h1, h2, h3, h4]
 
 lemma foo [Field F] (a b x y z : F)
-    (h1 : a * x = 0) (h2 : a * y + b * x = z) (h4 : b * y = 0) : (b * x - z) * (a * y - z) = 0 := by
+    (h1 : a * x = 0) (h2 : a * y + b * x = z) (_h4 : b * y = 0) : (b * x - z) * (a * y - z) = 0 := by
   -- smt (showQuery := true) [h1, h2, h4]
   -- smt [h1, h2, h4]
   grobner
