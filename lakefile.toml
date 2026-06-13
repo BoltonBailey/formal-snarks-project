@@ -12,12 +12,12 @@ maxSynthPendingDepth = 3
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"
-rev = "v4.27.0"
+rev = "v4.28.0"
 
 [[require]]
 name = "smt"
 scope = "ufmg-smite"
-rev = "main"
+rev = "535adf04d082563bacf01f4462ce90a671326171"
 
 [[lean_lib]]
 name = "FormalSnarksProject"
