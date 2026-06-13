@@ -124,7 +124,7 @@ noncomputable def Groth16TypeIII
     {r : Fin n_wit → F} :
     AGMProofSystemInstantiation F :=
   let t : Polynomial F :=
-    ∏ i in (Finset.univ : Finset (Fin n_wit)), (Polynomial.X - Polynomial.C (r i));
+    ∏ i ∈ (Finset.univ : Finset (Fin n_wit)), (Polynomial.X - Polynomial.C (r i));
   {
     Stmt := Fin n_stmt -> F
     Sample := Option Vars

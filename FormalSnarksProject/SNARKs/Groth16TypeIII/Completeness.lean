@@ -72,7 +72,7 @@ noncomputable def wit_prover (F : Type) [Field F]
             | SRS_Elements_G1_Idx.δ => 0
             | SRS_Elements_G1_Idx.x_pow _ => 0
             | SRS_Elements_G1_Idx.x_pow_times_t i =>
-              let t : Polynomial F := ∏ i in (Finset.univ : Finset (Fin n_wit)), (Polynomial.X - Polynomial.C (r i));
+              let t : Polynomial F := ∏ i ∈ (Finset.univ : Finset (Fin n_wit)), (Polynomial.X - Polynomial.C (r i));
               (((u_sum u_stmt u_wit stmt wit) * (v_sum v_stmt v_wit stmt wit) - (w_sum w_stmt w_wit stmt wit)) /ₘ t).coeff i
             | SRS_Elements_G1_Idx.y i => 0
             | SRS_Elements_G1_Idx.q i => wit i
@@ -103,7 +103,7 @@ def is_complete
       (Fin n_wit -> F)
       (fun (stmt : Fin n_stmt → F) (wit : Fin n_wit -> F) =>
         let t : Polynomial F :=
-          ∏ i in (Finset.univ : Finset (Fin n_wit)), (Polynomial.X - Polynomial.C (r i));
+          ∏ i ∈ (Finset.univ : Finset (Fin n_wit)), (Polynomial.X - Polynomial.C (r i));
         (((List.sum (List.map (fun i => Polynomial.C (stmt i) * u_stmt i) (List.finRange n_stmt)))
             + (List.sum (List.map (fun i => Polynomial.C (wit i) * u_wit i) (List.finRange n_wit))))
             *

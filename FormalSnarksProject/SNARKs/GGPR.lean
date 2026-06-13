@@ -134,7 +134,7 @@ noncomputable def GGPR
     AGMProofSystemInstantiation F :=
 
   /- t is the polynomial divisibility by which is used to verify satisfaction of the QAP -/
-  let t : Polynomial F := ∏ i : Fin n_wit in Finset.univ, (Polynomial.X - Polynomial.C (r i));
+  let t : Polynomial F := ∏ i ∈ (Finset.univ : Finset (Fin n_wit)), (Polynomial.X - Polynomial.C (r i));
   { Stmt := Fin n_stmt → F
     Sample := Option Vars
     SRSElements_G1 := @SRS_Elements_Idx n_stmt n_wit m d
@@ -393,7 +393,7 @@ lemma soundness
         r)
       ((Fin n_wit → F) × (Fin m → F))
       (fun (stmt : Fin n_stmt → F) (wit : (Fin n_wit -> F) × (Fin m → F)) =>
-        let t : Polynomial F := ∏ i : Fin n_wit in Finset.univ, (Polynomial.X - Polynomial.C (r i));
+        let t : Polynomial F := ∏ i ∈ (Finset.univ : Finset (Fin n_wit)), (Polynomial.X - Polynomial.C (r i));
         (-- Definition 2 from GGPR
           (v_0
             + (List.sum (List.map (fun i => Polynomial.C (stmt i) * v_stmt i) (List.finRange n_stmt)))
@@ -409,7 +409,7 @@ lemma soundness
            ⟨fun i => prover.snd Proof_G2_Idx.H (SRS_Elements_Idx.EK_β_v i ) ,
             fun i => prover.snd Proof_G2_Idx.H (SRS_Elements_Idx.EK_β_w i ) ⟩ )
     ) := by
-  unfold AGMProofSystemInstantiation.soundness AGMProofSystemInstantiation.verify AGMProofSystemInstantiation.proof_element_G1_as_poly AGMProofSystemInstantiation.proof_element_G2_as_poly
+  unfold AGMProofSystemInstantiation.soundness AGMProofSystemInstantiation.verify AGMProofSystemInstantiation.check_poly AGMProofSystemInstantiation.pairing_poly AGMProofSystemInstantiation.proof_element_G1_as_poly AGMProofSystemInstantiation.proof_element_G2_as_poly
   -- TODO namespcace AGMProofSystemInstantiation eliminate
   intros stmt prover eqns'
   rcases eqns' with ⟨eqns, null⟩
@@ -453,8 +453,8 @@ lemma soundness
   trace "Converting to MvPolynomial over Polynomials"
   -- replace eqn := congr_arg (MvPolynomial.optionEquivRight F Vars) eqn
   simp only [←(EquivLike.apply_eq_iff_eq (optionEquivRight _ _))] at eqnI eqnII eqnIII eqnIV eqnV
-  simp only [AlgEquiv.map_add, AlgEquiv.map_zero, AlgEquiv.map_mul, AlgEquiv.map_one,
-    AlgEquiv.map_neg, AlgEquiv.list_map_sum, AlgEquiv.map_pow] at eqnI eqnII eqnIII eqnIV eqnV
+  simp only [map_add, map_zero, map_mul, map_one,
+    map_neg, AlgEquiv.list_map_sum, map_pow] at eqnI eqnII eqnIII eqnIV eqnV
   simp only [optionEquivRight_C, optionEquivRight_X_none, optionEquivRight_X_some, optionEquivRight_to_MvPolynomial_Option] at eqnI eqnII eqnIII eqnIV eqnV
 
   -- Move Cs back out so we can recognize the monomials
@@ -505,8 +505,6 @@ lemma soundness
   skip
 
   integral_domain_tactic
-
-  done
 
   sorry
   -- TODO unfinished

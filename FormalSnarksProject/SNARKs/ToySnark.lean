@@ -146,7 +146,7 @@ lemma soundness
       (fun prover i => prover.fst Proof_G1_Idx.Pf (if i = WitEntries.A then .α else .β))
 
     ) := by
-  unfold AGMProofSystemInstantiation.soundness AGMProofSystemInstantiation.verify AGMProofSystemInstantiation.proof_element_G1_as_poly AGMProofSystemInstantiation.proof_element_G2_as_poly
+  unfold AGMProofSystemInstantiation.soundness AGMProofSystemInstantiation.verify AGMProofSystemInstantiation.check_poly AGMProofSystemInstantiation.pairing_poly AGMProofSystemInstantiation.proof_element_G1_as_poly AGMProofSystemInstantiation.proof_element_G2_as_poly
   intros stmt prover eqns'
   rcases eqns' with ⟨eqns, null⟩
   have eqn := eqns ()
@@ -180,8 +180,8 @@ lemma soundness
   -- so that we can treat polynomials in Vars_X as constants
   trace "Converting to MvPolynomial over Polynomials"
   replace eqn := congr_arg (MvPolynomial.optionEquivRight F Vars) eqn
-  simp only [AlgEquiv.map_add, AlgEquiv.map_zero, AlgEquiv.map_mul, AlgEquiv.map_one,
-    AlgEquiv.map_neg, AlgEquiv.list_map_sum, AlgEquiv.map_pow] at eqn
+  simp only [map_add, map_zero, map_mul, map_one,
+    map_neg, AlgEquiv.list_map_sum, map_pow] at eqn
   simp only [MvPolynomial.optionEquivRight_C, MvPolynomial.optionEquivRight_X_none, MvPolynomial.optionEquivRight_X_some, optionEquivRight_to_MvPolynomial_Option] at eqn
   -- Move Cs back out so we can recognize the monomials
   -- simp only [←MvPolynomial.C_mul, ←MvPolynomial.C_pow, ←MvPolynomial.C_add,
@@ -206,7 +206,7 @@ lemma soundness
 
   simp [ite_true, ite_self, add_zero, ite_false, and_self, zero_add,
     one_ne_zero, and_false, false_and, add_eq_zero, mul_eq_zero,
-    add_right_eq_self, zero_ne_one, and_true, true_and, neg_zero] at h20 h11 h02 ⊢
+    add_eq_left, zero_ne_one, and_true, true_and, neg_zero] at h20 h11 h02 ⊢
 
 
   -- Completely remove references to Polynomial

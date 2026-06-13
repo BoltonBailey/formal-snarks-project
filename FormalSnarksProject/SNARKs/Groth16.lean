@@ -92,7 +92,7 @@ noncomputable def Groth16TypeI
     {r : Fin n_wit → F} :
     AGMProofSystemInstantiation F :=
   let t : Polynomial F :=
-    ∏ i in (Finset.univ : Finset (Fin n_wit)), (Polynomial.X - Polynomial.C (r i));
+    ∏ i ∈ (Finset.univ : Finset (Fin n_wit)), (Polynomial.X - Polynomial.C (r i));
   {
     Stmt := Fin n_stmt -> F
     Sample := Option Vars
@@ -296,7 +296,7 @@ lemma is_sound
       (Fin n_wit -> F)
       (fun (stmt : Fin n_stmt → F) (wit : Fin n_wit -> F) =>
         let t : Polynomial F :=
-          ∏ i in (Finset.univ : Finset (Fin n_wit)), (Polynomial.X - Polynomial.C (r i));
+          ∏ i ∈ (Finset.univ : Finset (Fin n_wit)), (Polynomial.X - Polynomial.C (r i));
         (((List.sum (List.map (fun i => Polynomial.C (stmt i) * u_stmt i) (List.finRange n_stmt)))
             + (List.sum (List.map (fun i => Polynomial.C (wit i) * u_wit i) (List.finRange n_wit))))
             *
@@ -348,6 +348,7 @@ lemma is_sound
     simp only [mul_comm _ (t), <-mul_assoc]
     simp only [mul_assoc, List.sum_map_mul_right, List.sum_map_mul_left]
 
+    rw [mul_comm]
     apply Polynomial.mul_self_modByMonic
     apply Polynomial.monic_prod_of_monic
     intro i hi
@@ -383,8 +384,8 @@ lemma is_sound
   -- Apply MvPolynomial.optionEquivRight *here*, so that we can treat polynomials in Vars_X as constants
   trace "Converting to MvPolynomial over Polynomials"
   simp only [←(EquivLike.apply_eq_iff_eq (optionEquivRight _ _))] at eqn eqnA eqnB eqnC
-  simp only [AlgEquiv.map_add, AlgEquiv.map_zero, AlgEquiv.map_mul, AlgEquiv.map_one,
-    AlgEquiv.map_neg, AlgEquiv.list_map_sum, AlgEquiv.map_pow] at eqn eqnA eqnB eqnC
+  simp only [map_add, map_zero, map_mul, map_one,
+    map_neg, AlgEquiv.list_map_sum, map_pow] at eqn eqnA eqnB eqnC
   simp only [optionEquivRight_C, optionEquivRight_X_none, optionEquivRight_X_some, optionEquivRight_to_MvPolynomial_Option] at eqn eqnA eqnB eqnC
 
   -- Move Cs back out so we can recognize the monomials
@@ -458,7 +459,6 @@ lemma is_sound
   trace "Remove zeros"
   simp only [neg_zero, add_zero, zero_add] at h0012 h0021 h0022 h0112 h0121 h0122 h0212 h0221 h0222 h1022 h1112 h1121 h1122 hA1011 hA0111 hA0012 hA0011 hA0010 hA0101 hA1001 hA0001 hA0110 hA1010 hA0021 hB1011 hB0111 hB0012 hB0011 hB0010 hB0101 hB1001 hB0001 hB0110 hB1010 hB0021 hC1011 hC0111 hC0012 hC0011 hC0010 hC0101 hC1001 hC0001 hC0110 hC1010 hC0021
 
-  save
 
   -- Step 2: Recursively simplify and case-analyze the equations
   -- dsimp only
@@ -564,8 +564,8 @@ lemma is_sound
   -- -/
 
 
-  integral_domain_tactic <;> polyrith
-  -- Output not checked
+  integral_domain_tactic
+  -- Output not checked (polyrith no longer available)
   sorry
 
 

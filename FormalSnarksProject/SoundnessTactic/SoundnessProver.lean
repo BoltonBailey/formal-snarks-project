@@ -42,8 +42,8 @@ macro_rules
     -- Apply MvPolynomial.optionEquivRight *here*, so that we can treat polynomials in Vars_X as constants
     trace "Converting to MvPolynomial over Polynomials";
     replace eqn := congr_arg (MvPolynomial.optionEquivRight F Vars) eqn;
-    simp only [AlgEquiv.map_add, AlgEquiv.map_zero, AlgEquiv.map_mul, AlgEquiv.map_one,
-      AlgEquiv.map_neg, AlgEquiv.list_map_sum, AlgEquiv.map_pow] at eqn;
+    simp only [map_add, map_zero, map_mul, map_one,
+      map_neg, AlgEquiv.list_map_sum, map_pow] at eqn;
     simp only [MvPolynomial.optionEquivRight_C, MvPolynomial.optionEquivRight_X_none, MvPolynomial.optionEquivRight_X_some, optionEquivRight_to_MvPolynomial_Option] at eqn;
 
     -- Move Cs back out so we can recognize the monomials

@@ -189,7 +189,8 @@ lemma collapseToxicWaste_check_poly (𝓟 : AGMProofSystemInstantiation F) (d : 
         (AGMProofSystemInstantiation.check_poly 𝓟 agm stmt check_idx) := by
   intros agm stmt check_idx
   unfold collapseToxicWaste AGMProofSystemInstantiation.check_poly AGMProofSystemInstantiation.pairing_poly AGMProofSystemInstantiation.proof_element_G1_as_poly AGMProofSystemInstantiation.proof_element_G2_as_poly
-  simp only [AlgHom.list_map_sum, map_mul, map_add, MvPolynomial.algHom_C]
+  simp only [AlgHom.list_map_sum, map_mul, map_add, MvPolynomial.algHom_C,
+    MvPolynomial.algebraMap_eq]
 
 lemma collapseToxicWaste_soundness (𝓟 : AGMProofSystemInstantiation F) (d : ℕ) (hd : 0 < d)
     [DecidableEq 𝓟.Sample]

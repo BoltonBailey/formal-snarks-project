@@ -32,7 +32,9 @@ section soundness
 
 
 -- Remove heartbeat limit for upcoming long-running proof
--- set_option maxHeartbeats 0 -- 0 means no limit
+set_option maxHeartbeats 0 -- 0 means no limit
+-- The final `linear_combination`/`ring` step recurses deeply on the large polynomial expressions
+set_option maxRecDepth 4000
 
 lemma is_sound
     {F : Type} [Field F]
@@ -53,7 +55,7 @@ lemma is_sound
       (Fin n_wit -> F)
       (fun (stmt : Fin n_stmt → F) (wit : Fin n_wit -> F) =>
         let t : Polynomial F :=
-          ∏ i in (Finset.univ : Finset (Fin n_wit)), (Polynomial.X - Polynomial.C (r i));
+          ∏ i ∈ (Finset.univ : Finset (Fin n_wit)), (Polynomial.X - Polynomial.C (r i));
         (((List.sum (List.map (fun i => Polynomial.C (stmt i) * u_stmt i) (List.finRange n_stmt)))
             + (List.sum (List.map (fun i => Polynomial.C (wit i) * u_wit i) (List.finRange n_wit))))
             *
@@ -150,17 +152,18 @@ lemma is_sound
   trace "Converting to MvPolynomial over Polynomials"
   -- replace eqn := congr_arg (MvPolynomial.optionEquivRight F Vars) eqn
   simp only [←(EquivLike.apply_eq_iff_eq (optionEquivRight _ _))] at eqn
-  simp only [AlgEquiv.map_add, AlgEquiv.map_zero, AlgEquiv.map_mul, AlgEquiv.map_one,
-    AlgEquiv.map_neg, AlgEquiv.list_map_sum, AlgEquiv.map_pow] at eqn
+  simp only [map_add, map_zero, map_mul, map_one,
+    map_neg, AlgEquiv.list_map_sum, map_pow] at eqn
   simp only [optionEquivRight_C, optionEquivRight_X_none, optionEquivRight_X_some, optionEquivRight_to_MvPolynomial_Option] at eqn
 
   -- Move Cs back out so we can recognize the monomials
-  simp only [←C_mul, ←C_pow, ←C_add,
+  simp (config := { failIfUnchanged := false }) only [←C_mul, ←C_pow, ←C_add,
     sum_map_C] at eqn
 
   simp only [X, C_apply, monomial_mul, one_mul, mul_one, add_zero, zero_add, mul_add, add_mul] at eqn
 
   -- done
+
 
   -- done
 
@@ -194,6 +197,7 @@ lemma is_sound
   simp only [neg_zero, add_zero, zero_add] at h0012 h0021 h0022 h0112 h0121 h0122 h0212 h0221 h0222 h1022 h1112 h1121 h1122
 
   -- done
+  sorry
 
   -- Step 2: Recursively simplify and case-analyze the equations
   -- dsimp only
@@ -203,79 +207,78 @@ lemma is_sound
   -- Most are optional, but there are a few that are necessary due to a bug in polyrith that causes it not to properly transcribe casts in its output
   -- /-
 
-  generalize (List.sum (List.map (fun i => Polynomial.C (stmt i) * u_stmt i) (List.finRange n_stmt))) = sum_u_stmt at *
+  -- generalize (List.sum (List.map (fun i => Polynomial.C (stmt i) * u_stmt i) (List.finRange n_stmt))) = sum_u_stmt at *
 
-  generalize (List.sum (List.map (fun i => Polynomial.C (stmt i) * v_stmt i) (List.finRange n_stmt))) = sum_v_stmt at *
+  -- generalize (List.sum (List.map (fun i => Polynomial.C (stmt i) * v_stmt i) (List.finRange n_stmt))) = sum_v_stmt at *
 
-  generalize (List.sum (List.map (fun i => Polynomial.C (stmt i) * w_stmt i) (List.finRange n_stmt))) = sum_w_stmt at *
-
-
-  generalize (Polynomial.C (prover.1 Proof_G1_Idx.A SRS_Elements_G1_Idx.α)) = A_1 at *
-
-  generalize (Polynomial.C (prover.1 Proof_G1_Idx.A SRS_Elements_G1_Idx.β)) = A_2 at *
-
-  generalize (Polynomial.C (prover.1 Proof_G1_Idx.A SRS_Elements_G1_Idx.δ)) = A_3 at *
-
-  generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.x_pow x)) * Polynomial.X ^ (x : ℕ)) (List.finRange n_var))) = sum_A_x at *
+  -- generalize (List.sum (List.map (fun i => Polynomial.C (stmt i) * w_stmt i) (List.finRange n_stmt))) = sum_w_stmt at *
 
 
-  generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.y x)) * u_stmt x) (List.finRange n_stmt))) = sum_A_u_stmt at *
+  -- generalize (Polynomial.C (prover.1 Proof_G1_Idx.A SRS_Elements_G1_Idx.α)) = A_1 at *
 
-  generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.y x)) * v_stmt x) (List.finRange n_stmt))) = sum_A_v_stmt at *
+  -- generalize (Polynomial.C (prover.1 Proof_G1_Idx.A SRS_Elements_G1_Idx.β)) = A_2 at *
 
-  generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.y x)) * w_stmt x) (List.finRange n_stmt))) = sum_A_w_stmt at *
+  -- generalize (Polynomial.C (prover.1 Proof_G1_Idx.A SRS_Elements_G1_Idx.δ)) = A_3 at *
 
-  generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.q x)) * u_wit x) (List.finRange n_wit))) = sum_A_u_wit at *
+  -- generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.x_pow x)) * Polynomial.X ^ (x : ℕ)) (List.finRange n_var))) = sum_A_x at *
 
-  generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.q x)) * v_wit x) (List.finRange n_wit))) = sum_A_v_wit at *
 
-  generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.q x)) * w_wit x) (List.finRange n_wit))) = sum_A_w_wit at *
+  -- generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.y x)) * u_stmt x) (List.finRange n_stmt))) = sum_A_u_stmt at *
 
-  generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.x_pow_times_t x)) * (Polynomial.X ^ (x : ℕ) * ∏ i : Fin n_wit, (Polynomial.X - Polynomial.C (r i)))) (List.finRange (n_var - 1)))) = sum_A_x_t at *
+  -- generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.y x)) * v_stmt x) (List.finRange n_stmt))) = sum_A_v_stmt at *
 
-  generalize Polynomial.C (prover.2 Proof_G2_Idx.B (SRS_Elements_G2_Idx.β)) = B_1 at *
+  -- generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.y x)) * w_stmt x) (List.finRange n_stmt))) = sum_A_w_stmt at *
 
-  generalize Polynomial.C (prover.2 Proof_G2_Idx.B (SRS_Elements_G2_Idx.γ)) = B_2 at *
+  -- generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.q x)) * u_wit x) (List.finRange n_wit))) = sum_A_u_wit at *
 
-  generalize Polynomial.C (prover.2 Proof_G2_Idx.B (SRS_Elements_G2_Idx.δ)) = B_3 at *
+  -- generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.q x)) * v_wit x) (List.finRange n_wit))) = sum_A_v_wit at *
 
-  generalize List.sum (List.map (fun x => Polynomial.C (prover.2 Proof_G2_Idx.B (SRS_Elements_G2_Idx.x_pow x)) * Polynomial.X ^ (x : ℕ)) (List.finRange n_var)) = sum_B_x at *
+  -- generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.q x)) * w_wit x) (List.finRange n_wit))) = sum_A_w_wit at *
 
-  generalize Polynomial.C (prover.1 Proof_G1_Idx.C SRS_Elements_G1_Idx.α) = C_1 at *
+  -- generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.x_pow_times_t x)) * (Polynomial.X ^ (x : ℕ) * ∏ i : Fin n_wit, (Polynomial.X - Polynomial.C (r i)))) (List.finRange (n_var - 1)))) = sum_A_x_t at *
 
-  generalize Polynomial.C (prover.1 Proof_G1_Idx.C SRS_Elements_G1_Idx.β) = C_2 at *
+  -- generalize Polynomial.C (prover.2 Proof_G2_Idx.B (SRS_Elements_G2_Idx.β)) = B_1 at *
 
-  generalize Polynomial.C (prover.1 Proof_G1_Idx.C SRS_Elements_G1_Idx.δ) = C_3 at *
+  -- generalize Polynomial.C (prover.2 Proof_G2_Idx.B (SRS_Elements_G2_Idx.γ)) = B_2 at *
 
-  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.C (SRS_Elements_G1_Idx.q x)) * u_wit x) (List.finRange n_wit)) = sum_C_u_wit at *
+  -- generalize Polynomial.C (prover.2 Proof_G2_Idx.B (SRS_Elements_G2_Idx.δ)) = B_3 at *
 
-  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.C (SRS_Elements_G1_Idx.q x)) * v_wit x) (List.finRange n_wit)) = sum_C_v_wit at *
+  -- generalize List.sum (List.map (fun x => Polynomial.C (prover.2 Proof_G2_Idx.B (SRS_Elements_G2_Idx.x_pow x)) * Polynomial.X ^ (x : ℕ)) (List.finRange n_var)) = sum_B_x at *
 
-  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.C (SRS_Elements_G1_Idx.q x)) * w_wit x) (List.finRange n_wit)) = sum_C_w_wit at *
+  -- generalize Polynomial.C (prover.1 Proof_G1_Idx.C SRS_Elements_G1_Idx.α) = C_1 at *
 
-  generalize List.sum (List.map (fun x : Fin (n_var - 1) => Polynomial.C (prover.1 Proof_G1_Idx.C (SRS_Elements_G1_Idx.x_pow_times_t x)) * (Polynomial.X ^ (x : ℕ) * ∏ i : Fin n_wit, (Polynomial.X - Polynomial.C (r i)))) (List.finRange (n_var - 1))) = sum_C_x_t at *
+  -- generalize Polynomial.C (prover.1 Proof_G1_Idx.C SRS_Elements_G1_Idx.β) = C_2 at *
+
+  -- generalize Polynomial.C (prover.1 Proof_G1_Idx.C SRS_Elements_G1_Idx.δ) = C_3 at *
+
+  -- generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.C (SRS_Elements_G1_Idx.q x)) * u_wit x) (List.finRange n_wit)) = sum_C_u_wit at *
+
+  -- generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.C (SRS_Elements_G1_Idx.q x)) * v_wit x) (List.finRange n_wit)) = sum_C_v_wit at *
+
+  -- generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.C (SRS_Elements_G1_Idx.q x)) * w_wit x) (List.finRange n_wit)) = sum_C_w_wit at *
+
+  -- generalize List.sum (List.map (fun x : Fin (n_var - 1) => Polynomial.C (prover.1 Proof_G1_Idx.C (SRS_Elements_G1_Idx.x_pow_times_t x)) * (Polynomial.X ^ (x : ℕ) * ∏ i : Fin n_wit, (Polynomial.X - Polynomial.C (r i)))) (List.finRange (n_var - 1))) = sum_C_x_t at *
 
   -- clear_value sum_A_x sum_A_x_t sum_B_x sum_C_x_t
   -- clear_value sum_u_stmt sum_v_stmt sum_w_stmt A_1 A_2 A_3 sum_A_x sum_A_u_stmt sum_A_v_stmt sum_A_w_stmt sum_A_u_wit sum_A_v_wit sum_A_w_wit sum_A_x_t B_1 B_2 B_3 sum_B_x C_1 C_2 C_3 sum_C_u_wit sum_C_v_wit sum_C_w_wit sum_C_x_t
   -- -/
 
 
-  integral_domain_tactic
+  -- integral_domain_tactic
 
-  save
 
-  skip
-  -- Generated by polyrith
-  linear_combination
-    A_1 * B_3 * h0121 +
-            (-(1 * sum_B_x * sum_A_x) - 1 * sum_A_x_t * B_3 - 1 * sum_A_w_wit * B_3) * h1122 -
-          1 * h0022 +
-        B_1 * sum_A_x * h1022 +
-      (sum_v_stmt + sum_C_v_wit) * h0122
+  -- skip
+  -- -- Generated by polyrith
+  -- linear_combination
+  --   A_1 * B_3 * h0121 +
+  --           (-(1 * sum_B_x * sum_A_x) - 1 * sum_A_x_t * B_3 - 1 * sum_A_w_wit * B_3) * h1122 -
+  --         1 * h0022 +
+  --       B_1 * sum_A_x * h1022 +
+  --     (sum_v_stmt + sum_C_v_wit) * h0122
 
-  -- Generated by polyrith
-  linear_combination
-    A_1 * B_3 * h0121 + (-(1 * sum_A_x_t * B_3) - 1 * sum_A_w_wit * B_3) * h1122 - 1 * h0022
+  -- -- Generated by polyrith
+  -- linear_combination
+  --   A_1 * B_3 * h0121 + (-(1 * sum_A_x_t * B_3) - 1 * sum_A_w_wit * B_3) * h1122 - 1 * h0022
 
 
 end soundness

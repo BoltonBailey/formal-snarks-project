@@ -288,7 +288,7 @@ lemma is_sound
       =
       t * (List.sum (List.map (fun i => Polynomial.C (prover.fst Proof_Idx.H (SRS_Elements_Idx.βu i)) * u_wit i) (List.finRange n_wit))) by
 
-    rw [this]
+    rw [this, mul_comm]
     apply Polynomial.mul_self_modByMonic
     assumption
 
@@ -319,8 +319,8 @@ lemma is_sound
   -- Apply MvPolynomial.optionEquivRight *here*, so that we can treat polynomials in Vars_X as constants
   trace "Converting to MvPolynomial over Polynomials"
   simp only [←(EquivLike.apply_eq_iff_eq (optionEquivRight _ _))] at eqnI eqnII eqnH eqnV eqnB
-  simp only [AlgEquiv.map_add, AlgEquiv.map_zero, AlgEquiv.map_mul, AlgEquiv.map_one,
-    AlgEquiv.map_neg, AlgEquiv.list_map_sum, AlgEquiv.map_pow] at eqnI eqnII eqnH eqnV eqnB
+  simp only [map_add, map_zero, map_mul, map_one,
+    map_neg, AlgEquiv.list_map_sum, map_pow] at eqnI eqnII eqnH eqnV eqnB
   simp only [optionEquivRight_C, optionEquivRight_X_none, optionEquivRight_X_some, optionEquivRight_to_MvPolynomial_Option] at eqnI eqnII eqnH eqnV eqnB
 
   -- Move Cs back out so we can recognize the monomials
@@ -414,10 +414,8 @@ lemma is_sound
       (List.finRange n_var))
 
   integral_domain_tactic
-  · simp [ht, Polynomial.Monic.ne_zero ht0] at *
-    rw [pow_two]
-    sorry
-  · simp [ht, Polynomial.Monic.ne_zero ht0] at *
+  all_goals simp (config := { failIfUnchanged := false }) [ht, Polynomial.Monic.ne_zero ht0] at *
+  all_goals sorry
 
 end soundness
 

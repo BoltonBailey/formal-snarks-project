@@ -425,7 +425,7 @@ lemma soundness
           %ₘ t = 0)
         ( fun prover i => prover.fst Proof_G1_Idx.Z (SRS_Elements_Idx.EK_β_v_w_y i) )
     ) := by
-  unfold soundness verify check_poly pairing_poly proof_element_G1_as_poly proof_element_G2_as_poly
+  unfold AGMProofSystemInstantiation.soundness verify check_poly pairing_poly proof_element_G1_as_poly proof_element_G2_as_poly
   -- TODO namespcace AGMProofSystemInstantiation eliminate
   intros stmt prover eqns'
   rcases eqns' with ⟨eqns, eqnVI⟩
@@ -468,7 +468,8 @@ lemma soundness
     simp only [mul_comm _ (t), <-mul_assoc]
     -- simp only [mul_assoc, List.sum_map_mul_right, List.sum_map_mul_left]
 
-    apply Polynomial.mul_self_modByMonic t _ tMonic
+    rw [mul_comm]
+    apply Polynomial.mul_self_modByMonic tMonic
     done
 
   -- done
@@ -504,8 +505,8 @@ lemma soundness
   trace "Converting to MvPolynomial over Polynomials"
   -- replace eqn := congr_arg (MvPolynomial.optionEquivRight F Vars) eqn
   simp only [←(EquivLike.apply_eq_iff_eq (optionEquivRight _ _))] at eqnI eqnII eqnIII eqnIV eqnV
-  simp only [AlgEquiv.map_add, AlgEquiv.map_zero, AlgEquiv.map_mul, AlgEquiv.map_one,
-    AlgEquiv.map_neg, AlgEquiv.list_map_sum, AlgEquiv.map_pow] at eqnI eqnII eqnIII eqnIV eqnV
+  simp only [map_add, map_zero, map_mul, map_one,
+    map_neg, AlgEquiv.list_map_sum, map_pow] at eqnI eqnII eqnIII eqnIV eqnV
   simp only [optionEquivRight_C, optionEquivRight_X_none, optionEquivRight_X_some, optionEquivRight_to_MvPolynomial_Option] at eqnI eqnII eqnIII eqnIV eqnV
 
   -- Move Cs back out so we can recognize the monomials
@@ -684,7 +685,7 @@ lemma soundness
 
   clear tMonic
 
-  simp [this, -map_eq_zero, -Polynomial.C_eq_zero] at *
+  simp (config := { failIfUnchanged := false }) [-map_eq_zero, -Polynomial.C_eq_zero] at *
   -- polyrith -- error: not in ideal
   integral_domain_tactic <;> sorry
   -- TODO there must be some kind of bug in the representation

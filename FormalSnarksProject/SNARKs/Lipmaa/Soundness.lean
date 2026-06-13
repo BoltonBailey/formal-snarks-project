@@ -12,9 +12,8 @@ namespace Lipmaa
 section soundness
 
 lemma Polynomial.mul_self_modByMonic {F : Type} [Field F] (t p : Polynomial F) (mt : t.Monic) : (t * p) %ₘ t = 0 := by
-  rw [Polynomial.dvd_iff_modByMonic_eq_zero]
+  rw [Polynomial.modByMonic_eq_zero_iff_dvd mt]
   apply dvd_mul_right
-  exact mt
 
 
 
@@ -40,7 +39,7 @@ lemma soundness
       (Fin n_wit -> F)
       (fun (stmt : Fin n_stmt → F) (wit : Fin n_wit -> F) =>
         let t : Polynomial F :=
-          ∏ i in (Finset.univ : Finset (Fin n_wit)), (Polynomial.X - Polynomial.C (r i));
+          ∏ i ∈ (Finset.univ : Finset (Fin n_wit)), (Polynomial.X - Polynomial.C (r i));
         (((List.sum (List.map (fun i => Polynomial.C (stmt i) * u_stmt i) (List.finRange n_stmt)))
             + (List.sum (List.map (fun i => Polynomial.C (wit i) * u_wit i) (List.finRange n_wit))))
             *
@@ -54,7 +53,7 @@ lemma soundness
       (fun prover i => prover.fst Proof_G1_Idx.C (SRS_Elements_G1_Idx.q i))
     ) := by
 
-  unfold soundness verify check_poly pairing_poly proof_element_G1_as_poly proof_element_G2_as_poly
+  unfold AGMProofSystemInstantiation.soundness verify check_poly pairing_poly proof_element_G1_as_poly proof_element_G2_as_poly
 
   -- TODO namespcace AGMProofSystemInstantiation eliminate
   intros stmt prover eqns'
@@ -129,8 +128,8 @@ lemma soundness
   trace "Converting to MvPolynomial over Polynomials"
   -- replace eqn := congr_arg (MvPolynomial.optionEquivRight F Vars) eqn
   simp only [←(EquivLike.apply_eq_iff_eq (optionEquivRight _ _))] at eqn
-  simp only [AlgEquiv.map_add, AlgEquiv.map_zero, AlgEquiv.map_mul, AlgEquiv.map_one,
-    AlgEquiv.map_neg, AlgEquiv.list_map_sum, AlgEquiv.map_pow] at eqn
+  simp only [map_add, map_zero, map_mul, map_one,
+    map_neg, AlgEquiv.list_map_sum, map_pow] at eqn
   simp only [optionEquivRight_C, optionEquivRight_X_none, optionEquivRight_X_some, optionEquivRight_to_MvPolynomial_Option] at eqn
 
   -- Move Cs back out so we can recognize the monomials
@@ -279,14 +278,9 @@ lemma soundness
 
   integral_domain_tactic
 
-  save
 
-  skip
-  polyrith
-
-  polyrith
-
-  -- NOTE: If you try to run lake build on this file, polyrith fails, even though it works fine in the editor
-  -- This perhaps has to do with polyrith making external calls to Sage Web APIs
+  -- NOTE: polyrith is no longer available (its external Sage service was shut down),
+  -- so the remaining goals are left as `sorry`. The original proof closed them with polyrith.
+  all_goals sorry
 
 end soundness

@@ -86,32 +86,13 @@ def compile_Fin_list (l : List ℕ) : List (Fin (l.length)) := sorry
 
 
 def StraightforwardAGMProofSystem.toAGMProofSystem (F : Type) [Field F] (n_stmt n_wit : ℕ)
-    (𝓟 : StraightforwardAGMProofSystem) (aux : 𝓟.Aux) : AGMProofSystemInstantiation F where
-  Stmt := Fin n_stmt -> F
-  Sample := Option 𝓟.Vars
-  SRSElements_G1 := List.foldl Sum Empty ((𝓟.SRSElements_G1_Lengths n_stmt n_wit aux).map Fin)
-  ListSRSElements_G1 := List.foldl List.append [] (_)
-  SRSElements_G2 := _
-  ListSRSElements_G2 := _
-  SRSElementValue_G1 := _
-  SRSElementValue_G2 := _
-  Proof_G1 := _
-  ListProof_G1 := _
-  Proof_G2 := _
-  ListProof_G2 := _
-  EqualityChecks := _
-  Pairings := _
-  ListPairings := _
-  verificationPairingSRS_G1 := _
-  verificationPairingSRS_G2 := _
-  verificationPairingProof_G1 := _
-  verificationPairingProof_G2 := _
+    (𝓟 : StraightforwardAGMProofSystem) (aux : 𝓟.Aux) : AGMProofSystemInstantiation F := sorry
 
 
 
 
 def StraightforwardAGMProofSystem.soundness (F : Type) [Field F] (n_stmt n_wit : ℕ)
-    (𝓟 : StraightforwardAGMProofSystem F n_stmt n_wit) : Prop := sorry
+    (𝓟 : StraightforwardAGMProofSystem) : Prop := sorry
     -- ∀ stmt : Fin n_stmt → F,
     --   ∀ agm : proof_elems_index → Fin n_SRS → F,
     --     ((-- if all checks on the proof pass, the extracted witness must satisfy the relation
