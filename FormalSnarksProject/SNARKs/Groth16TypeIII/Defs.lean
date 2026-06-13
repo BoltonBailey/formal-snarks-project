@@ -1,11 +1,10 @@
+
+import Mathlib
+
 import FormalSnarksProject.Models.AGMProofSystemInstantiation
-import Mathlib.Algebra.Polynomial.Div
--- import FormalSnarksProject.ToMathlib.List
 import FormalSnarksProject.ToMathlib.OptionEquivRight
-import Mathlib.Algebra.MvPolynomial.Equiv
 import FormalSnarksProject.SoundnessTactic.SoundnessProver
 import FormalSnarksProject.SoundnessTactic.ProofMode
--- import FormalSnarksProject.ToMathlib.MulModByMonic
 
 /-!
 
