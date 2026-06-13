@@ -16,66 +16,11 @@ variable {F : Type}
 
 variable [Field F]
 
--- https://github.com/leanprover-community/mathlib4/pull/13023
-@[to_additive]
-lemma List.prod_map_ite_eq {A B : Type} [DecidableEq A] [CommGroup B] (f g : A → B) (a : A) (l : List A) :
-    List.prod (List.map (fun x => ite (x = a) (f x) (g x)) l)
-      =
-    (f a / g a) ^ (List.count a l) * List.prod (List.map g l)  :=
-  by
-  induction l with
-  | nil =>
-    simp
-  | cons x xs ih =>
-    simp only [map_cons, prod_cons, nodup_cons, ne_eq, mem_cons] at ih ⊢
-    rw [ih]
-    clear ih
-    rw [List.count_cons]
-    by_cases hx : x = a
-    · simp [hx, ite_true, pow_add]
-      -- TODO replace with `abel`
-      simp only [mul_assoc, mul_comm (f a / g a) _, mul_comm (f a) _]
-      simp only [mul_right_inj]
-      simp only [mul_assoc, mul_comm (g a) _]
-      simp only [mul_right_inj]
-      simp only [div_mul_cancel]
-    · simp only [hx, ite_false, ne_comm.mp hx, add_zero]
-      simp only [mul_assoc, mul_comm (g x) _]
+-- `List.prod_map_ite_eq` / `List.sum_map_ite_eq` (PR 13023) are now in Mathlib.
 
--- https://github.com/leanprover-community/mathlib4/pull/11106
-theorem MvPolynomial.degreeOf_C_mul {σ R : Type} [Field R] (j : σ)
-    (c : R) (hc : c ≠ 0) (f : MvPolynomial σ R) :
-    MvPolynomial.degreeOf j (MvPolynomial.C c * f) = MvPolynomial.degreeOf j f := by
-  rw [Nat.eq_iff_le_and_ge]
-  constructor
-  · convert MvPolynomial.degreeOf_C_mul_le f j c
-  · have := MvPolynomial.degreeOf_C_mul_le (C (c) * f) j (1/c)
-    rw [<-mul_assoc] at this
-    rw [←C_mul] at this
-    simp only [one_div, ne_eq, hc, not_false_eq_true, inv_mul_cancel, map_one, one_mul] at this
-    convert this
+-- `MvPolynomial.degreeOf_C_mul` (PR 11106) is now in Mathlib.
 
--- https://github.com/leanprover-community/mathlib4/pull/13024
-@[simp]
-lemma MvPolynomial.coeff_single_X {R : Type} {σ : Type u_1} [CommSemiring R] [DecidableEq σ]
-    (j : σ) (n : ℕ)
-    (x : σ) :
-    MvPolynomial.coeff (R := R) (Finsupp.single j n) (MvPolynomial.X x) = if n = 1 ∧ j = x then 1 else 0  := by
-  simp_rw [MvPolynomial.X, MvPolynomial.coeff_monomial, Finsupp.single_eq_single_iff]
-  congr
-  simp_rw [eq_iff_iff]
-  tauto
-
--- https://github.com/leanprover-community/mathlib4/pull/13024
-@[simp]
-lemma MvPolynomial.coeff_single_X_pow {R : Type} {σ : Type u_1} [CommSemiring R] [DecidableEq σ]
-    (j : σ) (n k : ℕ)
-    (x : σ) :
-    MvPolynomial.coeff (R := R) (Finsupp.single j n) (MvPolynomial.X x ^ k) = if n = k ∧ j = x ∨ k = 0 ∧ n = 0 then 1 else 0  := by
-  rw [MvPolynomial.X_pow_eq_monomial, MvPolynomial.coeff_monomial]
-  congr
-  simp only [Finsupp.single_eq_single_iff, eq_iff_iff]
-  tauto
+-- `MvPolynomial.coeff_single_X` / `coeff_single_X_pow` (PR 13024) are now in Mathlib.
 
 lemma MvPolynomial.prod_neq_pow_eq_monomial_erase {σ F : Type} [Field F] [DecidableEq σ]
   (sample_removed : σ)
@@ -101,7 +46,7 @@ lemma MvPolynomial.coeff_zero_of_not_mem_support {σ F : Type} [Field F]
     (p : MvPolynomial σ F)
     (m : σ →₀ ℕ)
     (h : m ∉ p.support) :
-    coeff m p = 0 := not_mem_support_iff.mp h
+    coeff m p = 0 := notMem_support_iff.mp h
 
 lemma mod_cast_eq_cast_mod (a b : ℕ) : ((a : ℤ) % (b : ℤ)) = ((a % b : ℕ): ℤ) := by
   exact rfl
@@ -113,7 +58,7 @@ lemma Int.near_mods (a b c d : ℤ) (ha' : 0 ≤ a) (hb' : 0 ≤ b)
   -- TODO reprove below with this lemma
 
   have h := congr_arg (fun p => p % (d : ℤ)) habcd
-  simp_rw [Int.add_mul_emod_self] at h
+  simp_rw [Int.add_mul_emod_self_right] at h
   rw [emod_eq_of_lt ha', emod_eq_of_lt hb'] at h
   simp [h] at *
 
@@ -124,12 +69,9 @@ lemma Int.near_mods (a b c d : ℤ) (ha' : 0 ≤ a) (hb' : 0 ≤ b)
 
 -- Junyan from Zulip mentions Nat.ModEq.eq_of_lt_of_lt for this
 lemma near_mods (a b d : ℕ) (c : ℤ) (ha : a < d) (hb : b < d) (habcd : a = b + c * d) :
-    c = 0 := by
-  have h := congr_arg (fun p => p % (d : ℤ)) habcd
-  simp_rw [Int.add_mul_emod_self, mod_cast_eq_cast_mod, Int.ofNat_inj] at h
-  simp only [ha, Nat.mod_eq_of_lt, hb] at h
-  rw [h, self_eq_add_right, mul_eq_zero, Nat.cast_eq_zero] at habcd
-  cases habcd <;> linarith
+    c = 0 :=
+  Int.near_mods a b c d (by positivity) (by positivity)
+    (by exact_mod_cast ha) (by exact_mod_cast hb) habcd
 
 lemma MvPolynomial.bind_ite_filter_aux {σ F : Type} [Field F] [DecidableEq σ]
     (p : MvPolynomial σ F)

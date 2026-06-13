@@ -49,18 +49,9 @@ lemma to_MvPolynomial_Option_C {F V : Type} [Field F] (r : F) :
 @[simp]
 theorem MvPolynomial.algHom_eval₂_algebraMap {σ R A B : Type*} [CommSemiring R] [CommSemiring A] [CommSemiring B]
     [Algebra R A] [Algebra R B] (p : MvPolynomial σ R) (f : A →ₐ[R] B) (a : σ -> A) :
-    f (eval₂ (algebraMap R A) a p) = eval₂ (algebraMap R B) (f ∘ a) p := by
-  simp only [eval₂, sum_def]
-  simp only [f.map_sum, f.map_mul, f.map_pow, eq_intCast, map_intCast, AlgHom.commutes]
-  congr
-  ext x
-  congr
-  simp only [Function.comp_apply]
-  unfold prod
-  rw [f.map_prod]
-  congr
-  ext x1
-  simp
+    f (eval₂ (algebraMap R A) a p) = eval₂ (algebraMap R B) (f ∘ a) p :=
+  -- `aeval a p` is defeq to `eval₂ (algebraMap R A) a p`, and `f ∘ a` to `fun i => f (a i)`.
+  comp_aeval_apply (f := a) f p
 
 theorem Polynomial.hom_congr_vars {R : Type u} {S : Type v}
     [CommSemiring R] [CommSemiring S]
@@ -98,9 +89,9 @@ lemma MvPolynomial.sum_map_C {σ A R : Type} [CommSemiring R] (l : List A) (f : 
   | nil => simp
   | cons hd tl ih => simp [ih]
 
-theorem AlgEquiv.list_map_sum {R : Type uR} {A₁ : Type uA₁} {A₂ : Type uA₂}
+theorem AlgEquiv.list_map_sum {R : Type*} {A₁ : Type*} {A₂ : Type*}
     [CommSemiring R] [Semiring A₁] [Semiring A₂] [Algebra R A₁] [Algebra R A₂]
-    (e : A₁ ≃ₐ[R] A₂) {ι : Type u_1} (f : ι → A₁) (l : List ι) :
+    (e : A₁ ≃ₐ[R] A₂) {ι : Type*} (f : ι → A₁) (l : List ι) :
     e (l.map (fun (x : ι) => f x)).sum = (l.map fun (x : ι) => e (f x)).sum := by
   induction l with
   | nil => simp
