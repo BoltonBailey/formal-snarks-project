@@ -431,72 +431,15 @@ lemma soundness
     List.sum_append, List.map_nil, List.sum_nil, add_zero, Sum.elim_lam_const_lam_const, map_one,
     one_mul, map_zero, zero_mul, map_neg, neg_mul, neg_add_rev, zero_add, mul_zero,
     -- Note: everything above is @simp tagged
-    Function.comp, List.sum_map_zero] at eqnI eqnII eqnIII eqnIV eqnV
+    Function.comp_def, List.sum_map_zero] at eqnI eqnII eqnIII eqnIV eqnV
 
-  simp only [mul_add, add_mul, List.sum_map_add] at eqnI eqnII eqnIII eqnIV eqnV
-
-  -- Move all the X (some _) terms to the left, and out of sums
-  simp only [
-    -- Associativity to obtain a right-leaning tree
-    mul_assoc,
-    -- Commutativity lemmas to move X (some _) to the left
-    mul_left_comm (C _) (X (some _)) _, mul_left_comm (List.sum _) (X (some _)) _,
-    mul_comm (C _) (X (some _)), mul_comm (List.sum _) (X (some _)),
-    -- Move negations to the bottom
-    neg_mul, mul_neg,
-    -- Move constant multiplications (which the X (some _) terms should be) out of sums
-    List.sum_map_mul_right, List.sum_map_mul_left] at eqnI eqnII eqnIII eqnIV eqnV
-
-  -- Apply MvPolynomial.optionEquivRight *here*, so that we can treat polynomials in Vars_X as constants
-  -- replace eqn := congr_arg (MvPolynomial.optionEquivRight F Vars) eqn
-  simp only [←(EquivLike.apply_eq_iff_eq (optionEquivRight _ _))] at eqnI eqnII eqnIII eqnIV eqnV
-  simp only [map_add, map_zero, map_mul, map_one,
-    map_neg, AlgEquiv.list_map_sum, map_pow] at eqnI eqnII eqnIII eqnIV eqnV
-  simp only [optionEquivRight_C, optionEquivRight_X_none, optionEquivRight_X_some, optionEquivRight_to_MvPolynomial_Option] at eqnI eqnII eqnIII eqnIV eqnV
-
-  -- Move Cs back out so we can recognize the monomials
-  simp only [←C_mul, ←C_pow, ←C_add, sum_map_C] at eqnI eqnII eqnIII eqnIV eqnV
-
-  simp only [X, C_apply, monomial_mul, one_mul, mul_one, add_zero, zero_add, mul_add, add_mul] at eqnI eqnII eqnIII eqnIV eqnV
-
-  have h11eqnII := congr_arg (coeff (Finsupp.single Vars.α 1 + Finsupp.single Vars.β_v 1 + Finsupp.single Vars.γ 1)) eqnII
-  have h12eqnII := congr_arg (coeff (Finsupp.single Vars.α 1 + Finsupp.single Vars.β_w 1 + Finsupp.single Vars.γ 1)) eqnII
-  have h19eqnII := congr_arg (coeff (Finsupp.single Vars.α 1 + Finsupp.single Vars.γ 1)) eqnII
-  have h21eqnII := congr_arg (coeff (Finsupp.single Vars.α 1 + Finsupp.single Vars.β_v 1)) eqnII
-  have h22eqnII := congr_arg (coeff (Finsupp.single Vars.α 2)) eqnII
-  have h71eqnII := congr_arg (coeff (Finsupp.single Vars.α 1)) eqnII
-  have h74eqnII := congr_arg (coeff (Finsupp.single Vars.α 1 + Finsupp.single Vars.β_w 1)) eqnII
-
-  have h11eqnIII := congr_arg (coeff (Finsupp.single Vars.α 1 + Finsupp.single Vars.β_v 1 + Finsupp.single Vars.γ 1)) eqnIII
-  have h12eqnIII := congr_arg (coeff (Finsupp.single Vars.α 1 + Finsupp.single Vars.β_w 1 + Finsupp.single Vars.γ 1)) eqnIII
-  have h19eqnIII := congr_arg (coeff (Finsupp.single Vars.α 1 + Finsupp.single Vars.γ 1)) eqnIII
-  have h21eqnIII := congr_arg (coeff (Finsupp.single Vars.α 1 + Finsupp.single Vars.β_v 1)) eqnIII
-  have h22eqnIII := congr_arg (coeff (Finsupp.single Vars.α 2)) eqnIII
-  have h71eqnIII := congr_arg (coeff (Finsupp.single Vars.α 1)) eqnIII
-  have h74eqnIII := congr_arg (coeff (Finsupp.single Vars.α 1 + Finsupp.single Vars.β_w 1)) eqnIII
-
-  have h2eqnV := congr_arg (coeff (Finsupp.single Vars.β_v 1 + Finsupp.single Vars.γ 1)) eqnV
-  have h3eqnV := congr_arg (coeff (Finsupp.single Vars.β_w 1 + Finsupp.single Vars.γ 1)) eqnV
-
-  have h1eqnI := congr_arg (coeff 0) eqnI
-
-  clear eqnI
-  clear eqnII
-  clear eqnIII
-  clear eqnIV
-  clear eqnV
-
-  simp only [coeff_monomial, coeff_add, coeff_neg, coeff_zero] at h11eqnII h12eqnII h19eqnII h21eqnII h22eqnII h71eqnII h74eqnII h11eqnIII h12eqnIII h19eqnIII h21eqnIII h22eqnIII h71eqnIII h74eqnIII h2eqnV h3eqnV h1eqnI
-
-  simp only [Vars.finsupp_eq_ext, Finsupp.single_apply, Finsupp.add_apply] at h11eqnII h12eqnII h19eqnII h21eqnII h22eqnII h71eqnII h74eqnII h11eqnIII h12eqnIII h19eqnIII h21eqnIII h22eqnIII h71eqnIII h74eqnIII h2eqnV h3eqnV h1eqnI
-
-  simp (config := {decide := true}) only [ite_false, ite_true] at h11eqnII h12eqnII h19eqnII h21eqnII h22eqnII h71eqnII h74eqnII h11eqnIII h12eqnIII h19eqnIII h21eqnIII h22eqnIII h71eqnIII h74eqnIII h2eqnV h3eqnV h1eqnI
-  simp only [neg_zero, add_zero, zero_add] at h11eqnII h12eqnII h19eqnII h21eqnII h22eqnII h71eqnII h74eqnII h11eqnIII h12eqnIII h19eqnIII h21eqnIII h22eqnIII h71eqnIII h74eqnIII h2eqnV h3eqnV h1eqnI
-
-  integral_domain_tactic
-
+  -- TODO(v4.29 bump): the remainder of this proof is blocked by a `List.sum_append` regression.
+  -- As of toolchain v4.29.0, `List.sum_append` carries a `Std.LawfulLeftIdentity (· + ·) 0` instance
+  -- argument that `simp`/`rw` cannot synthesize here (the element type is only known via a metavariable
+  -- during instance search), so the `(_ ++ _).sum` terms never split and the downstream
+  -- `optionEquivRight` distribution + coefficient extraction stall. The full pipeline is preserved in
+  -- git history (pre-bump); restore it once the upstream regression is resolved.
   sorry
-  -- TODO unfinished
 
 end GGPR
 

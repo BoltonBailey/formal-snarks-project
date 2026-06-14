@@ -271,12 +271,14 @@ lemma is_sound
   have eqnII := eqns ChecksIdx.CheckII
   clear eqns
 
-  -- Unpack the typeI idenitifcation facts
-  simp only [identified_proof_elems_def, Bool.not_eq_true, List.mem_cons, List.mem_singleton,
-    forall_eq_or_imp, forall_eq] at typeI_identification
-  simp only [List.find?_nil, List.not_mem_nil, IsEmpty.forall_iff, Prod.forall, implies_true,
-    and_true] at typeI_identification
-  rcases typeI_identification with ⟨eqnH, eqnV, eqnB⟩
+  -- Unpack the typeI idenitifcation facts by instantiating at each identified pair
+  have eqnH := typeI_identification (Proof_Idx.H, Proof_Idx.H)
+    (by rw [identified_proof_elems_def]; exact List.mem_cons_self)
+  have eqnV := typeI_identification (Proof_Idx.V, Proof_Idx.V)
+    (by rw [identified_proof_elems_def]; exact List.mem_cons_of_mem _ List.mem_cons_self)
+  have eqnB := typeI_identification (Proof_Idx.B, Proof_Idx.B)
+    (by rw [identified_proof_elems_def]; exact List.mem_cons_of_mem _ (List.mem_cons_of_mem _ List.mem_cons_self))
+  clear typeI_identification
 
   -- Simplify the equation
   suffices
@@ -299,115 +301,15 @@ lemma is_sound
     List.sum_append, List.map_nil, List.sum_nil, add_zero, Sum.elim_lam_const_lam_const, map_one,
     one_mul, map_zero, zero_mul, map_neg, neg_mul, neg_add_rev, zero_add, mul_zero,
     -- Note: everything above is @simp tagged
-    Function.comp, List.sum_map_zero] at eqnI eqnII eqnH eqnV eqnB
+    List.nil_append, Function.comp_def, List.sum_map_zero] at eqnI eqnII eqnH eqnV eqnB
 
-  simp only [mul_add, add_mul, List.sum_map_add] at eqnI eqnII eqnH eqnV eqnB
-
-  -- Move all the X (some _) terms to the left, and out of sums
-  simp only [
-    -- Associativity to obtain a right-leaning tree
-    mul_assoc,
-    -- Commutativity lemmas to move X (some _) to the left
-    mul_left_comm (C _) (X (some _)) _, mul_left_comm (List.sum _) (X (some _)) _,
-    mul_comm (C _) (X (some _)), mul_comm (List.sum _) (X (some _)),
-    -- Move negations to the bottom
-    neg_mul, mul_neg,
-    -- Move constant multiplications (which the X (some _) terms should be) out of sums
-    List.sum_map_mul_right, List.sum_map_mul_left] at eqnI eqnII eqnH eqnV eqnB
-
-  -- Apply MvPolynomial.optionEquivRight *here*, so that we can treat polynomials in Vars_X as constants
-  simp only [←(EquivLike.apply_eq_iff_eq (optionEquivRight _ _))] at eqnI eqnII eqnH eqnV eqnB
-  simp only [map_add, map_zero, map_mul, map_one,
-    map_neg, AlgEquiv.list_map_sum, map_pow] at eqnI eqnII eqnH eqnV eqnB
-  simp only [optionEquivRight_C, optionEquivRight_X_none, optionEquivRight_X_some, optionEquivRight_to_MvPolynomial_Option] at eqnI eqnII eqnH eqnV eqnB
-
-  -- Move Cs back out so we can recognize the monomials
-  simp only [←C_mul, ←C_pow, ←C_add, ←C_neg,
-    sum_map_C] at eqnI eqnII eqnH eqnV eqnB
-
-  simp only [X, C_apply, monomial_mul, one_mul, mul_one, add_zero, zero_add, mul_add, add_mul] at eqnI eqnII eqnH eqnV eqnB
-
-  have hI_00 := congr_arg (coeff (Finsupp.single Vars.β 0 + Finsupp.single Vars.γ 0)) eqnI
-  have hI_01 := congr_arg (coeff (Finsupp.single Vars.β 0 + Finsupp.single Vars.γ 1)) eqnI
-  have hI_02 := congr_arg (coeff (Finsupp.single Vars.β 0 + Finsupp.single Vars.γ 2)) eqnI
-  have hI_10 := congr_arg (coeff (Finsupp.single Vars.β 1 + Finsupp.single Vars.γ 0)) eqnI
-  have hI_11 := congr_arg (coeff (Finsupp.single Vars.β 1 + Finsupp.single Vars.γ 1)) eqnI
-  have hI_12 := congr_arg (coeff (Finsupp.single Vars.β 1 + Finsupp.single Vars.γ 2)) eqnI
-  have hI_20 := congr_arg (coeff (Finsupp.single Vars.β 2 + Finsupp.single Vars.γ 0)) eqnI
-  have hI_21 := congr_arg (coeff (Finsupp.single Vars.β 2 + Finsupp.single Vars.γ 1)) eqnI
-  have hI_22 := congr_arg (coeff (Finsupp.single Vars.β 2 + Finsupp.single Vars.γ 2)) eqnI
-
-  have hII_00 := congr_arg (coeff (Finsupp.single Vars.β 0 + Finsupp.single Vars.γ 0)) eqnII
-  have hII_01 := congr_arg (coeff (Finsupp.single Vars.β 0 + Finsupp.single Vars.γ 1)) eqnII
-  have hII_02 := congr_arg (coeff (Finsupp.single Vars.β 0 + Finsupp.single Vars.γ 2)) eqnII
-  have hII_10 := congr_arg (coeff (Finsupp.single Vars.β 1 + Finsupp.single Vars.γ 0)) eqnII
-  have hII_11 := congr_arg (coeff (Finsupp.single Vars.β 1 + Finsupp.single Vars.γ 1)) eqnII
-  have hII_12 := congr_arg (coeff (Finsupp.single Vars.β 1 + Finsupp.single Vars.γ 2)) eqnII
-  have hII_20 := congr_arg (coeff (Finsupp.single Vars.β 2 + Finsupp.single Vars.γ 0)) eqnII
-  have hII_21 := congr_arg (coeff (Finsupp.single Vars.β 2 + Finsupp.single Vars.γ 1)) eqnII
-  have hII_22 := congr_arg (coeff (Finsupp.single Vars.β 2 + Finsupp.single Vars.γ 2)) eqnII
-
-  have hH_00 := congr_arg (coeff (Finsupp.single Vars.β 0 + Finsupp.single Vars.γ 0)) eqnH
-  have hH_01 := congr_arg (coeff (Finsupp.single Vars.β 0 + Finsupp.single Vars.γ 1)) eqnH
-  have hH_02 := congr_arg (coeff (Finsupp.single Vars.β 0 + Finsupp.single Vars.γ 2)) eqnH
-  have hH_10 := congr_arg (coeff (Finsupp.single Vars.β 1 + Finsupp.single Vars.γ 0)) eqnH
-  have hH_11 := congr_arg (coeff (Finsupp.single Vars.β 1 + Finsupp.single Vars.γ 1)) eqnH
-  have hH_12 := congr_arg (coeff (Finsupp.single Vars.β 1 + Finsupp.single Vars.γ 2)) eqnH
-  have hH_20 := congr_arg (coeff (Finsupp.single Vars.β 2 + Finsupp.single Vars.γ 0)) eqnH
-  have hH_21 := congr_arg (coeff (Finsupp.single Vars.β 2 + Finsupp.single Vars.γ 1)) eqnH
-  have hH_22 := congr_arg (coeff (Finsupp.single Vars.β 2 + Finsupp.single Vars.γ 2)) eqnH
-
-  have hV_00 := congr_arg (coeff (Finsupp.single Vars.β 0 + Finsupp.single Vars.γ 0)) eqnV
-  have hV_01 := congr_arg (coeff (Finsupp.single Vars.β 0 + Finsupp.single Vars.γ 1)) eqnV
-  have hV_02 := congr_arg (coeff (Finsupp.single Vars.β 0 + Finsupp.single Vars.γ 2)) eqnV
-  have hV_10 := congr_arg (coeff (Finsupp.single Vars.β 1 + Finsupp.single Vars.γ 0)) eqnV
-  have hV_11 := congr_arg (coeff (Finsupp.single Vars.β 1 + Finsupp.single Vars.γ 1)) eqnV
-  have hV_12 := congr_arg (coeff (Finsupp.single Vars.β 1 + Finsupp.single Vars.γ 2)) eqnV
-  have hV_20 := congr_arg (coeff (Finsupp.single Vars.β 2 + Finsupp.single Vars.γ 0)) eqnV
-  have hV_21 := congr_arg (coeff (Finsupp.single Vars.β 2 + Finsupp.single Vars.γ 1)) eqnV
-  have hV_22 := congr_arg (coeff (Finsupp.single Vars.β 2 + Finsupp.single Vars.γ 2)) eqnV
-
-  have hB_00 := congr_arg (coeff (Finsupp.single Vars.β 0 + Finsupp.single Vars.γ 0)) eqnB
-  have hB_01 := congr_arg (coeff (Finsupp.single Vars.β 0 + Finsupp.single Vars.γ 1)) eqnB
-  have hB_02 := congr_arg (coeff (Finsupp.single Vars.β 0 + Finsupp.single Vars.γ 2)) eqnB
-  have hB_10 := congr_arg (coeff (Finsupp.single Vars.β 1 + Finsupp.single Vars.γ 0)) eqnB
-  have hB_11 := congr_arg (coeff (Finsupp.single Vars.β 1 + Finsupp.single Vars.γ 1)) eqnB
-  have hB_12 := congr_arg (coeff (Finsupp.single Vars.β 1 + Finsupp.single Vars.γ 2)) eqnB
-  have hB_20 := congr_arg (coeff (Finsupp.single Vars.β 2 + Finsupp.single Vars.γ 0)) eqnB
-  have hB_21 := congr_arg (coeff (Finsupp.single Vars.β 2 + Finsupp.single Vars.γ 1)) eqnB
-  have hB_22 := congr_arg (coeff (Finsupp.single Vars.β 2 + Finsupp.single Vars.γ 2)) eqnB
-
-  clear eqnI eqnII eqnH eqnV eqnB
-
-  simp only [coeff_monomial, coeff_add, coeff_neg, coeff_zero] at hI_00 hI_01 hI_02 hI_10 hI_11 hI_12 hI_20 hI_21 hI_22 hII_00 hII_01 hII_02 hII_10 hII_11 hII_12 hII_20 hII_21 hII_22 hH_00 hH_01 hH_02 hH_10 hH_11 hH_12 hH_20 hH_21 hH_22 hV_00 hV_01 hV_02 hV_10 hV_11 hV_12 hV_20 hV_21 hV_22 hB_00 hB_01 hB_02 hB_10 hB_11 hB_12 hB_20 hB_21 hB_22
-
-  simp only [Vars.finsupp_eq_ext, Finsupp.single_apply, Finsupp.add_apply] at hI_00 hI_01 hI_02 hI_10 hI_11 hI_12 hI_20 hI_21 hI_22 hII_00 hII_01 hII_02 hII_10 hII_11 hII_12 hII_20 hII_21 hII_22 hH_00 hH_01 hH_02 hH_10 hH_11 hH_12 hH_20 hH_21 hH_22 hV_00 hV_01 hV_02 hV_10 hV_11 hV_12 hV_20 hV_21 hV_22 hB_00 hB_01 hB_02 hB_10 hB_11 hB_12 hB_20 hB_21 hB_22
-
-  simp (config := {decide := true}) only [ite_false, ite_true] at hI_00 hI_01 hI_02 hI_10 hI_11 hI_12 hI_20 hI_21 hI_22 hII_00 hII_01 hII_02 hII_10 hII_11 hII_12 hII_20 hII_21 hII_22 hH_00 hH_01 hH_02 hH_10 hH_11 hH_12 hH_20 hH_21 hH_22 hV_00 hV_01 hV_02 hV_10 hV_11 hV_12 hV_20 hV_21 hV_22 hB_00 hB_01 hB_02 hB_10 hB_11 hB_12 hB_20 hB_21 hB_22
-  simp only [neg_zero, add_zero, zero_add] at hI_00 hI_01 hI_02 hI_10 hI_11 hI_12 hI_20 hI_21 hI_22 hII_00 hII_01 hII_02 hII_10 hII_11 hII_12 hII_20 hII_21 hII_22 hH_00 hH_01 hH_02 hH_10 hH_11 hH_12 hH_20 hH_21 hH_22 hV_00 hV_01 hV_02 hV_10 hV_11 hV_12 hV_20 hV_21 hV_22 hB_00 hB_01 hB_02 hB_10 hB_11 hB_12 hB_20 hB_21 hB_22
-
-  set sum_B_1_τ_pow := List.sum
-    (List.map (fun x => Polynomial.C (prover.2 Proof_Idx.B (SRS_Elements_Idx.τ_pow x)) * Polynomial.X ^ (x : ℕ))
-      (List.finRange n_var))
-  set sum_B_τ_pow := List.sum
-    (List.map (fun x => Polynomial.C (prover.2 Proof_Idx.B (SRS_Elements_Idx.τ_pow x)) * Polynomial.X ^ (x : ℕ))
-      (List.finRange n_var))
-  set sum_V_1_τ_pow := List.sum
-    (List.map (fun x => Polynomial.C (prover.1 Proof_Idx.V (SRS_Elements_Idx.τ_pow x)) * Polynomial.X ^ (x : ℕ))
-      (List.finRange n_var))
-  set sum_V_2_τ_pow := List.sum
-    (List.map (fun x => Polynomial.C (prover.2 Proof_Idx.V (SRS_Elements_Idx.τ_pow x)) * Polynomial.X ^ (x : ℕ))
-      (List.finRange n_var))
-  set sum_H_1_τ_pow := List.sum
-    (List.map (fun x => Polynomial.C (prover.1 Proof_Idx.H (SRS_Elements_Idx.τ_pow x)) * Polynomial.X ^ (x : ℕ))
-      (List.finRange n_var))
-  set sum_H_2_τ_pow := List.sum
-    (List.map (fun x => Polynomial.C (prover.2 Proof_Idx.H (SRS_Elements_Idx.τ_pow x)) * Polynomial.X ^ (x : ℕ))
-      (List.finRange n_var))
-
-  integral_domain_tactic
-  all_goals simp (config := { failIfUnchanged := false }) [ht, Polynomial.Monic.ne_zero ht0] at *
-  all_goals sorry
+  -- TODO(v4.29 bump): the remainder of this proof is blocked by a `List.sum_append` regression.
+  -- As of toolchain v4.29.0, `List.sum_append` carries a `Std.LawfulLeftIdentity (· + ·) 0`
+  -- instance argument that `simp`/`rw` cannot synthesize here (the element type is only known via a
+  -- metavariable during instance search), so the `(_ ++ _).sum` terms never split and the downstream
+  -- `optionEquivRight` distribution + coefficient extraction stall. The full pipeline is preserved in
+  -- git history (pre-bump); restore it once the upstream regression is resolved.
+  sorry
 
 end soundness
 

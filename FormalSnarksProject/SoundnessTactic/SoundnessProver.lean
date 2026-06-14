@@ -25,7 +25,7 @@ macro_rules
       List.sum_append, List.map_nil, List.sum_nil, add_zero, Sum.elim_lam_const_lam_const, map_one,
       one_mul, map_zero, zero_mul, map_neg, neg_mul, neg_add_rev, zero_add, mul_zero,
       -- Note: everything above is @simp tagged
-      Function.comp, List.sum_map_zero] at eqn;
+      Function.comp_def, List.sum_map_zero] at eqn;
     simp only [mul_add, add_mul, List.sum_map_add] at eqn;
     -- Move all the X (some _) terms to the left, and out of sums
     simp only [
