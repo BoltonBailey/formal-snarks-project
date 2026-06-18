@@ -40,17 +40,6 @@ lemma MvPolynomial.prod_neq_pow_eq_monomial_erase {σ F : Type} [Field F] [Decid
     · simp only [h, ↓reduceIte, ne_eq, not_false_eq_true, Finsupp.erase_ne]
   simp
 
--- https://github.com/leanprover-community/mathlib4/pull/13026
-@[simp]
-lemma MvPolynomial.coeff_zero_of_not_mem_support {σ F : Type} [Field F]
-    (p : MvPolynomial σ F)
-    (m : σ →₀ ℕ)
-    (h : m ∉ p.support) :
-    coeff m p = 0 := notMem_support_iff.mp h
-
-lemma mod_cast_eq_cast_mod (a b : ℕ) : ((a : ℤ) % (b : ℤ)) = ((a % b : ℕ): ℤ) := by
-  exact rfl
-
 lemma Int.near_mods (a b c d : ℤ) (ha' : 0 ≤ a) (hb' : 0 ≤ b)
     (ha : a < d) (hb : b < d) (habcd : a = b + c * d) :
     c = 0 := by
@@ -194,12 +183,12 @@ lemma MvPolynomial.bind₁_ite_pow_eq_zero_of {σ F : Type} [Field F] [Decidable
       · have h''' : (if m ∈ support p then ({m} : Finset (σ →₀ ℕ)) else ∅) = (∅ : Finset (σ →₀ ℕ)) := by
           simp only [h', ↓reduceIte]
         rw [h''']
-        simp only [Finset.sum_empty, mem_support_iff, coeff_zero_of_not_mem_support p m h', ne_eq,
-          not_true_eq_false, not_false_eq_true, coeff_zero_of_not_mem_support]
+        simp only [Finset.sum_empty, mem_support_iff, notMem_support_iff.mp h', ne_eq,
+          not_true_eq_false, not_false_eq_true, notMem_support_iff.mp]
     rw [this]
     rw [h]
     simp
-  · apply MvPolynomial.coeff_zero_of_not_mem_support
+  · apply MvPolynomial.notMem_support_iff.mp
     contrapose! m_sample_target_bound
     exact lt_of_le_of_lt (monomial_le_degreeOf sample_target m_sample_target_bound) hdegree
 

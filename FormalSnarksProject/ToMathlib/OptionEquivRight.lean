@@ -46,13 +46,6 @@ lemma to_MvPolynomial_Option_C {F V : Type} [Field F] (r : F) :
     to_MvPolynomial_Option V (Polynomial.C r) = MvPolynomial.C r := by
   simp [to_MvPolynomial_Option]
 
-@[simp]
-theorem MvPolynomial.algHom_eval₂_algebraMap {σ R A B : Type*} [CommSemiring R] [CommSemiring A] [CommSemiring B]
-    [Algebra R A] [Algebra R B] (p : MvPolynomial σ R) (f : A →ₐ[R] B) (a : σ -> A) :
-    f (eval₂ (algebraMap R A) a p) = eval₂ (algebraMap R B) (f ∘ a) p :=
-  -- `aeval a p` is defeq to `eval₂ (algebraMap R A) a p`, and `f ∘ a` to `fun i => f (a i)`.
-  comp_aeval_apply (f := a) f p
-
 theorem Polynomial.hom_congr_vars {R : Type u} {S : Type v}
     [CommSemiring R] [CommSemiring S]
     {f₁ : Polynomial R →+* S} {f₂ : Polynomial R →+* S}

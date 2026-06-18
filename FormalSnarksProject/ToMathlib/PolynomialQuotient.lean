@@ -4,10 +4,6 @@ import Mathlib.Algebra.Polynomial.FieldDivision
 -- `Polynomial.modByMonic_eq_zero_iff_quotient_eq_zero` (PR 11116) is now in Mathlib,
 -- so it is no longer defined here.
 
-@[simp]
-lemma Polynomial.quotient_singleton_eq {R : Type*} [CommRing R] (p : Polynomial R) : (Ideal.Quotient.mk (Ideal.span {p})) p = 0 := by
-  rw [Ideal.Quotient.eq_zero_iff_dvd]
-
 lemma RingHom.list_map_sum {A : Type v} {B : Type w}
     [Semiring A] [Semiring B]
     (φ : A →+* B) {ι : Type u_1} (f : ι → A) (s : List ι) :
