@@ -8,25 +8,6 @@ section Groth16TypeIII
 
 open MvPolynomial Finsupp Option
 
--- -- https://github.com/leanprover-community/mathlib4/pull/11114
--- @[simp]
--- lemma MvPolynomial.optionEquivRight_X_some (R : Type u) (S₁ : Type v) [CommSemiring R] (x : S₁) :
---     (MvPolynomial.optionEquivRight R S₁) (X (some x)) = X x := by
---   unfold optionEquivRight AlgEquiv.ofAlgHom
---   simp only [AlgEquiv.coe_mk, aeval_X, Option.elim]
-
--- @[simp]
--- lemma MvPolynomial.optionEquivRight_X_none (R : Type u) (S₁ : Type v) [CommSemiring R] :
---     (MvPolynomial.optionEquivRight R S₁) (X (none)) = C (Polynomial.X) := by
---   unfold optionEquivRight AlgEquiv.ofAlgHom
---   simp only [AlgEquiv.coe_mk, aeval_X, Option.elim]
-
--- @[simp]
--- lemma MvPolynomial.optionEquivRight_C (R : Type u) (S₁ : Type v) [CommSemiring R] (r : R) :
---     (MvPolynomial.optionEquivRight R S₁) (C r) = C (Polynomial.C r) := by
---   unfold optionEquivRight AlgEquiv.ofAlgHom
---   simp only [Option.elim, AlgEquiv.coe_mk, aeval_C]
-  -- rfl
 
 /-- A ring hom from polynomials to multivariable polynomials over an option type -/
 noncomputable def to_MvPolynomial_Option {F : Type} [Field F] (V : Type) :
@@ -57,9 +38,11 @@ theorem Polynomial.hom_congr_vars {R : Type u} {S : Type v}
   · exact hv
 
 lemma optionEquivRight_comp_to_MvPolynomial_Option {F V : Type} [Field F] :
-    RingHom.comp (MvPolynomial.optionEquivRight F V).toRingEquiv.toRingHom (to_MvPolynomial_Option (F := F) V) = C := by
+    RingHom.comp (MvPolynomial.optionEquivRight F V).toRingEquiv.toRingHom
+      (to_MvPolynomial_Option (F := F) V) = C := by
   apply Polynomial.hom_congr_vars
-  · simp only [AlgEquiv.toRingEquiv_eq_coe, RingEquiv.toRingHom_eq_coe, AlgEquiv.toRingEquiv_toRingHom]
+  · simp only [AlgEquiv.toRingEquiv_eq_coe, RingEquiv.toRingHom_eq_coe,
+      AlgEquiv.toRingEquiv_toRingHom]
     rw [RingHom.comp_assoc]
     rw [@RingHom.ext_iff]
     intro x
