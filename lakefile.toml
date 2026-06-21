@@ -19,5 +19,10 @@ name = "mathlib"
 scope = "leanprover-community"
 rev = "v4.29.0"
 
+[[require]]
+name = "CompPoly"
+git = "https://github.com/Verified-zkEVM/CompPoly"
+rev = "2511ced8a740cde14bf257300cb4690fc70c7dac" # last v4.29.0-compatible commit
+
 [[lean_lib]]
 name = "FormalSnarksProject"
