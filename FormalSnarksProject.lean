@@ -1,18 +1,21 @@
 import FormalSnarksProject.Models.AGMProofSystemInstantiation
 import FormalSnarksProject.Models.AGMProofSystemInstantiationTypeI
 import FormalSnarksProject.Models.StraightforwardAGMProofSystem
-import FormalSnarksProject.SNARKs.BabySnark
-import FormalSnarksProject.SNARKs.GGPR
-import FormalSnarksProject.SNARKs.Groth16
+-- TODO(FinEnum/CompPoly refactor): not yet migrated from `List*` fields to `FinEnum` instances.
+-- import FormalSnarksProject.SNARKs.BabySnark
+-- import FormalSnarksProject.SNARKs.GGPR
+-- import FormalSnarksProject.SNARKs.Groth16
 import FormalSnarksProject.SNARKs.Groth16TypeIII.Completeness
 import FormalSnarksProject.SNARKs.Groth16TypeIII.Defs
 import FormalSnarksProject.SNARKs.Groth16TypeIII.Soundness
 import FormalSnarksProject.SNARKs.Lipmaa.Defs
 import FormalSnarksProject.SNARKs.Lipmaa.Soundness
-import FormalSnarksProject.SNARKs.Pinocchio
+-- TODO(FinEnum/CompPoly refactor): not yet migrated from `List*` fields to `FinEnum` instances.
+-- import FormalSnarksProject.SNARKs.Pinocchio
 import FormalSnarksProject.SNARKs.ToySnark
 import FormalSnarksProject.ToMathlib.ForTransformations
 import FormalSnarksProject.ToMathlib.OptionEquivRight
 import FormalSnarksProject.ToMathlib.PolynomialQuotient
 import FormalSnarksProject.ToMathlib.SMTTest
-import FormalSnarksProject.Transformations.Transformations
+-- TODO(FinEnum/CompPoly refactor): not yet migrated from `List*` fields to `FinEnum` instances.
+-- import FormalSnarksProject.Transformations.Transformations

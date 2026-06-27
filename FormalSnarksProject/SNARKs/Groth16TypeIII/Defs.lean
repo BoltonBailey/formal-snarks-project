@@ -28,7 +28,9 @@ inductive Vars : Type where
   | β : Vars
   | γ : Vars
   | δ : Vars
-deriving Repr, BEq
+deriving Repr, BEq, DecidableEq
+
+noncomputable instance : FinEnum Vars := .ofList [.α, .β, .γ, .δ] (fun x => by cases x <;> simp)
 
 local notation "Vars_α" => some Vars.α
 local notation "Vars_β" => some Vars.β
@@ -53,25 +55,25 @@ lemma Vars.finsupp_eq_ext (f g : Vars →₀ ℕ) : f = g ↔
 inductive Proof_G1_Idx : Type where
   | A : Proof_G1_Idx
   | C : Proof_G1_Idx
+deriving DecidableEq
 
--- instance : Fintype Proof_G1_Idx :=
---   ⟨⟨[Proof_G1_Idx.A, Proof_G1_Idx.C], by simp⟩, fun x => by cases x <;> simp⟩
+noncomputable instance : FinEnum Proof_G1_Idx := .ofList [.A, .C] (fun x => by cases x <;> simp)
 
 inductive Proof_G2_Idx : Type where
   | B : Proof_G2_Idx
+deriving DecidableEq
 
-instance : Fintype Proof_G2_Idx :=
-  ⟨⟨[Proof_G2_Idx.B], by simp⟩, fun x => by cases x; simp⟩
+noncomputable instance : FinEnum Proof_G2_Idx := .ofList [.B] (fun x => by cases x <;> simp)
 
 inductive PairingsIdx : Type where
   | ab : PairingsIdx
   | αβ : PairingsIdx
   | stmtγ : PairingsIdx
   | cδ : PairingsIdx
+deriving DecidableEq
 
--- instance : Fintype PairingsIdx :=
---   ⟨⟨[PairingsIdx.ab, PairingsIdx.αβ, PairingsIdx.stmtγ, PairingsIdx.cδ], by simp⟩,
---     fun x => by cases x <;> simp⟩
+noncomputable instance : FinEnum PairingsIdx :=
+  .ofList [.ab, .αβ, .stmtγ, .cδ] (fun x => by cases x <;> simp)
 
 inductive SRS_Elements_G1_Idx {n_stmt n_wit n_var : ℕ} : Type where
   | α : SRS_Elements_G1_Idx
@@ -81,12 +83,28 @@ inductive SRS_Elements_G1_Idx {n_stmt n_wit n_var : ℕ} : Type where
   | x_pow_times_t : Fin (n_var - 1) → SRS_Elements_G1_Idx
   | y : Fin n_stmt → SRS_Elements_G1_Idx
   | q : Fin n_wit → SRS_Elements_G1_Idx
+deriving DecidableEq
+
+noncomputable instance {n_stmt n_wit n_var : ℕ} :
+    FinEnum (@SRS_Elements_G1_Idx n_stmt n_wit n_var) := .ofList
+  ([.α, .β, .δ]
+    ++ (List.finRange n_var).map .x_pow
+    ++ (List.finRange (n_var - 1)).map .x_pow_times_t
+    ++ (List.finRange n_stmt).map .y
+    ++ (List.finRange n_wit).map .q)
+  (fun x => by cases x <;> simp)
 
 inductive SRS_Elements_G2_Idx {n_stmt n_wit n_var : ℕ} : Type where
   | β : SRS_Elements_G2_Idx
   | γ : SRS_Elements_G2_Idx
   | δ : SRS_Elements_G2_Idx
   | x_pow : Fin n_var → SRS_Elements_G2_Idx
+deriving DecidableEq
+
+noncomputable instance {n_stmt n_wit n_var : ℕ} :
+    FinEnum (@SRS_Elements_G2_Idx n_stmt n_wit n_var) := .ofList
+  ([.β, .γ, .δ] ++ (List.finRange n_var).map .x_pow)
+  (fun x => by cases x <;> simp)
 
 -- TODO Note: May well be best to completely forget about generalizing "straightforward" to the very end.
 -- TODO Note: Refactor files - model and a subdirectory for the six files from
@@ -106,7 +124,7 @@ n from the paper = n_var
 l from the paper = n_stmt
 m - l from the paper = n_wit
 -/
-noncomputable def Groth16TypeIII
+@[reducible] noncomputable def Groth16TypeIII
     /- The finite field parameter of our SNARK -/
     {F : Type} [Field F]
     /- The naturals representing:
@@ -128,20 +146,7 @@ noncomputable def Groth16TypeIII
     Stmt := Fin n_stmt -> F
     Sample := Option Vars
     SRSElements_G1 := @SRS_Elements_G1_Idx n_stmt n_wit n_var
-    ListSRSElements_G1 :=
-      [SRS_Elements_G1_Idx.α]
-      ++ [SRS_Elements_G1_Idx.β]
-      ++ [SRS_Elements_G1_Idx.δ]
-      ++ ((List.finRange n_var).map fun i => SRS_Elements_G1_Idx.x_pow i)
-      ++ ((List.finRange (n_var - 1)).map fun i => SRS_Elements_G1_Idx.x_pow_times_t i)
-      ++ ((List.finRange n_stmt).map fun i => SRS_Elements_G1_Idx.y i)
-      ++ ((List.finRange n_wit).map fun i => SRS_Elements_G1_Idx.q i)
     SRSElements_G2 := @SRS_Elements_G2_Idx n_stmt n_wit n_var
-    ListSRSElements_G2 :=
-      [SRS_Elements_G2_Idx.β]
-      ++ [SRS_Elements_G2_Idx.γ]
-      ++ [SRS_Elements_G2_Idx.δ]
-      ++ ((List.finRange n_var).map fun i => SRS_Elements_G2_Idx.x_pow i)
     SRSElementValue_G1 := fun SRS_idx => match SRS_idx with
       | SRS_Elements_G1_Idx.α => X Vars_γ * X Vars_δ * X Vars_α
       | SRS_Elements_G1_Idx.β => X Vars_γ * X Vars_δ * X Vars_β
@@ -167,12 +172,10 @@ noncomputable def Groth16TypeIII
       | SRS_Elements_G2_Idx.δ => X Vars_γ * X Vars_δ * X Vars_δ
       | SRS_Elements_G2_Idx.x_pow i => X Vars_γ * X Vars_δ * X Vars_x ^ (i : ℕ)
     Proof_G1 := Proof_G1_Idx
-    ListProof_G1 := [Proof_G1_Idx.A, Proof_G1_Idx.C]
     Proof_G2 := Proof_G2_Idx
-    ListProof_G2 := [Proof_G2_Idx.B]
     EqualityChecks := Unit
     Pairings := fun _ => PairingsIdx
-    ListPairings := fun _ => [PairingsIdx.ab, PairingsIdx.αβ, PairingsIdx.stmtγ, PairingsIdx.cδ]
+    Pairings_FinEnum := fun _ => inferInstance
     verificationPairingSRS_G1 := fun stmt _ i SRS_idx => match i with
       | PairingsIdx.ab => match SRS_idx with
         | SRS_Elements_G1_Idx.α => 0

@@ -94,23 +94,14 @@ lemma soundness
 
 
   -- Step 1: Obtain the coefficient equations of the MvPolynomials
-  simp_rw [Lipmaa] at eqn
-  -- All I want is a tactic that will apply the following simplifications to eqn in sequence.
-  -- TODO can I write a tactic taking a nested list of simp lemmas?
-  -- Can I combine all of these?
-  simp only [monomial_zero', List.singleton_append, List.cons_append, List.append_assoc,
-    List.map_cons, Sum.elim_inl, Sum.elim_inr, List.map_append, List.map_map, List.sum_cons,
-    List.sum_append, List.map_nil, List.sum_nil, add_zero, Sum.elim_lam_const_lam_const, map_one,
-    one_mul, map_zero, zero_mul, map_neg, neg_mul, neg_add_rev, zero_add, mul_zero,
-    -- Note: everything above is @simp tagged
-    Function.comp_def, List.sum_map_zero] at eqn
-
-  -- TODO(v4.29 bump): the remainder of this proof is blocked by a `List.sum_append` regression.
-  -- As of toolchain v4.29.0, `List.sum_append` carries a `Std.LawfulLeftIdentity (· + ·) 0` instance
-  -- argument that `simp`/`rw` cannot synthesize here (the element type is only known via a metavariable
-  -- during instance search), so the `(_ ++ _).sum` terms never split and the downstream
-  -- `optionEquivRight` distribution + coefficient extraction stall. The full pipeline is preserved in
-  -- git history (pre-bump); restore it once the upstream regression is resolved.
+  --
+  -- TODO(FinEnum/CompPoly refactor): the original pipeline rewrote `eqn` via `simp_rw [Lipmaa]`
+  -- followed by a list-expansion `simp only [...]`. After the move from explicit `List` fields to
+  -- `FinEnum` instances, the SRS enumerations are `FinEnum.toList` of *parameterized* index types,
+  -- which do not reduce to the concrete `++`/`finRange` lists definitionally, so the list-expansion
+  -- no longer fires. (`Lipmaa` is now `@[reducible]`, which also makes `simp_rw [Lipmaa]` a no-op.)
+  -- This was already blocked by the v4.29 `List.sum_append` regression (see git history for the full
+  -- pre-bump pipeline); both need resolving together before the coefficient extraction can resume.
   sorry
 
 end soundness

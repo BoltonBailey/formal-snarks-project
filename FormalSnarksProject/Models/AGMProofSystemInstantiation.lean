@@ -21,14 +21,17 @@ particular field
 structure AGMProofSystemInstantiation (F : Type) [Field F] where
   /-- The type of statements -/
   Stmt : Type
-  /-- The type indexing toxic waste elements sampled -/
+  /-- The type indexing toxic waste elements sampled.
+  A `FinEnum` instance gives an equivalence `Sample ≃ Fin n`, which is what the computable
+  multivariate polynomials (`CMvPolynomial n F`) require. -/
   Sample : Type
+  [Sample_FinEnum : FinEnum Sample]
   /-- The type indexing SRS elements in group I -/
   SRSElements_G1 : Type
-  ListSRSElements_G1 : List SRSElements_G1
+  [SRSElements_G1_FinEnum : FinEnum SRSElements_G1]
   /-- Similarly -/
   SRSElements_G2 : Type
-  ListSRSElements_G2 : List SRSElements_G2
+  [SRSElements_G2_FinEnum : FinEnum SRSElements_G2]
 
   /-- The SRS elements themselves, described as polynomials in the samples -/
   SRSElementValue_G1 : SRSElements_G1 → MvPolynomial Sample F
@@ -36,9 +39,9 @@ structure AGMProofSystemInstantiation (F : Type) [Field F] where
 
   /-- A type indexing proof elements in each group -/
   Proof_G1 : Type
-  ListProof_G1 : List Proof_G1
+  [Proof_G1_FinEnum : FinEnum Proof_G1]
   Proof_G2 : Type
-  ListProof_G2 : List Proof_G2
+  [Proof_G2_FinEnum : FinEnum Proof_G2]
 
   /-- The type indexing equations the verifier checks -/
   EqualityChecks : Type
@@ -47,7 +50,7 @@ structure AGMProofSystemInstantiation (F : Type) [Field F] where
   (each equation is treated as a sum of pairings, the result of which is compared to zero) -/
   Pairings : EqualityChecks → Type
 
-  ListPairings : (k : EqualityChecks) → List (Pairings k)
+  [Pairings_FinEnum : (k : EqualityChecks) → FinEnum (Pairings k)]
 
   /-- The coefficient that the verifier uses for the jth element of the ith component of the SRSI
   in the left half of the lth paring of the kth equality check -/
@@ -67,6 +70,16 @@ structure AGMProofSystemInstantiation (F : Type) [Field F] where
   side of the pairing to the other. It defaults to empty. -/
   Identified_Proof_Elems : List (Proof_G1 × Proof_G2) := []
 
+-- Register the bundled `FinEnum` fields as instances so that `FinEnum.toList`, the derived
+-- `Fintype`, and the `≃ Fin n` equivalences are available from a bare `𝓟`.
+attribute [instance]
+  AGMProofSystemInstantiation.Sample_FinEnum
+  AGMProofSystemInstantiation.SRSElements_G1_FinEnum
+  AGMProofSystemInstantiation.SRSElements_G2_FinEnum
+  AGMProofSystemInstantiation.Proof_G1_FinEnum
+  AGMProofSystemInstantiation.Proof_G2_FinEnum
+  AGMProofSystemInstantiation.Pairings_FinEnum
+
 namespace AGMProofSystemInstantiation
 
 /-- The type of possible provers in the AGM model.
@@ -78,13 +91,13 @@ def Prover (F : Type) [Field F]
 noncomputable def proof_element_G1_as_poly {F : Type} [Field F]
     (𝓟 : AGMProofSystemInstantiation F) (prover : 𝓟.Prover) (pf_elem : 𝓟.Proof_G1) :
     MvPolynomial (𝓟.Sample) F :=
-  (𝓟.ListSRSElements_G1.map fun SRS_elem =>
+  ((FinEnum.toList 𝓟.SRSElements_G1).map fun SRS_elem =>
           MvPolynomial.C (prover.fst pf_elem SRS_elem) * (𝓟.SRSElementValue_G1 SRS_elem)).sum
 
 noncomputable def proof_element_G2_as_poly {F : Type} [Field F]
     (𝓟 : AGMProofSystemInstantiation F) (prover : 𝓟.Prover) (pf_elem : 𝓟.Proof_G2) :
     MvPolynomial (𝓟.Sample) F :=
-  (𝓟.ListSRSElements_G2.map fun SRS_elem =>
+  ((FinEnum.toList 𝓟.SRSElements_G2).map fun SRS_elem =>
           MvPolynomial.C (prover.snd pf_elem SRS_elem) * (𝓟.SRSElementValue_G2 SRS_elem)).sum
 
 /-- The pairing evaluation, represented as a MvPolynomial in the samples -/
@@ -95,7 +108,7 @@ noncomputable def pairing_poly {F : Type} [Field F]
     ( -- G1 input of pairing
       -- Proof component
       (
-        (𝓟.ListProof_G1.map fun pf_elem => -- Sum over all left proof components
+        ((FinEnum.toList 𝓟.Proof_G1).map fun pf_elem => -- Sum over all left proof components
           C (𝓟.verificationPairingProof_G1 stmt check_idx pairing pf_elem) -- Coefficient of that element
             *
             -- Times the proof component itself
@@ -103,7 +116,7 @@ noncomputable def pairing_poly {F : Type} [Field F]
       )
       +
       ( -- SRS component
-        (𝓟.ListSRSElements_G1.map fun SRS_elem =>
+        ((FinEnum.toList 𝓟.SRSElements_G1).map fun SRS_elem =>
           C (𝓟.verificationPairingSRS_G1 stmt check_idx pairing SRS_elem) * (𝓟.SRSElementValue_G1 SRS_elem)).sum
       )
     )
@@ -111,7 +124,7 @@ noncomputable def pairing_poly {F : Type} [Field F]
     ( -- G2 input of pairing
       -- Proof component
       (
-        (𝓟.ListProof_G2.map fun pf_elem => -- Sum over all Right proof components
+        ((FinEnum.toList 𝓟.Proof_G2).map fun pf_elem => -- Sum over all Right proof components
           C (𝓟.verificationPairingProof_G2 stmt check_idx pairing pf_elem) -- Coefficient of that element
             *
             -- Times the proof component itself
@@ -119,7 +132,7 @@ noncomputable def pairing_poly {F : Type} [Field F]
       )
       +
       ( -- SRS component
-        (𝓟.ListSRSElements_G2.map fun SRS_elem =>
+        ((FinEnum.toList 𝓟.SRSElements_G2).map fun SRS_elem =>
           C (𝓟.verificationPairingSRS_G2 stmt check_idx pairing SRS_elem) * (𝓟.SRSElementValue_G2 SRS_elem)).sum
       )
     )
@@ -132,7 +145,7 @@ noncomputable def check_poly {F : Type} [Field F]
     (𝓟 : AGMProofSystemInstantiation F) (prover : 𝓟.Prover) (stmt : 𝓟.Stmt) (check_idx : 𝓟.EqualityChecks) :
     MvPolynomial 𝓟.Sample F :=
   (
-  (𝓟.ListPairings check_idx).map fun pairing =>
+  (FinEnum.toList (𝓟.Pairings check_idx)).map fun pairing =>
     𝓟.pairing_poly prover stmt check_idx pairing
   ).sum
 

@@ -109,47 +109,15 @@ lemma is_sound
 
 
   -- Step 1: Obtain the coefficient equations of the mv_polynomials
-  simp_rw [Groth16TypeIII] at eqn
-
-
-  -- All I want is a tactic that will apply the following simplifications to eqn in sequence.
-  -- TODO can I write a tactic taking a nested list of simp lemmas?
-  -- Can I combine all of these?
-
-
-  simp only [
-    Function.comp_def, List.sum_map_zero,
-    mul_add, add_mul, List.sum_map_add,
-    List.map_append, List.map_map, List.map_cons, List.map_nil,
-    -- List.sum_append, List.sum_nil, List.sum_cons
-    ] at eqn
-  -- done
-  simp only [map_one, List.singleton_append, List.cons_append, map_prod, map_sub, List.append_assoc,
-    List.sum_cons, List.sum_append, List.sum_map_add, one_mul, map_zero, zero_mul, List.sum_nil,
-    add_zero, map_neg, neg_mul, neg_add_rev, List.map_const', List.length_finRange,
-    List.sum_replicate, smul_zero, mul_zero, zero_add] at eqn
-
-  -- done
-
-  simp only [
-    -- Associativity to obtain a right-leaning tree
-    mul_assoc,
-    -- Commutativity lemmas to move X (some _) to the left
-    mul_left_comm (C _) (X (some _)) _, mul_left_comm (List.sum _) (X (some _)) _,
-    mul_comm (C _) (X (some _)), mul_comm (List.sum _) (X (some _)),
-    -- Move negations to the bottom
-    neg_mul, mul_neg,
-    -- Move constant multiplications (which the X (some _) terms should be) out of sums
-    List.sum_map_mul_right, List.sum_map_mul_left] at eqn
-
-
-  -- done
-
-  -- Apply MvPolynomial.optionEquivRight *here*, so that we can treat polynomials in Vars_X as constants
-  -- replace eqn := congr_arg (MvPolynomial.optionEquivRight F Vars) eqn
-  -- TODO(v4.29 bump): blocked by the `List.sum_append` regression (see SoundnessProver notes);
-  -- the `optionEquivRight` distribution can no longer fire because the `(_ ++ _).sum` terms do not
-  -- split. Full pipeline preserved in git history (pre-bump).
+  --
+  -- TODO(FinEnum/CompPoly refactor): the original pipeline rewrote `eqn` via `simp_rw [Groth16TypeIII]`
+  -- followed by several list-expansion `simp only [...]` passes. After the move from explicit `List`
+  -- fields to `FinEnum` instances, the SRS enumerations are `FinEnum.toList` of *parameterized* index
+  -- types, which do not reduce to the concrete `++`/`finRange` lists definitionally, so the
+  -- list-expansion no longer fires. (`Groth16TypeIII` is now `@[reducible]`, which also makes
+  -- `simp_rw [Groth16TypeIII]` a no-op.) This was already blocked by the v4.29 `List.sum_append`
+  -- regression (see git history for the full pre-bump pipeline); both need resolving together before
+  -- the `optionEquivRight` distribution + coefficient extraction can resume.
   sorry
 
   -- Step 2: Recursively simplify and case-analyze the equations

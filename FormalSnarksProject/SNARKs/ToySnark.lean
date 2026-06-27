@@ -16,7 +16,9 @@ namespace ToySnark
 inductive Vars : Type where
   | α : Vars
   | β : Vars
-deriving Repr, BEq
+deriving Repr, BEq, DecidableEq
+
+instance : FinEnum Vars := .ofList [.α, .β] (fun x => by cases x <;> simp)
 
 inductive StmtEntries : Type where
   | x : StmtEntries
@@ -48,36 +50,46 @@ lemma Vars.finsupp_eq_ext (f g : Vars →₀ ℕ) : f = g ↔
 -- One left proof
 inductive Proof_G1_Idx : Type where
   | Pf : Proof_G1_Idx
+deriving DecidableEq
 
-instance : Fintype Proof_G1_Idx :=
-  ⟨⟨[Proof_G1_Idx.Pf], by simp⟩, fun x => by cases x; simp⟩
+noncomputable instance : FinEnum Proof_G1_Idx := .ofList [.Pf] (fun x => by cases x <;> simp)
+@[simp] lemma toList_Proof_G1_Idx : FinEnum.toList Proof_G1_Idx = [.Pf] := by rfl
 
 -- No right proof
 def Proof_G2_Idx : Type := Empty
 
-instance : Fintype Proof_G2_Idx := inferInstanceAs (Fintype Empty)
+noncomputable instance : FinEnum Proof_G2_Idx := inferInstanceAs (FinEnum Empty)
+@[simp] lemma toList_Proof_G2_Idx : FinEnum.toList Proof_G2_Idx = [] := by rfl
 
 inductive PairingsIdx : Type where
   | lhs : PairingsIdx
   | rhs : PairingsIdx
+deriving DecidableEq
 
-instance : Fintype PairingsIdx :=
-  ⟨⟨[PairingsIdx.lhs, PairingsIdx.rhs], by simp⟩,
-    fun x => by cases x <;> simp⟩
+noncomputable instance : FinEnum PairingsIdx := .ofList [.lhs, .rhs] (fun x => by cases x <;> simp)
+@[simp] lemma toList_PairingsIdx : FinEnum.toList PairingsIdx = [.lhs, .rhs] := by rfl
 
 inductive SRS_Elements_G1_Idx : Type where
   | α : SRS_Elements_G1_Idx
   | β : SRS_Elements_G1_Idx
+deriving DecidableEq
+
+noncomputable instance : FinEnum SRS_Elements_G1_Idx := .ofList [.α, .β] (fun x => by cases x <;> simp)
+@[simp] lemma toList_SRS_Elements_G1_Idx : FinEnum.toList SRS_Elements_G1_Idx = [.α, .β] := by rfl
 
 inductive SRS_Elements_G2_Idx : Type where
   | α : SRS_Elements_G2_Idx
   | β : SRS_Elements_G2_Idx
+deriving DecidableEq
+
+noncomputable instance : FinEnum SRS_Elements_G2_Idx := .ofList [.α, .β] (fun x => by cases x <;> simp)
+@[simp] lemma toList_SRS_Elements_G2_Idx : FinEnum.toList SRS_Elements_G2_Idx = [.α, .β] := by rfl
 
 
 /--
 A description of a Toy SNARK
 -/
-noncomputable def ToySnark
+@[reducible] noncomputable def ToySnark
     /- The finite field parameter of our SNARK -/
     {F : Type} [Field F] :
     AGMProofSystemInstantiation F :=
@@ -85,11 +97,7 @@ noncomputable def ToySnark
     Stmt := StmtEntries -> F
     Sample := Option Vars
     SRSElements_G1 := SRS_Elements_G1_Idx
-    ListSRSElements_G1 :=
-      [.α, .β]
     SRSElements_G2 := SRS_Elements_G2_Idx
-    ListSRSElements_G2 :=
-      [.α, .β]
     SRSElementValue_G1 := fun SRS_idx => match SRS_idx with
       | SRS_Elements_G1_Idx.α => MvPolynomial.X Vars_α
       | SRS_Elements_G1_Idx.β => MvPolynomial.X Vars_β
@@ -97,12 +105,10 @@ noncomputable def ToySnark
       | SRS_Elements_G2_Idx.α => MvPolynomial.X Vars_α
       | SRS_Elements_G2_Idx.β => MvPolynomial.X Vars_β
     Proof_G1 := Proof_G1_Idx
-    ListProof_G1 := [Proof_G1_Idx.Pf]
     Proof_G2 := Proof_G2_Idx
-    ListProof_G2 := []
     EqualityChecks := Unit
     Pairings := fun _ => PairingsIdx
-    ListPairings := fun _ => [PairingsIdx.lhs, PairingsIdx.rhs]
+    Pairings_FinEnum := fun _ => inferInstance
     verificationPairingSRS_G1 := fun stmt _ i SRS_idx => match i with
       | PairingsIdx.lhs => 0
       | PairingsIdx.rhs => match SRS_idx with
@@ -152,8 +158,11 @@ lemma soundness
   clear eqns null
 
   -- Step 1: Obtain the coefficient equations of the mv_polynomials
-  simp_rw [ToySnark] at eqn
-  simp only [monomial_zero', List.singleton_append, List.cons_append, List.append_assoc,
+  -- (`ToySnark` is `@[reducible]`, so `simp` unfolds its value fields and the `FinEnum.toList`
+  -- instance projections directly; an explicit `simp_rw [ToySnark]` is no longer needed.)
+  simp only [toList_Proof_G1_Idx, toList_Proof_G2_Idx, toList_PairingsIdx,
+    toList_SRS_Elements_G1_Idx, toList_SRS_Elements_G2_Idx,
+    monomial_zero', List.singleton_append, List.cons_append, List.append_assoc,
     List.map_cons, Sum.elim_inl, Sum.elim_inr, List.map_append, List.map_map, List.sum_cons,
     List.sum_append, List.map_nil, List.sum_nil, add_zero, Sum.elim_lam_const_lam_const, map_one,
     one_mul, map_zero, zero_mul, map_neg, neg_mul, neg_add_rev, zero_add, mul_zero,
