@@ -9,20 +9,22 @@ relaxedAutoImplicit = false
 weak.linter.mathlibStandardSet = true
 maxSynthPendingDepth = 3
 
-[[require]]
-name = "smt"
-scope = "ufmg-smite"
-rev = "7d1d8239e78daa5197f9a71948776c4627049f5f"
+# TODO: smt (lean-smt) temporarily dropped — no v4.30.0-compatible release yet, and it blocks
+# the toolchain bump needed for the CompPoly FinEnum branch below. Restore once it's updated.
+# [[require]]
+# name = "smt"
+# scope = "ufmg-smite"
+# rev = "7d1d8239e78daa5197f9a71948776c4627049f5f"
 
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"
-rev = "v4.29.0"
+rev = "v4.30.0"
 
 [[require]]
 name = "CompPoly"
-git = "https://github.com/Verified-zkEVM/CompPoly"
-rev = "2511ced8a740cde14bf257300cb4690fc70c7dac" # last v4.29.0-compatible commit
+git = "https://github.com/BoltonBailey/CompPoly"
+rev = "7fe5c0debefd00216b40504d9d119c7f01a1fac1" # PR #261: parameterize CMvPolynomial by [FinEnum σ]
 
 [[lean_lib]]
 name = "FormalSnarksProject"

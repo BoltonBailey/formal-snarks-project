@@ -16,6 +16,7 @@ import FormalSnarksProject.SNARKs.ToySnark
 import FormalSnarksProject.ToMathlib.ForTransformations
 import FormalSnarksProject.ToMathlib.OptionEquivRight
 import FormalSnarksProject.ToMathlib.PolynomialQuotient
-import FormalSnarksProject.ToMathlib.SMTTest
+-- TODO: depends on the `smt` library, temporarily dropped from lakefile.toml (toolchain reasons).
+-- import FormalSnarksProject.ToMathlib.SMTTest
 -- TODO(FinEnum/CompPoly refactor): not yet migrated from `List*` fields to `FinEnum` instances.
 -- import FormalSnarksProject.Transformations.Transformations
