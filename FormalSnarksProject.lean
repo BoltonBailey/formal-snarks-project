@@ -13,8 +13,10 @@ import FormalSnarksProject.SNARKs.Lipmaa.Soundness
 -- TODO(FinEnum/CompPoly refactor): not yet migrated from `List*` fields to `FinEnum` instances.
 -- import FormalSnarksProject.SNARKs.Pinocchio
 import FormalSnarksProject.SNARKs.ToySnark
+import FormalSnarksProject.ToMathlib.FinEnumToList
 import FormalSnarksProject.ToMathlib.ForTransformations
 import FormalSnarksProject.ToMathlib.OptionEquivRight
+import FormalSnarksProject.ToMathlib.PolynomialDegreeHelpers
 import FormalSnarksProject.ToMathlib.PolynomialQuotient
 -- TODO: depends on the `smt` library, temporarily dropped from lakefile.toml (toolchain reasons).
 -- import FormalSnarksProject.ToMathlib.SMTTest

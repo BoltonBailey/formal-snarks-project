@@ -3,6 +3,7 @@ import Mathlib
 
 import FormalSnarksProject.Models.AGMProofSystemInstantiation
 import FormalSnarksProject.ToMathlib.OptionEquivRight
+import FormalSnarksProject.ToMathlib.FinEnumToList
 import FormalSnarksProject.SoundnessTactic.SoundnessProver
 import FormalSnarksProject.SoundnessTactic.ProofMode
 
@@ -107,6 +108,55 @@ instance {n_stmt n_wit n_var : ℕ} :
     FinEnum (@SRS_Elements_G2_Idx n_stmt n_wit n_var) := .ofList
   ([.β, .γ, .δ] ++ (List.finRange n_var).map .x_pow)
   (fun x => by cases x <;> simp)
+
+/-! ### `FinEnum.toList` expansions
+
+The soundness/completeness proofs expand the sums over SRS/proof/pairing indices into sums over
+the concrete defining lists. For the parameterized SRS index types this holds only propositionally
+(via `FinEnum.toList_ofList_of_nodup`), since `List.dedup` does not reduce on `List.finRange` of a
+variable length. -/
+
+@[simp] lemma toList_Proof_G1_Idx : FinEnum.toList Proof_G1_Idx = [.A, .C] := by rfl
+
+@[simp] lemma toList_Proof_G2_Idx : FinEnum.toList Proof_G2_Idx = [.B] := by rfl
+
+@[simp] lemma toList_PairingsIdx : FinEnum.toList PairingsIdx = [.ab, .αβ, .stmtγ, .cδ] := by rfl
+
+@[simp] lemma toList_SRS_Elements_G1_Idx {n_stmt n_wit n_var : ℕ} :
+    FinEnum.toList (@SRS_Elements_G1_Idx n_stmt n_wit n_var) =
+      [.α, .β, .δ]
+        ++ (List.finRange n_var).map .x_pow
+        ++ (List.finRange (n_var - 1)).map .x_pow_times_t
+        ++ (List.finRange n_stmt).map .y
+        ++ (List.finRange n_wit).map .q :=
+  FinEnum.toList_ofList_of_nodup _ _ (by
+    have hx : Function.Injective (@SRS_Elements_G1_Idx.x_pow n_stmt n_wit n_var) :=
+      fun a b h => by injection h
+    have hxt : Function.Injective (@SRS_Elements_G1_Idx.x_pow_times_t n_stmt n_wit n_var) :=
+      fun a b h => by injection h
+    have hy : Function.Injective (@SRS_Elements_G1_Idx.y n_stmt n_wit n_var) :=
+      fun a b h => by injection h
+    have hq : Function.Injective (@SRS_Elements_G1_Idx.q n_stmt n_wit n_var) :=
+      fun a b h => by injection h
+    have h1 : (List.map SRS_Elements_G1_Idx.x_pow (List.finRange n_var)).Nodup :=
+      (List.nodup_finRange _).map hx
+    have h2 : ((List.finRange (n_var - 1)).map SRS_Elements_G1_Idx.x_pow_times_t).Nodup :=
+      (List.nodup_finRange _).map hxt
+    have h3 : ((List.finRange n_stmt).map SRS_Elements_G1_Idx.y).Nodup :=
+      (List.nodup_finRange _).map hy
+    have h4 : ((List.finRange n_wit).map SRS_Elements_G1_Idx.q).Nodup :=
+      (List.nodup_finRange _).map hq
+    simp only [List.nodup_append, List.disjoint_left, List.nodup_cons, List.mem_cons,
+      List.mem_append, List.mem_map, List.not_mem_nil, List.nodup_nil]
+    aesop)
+
+@[simp] lemma toList_SRS_Elements_G2_Idx {n_stmt n_wit n_var : ℕ} :
+    FinEnum.toList (@SRS_Elements_G2_Idx n_stmt n_wit n_var) =
+      [.β, .γ, .δ] ++ (List.finRange n_var).map .x_pow :=
+  FinEnum.toList_ofList_of_nodup _ _ (by
+    have hx : Function.Injective (@SRS_Elements_G2_Idx.x_pow n_stmt n_wit n_var) :=
+      fun a b h => by injection h
+    simp [(List.nodup_finRange _).map hx])
 
 -- TODO Note: May well be best to completely forget about generalizing "straightforward" to the very end.
 -- TODO Note: Refactor files - model and a subdirectory for the six files from

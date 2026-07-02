@@ -70,6 +70,16 @@ lemma MvPolynomial.sum_map_C {σ A R : Type} [CommSemiring R] (l : List A) (f : 
   | nil => simp
   | cons hd tl ih => simp [ih]
 
+/-- `List.sum_append` restated over `AddMonoid`. The core `List.sum_append` takes
+`Std.Associative`/`Std.LawfulLeftIdentity` instance arguments, which `simp` fails to synthesize
+while the list's element type is still a metavariable mid-rewrite; this version only needs the
+`AddMonoid` instance. -/
+theorem List.sum_append_add_monoid {M : Type*} [AddMonoid M] :
+    ∀ (l₁ l₂ : List M), (l₁ ++ l₂).sum = l₁.sum + l₂.sum
+  | [], l₂ => by simp
+  | a :: l₁, l₂ => by
+    simp only [List.cons_append, List.sum_cons, List.sum_append_add_monoid l₁ l₂, add_assoc]
+
 theorem AlgEquiv.list_map_sum {R : Type*} {A₁ : Type*} {A₂ : Type*}
     [CommSemiring R] [Semiring A₁] [Semiring A₂] [Algebra R A₁] [Algebra R A₂]
     (e : A₁ ≃ₐ[R] A₂) {ι : Type*} (f : ι → A₁) (l : List ι) :
@@ -171,6 +181,17 @@ lemma monic_prod_X_sub_C {F : Type} [Field F] [BEq F] [LawfulBEq F] {ι : Type*}
   rw [monic_toPoly_iff, toPoly_prod]
   simp only [toPoly_X_sub_C]
   exact Polynomial.monic_prod_of_monic _ _ (fun i _ => Polynomial.monic_X_sub_C (r i))
+
+/-- `toPoly` is injective (it underlies the ring equivalence with mathlib `Polynomial`). -/
+lemma toPoly_injective {F : Type} [Field F] [BEq F] [LawfulBEq F] :
+    Function.Injective (CompPoly.CPolynomial.toPoly (R := F)) :=
+  (CompPoly.CPolynomial.ringEquiv (R := F)).injective
+
+/-- `toPoly` distributes over `List.sum`. -/
+lemma toPoly_list_sum {F : Type} [Field F] [BEq F] [LawfulBEq F]
+    (l : List (CompPoly.CPolynomial F)) :
+    l.sum.toPoly = (l.map CompPoly.CPolynomial.toPoly).sum :=
+  map_list_sum (CompPoly.CPolynomial.ringEquiv (R := F) : CompPoly.CPolynomial F →+* Polynomial F) l
 
 /-- For monic `t`, `(t * p) %ₘ t = 0` — the computable analogue of `Polynomial.mul_self_modByMonic`. -/
 lemma mul_self_modByMonic {F : Type} [Field F] [BEq F] [LawfulBEq F]
