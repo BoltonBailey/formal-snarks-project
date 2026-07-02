@@ -7,11 +7,13 @@ import FormalSnarksProject.SoundnessTactic.SoundnessProver
 import FormalSnarksProject.SoundnessTactic.ProofMode
 
 
-open scoped BigOperators Classical
+open scoped BigOperators
 
 section Lipmaa
 
-open MvPolynomial Option AGMProofSystemInstantiation
+open Option AGMProofSystemInstantiation
+open CPoly CPoly.CMvPolynomial
+open CompPoly
 
 namespace Lipmaa
 
@@ -19,7 +21,7 @@ inductive Vars : Type where
   | y : Vars
 deriving Repr, BEq, DecidableEq
 
-noncomputable instance : FinEnum Vars := .ofList [.y] (fun x => by cases x <;> simp)
+instance : FinEnum Vars := .ofList [.y] (fun x => by cases x <;> simp)
 
 local notation "Vars_y" => some Vars.y
 local notation "Vars_x" => none
@@ -41,13 +43,13 @@ inductive Proof_G1_Idx : Type where
   | C : Proof_G1_Idx
 deriving DecidableEq
 
-noncomputable instance : FinEnum Proof_G1_Idx := .ofList [.A, .C] (fun x => by cases x <;> simp)
+instance : FinEnum Proof_G1_Idx := .ofList [.A, .C] (fun x => by cases x <;> simp)
 
 inductive Proof_G2_Idx : Type where
   | B : Proof_G2_Idx
 deriving DecidableEq
 
-noncomputable instance : FinEnum Proof_G2_Idx := .ofList [.B] (fun x => by cases x <;> simp)
+instance : FinEnum Proof_G2_Idx := .ofList [.B] (fun x => by cases x <;> simp)
 
 inductive PairingsIdx : Type where
   | ab : PairingsIdx
@@ -56,7 +58,7 @@ inductive PairingsIdx : Type where
   | cδ : PairingsIdx
 deriving DecidableEq
 
-noncomputable instance : FinEnum PairingsIdx :=
+instance : FinEnum PairingsIdx :=
   .ofList [.ab, .αβ, .stmtγ, .cδ] (fun x => by cases x <;> simp)
 
 inductive SRS_Elements_G1_Idx {n_stmt n_wit n_var : ℕ} : Type where
@@ -69,7 +71,7 @@ inductive SRS_Elements_G1_Idx {n_stmt n_wit n_var : ℕ} : Type where
   | q : Fin n_wit → SRS_Elements_G1_Idx
 deriving DecidableEq
 
-noncomputable instance {n_stmt n_wit n_var : ℕ} :
+instance {n_stmt n_wit n_var : ℕ} :
     FinEnum (@SRS_Elements_G1_Idx n_stmt n_wit n_var) := .ofList
   ([.α, .β, .δ]
     ++ (List.finRange n_var).map .x_pow
@@ -85,7 +87,7 @@ inductive SRS_Elements_G2_Idx {n_stmt n_wit n_var : ℕ} : Type where
   | x_pow : Fin n_var → SRS_Elements_G2_Idx
 deriving DecidableEq
 
-noncomputable instance {n_stmt n_wit n_var : ℕ} :
+instance {n_stmt n_wit n_var : ℕ} :
     FinEnum (@SRS_Elements_G2_Idx n_stmt n_wit n_var) := .ofList
   ([.β, .γ, .δ] ++ (List.finRange n_var).map .x_pow)
   (fun x => by cases x <;> simp)
@@ -98,23 +100,23 @@ TODO
 -/
 @[reducible] noncomputable def Lipmaa
     /- The finite field parameter of our SNARK -/
-    {F : Type} [Field F]
+    {F : Type} [Field F] [BEq F] [LawfulBEq F]
     /- The naturals representing:
       n_stmt - the statement size,
       n_wit - the witness size -/
     {n_stmt n_wit n_var : ℕ}
     /- u_stmt and u_wit are Fin-indexed collections of polynomials from the square span program -/
-    {u_stmt : Fin n_stmt → (Polynomial F) }
-    {u_wit : Fin n_wit → (Polynomial F) }
-    {v_stmt : Fin n_stmt → (Polynomial F) }
-    {v_wit : Fin n_wit → (Polynomial F) }
-    {w_stmt : Fin n_stmt → (Polynomial F) }
-    {w_wit : Fin n_wit → (Polynomial F) }
+    {u_stmt : Fin n_stmt → (CompPoly.CPolynomial F) }
+    {u_wit : Fin n_wit → (CompPoly.CPolynomial F) }
+    {v_stmt : Fin n_stmt → (CompPoly.CPolynomial F) }
+    {v_wit : Fin n_wit → (CompPoly.CPolynomial F) }
+    {w_stmt : Fin n_stmt → (CompPoly.CPolynomial F) }
+    {w_wit : Fin n_wit → (CompPoly.CPolynomial F) }
     /- The roots of the polynomial t -/
     {r : Fin n_wit → F} :
     AGMProofSystemInstantiation F :=
-  let t : Polynomial F :=
-    ∏ i ∈ (Finset.univ : Finset (Fin n_wit)), (Polynomial.X - Polynomial.C (r i));
+  let t : CompPoly.CPolynomial F :=
+    ∏ i ∈ (Finset.univ : Finset (Fin n_wit)), (CompPoly.CPolynomial.X - CompPoly.CPolynomial.C (r i));
   {
     Stmt := Fin n_stmt -> F
     Sample := Option Vars
@@ -127,17 +129,17 @@ TODO
       | SRS_Elements_G1_Idx.x_pow i => (X Vars_y ^ 5) * (X Vars_y ^ 1) * X Vars_x ^ (i : ℕ)
       | SRS_Elements_G1_Idx.x_pow_times_t i => (X Vars_y ^ 5)
                                                   * X Vars_x ^ (i : ℕ)
-                                                  * to_MvPolynomial_Option Vars t
-      | SRS_Elements_G1_Idx.y i => (((X Vars_y ^ 25) * (X Vars_y ^ 1)) * ( (to_MvPolynomial_Option Vars (u_stmt i))))
+                                                  * to_CMvPolynomial_Option Vars t
+      | SRS_Elements_G1_Idx.y i => (((X Vars_y ^ 25) * (X Vars_y ^ 1)) * ( (to_CMvPolynomial_Option Vars (u_stmt i))))
                                       +
-                                      ((X Vars_y ^ 75) * (X Vars_y ^ 1)) * (to_MvPolynomial_Option Vars (v_stmt i))
+                                      ((X Vars_y ^ 75) * (X Vars_y ^ 1)) * (to_CMvPolynomial_Option Vars (v_stmt i))
                                       +
-                                      (X Vars_y ^ 1) * (to_MvPolynomial_Option Vars (w_stmt i))
-      | SRS_Elements_G1_Idx.q i => ((X Vars_y ^ 25) * (X Vars_y ^ 5)) * ( to_MvPolynomial_Option Vars (u_wit i))
+                                      (X Vars_y ^ 1) * (to_CMvPolynomial_Option Vars (w_stmt i))
+      | SRS_Elements_G1_Idx.q i => ((X Vars_y ^ 25) * (X Vars_y ^ 5)) * ( to_CMvPolynomial_Option Vars (u_wit i))
                                       +
-                                      ((X Vars_y ^ 75) * (X Vars_y ^ 5)) * (to_MvPolynomial_Option Vars (v_wit i))
+                                      ((X Vars_y ^ 75) * (X Vars_y ^ 5)) * (to_CMvPolynomial_Option Vars (v_wit i))
                                       +
-                                      (X Vars_y ^ 5) * to_MvPolynomial_Option Vars (w_wit i)
+                                      (X Vars_y ^ 5) * to_CMvPolynomial_Option Vars (w_wit i)
       -- Note that the polynomials here have been multiplied through by γδ
     SRSElementValue_G2 := fun SRS_idx => match SRS_idx with
       | SRS_Elements_G2_Idx.β => (X Vars_y ^ 5) * (X Vars_y ^ 1) * (X Vars_y ^ 25)

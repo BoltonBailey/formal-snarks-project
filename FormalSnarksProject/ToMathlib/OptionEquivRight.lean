@@ -1,6 +1,12 @@
 import Mathlib.Algebra.Polynomial.Div
 import Mathlib.Algebra.MvPolynomial.Equiv
 import Mathlib.Data.FunLike.Basic
+import Mathlib.Data.FinEnum.Option
+import CompPoly.Multivariate.CMvPolynomialEvalLemmas
+import CompPoly.Multivariate.Rename
+import CompPoly.Univariate.ToPoly.Impl
+import CompPoly.Univariate.ToPoly.Equiv
+import CompPoly.Univariate.DivisionCorrectness
 
 open scoped BigOperators
 
@@ -71,5 +77,109 @@ theorem AlgEquiv.list_map_sum {R : Type*} {A₁ : Type*} {A₂ : Type*}
   induction l with
   | nil => simp
   | cons hd tl ih => simp [ih]
+
+/-! ### Computable-polynomial (`CMvPolynomial`) version of the `Option` embedding
+
+The SNARK definitions describe SRS elements as `CPoly.CMvPolynomial (Option Vars) F`, with the
+univariate QAP polynomials given as computable `CompPoly.CPolynomial F`. `to_CMvPolynomial_Option`
+embeds such a `CPolynomial` into a `CMvPolynomial (Option V)`, mapping the variable to the `none`
+sample (via `CPolynomial.eval₂`). `cmvOptionEmbedPoly` is the corresponding mathlib-`Polynomial`
+embedding, kept only as the bridge TARGET: `fromCMvPolynomial_to_CMvPolynomial_Option` records that
+the computable embedding agrees with `to_MvPolynomial_Option ∘ toPoly` across `CPoly.polyRingEquiv`,
+which is how soundness proofs fall back on the existing `optionEquivRight` machinery. -/
+
+open CPoly
+open CompPoly
+
+/-- Embedding of mathlib univariate `Polynomial`s into `CMvPolynomial` over an option type, sending
+`Polynomial.X` to the `none` sample. Used only as the bridge target for `to_CMvPolynomial_Option`. -/
+noncomputable def cmvOptionEmbedPoly {F : Type} [Field F] [BEq F] [LawfulBEq F]
+    (V : Type) [FinEnum V] :
+    Polynomial F →+* CMvPolynomial (Option V) F :=
+  Polynomial.eval₂RingHom CMvPolynomial.CRingHom (CMvPolynomial.X none)
+
+@[simp] lemma cmvOptionEmbedPoly_X {F V : Type} [Field F] [BEq F] [LawfulBEq F] [FinEnum V] :
+    cmvOptionEmbedPoly V (Polynomial.X) = CMvPolynomial.X (R := F) none := by
+  simp [cmvOptionEmbedPoly]
+
+@[simp] lemma cmvOptionEmbedPoly_C {F V : Type} [Field F] [BEq F] [LawfulBEq F] [FinEnum V]
+    (r : F) :
+    cmvOptionEmbedPoly V (Polynomial.C r) = CMvPolynomial.C r := by
+  simp only [cmvOptionEmbedPoly, Polynomial.coe_eval₂RingHom, Polynomial.eval₂_C]
+  rfl
+
+lemma fromCMvPolynomial_cmvOptionEmbedPoly {F V : Type} [Field F] [BEq F] [LawfulBEq F]
+    [FinEnum V] (p : Polynomial F) :
+    CPoly.fromCMvPolynomial (cmvOptionEmbedPoly V p) = to_MvPolynomial_Option V p := by
+  have hpr : ∀ x : CMvPolynomial (Option V) F,
+      (CPoly.polyRingEquiv (σ := Option V) (R := F)).toRingHom x = CPoly.fromCMvPolynomial x :=
+    fun _ => rfl
+  have key :
+      RingHom.comp (CPoly.polyRingEquiv (σ := Option V) (R := F)).toRingHom
+        (cmvOptionEmbedPoly (F := F) V) = to_MvPolynomial_Option V := by
+    apply Polynomial.hom_congr_vars
+    · ext r
+      simp only [RingHom.coe_comp, Function.comp_apply, cmvOptionEmbedPoly_C,
+        to_MvPolynomial_Option_C]
+      rw [hpr, CPoly.fromCMvPolynomial_C]
+    · simp only [RingHom.coe_comp, Function.comp_apply, cmvOptionEmbedPoly_X,
+        to_MvPolynomial_Option_X]
+      rw [hpr, CPoly.fromCMvPolynomial_X]
+  have hp := DFunLike.congr_fun key p
+  simp only [RingHom.coe_comp, Function.comp_apply] at hp
+  rw [hpr] at hp
+  exact hp
+
+/-- The computable (`CompPoly.CPolynomial`) version of the `Option` embedding: sends a univariate
+computable polynomial to a `CMvPolynomial (Option V)`, mapping the variable to the `none` sample.
+The SNARK definitions describe SRS elements with this. -/
+noncomputable def to_CMvPolynomial_Option {F : Type} [Field F] [BEq F] [LawfulBEq F]
+    (V : Type) [FinEnum V] (p : CompPoly.CPolynomial F) : CMvPolynomial (Option V) F :=
+  CompPoly.CPolynomial.eval₂ CMvPolynomial.CRingHom (CMvPolynomial.X none) p
+
+lemma to_CMvPolynomial_Option_eq_poly {F V : Type} [Field F] [BEq F] [LawfulBEq F] [FinEnum V]
+    (p : CompPoly.CPolynomial F) :
+    to_CMvPolynomial_Option V p = cmvOptionEmbedPoly V p.toPoly := by
+  rw [to_CMvPolynomial_Option, CompPoly.CPolynomial.eval₂_toPoly, cmvOptionEmbedPoly,
+    Polynomial.coe_eval₂RingHom]
+
+/-- The computable embedding agrees with the mathlib embedding `to_MvPolynomial_Option ∘ toPoly`
+across `CPoly.polyRingEquiv` — the bridge soundness proofs use to fall back on `optionEquivRight`. -/
+lemma fromCMvPolynomial_to_CMvPolynomial_Option {F V : Type} [Field F] [BEq F] [LawfulBEq F]
+    [FinEnum V] (p : CompPoly.CPolynomial F) :
+    CPoly.fromCMvPolynomial (to_CMvPolynomial_Option V p) = to_MvPolynomial_Option V p.toPoly := by
+  rw [to_CMvPolynomial_Option_eq_poly, fromCMvPolynomial_cmvOptionEmbedPoly]
+
+/-! ### `CPolynomial` monic / `modByMonic` helpers for the QAP vanishing polynomial
+
+The soundness/completeness proofs need the computable vanishing polynomial
+`t = ∏ (X - C (rᵢ))` to be monic and the basic `(t * p) %ₘ t = 0` fact, neither of which CompPoly
+exposes natively for `CPolynomial`. These transport the statements through `toPoly` to the mathlib
+`Polynomial` lemmas (`monic_X_sub_C`, `monic_prod_of_monic`, `modByMonic_eq_zero_iff_dvd`). -/
+
+namespace CompPoly.CPolynomial
+
+/-- `toPoly` of a computable linear factor `X - C x` is mathlib's `X - C x`. -/
+lemma toPoly_X_sub_C {F : Type} [Field F] [BEq F] [LawfulBEq F] (x : F) :
+    (CompPoly.CPolynomial.X - CompPoly.CPolynomial.C x).toPoly = Polynomial.X - Polynomial.C x := by
+  rw [toPoly_sub, X_toPoly, C_toPoly]
+
+/-- The computable vanishing polynomial `∏ (X - C (r i))` is monic. -/
+lemma monic_prod_X_sub_C {F : Type} [Field F] [BEq F] [LawfulBEq F] {ι : Type*} [DecidableEq ι]
+    (s : Finset ι) (r : ι → F) :
+    (∏ i ∈ s, (CompPoly.CPolynomial.X - CompPoly.CPolynomial.C (r i))).monic := by
+  rw [monic_toPoly_iff, toPoly_prod]
+  simp only [toPoly_X_sub_C]
+  exact Polynomial.monic_prod_of_monic _ _ (fun i _ => Polynomial.monic_X_sub_C (r i))
+
+/-- For monic `t`, `(t * p) %ₘ t = 0` — the computable analogue of `Polynomial.mul_self_modByMonic`. -/
+lemma mul_self_modByMonic {F : Type} [Field F] [BEq F] [LawfulBEq F]
+    (t p : CompPoly.CPolynomial F) (ht : t.monic) :
+    (t * p).modByMonic t = 0 := by
+  rw [← toPoly_eq_zero_iff, modByMonic_toPoly_eq_modByMonic _ _ ht, toPoly_mul,
+    Polynomial.modByMonic_eq_zero_iff_dvd ((monic_toPoly_iff t).mp ht)]
+  exact dvd_mul_right _ _
+
+end CompPoly.CPolynomial
 
 end Groth16TypeIII

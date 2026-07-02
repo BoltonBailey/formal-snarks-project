@@ -9,46 +9,47 @@ This file contains a draft of the completeness proof for the Type III version of
 
 -/
 
-open scoped BigOperators Classical
+open scoped BigOperators
 
-open MvPolynomial Option AGMProofSystemInstantiation
+open Option AGMProofSystemInstantiation
+open CompPoly
 
 namespace Groth16TypeIII
 
 section completeness
 
-noncomputable def u_sum {F : Type} [Field F] {n_stmt n_wit : ℕ}
-    (u_stmt : Fin n_stmt → (Polynomial F))
-    (u_wit : Fin n_wit → (Polynomial F))
+noncomputable def u_sum {F : Type} [Field F] [BEq F] [LawfulBEq F] {n_stmt n_wit : ℕ}
+    (u_stmt : Fin n_stmt → (CompPoly.CPolynomial F))
+    (u_wit : Fin n_wit → (CompPoly.CPolynomial F))
     (stmt : Fin n_stmt -> F)
     (wit : Fin n_wit -> F)
-    : Polynomial F :=
-  List.sum (List.map (fun j => Polynomial.C (stmt j) * (u_stmt j)) (List.finRange n_stmt))
-  + List.sum (List.map (fun j => Polynomial.C (wit j) * (u_wit j)) (List.finRange n_wit))
+    : CompPoly.CPolynomial F :=
+  List.sum (List.map (fun j => CompPoly.CPolynomial.C (stmt j) * (u_stmt j)) (List.finRange n_stmt))
+  + List.sum (List.map (fun j => CompPoly.CPolynomial.C (wit j) * (u_wit j)) (List.finRange n_wit))
 
-noncomputable def v_sum {F : Type} [Field F] {n_stmt n_wit : ℕ}
-    (v_stmt : Fin n_stmt → (Polynomial F))
-    (v_wit : Fin n_wit → (Polynomial F))
+noncomputable def v_sum {F : Type} [Field F] [BEq F] [LawfulBEq F] {n_stmt n_wit : ℕ}
+    (v_stmt : Fin n_stmt → (CompPoly.CPolynomial F))
+    (v_wit : Fin n_wit → (CompPoly.CPolynomial F))
     (stmt : Fin n_stmt -> F)
     (wit : Fin n_wit -> F)
-    : Polynomial F :=
-  List.sum (List.map (fun j => Polynomial.C (stmt j) * (v_stmt j)) (List.finRange n_stmt))
-  + List.sum (List.map (fun j => Polynomial.C (wit j) * (v_wit j)) (List.finRange n_wit))
+    : CompPoly.CPolynomial F :=
+  List.sum (List.map (fun j => CompPoly.CPolynomial.C (stmt j) * (v_stmt j)) (List.finRange n_stmt))
+  + List.sum (List.map (fun j => CompPoly.CPolynomial.C (wit j) * (v_wit j)) (List.finRange n_wit))
 
-noncomputable def w_sum {F : Type} [Field F] {n_stmt n_wit : ℕ}
-    (w_stmt : Fin n_stmt → (Polynomial F))
-    (w_wit : Fin n_wit → (Polynomial F))
+noncomputable def w_sum {F : Type} [Field F] [BEq F] [LawfulBEq F] {n_stmt n_wit : ℕ}
+    (w_stmt : Fin n_stmt → (CompPoly.CPolynomial F))
+    (w_wit : Fin n_wit → (CompPoly.CPolynomial F))
     (stmt : Fin n_stmt -> F)
     (wit : Fin n_wit -> F)
-    : Polynomial F :=
-  List.sum (List.map (fun j => Polynomial.C (stmt j) * (w_stmt j)) (List.finRange n_stmt))
-  + List.sum (List.map (fun j => Polynomial.C (wit j) * (w_wit j)) (List.finRange n_wit))
+    : CompPoly.CPolynomial F :=
+  List.sum (List.map (fun j => CompPoly.CPolynomial.C (stmt j) * (w_stmt j)) (List.finRange n_stmt))
+  + List.sum (List.map (fun j => CompPoly.CPolynomial.C (wit j) * (w_wit j)) (List.finRange n_wit))
 
-noncomputable def wit_prover (F : Type) [Field F]
+noncomputable def wit_prover (F : Type) [Field F] [BEq F] [LawfulBEq F]
     (n_stmt n_wit n_var : ℕ)
-    (u_stmt : Fin n_stmt → (Polynomial F)) (u_wit : Fin n_wit → (Polynomial F))
-    (v_stmt : Fin n_stmt → (Polynomial F)) (v_wit : Fin n_wit → (Polynomial F))
-    (w_stmt : Fin n_stmt → (Polynomial F)) (w_wit : Fin n_wit → (Polynomial F))
+    (u_stmt : Fin n_stmt → (CompPoly.CPolynomial F)) (u_wit : Fin n_wit → (CompPoly.CPolynomial F))
+    (v_stmt : Fin n_stmt → (CompPoly.CPolynomial F)) (v_wit : Fin n_wit → (CompPoly.CPolynomial F))
+    (w_stmt : Fin n_stmt → (CompPoly.CPolynomial F)) (w_wit : Fin n_wit → (CompPoly.CPolynomial F))
     (r : Fin n_wit → F)
     (stmt : Fin n_stmt -> F)
     (wit : Fin n_wit -> F) :
@@ -72,8 +73,8 @@ noncomputable def wit_prover (F : Type) [Field F]
             | SRS_Elements_G1_Idx.δ => 0
             | SRS_Elements_G1_Idx.x_pow _ => 0
             | SRS_Elements_G1_Idx.x_pow_times_t i =>
-              let t : Polynomial F := ∏ i ∈ (Finset.univ : Finset (Fin n_wit)), (Polynomial.X - Polynomial.C (r i));
-              (((u_sum u_stmt u_wit stmt wit) * (v_sum v_stmt v_wit stmt wit) - (w_sum w_stmt w_wit stmt wit)) /ₘ t).coeff i
+              let t : CompPoly.CPolynomial F := ∏ i ∈ (Finset.univ : Finset (Fin n_wit)), (CompPoly.CPolynomial.X - CompPoly.CPolynomial.C (r i));
+              (((u_sum u_stmt u_wit stmt wit) * (v_sum v_stmt v_wit stmt wit) - (w_sum w_stmt w_wit stmt wit)).divByMonic t).coeff i
             | SRS_Elements_G1_Idx.y _ => 0
             | SRS_Elements_G1_Idx.q i => wit i
         snd pf_elem srs_elem := match pf_elem with
@@ -85,14 +86,14 @@ noncomputable def wit_prover (F : Type) [Field F]
 
 
 def is_complete
-    {F : Type} [Field F]
+    {F : Type} [Field F] [BEq F] [LawfulBEq F]
     {n_stmt n_wit n_var : ℕ}
-    {u_stmt : Fin n_stmt → (Polynomial F)}
-    {u_wit : Fin n_wit → (Polynomial F)}
-    {v_stmt : Fin n_stmt → (Polynomial F)}
-    {v_wit : Fin n_wit → (Polynomial F)}
-    {w_stmt : Fin n_stmt → (Polynomial F)}
-    {w_wit : Fin n_wit → (Polynomial F)}
+    {u_stmt : Fin n_stmt → (CompPoly.CPolynomial F)}
+    {u_wit : Fin n_wit → (CompPoly.CPolynomial F)}
+    {v_stmt : Fin n_stmt → (CompPoly.CPolynomial F)}
+    {v_wit : Fin n_wit → (CompPoly.CPolynomial F)}
+    {w_stmt : Fin n_stmt → (CompPoly.CPolynomial F)}
+    {w_wit : Fin n_wit → (CompPoly.CPolynomial F)}
     {r : Fin n_wit → F} :
     (completeness
       F
@@ -102,18 +103,16 @@ def is_complete
         (v_wit := v_wit) (w_stmt := w_stmt) (w_wit := w_wit) (r := r))
       (Fin n_wit -> F)
       (fun (stmt : Fin n_stmt → F) (wit : Fin n_wit -> F) =>
-        let t : Polynomial F :=
-          ∏ i ∈ (Finset.univ : Finset (Fin n_wit)), (Polynomial.X - Polynomial.C (r i));
-        (((List.sum (List.map (fun i => Polynomial.C (stmt i) * u_stmt i) (List.finRange n_stmt)))
-            + (List.sum (List.map (fun i => Polynomial.C (wit i) * u_wit i) (List.finRange n_wit))))
+        let t : CompPoly.CPolynomial F :=
+          ∏ i ∈ (Finset.univ : Finset (Fin n_wit)), (CompPoly.CPolynomial.X - CompPoly.CPolynomial.C (r i));
+        (((List.sum (List.map (fun i => CompPoly.CPolynomial.C (stmt i) * u_stmt i) (List.finRange n_stmt)))
+            + (List.sum (List.map (fun i => CompPoly.CPolynomial.C (wit i) * u_wit i) (List.finRange n_wit))))
             *
-          ((List.sum (List.map (fun i => Polynomial.C (stmt i) * v_stmt i) (List.finRange n_stmt)))
-            + (List.sum (List.map (fun i => Polynomial.C (wit i) * v_wit i) (List.finRange n_wit))))
+          ((List.sum (List.map (fun i => CompPoly.CPolynomial.C (stmt i) * v_stmt i) (List.finRange n_stmt)))
+            + (List.sum (List.map (fun i => CompPoly.CPolynomial.C (wit i) * v_wit i) (List.finRange n_wit))))
             -
-          ((List.sum (List.map (fun i => Polynomial.C (stmt i) * w_stmt i) (List.finRange n_stmt)))
-            + (List.sum (List.map (fun i => Polynomial.C (wit i) * w_wit i) (List.finRange n_wit))))
-            %ₘ t = 0
-        )
+          ((List.sum (List.map (fun i => CompPoly.CPolynomial.C (stmt i) * w_stmt i) (List.finRange n_stmt)))
+            + (List.sum (List.map (fun i => CompPoly.CPolynomial.C (wit i) * w_wit i) (List.finRange n_wit))))).modByMonic t = 0
       )
       (
         wit_prover

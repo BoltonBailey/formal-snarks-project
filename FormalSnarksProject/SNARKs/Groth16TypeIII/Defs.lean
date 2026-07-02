@@ -15,11 +15,13 @@ This file contains the definition for the Type III version of Groth16 presented 
 
 -/
 
-open scoped BigOperators Classical
+open scoped BigOperators
 
 section Groth16TypeIII
 
-open MvPolynomial Option AGMProofSystemInstantiation
+open Option AGMProofSystemInstantiation
+open CPoly CPoly.CMvPolynomial
+open CompPoly
 
 namespace Groth16TypeIII
 
@@ -30,7 +32,7 @@ inductive Vars : Type where
   | δ : Vars
 deriving Repr, BEq, DecidableEq
 
-noncomputable instance : FinEnum Vars := .ofList [.α, .β, .γ, .δ] (fun x => by cases x <;> simp)
+instance : FinEnum Vars := .ofList [.α, .β, .γ, .δ] (fun x => by cases x <;> simp)
 
 local notation "Vars_α" => some Vars.α
 local notation "Vars_β" => some Vars.β
@@ -57,13 +59,13 @@ inductive Proof_G1_Idx : Type where
   | C : Proof_G1_Idx
 deriving DecidableEq
 
-noncomputable instance : FinEnum Proof_G1_Idx := .ofList [.A, .C] (fun x => by cases x <;> simp)
+instance : FinEnum Proof_G1_Idx := .ofList [.A, .C] (fun x => by cases x <;> simp)
 
 inductive Proof_G2_Idx : Type where
   | B : Proof_G2_Idx
 deriving DecidableEq
 
-noncomputable instance : FinEnum Proof_G2_Idx := .ofList [.B] (fun x => by cases x <;> simp)
+instance : FinEnum Proof_G2_Idx := .ofList [.B] (fun x => by cases x <;> simp)
 
 inductive PairingsIdx : Type where
   | ab : PairingsIdx
@@ -72,7 +74,7 @@ inductive PairingsIdx : Type where
   | cδ : PairingsIdx
 deriving DecidableEq
 
-noncomputable instance : FinEnum PairingsIdx :=
+instance : FinEnum PairingsIdx :=
   .ofList [.ab, .αβ, .stmtγ, .cδ] (fun x => by cases x <;> simp)
 
 inductive SRS_Elements_G1_Idx {n_stmt n_wit n_var : ℕ} : Type where
@@ -85,7 +87,7 @@ inductive SRS_Elements_G1_Idx {n_stmt n_wit n_var : ℕ} : Type where
   | q : Fin n_wit → SRS_Elements_G1_Idx
 deriving DecidableEq
 
-noncomputable instance {n_stmt n_wit n_var : ℕ} :
+instance {n_stmt n_wit n_var : ℕ} :
     FinEnum (@SRS_Elements_G1_Idx n_stmt n_wit n_var) := .ofList
   ([.α, .β, .δ]
     ++ (List.finRange n_var).map .x_pow
@@ -101,7 +103,7 @@ inductive SRS_Elements_G2_Idx {n_stmt n_wit n_var : ℕ} : Type where
   | x_pow : Fin n_var → SRS_Elements_G2_Idx
 deriving DecidableEq
 
-noncomputable instance {n_stmt n_wit n_var : ℕ} :
+instance {n_stmt n_wit n_var : ℕ} :
     FinEnum (@SRS_Elements_G2_Idx n_stmt n_wit n_var) := .ofList
   ([.β, .γ, .δ] ++ (List.finRange n_var).map .x_pow)
   (fun x => by cases x <;> simp)
@@ -126,22 +128,22 @@ m - l from the paper = n_wit
 -/
 @[reducible] noncomputable def Groth16TypeIII
     /- The finite field parameter of our SNARK -/
-    {F : Type} [Field F]
+    {F : Type} [Field F] [BEq F] [LawfulBEq F]
     /- The naturals representing:
       n_stmt - the statement size,
       n_wit - the witness size -/
     {n_stmt n_wit n_var : ℕ}
-    {u_stmt : Fin n_stmt → (Polynomial F) }
-    {u_wit : Fin n_wit → (Polynomial F) }
-    {v_stmt : Fin n_stmt → (Polynomial F) }
-    {v_wit : Fin n_wit → (Polynomial F) }
-    {w_stmt : Fin n_stmt → (Polynomial F) }
-    {w_wit : Fin n_wit → (Polynomial F) }
+    {u_stmt : Fin n_stmt → (CompPoly.CPolynomial F) }
+    {u_wit : Fin n_wit → (CompPoly.CPolynomial F) }
+    {v_stmt : Fin n_stmt → (CompPoly.CPolynomial F) }
+    {v_wit : Fin n_wit → (CompPoly.CPolynomial F) }
+    {w_stmt : Fin n_stmt → (CompPoly.CPolynomial F) }
+    {w_wit : Fin n_wit → (CompPoly.CPolynomial F) }
     /- The roots of the polynomial t -/
     {r : Fin n_wit → F} :
     AGMProofSystemInstantiation F :=
-  let t : Polynomial F :=
-    ∏ i ∈ (Finset.univ : Finset (Fin n_wit)), (Polynomial.X - Polynomial.C (r i));
+  let t : CompPoly.CPolynomial F :=
+    ∏ i ∈ (Finset.univ : Finset (Fin n_wit)), (CompPoly.CPolynomial.X - CompPoly.CPolynomial.C (r i));
   {
     Stmt := Fin n_stmt -> F
     Sample := Option Vars
@@ -154,17 +156,17 @@ m - l from the paper = n_wit
       | SRS_Elements_G1_Idx.x_pow i => X Vars_γ * X Vars_δ * X Vars_x ^ (i : ℕ)
       | SRS_Elements_G1_Idx.x_pow_times_t i => X Vars_γ
                                                   * X Vars_x ^ (i : ℕ)
-                                                  * to_MvPolynomial_Option Vars t
-      | SRS_Elements_G1_Idx.y i => ((X Vars_β * X Vars_δ) * ( (to_MvPolynomial_Option Vars (u_stmt i))))
+                                                  * to_CMvPolynomial_Option Vars t
+      | SRS_Elements_G1_Idx.y i => ((X Vars_β * X Vars_δ) * ( (to_CMvPolynomial_Option Vars (u_stmt i))))
                                       +
-                                      (X Vars_α * X Vars_δ) * (to_MvPolynomial_Option Vars (v_stmt i))
+                                      (X Vars_α * X Vars_δ) * (to_CMvPolynomial_Option Vars (v_stmt i))
                                       +
-                                      X Vars_δ * (to_MvPolynomial_Option Vars (w_stmt i))
-      | SRS_Elements_G1_Idx.q i => (X Vars_β * X Vars_γ) * ( to_MvPolynomial_Option Vars (u_wit i))
+                                      X Vars_δ * (to_CMvPolynomial_Option Vars (w_stmt i))
+      | SRS_Elements_G1_Idx.q i => (X Vars_β * X Vars_γ) * ( to_CMvPolynomial_Option Vars (u_wit i))
                                       +
-                                      (X Vars_α * X Vars_γ) * (to_MvPolynomial_Option Vars (v_wit i))
+                                      (X Vars_α * X Vars_γ) * (to_CMvPolynomial_Option Vars (v_wit i))
                                       +
-                                      X Vars_γ * to_MvPolynomial_Option Vars (w_wit i)
+                                      X Vars_γ * to_CMvPolynomial_Option Vars (w_wit i)
       -- Note that the polynomials here have been multiplied through by γδ
     SRSElementValue_G2 := fun SRS_idx => match SRS_idx with
       | SRS_Elements_G2_Idx.β => X Vars_γ * X Vars_δ * X Vars_β

@@ -1,33 +1,28 @@
 import FormalSnarksProject.SNARKs.Lipmaa.Defs
 
 
-open scoped BigOperators Classical
+open scoped BigOperators
 
 section Lipmaa
 
-open MvPolynomial Option AGMProofSystemInstantiation
+open Option AGMProofSystemInstantiation
+open CompPoly
 
 namespace Lipmaa
 
 section soundness
 
-lemma Polynomial.mul_self_modByMonic {F : Type} [Field F] (t p : Polynomial F) (mt : t.Monic) : (t * p) %ₘ t = 0 := by
-  rw [Polynomial.modByMonic_eq_zero_iff_dvd mt]
-  apply dvd_mul_right
-
-
-
 -- Remove heartbeat limit for upcoming long-running proof
 set_option maxHeartbeats 0 in -- 0 means no limit
 lemma soundness
-    {F : Type} [Field F]
+    {F : Type} [Field F] [BEq F] [LawfulBEq F]
     {n_stmt n_wit n_var : ℕ}
-    {u_stmt : Fin n_stmt → (Polynomial F)}
-    {u_wit : Fin n_wit → (Polynomial F)}
-    {v_stmt : Fin n_stmt → (Polynomial F)}
-    {v_wit : Fin n_wit → (Polynomial F)}
-    {w_stmt : Fin n_stmt → (Polynomial F)}
-    {w_wit : Fin n_wit → (Polynomial F)}
+    {u_stmt : Fin n_stmt → (CompPoly.CPolynomial F)}
+    {u_wit : Fin n_wit → (CompPoly.CPolynomial F)}
+    {v_stmt : Fin n_stmt → (CompPoly.CPolynomial F)}
+    {v_wit : Fin n_wit → (CompPoly.CPolynomial F)}
+    {w_stmt : Fin n_stmt → (CompPoly.CPolynomial F)}
+    {w_wit : Fin n_wit → (CompPoly.CPolynomial F)}
     {r : Fin n_wit → F} :
     (AGMProofSystemInstantiation.soundness
       F
@@ -37,17 +32,16 @@ lemma soundness
         (v_wit := v_wit) (w_stmt := w_stmt) (w_wit := w_wit) (r := r))
       (Fin n_wit -> F)
       (fun (stmt : Fin n_stmt → F) (wit : Fin n_wit -> F) =>
-        let t : Polynomial F :=
-          ∏ i ∈ (Finset.univ : Finset (Fin n_wit)), (Polynomial.X - Polynomial.C (r i));
-        (((List.sum (List.map (fun i => Polynomial.C (stmt i) * u_stmt i) (List.finRange n_stmt)))
-            + (List.sum (List.map (fun i => Polynomial.C (wit i) * u_wit i) (List.finRange n_wit))))
+        let t : CompPoly.CPolynomial F :=
+          ∏ i ∈ (Finset.univ : Finset (Fin n_wit)), (CompPoly.CPolynomial.X - CompPoly.CPolynomial.C (r i));
+        (((List.sum (List.map (fun i => CompPoly.CPolynomial.C (stmt i) * u_stmt i) (List.finRange n_stmt)))
+            + (List.sum (List.map (fun i => CompPoly.CPolynomial.C (wit i) * u_wit i) (List.finRange n_wit))))
             *
-          ((List.sum (List.map (fun i => Polynomial.C (stmt i) * v_stmt i) (List.finRange n_stmt)))
-            + (List.sum (List.map (fun i => Polynomial.C (wit i) * v_wit i) (List.finRange n_wit))))
+          ((List.sum (List.map (fun i => CompPoly.CPolynomial.C (stmt i) * v_stmt i) (List.finRange n_stmt)))
+            + (List.sum (List.map (fun i => CompPoly.CPolynomial.C (wit i) * v_wit i) (List.finRange n_wit))))
             -
-          ((List.sum (List.map (fun i => Polynomial.C (stmt i) * w_stmt i) (List.finRange n_stmt)))
-            + (List.sum (List.map (fun i => Polynomial.C (wit i) * w_wit i) (List.finRange n_wit)))))
-            %ₘ t = 0
+          ((List.sum (List.map (fun i => CompPoly.CPolynomial.C (stmt i) * w_stmt i) (List.finRange n_stmt)))
+            + (List.sum (List.map (fun i => CompPoly.CPolynomial.C (wit i) * w_wit i) (List.finRange n_wit))))).modByMonic t = 0
       )
       (fun prover i => prover.fst Proof_G1_Idx.C (SRS_Elements_G1_Idx.q i))
     ) := by
@@ -65,19 +59,19 @@ lemma soundness
   -- let C_h := fun x => prover.fst Proof_G1_Idx.C (SRS_Elements_G1_Idx.x_pow_times_t x)
 
   suffices
-      ((List.sum (List.map (fun i => Polynomial.C (stmt i) * u_stmt i) (List.finRange n_stmt)))
-      + (List.sum (List.map (fun i => Polynomial.C (prover.fst Proof_G1_Idx.C (SRS_Elements_G1_Idx.q i)) * u_wit i) (List.finRange n_wit))))
+      ((List.sum (List.map (fun i => CompPoly.CPolynomial.C (stmt i) * u_stmt i) (List.finRange n_stmt)))
+      + (List.sum (List.map (fun i => CompPoly.CPolynomial.C (prover.fst Proof_G1_Idx.C (SRS_Elements_G1_Idx.q i)) * u_wit i) (List.finRange n_wit))))
       *
-      ((List.sum (List.map (fun i => Polynomial.C (stmt i) * v_stmt i) (List.finRange n_stmt)))
-      + (List.sum (List.map (fun i => Polynomial.C (prover.fst Proof_G1_Idx.C (SRS_Elements_G1_Idx.q i)) * v_wit i) (List.finRange n_wit))))
+      ((List.sum (List.map (fun i => CompPoly.CPolynomial.C (stmt i) * v_stmt i) (List.finRange n_stmt)))
+      + (List.sum (List.map (fun i => CompPoly.CPolynomial.C (prover.fst Proof_G1_Idx.C (SRS_Elements_G1_Idx.q i)) * v_wit i) (List.finRange n_wit))))
       =
-      ((List.sum (List.map (fun i => Polynomial.C (stmt i) * w_stmt i) (List.finRange n_stmt)))
-      + (List.sum (List.map (fun i => Polynomial.C (prover.fst Proof_G1_Idx.C (SRS_Elements_G1_Idx.q i)) * w_wit i) (List.finRange n_wit))))
+      ((List.sum (List.map (fun i => CompPoly.CPolynomial.C (stmt i) * w_stmt i) (List.finRange n_stmt)))
+      + (List.sum (List.map (fun i => CompPoly.CPolynomial.C (prover.fst Proof_G1_Idx.C (SRS_Elements_G1_Idx.q i)) * w_wit i) (List.finRange n_wit))))
       +
-      List.sum (List.map (fun x : Fin (n_var - 1) => Polynomial.C (prover.fst Proof_G1_Idx.C (SRS_Elements_G1_Idx.x_pow_times_t x)) * (Polynomial.X ^ (x : ℕ) * t)) (List.finRange (n_var - 1))) by
+      List.sum (List.map (fun x : Fin (n_var - 1) => CompPoly.CPolynomial.C (prover.fst Proof_G1_Idx.C (SRS_Elements_G1_Idx.x_pow_times_t x)) * (CompPoly.CPolynomial.X ^ (x : ℕ) * t)) (List.finRange (n_var - 1))) by
 
     rw [<-sub_eq_iff_eq_add'] at this
-    have h := congr_arg (fun x => x %ₘ t) this
+    have h := congr_arg (fun x => x.modByMonic t) this
     simp only at h
     simp
     rw [h]
@@ -86,10 +80,8 @@ lemma soundness
     simp only [mul_comm _ (t), <-mul_assoc]
     simp only [mul_assoc, List.sum_map_mul_right, List.sum_map_mul_left]
 
-    apply Polynomial.mul_self_modByMonic
-    apply Polynomial.monic_prod_of_monic
-    intro i hi
-    exact Polynomial.monic_X_sub_C (r i)
+    apply CompPoly.CPolynomial.mul_self_modByMonic
+    exact CompPoly.CPolynomial.monic_prod_X_sub_C _ r
 
 
 

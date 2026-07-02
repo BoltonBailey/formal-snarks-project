@@ -1,11 +1,14 @@
 import Mathlib
+import CompPoly.Multivariate.CMvPolynomialEvalLemmas
+import CompPoly.Multivariate.Rename
 
 
-open scoped BigOperators Classical
+open scoped BigOperators
 
 section
 
-open MvPolynomial
+open CPoly
+open CPoly.CMvPolynomial
 
 
 -- TODO before all this, finalize the terminology for the various levels of instantiation.
@@ -34,8 +37,8 @@ structure AGMProofSystemInstantiation (F : Type) [Field F] where
   [SRSElements_G2_FinEnum : FinEnum SRSElements_G2]
 
   /-- The SRS elements themselves, described as polynomials in the samples -/
-  SRSElementValue_G1 : SRSElements_G1 → MvPolynomial Sample F
-  SRSElementValue_G2 : SRSElements_G2 → MvPolynomial Sample F
+  SRSElementValue_G1 : SRSElements_G1 → CMvPolynomial Sample F
+  SRSElementValue_G2 : SRSElements_G2 → CMvPolynomial Sample F
 
   /-- A type indexing proof elements in each group -/
   Proof_G1 : Type
@@ -45,6 +48,7 @@ structure AGMProofSystemInstantiation (F : Type) [Field F] where
 
   /-- The type indexing equations the verifier checks -/
   EqualityChecks : Type
+  [EqualityChecks_FinEnum : FinEnum EqualityChecks]
 
   /-- The pairings that the verifier computes for each equation
   (each equation is treated as a sum of pairings, the result of which is compared to zero) -/
@@ -78,6 +82,7 @@ attribute [instance]
   AGMProofSystemInstantiation.SRSElements_G2_FinEnum
   AGMProofSystemInstantiation.Proof_G1_FinEnum
   AGMProofSystemInstantiation.Proof_G2_FinEnum
+  AGMProofSystemInstantiation.EqualityChecks_FinEnum
   AGMProofSystemInstantiation.Pairings_FinEnum
 
 namespace AGMProofSystemInstantiation
@@ -88,22 +93,22 @@ def Prover (F : Type) [Field F]
     (𝓟 : AGMProofSystemInstantiation F) : Type :=
   (𝓟.Proof_G1 -> 𝓟.SRSElements_G1 -> F) × (𝓟.Proof_G2 -> 𝓟.SRSElements_G2 -> F)
 
-noncomputable def proof_element_G1_as_poly {F : Type} [Field F]
+def proof_element_G1_as_poly {F : Type} [Field F] [BEq F] [LawfulBEq F]
     (𝓟 : AGMProofSystemInstantiation F) (prover : 𝓟.Prover) (pf_elem : 𝓟.Proof_G1) :
-    MvPolynomial (𝓟.Sample) F :=
+    CMvPolynomial (𝓟.Sample) F :=
   ((FinEnum.toList 𝓟.SRSElements_G1).map fun SRS_elem =>
-          MvPolynomial.C (prover.fst pf_elem SRS_elem) * (𝓟.SRSElementValue_G1 SRS_elem)).sum
+          CMvPolynomial.C (prover.fst pf_elem SRS_elem) * (𝓟.SRSElementValue_G1 SRS_elem)).sum
 
-noncomputable def proof_element_G2_as_poly {F : Type} [Field F]
+def proof_element_G2_as_poly {F : Type} [Field F] [BEq F] [LawfulBEq F]
     (𝓟 : AGMProofSystemInstantiation F) (prover : 𝓟.Prover) (pf_elem : 𝓟.Proof_G2) :
-    MvPolynomial (𝓟.Sample) F :=
+    CMvPolynomial (𝓟.Sample) F :=
   ((FinEnum.toList 𝓟.SRSElements_G2).map fun SRS_elem =>
-          MvPolynomial.C (prover.snd pf_elem SRS_elem) * (𝓟.SRSElementValue_G2 SRS_elem)).sum
+          CMvPolynomial.C (prover.snd pf_elem SRS_elem) * (𝓟.SRSElementValue_G2 SRS_elem)).sum
 
-/-- The pairing evaluation, represented as a MvPolynomial in the samples -/
-noncomputable def pairing_poly {F : Type} [Field F]
+/-- The pairing evaluation, represented as a CMvPolynomial in the samples -/
+def pairing_poly {F : Type} [Field F] [BEq F] [LawfulBEq F]
     (𝓟 : AGMProofSystemInstantiation F) (prover : 𝓟.Prover) (stmt : 𝓟.Stmt) (check_idx : 𝓟.EqualityChecks) (pairing : 𝓟.Pairings check_idx) :
-    MvPolynomial 𝓟.Sample F :=
+    CMvPolynomial 𝓟.Sample F :=
   (
     ( -- G1 input of pairing
       -- Proof component
@@ -139,18 +144,25 @@ noncomputable def pairing_poly {F : Type} [Field F]
   )
 
 /-- The value that the verifier checks to be equal to 0 for a given equality check, as a
-MvPolynomial in the samples.
+CMvPolynomial in the samples.
 -/
-noncomputable def check_poly {F : Type} [Field F]
+def check_poly {F : Type} [Field F] [BEq F] [LawfulBEq F]
     (𝓟 : AGMProofSystemInstantiation F) (prover : 𝓟.Prover) (stmt : 𝓟.Stmt) (check_idx : 𝓟.EqualityChecks) :
-    MvPolynomial 𝓟.Sample F :=
+    CMvPolynomial 𝓟.Sample F :=
   (
   (FinEnum.toList (𝓟.Pairings check_idx)).map fun pairing =>
     𝓟.pairing_poly prover stmt check_idx pairing
   ).sum
 
+/-- The list of all check polynomials, one for each equality check the verifier performs. -/
+def check_polys {F : Type} [Field F] [BEq F] [LawfulBEq F]
+    (𝓟 : AGMProofSystemInstantiation F) (prover : 𝓟.Prover) (stmt : 𝓟.Stmt) :
+    List (CMvPolynomial 𝓟.Sample F) :=
+  (FinEnum.toList 𝓟.EqualityChecks).map fun check_idx =>
+    𝓟.check_poly prover stmt check_idx
 
-def verify {F : Type} [Field F]
+
+def verify {F : Type} [Field F] [BEq F] [LawfulBEq F]
     (𝓟 : AGMProofSystemInstantiation F) (prover : 𝓟.Prover) (stmt : 𝓟.Stmt) : Prop :=
   (
     ∀ check_idx : 𝓟.EqualityChecks, 𝓟.check_poly prover stmt check_idx = 0
@@ -160,7 +172,7 @@ def verify {F : Type} [Field F]
     𝓟.proof_element_G1_as_poly prover pfs.fst = 𝓟.proof_element_G2_as_poly prover pfs.snd
 
 
-def soundness (F : Type) [Field F]
+def soundness (F : Type) [Field F] [BEq F] [LawfulBEq F]
     (𝓟 : AGMProofSystemInstantiation F)
     (Wit : Type) (relation : 𝓟.Stmt -> Wit -> Prop)
     (extractor : 𝓟.Prover -> Wit) : Prop :=
@@ -169,7 +181,7 @@ def soundness (F : Type) [Field F]
       𝓟.verify prover stmt -> relation stmt (extractor prover)
 
 
-def completeness (F : Type) [Field F]
+def completeness (F : Type) [Field F] [BEq F] [LawfulBEq F]
     (𝓟 : AGMProofSystemInstantiation F) (Wit : Type)
     (relation : 𝓟.Stmt -> Wit -> Prop)
     (prover : 𝓟.Stmt -> Wit -> 𝓟.Prover) : Prop :=
