@@ -1,6 +1,7 @@
 import FormalSnarksProject.Models.AGMProofSystemInstantiation
 import FormalSnarksProject.Models.AGMProofSystemInstantiationTypeI
 import FormalSnarksProject.Models.StraightforwardAGMProofSystem
+import FormalSnarksProject.SNARKs.BabySnark.Completeness
 import FormalSnarksProject.SNARKs.BabySnark.Defs
 import FormalSnarksProject.SNARKs.BabySnark.Soundness
 import FormalSnarksProject.SNARKs.GGPR.Completeness
@@ -17,6 +18,7 @@ import FormalSnarksProject.SNARKs.Lipmaa.Soundness
 import FormalSnarksProject.SNARKs.Pinocchio.Completeness
 import FormalSnarksProject.SNARKs.Pinocchio.Defs
 import FormalSnarksProject.SNARKs.Pinocchio.Soundness
+import FormalSnarksProject.SNARKs.ToySnark.Completeness
 import FormalSnarksProject.SNARKs.ToySnark.Defs
 import FormalSnarksProject.SNARKs.ToySnark.Soundness
 import FormalSnarksProject.ToMathlib.FinEnumToList

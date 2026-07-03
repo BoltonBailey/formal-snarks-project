@@ -154,6 +154,8 @@ The SRS elements of both groups and the verification equation are as in the Type
 additionally each proof element may be given on either side of the pairing, and the verifier
 checks that the two copies agree.
 
+TODO redefine with a type I AGMA proof system instantiation,
+
 Note that the SRS polynomials here have been multiplied through by γδ.
 -/
 @[reducible] noncomputable def Groth16TypeI
