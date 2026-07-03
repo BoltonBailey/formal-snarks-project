@@ -81,4 +81,17 @@ lemma degree_mul_sub_lt_of_degree_lt {u v w : Polynomial F} {n m : ℕ}
     exact_mod_cast (by omega : n - 1 + (n - 1) < n - 1 + m)
   · exact lt_of_lt_of_le hw (by exact_mod_cast (by omega : n ≤ n - 1 + m))
 
+/-- Degree bound for a product: if `degree u < a`, `degree v < b` (with `0 < a`) and
+`a + b ≤ c + 1`, then `degree (u * v) < c`. -/
+lemma degree_mul_lt_of_degree_lt {u v : Polynomial F} {a b c : ℕ}
+    (hu : u.degree < a) (hv : v.degree < b) (ha : 0 < a) (hab : a + b ≤ c + 1) :
+    (u * v).degree < (c : WithBot ℕ) := by
+  apply lt_of_le_of_lt (degree_mul_le _ _)
+  calc u.degree + v.degree
+      ≤ ((a - 1 : ℕ) : WithBot ℕ) + v.degree := add_le_add (degree_le_coe_sub_one hu) le_rfl
+    _ < ((a - 1 : ℕ) : WithBot ℕ) + (b : WithBot ℕ) := by
+        exact WithBot.add_lt_add_left (by exact_mod_cast WithBot.coe_ne_bot) hv
+    _ ≤ (c : WithBot ℕ) := by
+        exact_mod_cast (by omega : a - 1 + b ≤ c)
+
 end Polynomial
