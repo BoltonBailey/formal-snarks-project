@@ -1,18 +1,21 @@
 import FormalSnarksProject.Models.AGMProofSystemInstantiation
 import FormalSnarksProject.Models.AGMProofSystemInstantiationTypeI
 import FormalSnarksProject.Models.StraightforwardAGMProofSystem
--- TODO(FinEnum/CompPoly refactor): not yet migrated from `List*` fields to `FinEnum` instances.
--- import FormalSnarksProject.SNARKs.BabySnark
--- import FormalSnarksProject.SNARKs.GGPR
--- import FormalSnarksProject.SNARKs.Groth16
+import FormalSnarksProject.SNARKs.BabySnark.Defs
+import FormalSnarksProject.SNARKs.BabySnark.Soundness
+import FormalSnarksProject.SNARKs.GGPR.Defs
+import FormalSnarksProject.SNARKs.GGPR.Soundness
+import FormalSnarksProject.SNARKs.Groth16TypeI.Defs
+import FormalSnarksProject.SNARKs.Groth16TypeI.Soundness
 import FormalSnarksProject.SNARKs.Groth16TypeIII.Completeness
 import FormalSnarksProject.SNARKs.Groth16TypeIII.Defs
 import FormalSnarksProject.SNARKs.Groth16TypeIII.Soundness
 import FormalSnarksProject.SNARKs.Lipmaa.Defs
 import FormalSnarksProject.SNARKs.Lipmaa.Soundness
--- TODO(FinEnum/CompPoly refactor): not yet migrated from `List*` fields to `FinEnum` instances.
--- import FormalSnarksProject.SNARKs.Pinocchio
-import FormalSnarksProject.SNARKs.ToySnark
+import FormalSnarksProject.SNARKs.Pinocchio.Defs
+import FormalSnarksProject.SNARKs.Pinocchio.Soundness
+import FormalSnarksProject.SNARKs.ToySnark.Defs
+import FormalSnarksProject.SNARKs.ToySnark.Soundness
 import FormalSnarksProject.ToMathlib.FinEnumToList
 import FormalSnarksProject.ToMathlib.ForTransformations
 import FormalSnarksProject.ToMathlib.OptionEquivRight

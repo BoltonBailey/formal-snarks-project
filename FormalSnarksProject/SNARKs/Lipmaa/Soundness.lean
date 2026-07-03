@@ -5,7 +5,7 @@ open scoped BigOperators
 
 section Lipmaa
 
-open Option AGMProofSystemInstantiation
+open MvPolynomial Option AGMProofSystemInstantiation
 open CompPoly
 
 namespace Lipmaa
@@ -14,6 +14,8 @@ section soundness
 
 -- Remove heartbeat limit for upcoming long-running proof
 set_option maxHeartbeats 0 in -- 0 means no limit
+-- The final `linear_combination`/`ring` step recurses deeply on the large polynomial expressions
+set_option maxRecDepth 10000 in
 lemma soundness
     {F : Type} [Field F] [BEq F] [LawfulBEq F]
     {n_stmt n_wit n_var : ℕ}
@@ -85,16 +87,175 @@ lemma soundness
 
 
 
-  -- Step 1: Obtain the coefficient equations of the MvPolynomials
+  -- Step 1: Obtain the coefficient equations of the mv_polynomials
   --
-  -- TODO(FinEnum/CompPoly refactor): the original pipeline rewrote `eqn` via `simp_rw [Lipmaa]`
-  -- followed by a list-expansion `simp only [...]`. After the move from explicit `List` fields to
-  -- `FinEnum` instances, the SRS enumerations are `FinEnum.toList` of *parameterized* index types,
-  -- which do not reduce to the concrete `++`/`finRange` lists definitionally, so the list-expansion
-  -- no longer fires. (`Lipmaa` is now `@[reducible]`, which also makes `simp_rw [Lipmaa]` a no-op.)
-  -- This was already blocked by the v4.29 `List.sum_append` regression (see git history for the full
-  -- pre-bump pipeline); both need resolving together before the coefficient extraction can resume.
-  sorry
+  -- Bridge helpers: `CPoly.polyRingEquiv` (whose coercion is `CPoly.fromCMvPolynomial`) carries
+  -- the computable `CMvPolynomial` verification equation over to mathlib's `MvPolynomial`.
+  have equivC : ∀ c : F,
+      (CPoly.polyRingEquiv (σ := Option Vars) (R := F)) (CPoly.CMvPolynomial.C c) = C c :=
+    fun c => CPoly.fromCMvPolynomial_C c
+  have equivX : ∀ v : Option Vars,
+      (CPoly.polyRingEquiv (σ := Option Vars) (R := F)) (CPoly.CMvPolynomial.X v) = X v :=
+    fun v => CPoly.fromCMvPolynomial_X v
+  have equivOpt : ∀ p : CompPoly.CPolynomial F,
+      (CPoly.polyRingEquiv (σ := Option Vars) (R := F)) (to_CMvPolynomial_Option Vars p) =
+        to_MvPolynomial_Option Vars p.toPoly :=
+    fun p => fromCMvPolynomial_to_CMvPolynomial_Option p
+
+  -- Expand the `FinEnum` index enumerations into their concrete defining lists (still in the
+  -- computable `CMvPolynomial` world), splitting the sums along the way.
+  simp only [toList_PairingsIdx, toList_Proof_G1_Idx, toList_Proof_G2_Idx,
+    toList_SRS_Elements_G1_Idx, toList_SRS_Elements_G2_Idx,
+    List.map_append, List.map_cons, List.map_nil, List.map_map, Function.comp_def,
+    List.sum_append_add_monoid, List.sum_cons, List.sum_nil] at eqn
+
+  -- Transport the verification equation to mathlib's `MvPolynomial`, and convert the computable
+  -- vanishing polynomial `∏ (X - C (r i))` into the corresponding mathlib `Polynomial`.
+  replace eqn := congr_arg (CPoly.polyRingEquiv (σ := Option Vars) (R := F)) eqn
+  simp only [map_add, map_mul, map_neg, map_one, map_zero, map_pow, map_list_sum,
+    List.map_map, Function.comp_def, equivC, equivX, equivOpt,
+    CompPoly.CPolynomial.toPoly_prod, CompPoly.CPolynomial.toPoly_X_sub_C] at eqn
+
+  -- Clean up zero/one coefficients and distribute products over sums
+  simp only [List.sum_map_zero, mul_add, add_mul, List.sum_map_add,
+    map_one, one_mul, map_zero, zero_mul, add_zero, map_neg, neg_mul, neg_add_rev,
+    List.map_const', List.length_finRange, List.sum_replicate, smul_zero, mul_zero,
+    zero_add] at eqn
+
+  simp only [
+    -- Associativity to obtain a right-leaning tree
+    mul_assoc,
+    -- Commutativity lemmas to move X (some _) to the left
+    mul_left_comm (C _) (X (some _)) _, mul_left_comm (List.sum _) (X (some _)) _,
+    mul_comm (C _) (X (some _)), mul_comm (List.sum _) (X (some _)),
+    -- Commutativity lemmas to move X (some _) ^ _ to the left
+    mul_left_comm (C _) (X (some _) ^ _) _, mul_left_comm (List.sum _) (X (some _) ^ _) _,
+    mul_comm (C _) (X (some _) ^ _), mul_comm (List.sum _) (X (some _) ^ _),
+    -- Move negations to the bottom
+    neg_mul, mul_neg,
+    -- Move constant multiplications (which the X (some _) terms should be) out of sums
+    List.sum_map_mul_right, List.sum_map_mul_left] at eqn
+
+  -- Apply MvPolynomial.optionEquivRight *here*, so that we can treat polynomials in Vars_X as constants
+  replace eqn := congr_arg (MvPolynomial.optionEquivRight F Vars) eqn
+  simp only [map_add, map_zero, map_mul, map_one,
+    map_neg, AlgEquiv.list_map_sum, map_pow] at eqn
+  simp only [optionEquivRight_C, optionEquivRight_X_none, optionEquivRight_X_some,
+    optionEquivRight_to_MvPolynomial_Option] at eqn
+
+  -- Move Cs back out so we can recognize the monomials
+  simp only [← C_mul, ← C_pow, ← C_add, MvPolynomial.sum_map_C] at eqn
+
+  simp only [X, C_apply, monomial_mul, monomial_pow, one_mul, mul_one, add_zero, zero_add,
+    mul_add, add_mul] at eqn
+
+  -- Extract the coefficients of the relevant toxic-waste monomials. The four toxic elements
+  -- (α, β, γ, δ) are Kronecker-packed into powers of the single sample `y`
+  -- (α = y^75, β = y^25, γ = y^5, δ = y^1), so the Groth16 monomial α^a β^b γ^c δ^d becomes
+  -- y^(75a + 25b + 5c + d).
+  have h0012 := congr_arg (coeff (Finsupp.single Vars.y (75 * 0 + 25 * 0 + 5 * 1 + 1 * 2))) eqn
+  have h0021 := congr_arg (coeff (Finsupp.single Vars.y (75 * 0 + 25 * 0 + 5 * 2 + 1 * 1))) eqn
+  have h0022 := congr_arg (coeff (Finsupp.single Vars.y (75 * 0 + 25 * 0 + 5 * 2 + 1 * 2))) eqn
+  have h0112 := congr_arg (coeff (Finsupp.single Vars.y (75 * 0 + 25 * 1 + 5 * 1 + 1 * 2))) eqn
+  have h0121 := congr_arg (coeff (Finsupp.single Vars.y (75 * 0 + 25 * 1 + 5 * 2 + 1 * 1))) eqn
+  have h0122 := congr_arg (coeff (Finsupp.single Vars.y (75 * 0 + 25 * 1 + 5 * 2 + 1 * 2))) eqn
+  have h0212 := congr_arg (coeff (Finsupp.single Vars.y (75 * 0 + 25 * 2 + 5 * 1 + 1 * 2))) eqn
+  have h0221 := congr_arg (coeff (Finsupp.single Vars.y (75 * 0 + 25 * 2 + 5 * 2 + 1 * 1))) eqn
+  have h0222 := congr_arg (coeff (Finsupp.single Vars.y (75 * 0 + 25 * 2 + 5 * 2 + 1 * 2))) eqn
+  have h1022 := congr_arg (coeff (Finsupp.single Vars.y (75 * 1 + 25 * 0 + 5 * 2 + 1 * 2))) eqn
+  have h1112 := congr_arg (coeff (Finsupp.single Vars.y (75 * 1 + 25 * 1 + 5 * 1 + 1 * 2))) eqn
+  have h1121 := congr_arg (coeff (Finsupp.single Vars.y (75 * 1 + 25 * 1 + 5 * 2 + 1 * 1))) eqn
+  have h1122 := congr_arg (coeff (Finsupp.single Vars.y (75 * 1 + 25 * 1 + 5 * 2 + 1 * 2))) eqn
+
+  clear eqn
+
+  simp only [coeff_monomial, coeff_add, coeff_neg, coeff_zero] at h0012 h0021 h0022 h0112 h0121 h0122 h0212 h0221 h0222 h1022 h1112 h1121 h1122
+
+  simp only [Vars.finsupp_eq_ext, Finsupp.smul_single', Finsupp.single_apply, Finsupp.add_apply] at h0012 h0021 h0022 h0112 h0121 h0122 h0212 h0221 h0222 h1022 h1112 h1121 h1122
+
+  simp (config := {decide := true}) only [ite_false, ite_true] at h0012 h0021 h0022 h0112 h0121 h0122 h0212 h0221 h0222 h1022 h1112 h1121 h1122
+  simp only [neg_zero, add_zero, zero_add, one_pow, mul_one, one_mul] at h0012 h0021 h0022 h0112 h0121 h0122 h0212 h0221 h0222 h1022 h1112 h1121 h1122
+
+  -- Step 2: Reduce the computable-polynomial goal to the corresponding mathlib `Polynomial`
+  -- identity, so that goal and coefficient equations speak about the same atoms
+  have ht : t = ∏ i ∈ (Finset.univ : Finset (Fin n_wit)),
+      (CompPoly.CPolynomial.X - CompPoly.CPolynomial.C (r i)) := rfl
+  rw [ht]
+  apply CompPoly.CPolynomial.toPoly_injective
+  simp only [CompPoly.CPolynomial.toPoly_mul, CompPoly.CPolynomial.toPoly_add,
+    CompPoly.CPolynomial.toPoly_list_sum,
+    List.map_map, Function.comp_def, CompPoly.CPolynomial.C_toPoly,
+    CompPoly.CPolynomial.X_toPoly, CompPoly.CPolynomial.toPoly_pow,
+    CompPoly.CPolynomial.toPoly_prod, CompPoly.CPolynomial.toPoly_X_sub_C]
+
+  -- Step 3: Recursively simplify and case-analyze the equations
+  --
+  -- Set statements so that the equations are easier to read
+
+  generalize (List.sum (List.map (fun i => Polynomial.C (stmt i) * (u_stmt i).toPoly) (List.finRange n_stmt))) = sum_u_stmt at *
+
+  generalize (List.sum (List.map (fun i => Polynomial.C (stmt i) * (v_stmt i).toPoly) (List.finRange n_stmt))) = sum_v_stmt at *
+
+  generalize (List.sum (List.map (fun i => Polynomial.C (stmt i) * (w_stmt i).toPoly) (List.finRange n_stmt))) = sum_w_stmt at *
+
+  generalize (Polynomial.C (prover.1 Proof_G1_Idx.A SRS_Elements_G1_Idx.α)) = A_1 at *
+
+  generalize (Polynomial.C (prover.1 Proof_G1_Idx.A SRS_Elements_G1_Idx.β)) = A_2 at *
+
+  generalize (Polynomial.C (prover.1 Proof_G1_Idx.A SRS_Elements_G1_Idx.δ)) = A_3 at *
+
+  generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.x_pow x)) * Polynomial.X ^ (x : ℕ)) (List.finRange n_var))) = sum_A_x at *
+
+  generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.y x)) * (u_stmt x).toPoly) (List.finRange n_stmt))) = sum_A_u_stmt at *
+
+  generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.y x)) * (v_stmt x).toPoly) (List.finRange n_stmt))) = sum_A_v_stmt at *
+
+  generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.y x)) * (w_stmt x).toPoly) (List.finRange n_stmt))) = sum_A_w_stmt at *
+
+  generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.q x)) * (u_wit x).toPoly) (List.finRange n_wit))) = sum_A_u_wit at *
+
+  generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.q x)) * (v_wit x).toPoly) (List.finRange n_wit))) = sum_A_v_wit at *
+
+  generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.q x)) * (w_wit x).toPoly) (List.finRange n_wit))) = sum_A_w_wit at *
+
+  generalize (List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.A (SRS_Elements_G1_Idx.x_pow_times_t x)) * (Polynomial.X ^ (x : ℕ) * ∏ i : Fin n_wit, (Polynomial.X - Polynomial.C (r i)))) (List.finRange (n_var - 1)))) = sum_A_x_t at *
+
+  generalize Polynomial.C (prover.2 Proof_G2_Idx.B (SRS_Elements_G2_Idx.β)) = B_1 at *
+
+  generalize Polynomial.C (prover.2 Proof_G2_Idx.B (SRS_Elements_G2_Idx.γ)) = B_2 at *
+
+  generalize Polynomial.C (prover.2 Proof_G2_Idx.B (SRS_Elements_G2_Idx.δ)) = B_3 at *
+
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.2 Proof_G2_Idx.B (SRS_Elements_G2_Idx.x_pow x)) * Polynomial.X ^ (x : ℕ)) (List.finRange n_var)) = sum_B_x at *
+
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.C SRS_Elements_G1_Idx.α) = C_1 at *
+
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.C SRS_Elements_G1_Idx.β) = C_2 at *
+
+  generalize Polynomial.C (prover.1 Proof_G1_Idx.C SRS_Elements_G1_Idx.δ) = C_3 at *
+
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.C (SRS_Elements_G1_Idx.q x)) * (u_wit x).toPoly) (List.finRange n_wit)) = sum_C_u_wit at *
+
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.C (SRS_Elements_G1_Idx.q x)) * (v_wit x).toPoly) (List.finRange n_wit)) = sum_C_v_wit at *
+
+  generalize List.sum (List.map (fun x => Polynomial.C (prover.1 Proof_G1_Idx.C (SRS_Elements_G1_Idx.q x)) * (w_wit x).toPoly) (List.finRange n_wit)) = sum_C_w_wit at *
+
+  generalize List.sum (List.map (fun x : Fin (n_var - 1) => Polynomial.C (prover.1 Proof_G1_Idx.C (SRS_Elements_G1_Idx.x_pow_times_t x)) * (Polynomial.X ^ (x : ℕ) * ∏ i : Fin n_wit, (Polynomial.X - Polynomial.C (r i)))) (List.finRange (n_var - 1))) = sum_C_x_t at *
+
+  integral_domain_tactic
+
+  -- Certificates below are the Groth16TypeIII ones (originally generated by polyrith): the
+  -- Kronecker packing α = y^75, β = y^25, γ = y^5, δ = y^1 is collision-free on the relevant
+  -- monomials, so the coefficient system is identical to Groth16's.
+  linear_combination
+    A_1 * B_3 * h0121 +
+            (-(1 * sum_B_x * sum_A_x) - 1 * sum_A_x_t * B_3 - 1 * sum_A_w_wit * B_3) * h1122 -
+          1 * h0022 +
+        B_1 * sum_A_x * h1022 +
+      (sum_v_stmt + sum_C_v_wit) * h0122
+
+  linear_combination
+    A_1 * B_3 * h0121 + (-(1 * sum_A_x_t * B_3) - 1 * sum_A_w_wit * B_3) * h1122 - 1 * h0022
 
 end soundness
 

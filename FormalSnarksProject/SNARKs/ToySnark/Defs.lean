@@ -131,48 +131,6 @@ A description of a Toy SNARK
   }
 
 
-section soundness
-
-
-
--- Remove time-out
-set_option maxHeartbeats 0 in -- 0 means no limit
-lemma soundness
-    {F : Type} [Field F] [BEq F] [LawfulBEq F] :
-    (AGMProofSystemInstantiation.soundness
-      F
-      (ToySnark
-        (F := F))
-      (WitEntries -> F)
-      (fun (stmt : StmtEntries → F) (wit : WitEntries -> F) =>
-        wit WitEntries.A * stmt StmtEntries.y = stmt StmtEntries.z -- - wit WitEntries.I
-        ∨
-        wit WitEntries.B * stmt StmtEntries.x = stmt StmtEntries.z -- - wit WitEntries.I
-      )
-      (fun prover i => prover.fst Proof_G1_Idx.Pf (if i = WitEntries.A then .α else .β))
-
-    ) := by
-  unfold AGMProofSystemInstantiation.soundness AGMProofSystemInstantiation.verify AGMProofSystemInstantiation.check_poly AGMProofSystemInstantiation.pairing_poly AGMProofSystemInstantiation.proof_element_G1_as_poly AGMProofSystemInstantiation.proof_element_G2_as_poly
-  intros stmt prover eqns'
-  rcases eqns' with ⟨eqns, null⟩
-  have eqn := eqns ()
-  clear eqns null
-
-  -- Step 1: Obtain the coefficient equations of the polynomials.
-  --
-  -- TODO(CMvPolynomial port): `check_poly` now produces a `CPoly.CMvPolynomial` rather than a
-  -- mathlib `MvPolynomial`, so the old list-expansion + `optionEquivRight` coefficient-extraction
-  -- pipeline (preserved in git history, pre-bump) no longer applies directly. The intended new
-  -- pipeline transports `eqn` across `CPoly.polyRingEquiv` into `MvPolynomial` land and then reuses
-  -- the existing `OptionEquivRight` machinery. This was already blocked pre-port by the v4.29
-  -- `List.sum_append` regression; both need resolving together.
-  sorry
-
-end soundness
-
-
--- TODO I'm using lists rather than finsets now, so I think I can get rid of all the finset lemmas
-
 end ToySnark
 
 end ToySnark
