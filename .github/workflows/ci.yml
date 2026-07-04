@@ -4,14 +4,38 @@ on:
   push:
     branches: ["master"]
   pull_request:
-    branches: ["master"]
   workflow_dispatch:
+
+# Least privilege: CI only needs to read the repository.
+permissions:
+  contents: read
+
+# Cancel superseded in-flight runs of the same branch/PR.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
-      # uses lean standard action with all default input values
-      - uses: leanprover/lean-action@v1-beta
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Installs elan (pinned by lean-toolchain), restores the mathlib olean cache via
+      # `lake exe cache get`, builds the default targets, and caches `.lake` across runs.
+      - name: Build
+        uses: leanprover/lean-action@v1
+        with:
+          use-mathlib-cache: true
+
+      # The SMT export scripts are runnable scripts, not library content (they are not imported
+      # by the root module), so `lake build` does not check them. Elaborate them here — which
+      # also regenerates the .smt2 benchmark files — and fail if the committed benchmarks have
+      # drifted from the Lean sources.
+      - name: Check SMT benchmark exports are up to date
+        run: |
+          lake env lean FormalSnarksProject/SNARKs/Groth16TypeIII/SMTExport.lean
+          lake env lean FormalSnarksProject/SNARKs/ToySnark/SMTExport.lean
+          git diff --exit-code -- '*.smt2'
