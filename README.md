@@ -3,7 +3,7 @@
 
 This is an old repository associated with [this paper](https://www.usenix.org/system/files/usenixsecurity24-bailey.pdf).
 
-This project didn't fully make the transistion to Lean 4 at the time the rest of the ecosystem did. 
+This project didn't fully make the transition to Lean 4 at the time the rest of the ecosystem did. 
 With Claude Fable available again, I've used it to restore the project to a building state.
 
 Here are some next steps that I'd like to accomplish if I have time:
