@@ -1,5 +1,5 @@
 
-# inear PCP SNARKs in Lean
+# Linear PCP SNARKs in Lean
 
 This is an old repository associated with [this paper](https://www.usenix.org/system/files/usenixsecurity24-bailey.pdf).
 
