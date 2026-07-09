@@ -13,8 +13,8 @@ Run with
 
     lake env lean FormalSnarksProject/SNARKs/ToySnark/SMTExport.lean
 
-which writes `toysnark_soundness.smt2` in the current directory. It is intentionally **not**
-imported by the `FormalSnarksProject` root library (it is a runnable script, not library
+from the repository root, which writes `benchmarks/toysnark_soundness.smt2`. It is intentionally
+**not** imported by the `FormalSnarksProject` root library (it is a runnable script, not library
 content).
 -/
 
@@ -24,7 +24,7 @@ namespace ToySnark.SMTExport
 def prob : AGMProofSystemInstantiation.IdealMembershipProblem Symbolic.Var SMT.F :=
   Symbolic.soundnessProblem SMT.F
 
-#eval SMT.writeProblem prob "toysnark_soundness.smt2"
+#eval SMT.writeProblem prob "benchmarks/toysnark_soundness.smt2"
   ("Abstract ToySnark soundness, from the FormalSnarksProject Lean development.\n" ++
    "Query: does a cheating assignment exist that satisfies every verifier coefficient\n" ++
    "equation while falsifying the extracted relation? unsat = sound.")

@@ -328,22 +328,29 @@ def splitSumMonomial {σ τ : Type} [FinEnum σ] [FinEnum τ] (m : CMvMonomial (
     Vector.ofFn fun k => m.degreeOf (Sum.inr (FinEnum.equiv.symm k)))
 
 open AGMProofSystemInstantiation in
+/-- The coefficients of a polynomial over a sum `σ ⊕ τ` of variable types with respect to the
+monomials in the `σ`-variables, each a polynomial in the `τ`-variables. For a symbolic check
+polynomial (`σ` the toxic-waste samples, `τ` the abstract sum variables) these are the
+generators of the soundness ideal. Split each monomial into its two halves, then group by the
+`σ`-part (as in `AGMProofSystemInstantiation.verificationGenerators`, but staying at the
+computable `CMvMonomial` level rather than passing through `Finsupp`). Also used directly by the
+SNARKs that do not fit `SymbolicAGMScheme` (`ToySnark`, `BabySnark`, …), on their hand-built
+symbolic check polynomials. -/
+def coeffGenerators {σ τ : Type} [FinEnum σ] [FinEnum τ]
+    (p : CMvPolynomial (σ ⊕ τ) F) : List (CMvPolynomial τ F) :=
+  let terms : List (CMvMonomial σ × CMvPolynomial τ F) :=
+    (Lawful.monomials p).map fun m =>
+      let split := splitSumMonomial m
+      (split.1, CMvPolynomial.monomial split.2 (p.coeff m))
+  (terms.foldl (fun acc t => groupAdd acc t.1 t.2) []).map (·.2)
+
 /-- The generators of the soundness ideal contributed by one equality check: the coefficients of
 the symbolic check polynomial with respect to the toxic-waste monomials, each a polynomial in the
 sum variables. These are the abstract counterparts of the `h0012`, …, `h1122` equations of the
 manual proofs. -/
 def checkGenerators (k : 𝓢.EqualityChecks) :
     List (CMvPolynomial (SumVar 𝓢) F) :=
-  let p := 𝓢.symCheckPoly k
-  -- Split each monomial of the check polynomial into its toxic-waste and sum-variable parts,
-  -- then group by the toxic-waste part (as in
-  -- `AGMProofSystemInstantiation.verificationGenerators`, but staying at the computable
-  -- `CMvMonomial` level rather than passing through `Finsupp`).
-  let terms : List (CMvMonomial 𝓢.Vars × CMvPolynomial (SumVar 𝓢) F) :=
-    (Lawful.monomials p).map fun m =>
-      let split := splitSumMonomial m
-      (split.1, CMvPolynomial.monomial split.2 (p.coeff m))
-  (terms.foldl (fun acc t => groupAdd acc t.1 t.2) []).map (·.2)
+  coeffGenerators (𝓢.symCheckPoly k)
 
 /-- All generators of the soundness ideal, collected over the equality checks. -/
 def soundnessGenerators : List (CMvPolynomial (SumVar 𝓢) F) :=

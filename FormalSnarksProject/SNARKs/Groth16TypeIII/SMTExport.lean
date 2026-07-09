@@ -13,9 +13,9 @@ Run with
 
     lake env lean FormalSnarksProject/SNARKs/Groth16TypeIII/SMTExport.lean
 
-which writes `groth16_typeIII_soundness.smt2` in the current directory. It is intentionally
-**not** imported by the `FormalSnarksProject` root library (it is a runnable script, not library
-content).
+from the repository root, which writes `benchmarks/groth16_typeIII_soundness.smt2`. It is
+intentionally **not** imported by the `FormalSnarksProject` root library (it is a runnable
+script, not library content).
 -/
 
 open Groth16TypeIII.Symbolic
@@ -28,7 +28,7 @@ def prob : AGMProofSystemInstantiation.IdealMembershipProblem (SumVar (scheme SM
   soundnessProblem SMT.F
 
 set_option maxRecDepth 8000 in
-#eval SMT.writeProblem prob "groth16_typeIII_soundness.smt2"
+#eval SMT.writeProblem prob "benchmarks/groth16_typeIII_soundness.smt2"
   ("Abstract Groth16 (Type III) SNARK soundness, from the FormalSnarksProject\n" ++
    "Lean development. Query: does a cheating assignment exist that satisfies every verifier\n" ++
    "coefficient equation while falsifying the extracted QAP relation? unsat = sound.")

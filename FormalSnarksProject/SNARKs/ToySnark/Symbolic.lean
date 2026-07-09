@@ -20,8 +20,7 @@ directly over
 
 exactly the `IdealVars` split of the generic reduction in `StraightforwardAGMProofSystem.lean`
 (where the statement entries are indeterminates, making the problem statement-independent), and
-extracts the generators with the same computable monomial-splitting used by
-`SymbolicAGMScheme.checkGenerators`.
+extracts the generators with `SymbolicAGMScheme.coeffGenerators`.
 
 Correspondence with the manual proof in `Soundness.lean`:
 
@@ -72,18 +71,12 @@ def symCheckPoly : CMvPolynomial (SymVars) F :=
       * (X (Sum.inr Var.x) * X (Sum.inl Vars.α) + X (Sum.inr Var.y) * X (Sum.inl Vars.β))
     + (X (Sum.inr Var.z) * X (Sum.inl Vars.α)) * (- X (Sum.inl Vars.β))
 
-open AGMProofSystemInstantiation in
 /-- The generators of the soundness ideal: the coefficients of the symbolic check polynomial with
 respect to the toxic-waste monomials (`α²`, `αβ`, `β²`), each a polynomial in the ideal
 variables. These are the abstract counterparts of the `h20`, `h11`, `h02` equations of the manual
-soundness proof. Extraction is as in `SymbolicAGMScheme.checkGenerators`. -/
+soundness proof. -/
 def generators : List (CMvPolynomial Var F) :=
-  let p := symCheckPoly F
-  let terms : List (CMvMonomial Vars × CMvPolynomial Var F) :=
-    (Lawful.monomials p).map fun m =>
-      let split := SymbolicAGMScheme.splitSumMonomial m
-      (split.1, CMvPolynomial.monomial split.2 (p.coeff m))
-  (terms.foldl (fun acc t => groupAdd acc t.1 t.2) []).map (·.2)
+  SymbolicAGMScheme.coeffGenerators (symCheckPoly F)
 
 /-- The target polynomial of the soundness problem: the relation
 `A·y = z ∨ B·x = z` of `Soundness.lean`, with the witness `(A, B)` read off the prover's
