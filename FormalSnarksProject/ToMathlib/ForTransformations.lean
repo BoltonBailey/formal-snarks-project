@@ -1,6 +1,9 @@
 
 import Mathlib.RingTheory.Polynomial.Basic
 import Mathlib.Algebra.MvPolynomial.Monad
+import CompPoly.Multivariate.Operations
+import CompPoly.Multivariate.Rename
+import CompPoly.Multivariate.MvPolyEquiv
 
 section
 
@@ -210,5 +213,84 @@ lemma AlgHom.list_map_sum {R : Type u} {A : Type v} {B : Type w}
   | cons x xs ih =>
     simp only [List.map_cons, List.sum_cons, map_add, ih]
 
+lemma RingHom.list_map_sum {A : Type v} {B : Type w} [Semiring A] [Semiring B]
+    (φ : A →+* B) {ι : Type u_1} (f : ι → A) (s : List ι) :
+    φ (List.sum (s.map fun (x : ι) => f x)) = List.sum (s.map fun (x : ι) => φ (f x)) := by
+  induction s with
+  | nil =>
+    simp
+  | cons x xs ih =>
+    simp only [List.map_cons, List.sum_cons, map_add, ih]
+
+/-! ### `CMvPolynomial` counterparts, transported along `CPoly.polyRingEquiv`
+
+The transformations file manipulates the computable `CMvPolynomial` check polynomials
+directly; these lemmas transport the needed algebraic facts (no zero divisors, `X ≠ 0`, and
+naturality of `bind₁`) from their mathlib `MvPolynomial` counterparts. -/
+
+section CompPolyBridge
+
+open CPoly
+
+variable {σ τ F : Type} [FinEnum σ] [FinEnum τ] [Field F] [BEq F] [LawfulBEq F]
+
+/-- `CMvPolynomial` over a field has no zero divisors (transported from `MvPolynomial` along
+the ring equivalence). -/
+instance : NoZeroDivisors (CMvPolynomial σ F) :=
+  Function.Injective.noZeroDivisors (polyRingEquiv (σ := σ) (R := F))
+    (polyRingEquiv (σ := σ) (R := F)).injective (map_zero _) (map_mul _)
+
+lemma CPoly.CMvPolynomial.X_ne_zero (v : σ) :
+    (CMvPolynomial.X v : CMvPolynomial σ F) ≠ 0 := by
+  intro h
+  have equivX : (polyRingEquiv (σ := σ) (R := F)) (CMvPolynomial.X v) = MvPolynomial.X v :=
+    CPoly.fromCMvPolynomial_X v
+  have equivZero : (polyRingEquiv (σ := σ) (R := F)) 0 = 0 := map_zero
+  have h' := congr_arg (polyRingEquiv (σ := σ) (R := F)) h
+  rw [equivX, equivZero] at h'
+  exact MvPolynomial.X_ne_zero v h'
+
+/-- `CMvPolynomial.bind₁` as an application of the bundled `eval₂Hom` ring homomorphism, so
+that `map_*` lemmas apply to it. -/
+lemma CPoly.CMvPolynomial.bind₁_eq_eval₂Hom
+    (f : σ → CMvPolynomial τ F) (p : CMvPolynomial σ F) :
+    CMvPolynomial.bind₁ f p
+      = CMvPolynomial.eval₂Hom (algebraMap F (CMvPolynomial τ F)) f p := by
+  rw [CMvPolynomial.bind₁_eq_aeval]
+  rfl
+
+/-- The substitution homomorphism fixes constants. -/
+lemma CPoly.CMvPolynomial.eval₂Hom_algebraMap_C
+    (f : σ → CMvPolynomial τ F) (c : F) :
+    CMvPolynomial.eval₂Hom (algebraMap F (CMvPolynomial τ F)) f (CMvPolynomial.C c)
+      = CMvPolynomial.C c := by
+  rw [CMvPolynomial.eval₂Hom_apply, ← CMvPolynomial.aeval_eq_eval₂, CMvPolynomial.aeval_C]
+  rfl
+
+/-- Naturality of substitution: the computable `CMvPolynomial.bind₁` corresponds to mathlib's
+`MvPolynomial.bind₁` across the ring equivalence. -/
+lemma CPoly.CMvPolynomial.polyRingEquiv_bind₁
+    (f : σ → CMvPolynomial τ F) (p : CMvPolynomial σ F) :
+    (polyRingEquiv (σ := τ) (R := F)) (CMvPolynomial.bind₁ f p)
+      = MvPolynomial.bind₁ (fun i => (polyRingEquiv (σ := τ) (R := F)) (f i))
+          ((polyRingEquiv (σ := σ) (R := F)) p) := by
+  calc (polyRingEquiv (σ := τ) (R := F)) (CMvPolynomial.bind₁ f p)
+      = ((polyRingEquiv (σ := τ) (R := F)) : CMvPolynomial τ F →+* MvPolynomial τ F)
+          (MvPolynomial.eval₂ (algebraMap F (CMvPolynomial τ F)) f (fromCMvPolynomial p)) := by
+        rw [CMvPolynomial.bind₁_eq_aeval, CMvPolynomial.aeval_eq_eval₂, eval₂_equiv]
+        rfl
+    _ = MvPolynomial.eval₂
+          (((polyRingEquiv (σ := τ) (R := F)) : CMvPolynomial τ F →+* MvPolynomial τ F).comp
+            (algebraMap F (CMvPolynomial τ F)))
+          (fun i => (polyRingEquiv (σ := τ) (R := F)) (f i))
+          (fromCMvPolynomial p) :=
+        MvPolynomial.eval₂_comp_left _ _ _ _
+    _ = MvPolynomial.bind₁ (fun i => (polyRingEquiv (σ := τ) (R := F)) (f i))
+          ((polyRingEquiv (σ := σ) (R := F)) p) := by
+        rw [MvPolynomial.bind₁, MvPolynomial.aeval_def, MvPolynomial.algebraMap_eq]
+        congr 1
+        exact RingHom.ext fun c => CPoly.fromCMvPolynomial_C c
+
+end CompPolyBridge
 
 end
