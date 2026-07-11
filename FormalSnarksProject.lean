@@ -1,5 +1,6 @@
 import FormalSnarksProject.Models.AGMProofSystemInstantiation
 import FormalSnarksProject.Models.AGMProofSystemInstantiationTypeI
+import FormalSnarksProject.Models.IdealMembershipDecision
 import FormalSnarksProject.Models.StraightforwardAGMProofSystem
 import FormalSnarksProject.Models.SymbolicAGMScheme
 import FormalSnarksProject.SMT.Export
