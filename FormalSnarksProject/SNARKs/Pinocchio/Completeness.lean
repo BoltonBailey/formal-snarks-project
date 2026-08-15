@@ -1,5 +1,7 @@
-import FormalSnarksProject.SNARKs.Pinocchio.Defs
-import FormalSnarksProject.ToMathlib.PolynomialDegreeHelpers
+module
+
+public import FormalSnarksProject.SNARKs.Pinocchio.Defs
+public import FormalSnarksProject.ToMathlib.PolynomialDegreeHelpers
 
 /-!
 
@@ -16,6 +18,8 @@ polynomial identities; check I requires the quotient encoding on `s^0, …, s^(d
 faithful, which is where the degree hypotheses enter.
 
 -/
+
+@[expose] public section
 
 open scoped BigOperators
 

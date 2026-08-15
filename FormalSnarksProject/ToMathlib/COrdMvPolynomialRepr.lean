@@ -1,4 +1,6 @@
-import CompPoly.OrdMultivariate.COrdMvPolynomial
+module
+
+public import CompPoly.OrdMultivariate.COrdMvPolynomial
 
 /-!
 # A readable `Repr` for computable multivariate polynomials
@@ -16,6 +18,8 @@ short hand-written one — see `Groth16TypeIII/Symbolic.lean`) to get legible ou
 Since the ordered sparse representation stores each monomial as a sorted entry list, the factors
 are read directly off `COrdMvMonomial.entryList` — no enumeration of the variable type is needed.
 -/
+
+@[expose] public section
 
 namespace CPoly.COrdMvPolynomial
 
@@ -47,6 +51,7 @@ private def reprTerm (m : COrdMvMonomial σ) (c : R) : Format :=
 
 /-- Print a computable multivariate polynomial as a sum of terms, naming variables through
 `Repr σ` and omitting zero exponents. See the module docstring. -/
+@[no_expose]
 instance instRepr : Repr (COrdMvPolynomial σ R) where
   reprPrec p _ :=
     match (OrdLawful.monomials p).map fun m => reprTerm m (coeff m p) with

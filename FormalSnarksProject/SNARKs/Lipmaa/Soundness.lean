@@ -1,4 +1,8 @@
-import FormalSnarksProject.SNARKs.Lipmaa.Defs
+module
+
+public import FormalSnarksProject.SNARKs.Lipmaa.Defs
+
+@[expose] public section
 
 
 open scoped BigOperators

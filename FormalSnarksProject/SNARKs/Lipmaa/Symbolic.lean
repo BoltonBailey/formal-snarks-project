@@ -1,6 +1,8 @@
-import FormalSnarksProject.Models.SymbolicAGMScheme
-import FormalSnarksProject.SNARKs.Lipmaa.Defs
-import FormalSnarksProject.ToMathlib.FinEnumOrd
+module
+
+public import FormalSnarksProject.Models.SymbolicAGMScheme
+public import FormalSnarksProject.SNARKs.Lipmaa.Defs
+public import FormalSnarksProject.ToMathlib.FinEnumOrd
 
 /-!
 # Lipmaa, symbolically
@@ -19,6 +21,8 @@ The target polynomial encodes the QAP relation with the witness extracted from p
 `C`'s coefficients on the `q` component, matching the extractor of the manual proof in
 `Lipmaa/Soundness.lean`.
 -/
+
+@[expose] public section
 
 open scoped BigOperators
 

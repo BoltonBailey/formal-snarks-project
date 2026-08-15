@@ -1,5 +1,7 @@
-import FormalSnarksProject.SNARKs.GGPR.Symbolic
-import FormalSnarksProject.SMT.Export
+module
+
+meta import FormalSnarksProject.SNARKs.GGPR.Symbolic
+meta import FormalSnarksProject.SMT.Export
 
 /-!
 # Exporting the abstract GGPR soundness problem to SMT-LIB
@@ -17,6 +19,8 @@ from the repository root, which writes `benchmarks/ggpr_soundness.smt2`. It is i
 **not** imported by the `FormalSnarksProject` root library (it is a runnable script, not
 library content).
 -/
+
+meta section
 
 namespace GGPR.SMTExport
 

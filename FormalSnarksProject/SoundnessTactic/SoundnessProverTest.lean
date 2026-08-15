@@ -1,6 +1,7 @@
 
-import FormalSnarksProject.SoundnessTactic.SoundnessProver
+module
 
+import FormalSnarksProject.SoundnessTactic.SoundnessProver
 
 section test
 

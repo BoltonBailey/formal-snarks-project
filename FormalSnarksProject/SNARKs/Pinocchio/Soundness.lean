@@ -1,4 +1,6 @@
-import FormalSnarksProject.SNARKs.Pinocchio.Defs
+module
+
+public import FormalSnarksProject.SNARKs.Pinocchio.Defs
 
 /-!
 
@@ -8,6 +10,8 @@ This file contains the soundness proof for the Pinocchio SNARK; see `Defs.lean` 
 definition and an overview of the verifier's checks.
 
 -/
+
+@[expose] public section
 
 open scoped BigOperators
 

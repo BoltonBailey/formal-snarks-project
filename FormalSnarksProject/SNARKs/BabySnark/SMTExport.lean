@@ -1,5 +1,7 @@
-import FormalSnarksProject.SNARKs.BabySnark.Symbolic
-import FormalSnarksProject.SMT.Export
+module
+
+meta import FormalSnarksProject.SNARKs.BabySnark.Symbolic
+meta import FormalSnarksProject.SMT.Export
 
 /-!
 # Exporting the abstract BabySNARK soundness problem to SMT-LIB
@@ -17,6 +19,8 @@ from the repository root, which writes `benchmarks/babysnark_soundness.smt2`. It
 intentionally **not** imported by the `FormalSnarksProject` root library (it is a runnable
 script, not library content).
 -/
+
+meta section
 
 namespace BabySNARK.SMTExport
 

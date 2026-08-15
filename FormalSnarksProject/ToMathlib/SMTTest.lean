@@ -1,5 +1,9 @@
-import Mathlib
-import Smt
+module
+
+public import Mathlib
+public import Smt
+
+@[expose] public section
 
 #check Smt.Config
 

@@ -1,6 +1,8 @@
-import FormalSnarksProject.Models.SymbolicAGMScheme
-import FormalSnarksProject.SNARKs.BabySnark.Defs
-import FormalSnarksProject.ToMathlib.FinEnumOrd
+module
+
+public import FormalSnarksProject.Models.SymbolicAGMScheme
+public import FormalSnarksProject.SNARKs.BabySnark.Defs
+public import FormalSnarksProject.ToMathlib.FinEnumOrd
 
 /-!
 # BabySNARK, symbolically
@@ -39,6 +41,8 @@ per proof element). The target encodes the square span relation `(u_io + ∑ wit
 `t + (H's τ-part)` — matching the extractor and `suffices` step of the manual proof in
 `Soundness.lean`.
 -/
+
+@[expose] public section
 
 open CPoly CPoly.COrdMvPolynomial
 

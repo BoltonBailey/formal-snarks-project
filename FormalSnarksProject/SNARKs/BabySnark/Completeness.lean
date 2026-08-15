@@ -1,5 +1,7 @@
-import FormalSnarksProject.SNARKs.BabySnark.Defs
-import FormalSnarksProject.ToMathlib.PolynomialDegreeHelpers
+module
+
+public import FormalSnarksProject.SNARKs.BabySnark.Defs
+public import FormalSnarksProject.ToMathlib.PolynomialDegreeHelpers
 
 /-!
 
@@ -21,6 +23,8 @@ Completeness requires degree hypotheses making these truncated encodings faithfu
 `h` (of degree `deg(p²) - deg t ≤ 2·(n_var - 1) - deg t`) also has degree `< n_var`.
 
 -/
+
+@[expose] public section
 
 open scoped BigOperators
 

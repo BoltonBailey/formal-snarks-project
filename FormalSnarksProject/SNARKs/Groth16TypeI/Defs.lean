@@ -1,9 +1,11 @@
-import FormalSnarksProject.Models.AGMProofSystemInstantiationTypeI
-import FormalSnarksProject.ToMathlib.OptionEquivRight
-import FormalSnarksProject.ToMathlib.FinEnumToList
-import FormalSnarksProject.SoundnessTactic.SoundnessProver
-import FormalSnarksProject.SoundnessTactic.ProofMode
-import FormalSnarksProject.ToMathlib.FinEnumOrd
+module
+
+public import FormalSnarksProject.Models.AGMProofSystemInstantiationTypeI
+public import FormalSnarksProject.ToMathlib.OptionEquivRight
+public import FormalSnarksProject.ToMathlib.FinEnumToList
+public import FormalSnarksProject.SoundnessTactic.SoundnessProver
+public import FormalSnarksProject.SoundnessTactic.ProofMode
+public import FormalSnarksProject.ToMathlib.FinEnumOrd
 
 /-!
 
@@ -28,6 +30,8 @@ analysis in `Soundness.lean` accounts for this (in particular `A` and `B` may sw
 Note that the SRS polynomials here have been multiplied through by γδ.
 
 -/
+
+@[expose] public section
 
 open scoped BigOperators
 

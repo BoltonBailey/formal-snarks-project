@@ -1,6 +1,8 @@
-import FormalSnarksProject.Models.SymbolicAGMScheme
-import FormalSnarksProject.SNARKs.ToySnark.Defs
-import FormalSnarksProject.ToMathlib.FinEnumOrd
+module
+
+public import FormalSnarksProject.Models.SymbolicAGMScheme
+public import FormalSnarksProject.SNARKs.ToySnark.Defs
+public import FormalSnarksProject.ToMathlib.FinEnumOrd
 
 /-!
 # ToySnark, symbolically
@@ -35,6 +37,8 @@ Correspondence with the manual proof in `Soundness.lean`:
 
 (the disjunction is encoded as a product: over a field, a product is zero iff a factor is).
 -/
+
+@[expose] public section
 
 open CPoly CPoly.COrdMvPolynomial
 

@@ -1,4 +1,6 @@
-import FormalSnarksProject.SNARKs.GGPR.Defs
+module
+
+public import FormalSnarksProject.SNARKs.GGPR.Defs
 
 /-!
 
@@ -8,6 +10,8 @@ This file contains the soundness proof for the GGPR SNARK; see `Defs.lean` for t
 and an overview of the verifier's checks (only checks I and V are needed for this proof).
 
 -/
+
+@[expose] public section
 
 open scoped BigOperators
 

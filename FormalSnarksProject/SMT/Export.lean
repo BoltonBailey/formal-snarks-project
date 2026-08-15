@@ -1,5 +1,7 @@
-import FormalSnarksProject.Models.StraightforwardAGMProofSystem
-import FormalSnarksProject.ToMathlib.COrdMvPolynomialRepr
+module
+
+public import FormalSnarksProject.Models.StraightforwardAGMProofSystem
+public import FormalSnarksProject.ToMathlib.COrdMvPolynomialRepr
 
 /-!
 # Generic SMT-LIB (`QF_FF`) export of ideal-membership problems
@@ -34,6 +36,8 @@ coefficient falls outside that window, so the lift is never silently lossy.
 Variable names are obtained from the `Repr` of the problem's variable type, sanitized into
 SMT-LIB simple symbols (spaces to underscores, Greek letters spelled out).
 -/
+
+@[expose] public section
 
 open CPoly CPoly.COrdMvPolynomial
 

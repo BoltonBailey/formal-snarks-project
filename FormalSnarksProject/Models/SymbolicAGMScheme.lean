@@ -1,7 +1,11 @@
-import FormalSnarksProject.Models.StraightforwardAGMProofSystem
-import FormalSnarksProject.ToMathlib.OptionEquivRight
-import FormalSnarksProject.ToMathlib.COrdMvPolynomialRepr
-import FormalSnarksProject.ToMathlib.FinEnumOrd
+module
+
+public import FormalSnarksProject.Models.StraightforwardAGMProofSystem
+public import FormalSnarksProject.ToMathlib.OptionEquivRight
+public import FormalSnarksProject.ToMathlib.COrdMvPolynomialRepr
+public import FormalSnarksProject.ToMathlib.FinEnumOrd
+
+@[expose] public section
 
 open CPoly
 open CPoly.COrdMvPolynomial

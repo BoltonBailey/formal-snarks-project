@@ -1,5 +1,9 @@
 
-import Lean.Meta.Tactic.Simp
+module
+
+public import Lean.Meta.Tactic.Simp
+
+@[expose] public section
 
 open Lean Meta
 

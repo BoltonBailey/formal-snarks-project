@@ -1,9 +1,13 @@
 
-import Mathlib.RingTheory.Polynomial.Basic
-import Mathlib.Algebra.MvPolynomial.Monad
-import CompPoly.OrdMultivariate.Operations
-import CompPoly.OrdMultivariate.Rename
-import CompPoly.OrdMultivariate.MvPolyEquiv
+module
+
+public import Mathlib.RingTheory.Polynomial.Basic
+public import Mathlib.Algebra.MvPolynomial.Monad
+public import CompPoly.OrdMultivariate.Operations
+public import CompPoly.OrdMultivariate.Rename
+public import CompPoly.OrdMultivariate.MvPolyEquiv
+
+@[expose] public section
 
 section
 

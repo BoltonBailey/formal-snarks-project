@@ -1,5 +1,7 @@
-import FormalSnarksProject.SNARKs.Groth16TypeI.Symbolic
-import FormalSnarksProject.SMT.Export
+module
+
+meta import FormalSnarksProject.SNARKs.Groth16TypeI.Symbolic
+meta import FormalSnarksProject.SMT.Export
 
 /-!
 # Exporting the abstract Groth16 (Type I) soundness problem to SMT-LIB
@@ -19,6 +21,8 @@ from the repository root, which writes `benchmarks/groth16_typeI_soundness.smt2`
 intentionally **not** imported by the `FormalSnarksProject` root library (it is a runnable
 script, not library content).
 -/
+
+meta section
 
 namespace Groth16TypeI.SMTExport
 

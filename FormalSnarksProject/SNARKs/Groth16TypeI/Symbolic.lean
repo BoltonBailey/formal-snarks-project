@@ -1,6 +1,8 @@
-import FormalSnarksProject.Models.SymbolicAGMScheme
-import FormalSnarksProject.SNARKs.Groth16TypeI.Defs
-import FormalSnarksProject.ToMathlib.FinEnumOrd
+module
+
+public import FormalSnarksProject.Models.SymbolicAGMScheme
+public import FormalSnarksProject.SNARKs.Groth16TypeI.Defs
+public import FormalSnarksProject.ToMathlib.FinEnumOrd
 
 /-!
 # Groth16TypeI, symbolically
@@ -38,6 +40,8 @@ analysis starts from `A_α·B_α = 0` and resolves squares with `mul_self_eq_zer
 Nullstellensatz-style SMT encoding of `SMT/Export.lean` decides exactly radical membership, so
 this is covered.
 -/
+
+@[expose] public section
 
 open CPoly CPoly.COrdMvPolynomial
 
@@ -117,7 +121,7 @@ instance : Std.LawfulEqOrd SymVars := FinEnum.toOrd.lawfulEqOrd
 variable (F : Type) [Field F] [BEq F] [LawfulBEq F]
 
 /-- Shorthand for a toxic-waste sample inside the symbolic ring. -/
-private def tox (v : Vars) : COrdMvPolynomial SymVars F := X (Sum.inl v)
+def tox (v : Vars) : COrdMvPolynomial SymVars F := X (Sum.inl v)
 
 /-- The symbolic AGM expansion of a proof element over the single SRS, transcribing the
 (`γδ`-multiplied) SRS values of `Defs.lean`. -/

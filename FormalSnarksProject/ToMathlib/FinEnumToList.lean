@@ -1,4 +1,6 @@
-import Mathlib.Data.FinEnum
+module
+
+public import Mathlib.Data.FinEnum
 
 /-!
 
@@ -10,6 +12,8 @@ the defining list, which holds propositionally (up to `dedup`) but not definitio
 is parameterized (e.g. by `List.finRange n_var`). These lemmas provide that expansion.
 
 -/
+
+@[expose] public section
 
 namespace FinEnum
 

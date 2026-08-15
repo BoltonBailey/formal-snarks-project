@@ -1,5 +1,7 @@
-import FormalSnarksProject.SNARKs.GGPR.Defs
-import FormalSnarksProject.ToMathlib.PolynomialDegreeHelpers
+module
+
+public import FormalSnarksProject.SNARKs.GGPR.Defs
+public import FormalSnarksProject.ToMathlib.PolynomialDegreeHelpers
 
 /-!
 
@@ -16,6 +18,8 @@ all `w`-polynomials degree `< b`, and `a + b ≤ d + n_wit + 1`, then
 `deg h ≤ deg(v·w) - deg t < d`.
 
 -/
+
+@[expose] public section
 
 open scoped BigOperators
 

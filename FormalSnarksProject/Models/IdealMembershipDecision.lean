@@ -1,4 +1,6 @@
-import FormalSnarksProject.Models.SymbolicAGMScheme
+module
+
+public import FormalSnarksProject.Models.SymbolicAGMScheme
 
 /-!
 # A computable decision procedure for the soundness ideal-membership problems
@@ -31,6 +33,8 @@ The division uses the order already carried by the underlying monomial tree map
 termination is nevertheless enforced by fuel, since none of this needs to be proven — only the
 final certificate check is trusted, and that is verified.
 -/
+
+@[expose] public section
 
 open CPoly CPoly.COrdMvPolynomial
 

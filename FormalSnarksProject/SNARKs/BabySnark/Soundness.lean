@@ -1,5 +1,7 @@
-import FormalSnarksProject.SNARKs.BabySnark.Defs
-import FormalSnarksProject.ToMathlib.PolynomialDegreeHelpers
+module
+
+public import FormalSnarksProject.SNARKs.BabySnark.Defs
+public import FormalSnarksProject.ToMathlib.PolynomialDegreeHelpers
 
 /-!
 
@@ -9,6 +11,8 @@ This file contains the soundness proof for BabySNARK; see `Defs.lean` for the de
 overview of the verifier's checks.
 
 -/
+
+@[expose] public section
 
 open scoped BigOperators
 

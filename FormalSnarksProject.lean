@@ -1,42 +1,44 @@
-import FormalSnarksProject.Models.AGMProofSystemInstantiation
-import FormalSnarksProject.Models.AGMProofSystemInstantiationTypeI
-import FormalSnarksProject.Models.IdealMembershipDecision
-import FormalSnarksProject.Models.StraightforwardAGMProofSystem
-import FormalSnarksProject.Models.SymbolicAGMScheme
-import FormalSnarksProject.SMT.Export
-import FormalSnarksProject.SNARKs.BabySnark.Completeness
-import FormalSnarksProject.SNARKs.BabySnark.Defs
-import FormalSnarksProject.SNARKs.BabySnark.Soundness
-import FormalSnarksProject.SNARKs.BabySnark.Symbolic
-import FormalSnarksProject.SNARKs.GGPR.Completeness
-import FormalSnarksProject.SNARKs.GGPR.Defs
-import FormalSnarksProject.SNARKs.GGPR.Soundness
-import FormalSnarksProject.SNARKs.GGPR.Symbolic
-import FormalSnarksProject.SNARKs.Groth16TypeI.Defs
-import FormalSnarksProject.SNARKs.Groth16TypeI.Soundness
-import FormalSnarksProject.SNARKs.Groth16TypeI.Symbolic
-import FormalSnarksProject.SNARKs.Groth16TypeIII.Completeness
-import FormalSnarksProject.SNARKs.Groth16TypeIII.Defs
-import FormalSnarksProject.SNARKs.Groth16TypeIII.Soundness
-import FormalSnarksProject.SNARKs.Groth16TypeIII.Symbolic
-import FormalSnarksProject.SNARKs.Lipmaa.Completeness
-import FormalSnarksProject.SNARKs.Lipmaa.Defs
-import FormalSnarksProject.SNARKs.Lipmaa.Soundness
-import FormalSnarksProject.SNARKs.Lipmaa.Symbolic
-import FormalSnarksProject.SNARKs.Pinocchio.Completeness
-import FormalSnarksProject.SNARKs.Pinocchio.Defs
-import FormalSnarksProject.SNARKs.Pinocchio.Soundness
-import FormalSnarksProject.SNARKs.Pinocchio.Symbolic
-import FormalSnarksProject.SNARKs.ToySnark.Completeness
-import FormalSnarksProject.SNARKs.ToySnark.Defs
-import FormalSnarksProject.SNARKs.ToySnark.Soundness
-import FormalSnarksProject.SNARKs.ToySnark.Symbolic
-import FormalSnarksProject.ToMathlib.COrdMvPolynomialRepr
-import FormalSnarksProject.ToMathlib.FinEnumToList
-import FormalSnarksProject.ToMathlib.ForTransformations
-import FormalSnarksProject.ToMathlib.OptionEquivRight
-import FormalSnarksProject.ToMathlib.PolynomialDegreeHelpers
-import FormalSnarksProject.ToMathlib.PolynomialQuotient
-import FormalSnarksProject.Transformations.Transformations
+module
+
+public import FormalSnarksProject.Models.AGMProofSystemInstantiation
+public import FormalSnarksProject.Models.AGMProofSystemInstantiationTypeI
+public import FormalSnarksProject.Models.IdealMembershipDecision
+public import FormalSnarksProject.Models.StraightforwardAGMProofSystem
+public import FormalSnarksProject.Models.SymbolicAGMScheme
+public import FormalSnarksProject.SMT.Export
+public import FormalSnarksProject.SNARKs.BabySnark.Completeness
+public import FormalSnarksProject.SNARKs.BabySnark.Defs
+public import FormalSnarksProject.SNARKs.BabySnark.Soundness
+public import FormalSnarksProject.SNARKs.BabySnark.Symbolic
+public import FormalSnarksProject.SNARKs.GGPR.Completeness
+public import FormalSnarksProject.SNARKs.GGPR.Defs
+public import FormalSnarksProject.SNARKs.GGPR.Soundness
+public import FormalSnarksProject.SNARKs.GGPR.Symbolic
+public import FormalSnarksProject.SNARKs.Groth16TypeI.Defs
+public import FormalSnarksProject.SNARKs.Groth16TypeI.Soundness
+public import FormalSnarksProject.SNARKs.Groth16TypeI.Symbolic
+public import FormalSnarksProject.SNARKs.Groth16TypeIII.Completeness
+public import FormalSnarksProject.SNARKs.Groth16TypeIII.Defs
+public import FormalSnarksProject.SNARKs.Groth16TypeIII.Soundness
+public import FormalSnarksProject.SNARKs.Groth16TypeIII.Symbolic
+public import FormalSnarksProject.SNARKs.Lipmaa.Completeness
+public import FormalSnarksProject.SNARKs.Lipmaa.Defs
+public import FormalSnarksProject.SNARKs.Lipmaa.Soundness
+public import FormalSnarksProject.SNARKs.Lipmaa.Symbolic
+public import FormalSnarksProject.SNARKs.Pinocchio.Completeness
+public import FormalSnarksProject.SNARKs.Pinocchio.Defs
+public import FormalSnarksProject.SNARKs.Pinocchio.Soundness
+public import FormalSnarksProject.SNARKs.Pinocchio.Symbolic
+public import FormalSnarksProject.SNARKs.ToySnark.Completeness
+public import FormalSnarksProject.SNARKs.ToySnark.Defs
+public import FormalSnarksProject.SNARKs.ToySnark.Soundness
+public import FormalSnarksProject.SNARKs.ToySnark.Symbolic
+public import FormalSnarksProject.ToMathlib.COrdMvPolynomialRepr
+public import FormalSnarksProject.ToMathlib.FinEnumToList
+public import FormalSnarksProject.ToMathlib.ForTransformations
+public import FormalSnarksProject.ToMathlib.OptionEquivRight
+public import FormalSnarksProject.ToMathlib.PolynomialDegreeHelpers
+public import FormalSnarksProject.ToMathlib.PolynomialQuotient
+public import FormalSnarksProject.Transformations.Transformations
 -- TODO: depends on the `smt` library, temporarily dropped from lakefile.toml (toolchain reasons).
 -- import FormalSnarksProject.ToMathlib.SMTTest

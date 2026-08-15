@@ -1,7 +1,11 @@
 
-import Mathlib.Algebra.MvPolynomial.Basic
-import Mathlib.Algebra.Polynomial.Eval
-import FormalSnarksProject.SoundnessTactic.DeclareAttributes
+module
+
+public import Mathlib.Algebra.MvPolynomial.Basic
+public import Mathlib.Algebra.Polynomial.Eval
+public import FormalSnarksProject.SoundnessTactic.DeclareAttributes
+
+@[expose] public section
 -- import .general_lemmas.mv_X_mul
 -- import .general_lemmas.single_antidiagonal
 -- import .general_lemmas.mul_sum_symm

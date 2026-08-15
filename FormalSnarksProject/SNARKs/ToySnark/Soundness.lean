@@ -1,4 +1,6 @@
-import FormalSnarksProject.SNARKs.ToySnark.Defs
+module
+
+public import FormalSnarksProject.SNARKs.ToySnark.Defs
 
 /-!
 
@@ -7,6 +9,8 @@ import FormalSnarksProject.SNARKs.ToySnark.Defs
 This file contains the soundness proof for the toy SNARK defined in `Defs.lean`.
 
 -/
+
+@[expose] public section
 
 open scoped BigOperators
 

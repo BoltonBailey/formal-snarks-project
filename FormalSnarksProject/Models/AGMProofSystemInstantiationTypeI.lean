@@ -1,6 +1,10 @@
-import Mathlib
-import CompPoly.OrdMultivariate.COrdMvPolynomialEvalLemmas
-import CompPoly.OrdMultivariate.Rename
+module
+
+public import Mathlib
+public import CompPoly.OrdMultivariate.COrdMvPolynomialEvalLemmas
+public import CompPoly.OrdMultivariate.Rename
+
+@[expose] public section
 
 
 open scoped BigOperators

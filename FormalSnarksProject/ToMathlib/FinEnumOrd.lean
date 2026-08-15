@@ -1,4 +1,6 @@
-import Mathlib.Data.FinEnum
+module
+
+public import Mathlib.Data.FinEnum
 
 /-!
 # Lawful `Ord` instances from `FinEnum`
@@ -17,6 +19,8 @@ instance : Std.TransOrd Vars := FinEnum.toOrd.transOrd
 instance : Std.LawfulEqOrd Vars := FinEnum.toOrd.lawfulEqOrd
 ```
 -/
+
+@[expose] public section
 
 namespace FinEnum
 

@@ -1,6 +1,8 @@
-import FormalSnarksProject.Models.SymbolicAGMScheme
-import FormalSnarksProject.SNARKs.Groth16TypeIII.Defs
-import FormalSnarksProject.ToMathlib.FinEnumOrd
+module
+
+public import FormalSnarksProject.Models.SymbolicAGMScheme
+public import FormalSnarksProject.SNARKs.Groth16TypeIII.Defs
+public import FormalSnarksProject.ToMathlib.FinEnumOrd
 
 /-!
 # Groth16TypeIII, symbolically
@@ -34,6 +36,8 @@ The concrete SNARK of `Groth16TypeIII/Defs.lean` corresponds to instantiating th
 `instantiation u_stmt v_stmt w_stmt u_wit v_wit w_wit r` (see `toAGMProofSystem`); the existing
 definition is left untouched.
 -/
+
+@[expose] public section
 
 open scoped BigOperators
 

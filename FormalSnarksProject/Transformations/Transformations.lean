@@ -1,6 +1,10 @@
 
-import FormalSnarksProject.Models.AGMProofSystemInstantiation
-import FormalSnarksProject.ToMathlib.ForTransformations
+module
+
+public import FormalSnarksProject.Models.AGMProofSystemInstantiation
+public import FormalSnarksProject.ToMathlib.ForTransformations
+
+@[expose] public section
 
 
 section

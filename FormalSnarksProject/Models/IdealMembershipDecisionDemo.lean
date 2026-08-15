@@ -1,12 +1,14 @@
-import FormalSnarksProject.Models.IdealMembershipDecision
-import FormalSnarksProject.SNARKs.ToySnark.Symbolic
-import FormalSnarksProject.SNARKs.BabySnark.Symbolic
-import FormalSnarksProject.SNARKs.Groth16TypeIII.Symbolic
-import FormalSnarksProject.SNARKs.Lipmaa.Symbolic
-import FormalSnarksProject.SNARKs.Groth16TypeI.Symbolic
-import FormalSnarksProject.SNARKs.GGPR.Symbolic
-import FormalSnarksProject.SNARKs.Pinocchio.Symbolic
-import FormalSnarksProject.SMT.Export
+module
+
+meta import FormalSnarksProject.Models.IdealMembershipDecision
+meta import FormalSnarksProject.SNARKs.ToySnark.Symbolic
+meta import FormalSnarksProject.SNARKs.BabySnark.Symbolic
+meta import FormalSnarksProject.SNARKs.Groth16TypeIII.Symbolic
+meta import FormalSnarksProject.SNARKs.Lipmaa.Symbolic
+meta import FormalSnarksProject.SNARKs.Groth16TypeI.Symbolic
+meta import FormalSnarksProject.SNARKs.GGPR.Symbolic
+meta import FormalSnarksProject.SNARKs.Pinocchio.Symbolic
+meta import FormalSnarksProject.SMT.Export
 
 /-!
 # Running the soundness decision on the SNARK ideal-membership problems
@@ -28,6 +30,8 @@ Results (2026-07-11): ToySnark, BabySnark, Groth16TypeIII and Lipmaa all decide 
 degree-1 certificate (plain ideal membership — interestingly, the case analysis of the manual
 proofs is not needed at the certificate level).
 -/
+
+meta section
 
 open AGMProofSystemInstantiation SymbolicAGMScheme
 

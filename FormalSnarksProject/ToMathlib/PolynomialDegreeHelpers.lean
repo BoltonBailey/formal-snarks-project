@@ -1,4 +1,6 @@
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 
@@ -12,6 +14,8 @@ bounds, and the quotient by a monic divisor satisfies the expected degree bound 
 division is exact.
 
 -/
+
+@[expose] public section
 
 open scoped BigOperators
 

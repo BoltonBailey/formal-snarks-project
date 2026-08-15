@@ -1,6 +1,8 @@
-import FormalSnarksProject.Models.SymbolicAGMScheme
-import FormalSnarksProject.SNARKs.GGPR.Defs
-import FormalSnarksProject.ToMathlib.FinEnumOrd
+module
+
+public import FormalSnarksProject.Models.SymbolicAGMScheme
+public import FormalSnarksProject.SNARKs.GGPR.Defs
+public import FormalSnarksProject.ToMathlib.FinEnumOrd
 
 /-!
 # GGPR, symbolically
@@ -41,6 +43,8 @@ quotient off `H`'s full toxic-waste-free combination, matching the extractor and
 step of the manual proof in `Soundness.lean` (only checks I and V are needed there; we include
 all five checks' generators for faithfulness).
 -/
+
+@[expose] public section
 
 open CPoly CPoly.COrdMvPolynomial
 
@@ -137,10 +141,10 @@ instance : Std.LawfulEqOrd SymVars := FinEnum.toOrd.lawfulEqOrd
 variable (F : Type) [Field F] [BEq F] [LawfulBEq F]
 
 /-- Shorthand for a toxic-waste sample inside the symbolic ring. -/
-private def tox (v : Vars) : COrdMvPolynomial SymVars F := X (Sum.inl v)
+def tox (v : Vars) : COrdMvPolynomial SymVars F := X (Sum.inl v)
 
 /-- Shorthand for an ideal variable inside the symbolic ring. -/
-private def idl (v : Var) : COrdMvPolynomial SymVars F := X (Sum.inr v)
+def idl (v : Var) : COrdMvPolynomial SymVars F := X (Sum.inr v)
 
 /-- The symbolic AGM expansion of a proof element over the SRS, transcribing the SRS values of
 `Defs.lean`. -/

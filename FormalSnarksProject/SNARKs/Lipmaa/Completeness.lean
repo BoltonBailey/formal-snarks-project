@@ -1,5 +1,7 @@
-import FormalSnarksProject.SNARKs.Lipmaa.Defs
-import FormalSnarksProject.ToMathlib.PolynomialDegreeHelpers
+module
+
+public import FormalSnarksProject.SNARKs.Lipmaa.Defs
+public import FormalSnarksProject.ToMathlib.PolynomialDegreeHelpers
 
 /-!
 
@@ -19,6 +21,8 @@ hypotheses the statement is false: e.g. with `n_var = 0`, `n_wit = 0` (so `t = 1
 statement/witness satisfies the relation) and `u_stmt 0 = X^5`, the pairing check fails.
 
 -/
+
+@[expose] public section
 
 open scoped BigOperators
 

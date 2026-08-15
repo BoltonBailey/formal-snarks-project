@@ -1,4 +1,8 @@
-import Lean
+module
+
+public meta import Lean
+
+public meta section
 open Lean
 
 -- Mario's proof mode tactic for speed recompilation

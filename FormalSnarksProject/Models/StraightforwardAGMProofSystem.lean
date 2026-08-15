@@ -1,7 +1,11 @@
-import FormalSnarksProject.Models.AGMProofSystemInstantiation
-import FormalSnarksProject.ToMathlib.FinEnumOrd
-import CompPoly.OrdMultivariate.COrdMvPolynomialEvalLemmas
-import CompPoly.OrdMultivariate.Operations
+module
+
+public import FormalSnarksProject.Models.AGMProofSystemInstantiation
+public import FormalSnarksProject.ToMathlib.FinEnumOrd
+public import CompPoly.OrdMultivariate.COrdMvPolynomialEvalLemmas
+public import CompPoly.OrdMultivariate.Operations
+
+@[expose] public section
 
 open CPoly
 open CPoly.COrdMvPolynomial

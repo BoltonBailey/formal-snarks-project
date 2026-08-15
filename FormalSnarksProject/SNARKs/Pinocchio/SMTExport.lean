@@ -1,5 +1,7 @@
-import FormalSnarksProject.SNARKs.Pinocchio.Symbolic
-import FormalSnarksProject.SMT.Export
+module
+
+meta import FormalSnarksProject.SNARKs.Pinocchio.Symbolic
+meta import FormalSnarksProject.SMT.Export
 
 /-!
 # Exporting the abstract Pinocchio soundness problem to SMT-LIB
@@ -17,6 +19,8 @@ from the repository root, which writes `benchmarks/pinocchio_soundness.smt2`. It
 intentionally **not** imported by the `FormalSnarksProject` root library (it is a runnable
 script, not library content).
 -/
+
+meta section
 
 namespace Pinocchio.SMTExport
 

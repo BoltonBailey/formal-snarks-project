@@ -1,13 +1,17 @@
-import Lean
-import Std.Tactic.OpenPrivate
-import Std.Data.List.Basic
-import Mathlib.Lean.Expr.Basic
+module
+
+public import Lean
+public import Std.Tactic.OpenPrivate
+public import Std.Data.List.Basic
+public import Mathlib.Lean.Expr.Basic
 
 /-!
 
 Defines a variant of cases' that assigns names automatically.
 
 -/
+
+@[expose] public section
 
 namespace Mathlib.Tactic
 open Lean Meta Elab Elab.Tactic

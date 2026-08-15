@@ -1,6 +1,10 @@
 
-import Mathlib.Algebra.Polynomial.Basic
-import Mathlib.Tactic.ComputeDegree
+module
+
+public import Mathlib.Algebra.Polynomial.Basic
+public import Mathlib.Tactic.ComputeDegree
+
+@[expose] public section
 
 section Tactic
 

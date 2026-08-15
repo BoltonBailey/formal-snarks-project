@@ -1,12 +1,14 @@
 
-import Mathlib
+module
 
-import FormalSnarksProject.Models.AGMProofSystemInstantiation
-import FormalSnarksProject.ToMathlib.OptionEquivRight
-import FormalSnarksProject.ToMathlib.FinEnumToList
-import FormalSnarksProject.SoundnessTactic.SoundnessProver
-import FormalSnarksProject.SoundnessTactic.ProofMode
-import FormalSnarksProject.ToMathlib.FinEnumOrd
+public import Mathlib
+
+public import FormalSnarksProject.Models.AGMProofSystemInstantiation
+public import FormalSnarksProject.ToMathlib.OptionEquivRight
+public import FormalSnarksProject.ToMathlib.FinEnumToList
+public import FormalSnarksProject.SoundnessTactic.SoundnessProver
+public import FormalSnarksProject.SoundnessTactic.ProofMode
+public import FormalSnarksProject.ToMathlib.FinEnumOrd
 
 /-!
 
@@ -16,6 +18,8 @@ This file contains the definition for the Type III version of Groth16 presented 
 ["Another Look at Extraction and Randomization of Groth's zk-SNARK" by Baghery et al.](https://eprint.iacr.org/2020/811).
 
 -/
+
+@[expose] public section
 
 open scoped BigOperators
 

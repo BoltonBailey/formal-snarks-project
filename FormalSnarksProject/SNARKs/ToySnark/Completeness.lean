@@ -1,4 +1,6 @@
-import FormalSnarksProject.SNARKs.ToySnark.Defs
+module
+
+public import FormalSnarksProject.SNARKs.ToySnark.Defs
 
 /-!
 
@@ -18,6 +20,8 @@ itself is false, e.g. `x = y = z = 1`, `A = 1` satisfies `A·y = z`, but the che
 `A = B = 0` and hence `z = 0` whenever `x` and `y` are both nonzero.
 
 -/
+
+@[expose] public section
 
 open scoped BigOperators
 

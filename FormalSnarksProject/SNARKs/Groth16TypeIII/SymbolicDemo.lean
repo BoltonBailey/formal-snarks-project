@@ -1,4 +1,6 @@
-import FormalSnarksProject.SNARKs.Groth16TypeIII.Symbolic
+module
+
+meta import FormalSnarksProject.SNARKs.Groth16TypeIII.Symbolic
 
 /-!
 # Demo: the abstract Groth16 (Type III) soundness problem, evaluated
@@ -25,6 +27,8 @@ Notes:
 * `set_option maxRecDepth` is needed at each `#eval` because the `@[reducible] scheme` unfolds deep.
 * Printing all `generators` at once is slow; take a slice.
 -/
+
+meta section
 
 open Groth16TypeIII.Symbolic CPoly
 

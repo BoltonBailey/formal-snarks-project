@@ -1,5 +1,7 @@
-import FormalSnarksProject.SNARKs.Lipmaa.Symbolic
-import FormalSnarksProject.SMT.Export
+module
+
+meta import FormalSnarksProject.SNARKs.Lipmaa.Symbolic
+meta import FormalSnarksProject.SMT.Export
 
 /-!
 # Exporting the abstract Lipmaa soundness problem to SMT-LIB
@@ -17,6 +19,8 @@ from the repository root, which writes `benchmarks/lipmaa_soundness.smt2`. It is
 **not** imported by the `FormalSnarksProject` root library (it is a runnable script, not
 library content).
 -/
+
+meta section
 
 open Lipmaa.Symbolic
 open SymbolicAGMScheme

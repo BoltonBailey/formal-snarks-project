@@ -1,12 +1,16 @@
-import Mathlib.Algebra.Polynomial.Div
-import Mathlib.Algebra.MvPolynomial.Equiv
-import Mathlib.Data.FunLike.Basic
-import Mathlib.Data.FinEnum.Option
-import CompPoly.OrdMultivariate.COrdMvPolynomialEvalLemmas
-import CompPoly.OrdMultivariate.Rename
-import CompPoly.Univariate.ToPoly.Impl
-import CompPoly.Univariate.ToPoly.Equiv
-import CompPoly.Univariate.DivisionCorrectness
+module
+
+public import Mathlib.Algebra.Polynomial.Div
+public import Mathlib.Algebra.MvPolynomial.Equiv
+public import Mathlib.Data.FunLike.Basic
+public import Mathlib.Data.FinEnum.Option
+public import CompPoly.OrdMultivariate.COrdMvPolynomialEvalLemmas
+public import CompPoly.OrdMultivariate.Rename
+public import CompPoly.Univariate.ToPoly.Impl
+public import CompPoly.Univariate.ToPoly.Equiv
+public import CompPoly.Univariate.DivisionCorrectness
+
+@[expose] public section
 
 open scoped BigOperators
 
@@ -182,16 +186,24 @@ lemma monic_prod_X_sub_C {F : Type} [Field F] [BEq F] [LawfulBEq F] {ι : Type*}
   simp only [toPoly_X_sub_C]
   exact Polynomial.monic_prod_of_monic _ _ (fun i _ => Polynomial.monic_X_sub_C (r i))
 
+/-- The forward map of CompPoly's ring equivalence is `toPoly`, stated as an equality of
+functions. CompPoly's `ringEquiv_apply` closes this by `rfl`, but that definitional unfolding is
+unavailable to importers of the (unexposed) definitions, so the lemma is used explicitly below. -/
+lemma coe_ringEquiv {F : Type} [Field F] [BEq F] [LawfulBEq F] :
+    ⇑(CompPoly.CPolynomial.ringEquiv (R := F)) = CompPoly.CPolynomial.toPoly :=
+  funext CompPoly.CPolynomial.ringEquiv_apply
+
 /-- `toPoly` is injective (it underlies the ring equivalence with mathlib `Polynomial`). -/
 lemma toPoly_injective {F : Type} [Field F] [BEq F] [LawfulBEq F] :
-    Function.Injective (CompPoly.CPolynomial.toPoly (R := F)) :=
-  (CompPoly.CPolynomial.ringEquiv (R := F)).injective
+    Function.Injective (CompPoly.CPolynomial.toPoly (R := F)) := by
+  rw [← coe_ringEquiv]
+  exact (CompPoly.CPolynomial.ringEquiv (R := F)).injective
 
 /-- `toPoly` distributes over `List.sum`. -/
 lemma toPoly_list_sum {F : Type} [Field F] [BEq F] [LawfulBEq F]
     (l : List (CompPoly.CPolynomial F)) :
-    l.sum.toPoly = (l.map CompPoly.CPolynomial.toPoly).sum :=
-  map_list_sum (CompPoly.CPolynomial.ringEquiv (R := F) : CompPoly.CPolynomial F →+* Polynomial F) l
+    l.sum.toPoly = (l.map CompPoly.CPolynomial.toPoly).sum := by
+  simpa only [coe_ringEquiv] using map_list_sum (CompPoly.CPolynomial.ringEquiv (R := F)) l
 
 /-- For monic `t`, `(t * p) %ₘ t = 0` — the computable analogue of `Polynomial.mul_self_modByMonic`. -/
 lemma mul_self_modByMonic {F : Type} [Field F] [BEq F] [LawfulBEq F]

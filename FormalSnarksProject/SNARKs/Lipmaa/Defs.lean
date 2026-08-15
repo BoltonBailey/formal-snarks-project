@@ -1,12 +1,16 @@
-import FormalSnarksProject.Models.AGMProofSystemInstantiation
-import Mathlib.Algebra.Polynomial.Div
+module
+
+public import FormalSnarksProject.Models.AGMProofSystemInstantiation
+public import Mathlib.Algebra.Polynomial.Div
 -- import FormalSnarksProject.ToMathlib.List
-import FormalSnarksProject.ToMathlib.OptionEquivRight
-import FormalSnarksProject.ToMathlib.FinEnumToList
-import Mathlib.Algebra.MvPolynomial.Equiv
-import FormalSnarksProject.SoundnessTactic.SoundnessProver
-import FormalSnarksProject.SoundnessTactic.ProofMode
-import FormalSnarksProject.ToMathlib.FinEnumOrd
+public import FormalSnarksProject.ToMathlib.OptionEquivRight
+public import FormalSnarksProject.ToMathlib.FinEnumToList
+public import Mathlib.Algebra.MvPolynomial.Equiv
+public import FormalSnarksProject.SoundnessTactic.SoundnessProver
+public import FormalSnarksProject.SoundnessTactic.ProofMode
+public import FormalSnarksProject.ToMathlib.FinEnumOrd
+
+@[expose] public section
 
 
 open scoped BigOperators

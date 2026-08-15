@@ -1,4 +1,6 @@
-import FormalSnarksProject.SNARKs.Groth16TypeI.Defs
+module
+
+public import FormalSnarksProject.SNARKs.Groth16TypeI.Defs
 
 /-!
 
@@ -22,6 +24,8 @@ eliminates one junk component. Products that are only forced to be *squares* of 
 `F[X]` is an integral domain.
 
 -/
+
+@[expose] public section
 
 open scoped BigOperators
 
