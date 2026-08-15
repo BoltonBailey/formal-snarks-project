@@ -5,10 +5,10 @@ public import Mathlib.Algebra.Polynomial.Div
 -- import FormalSnarksProject.ToMathlib.List
 public import FormalSnarksProject.ToMathlib.OptionEquivRight
 public import Mathlib.Algebra.MvPolynomial.Equiv
-public import FormalSnarksProject.SoundnessTactic.SoundnessProver
+import FormalSnarksProject.SoundnessTactic.SoundnessProver
 public import FormalSnarksProject.ToMathlib.FinEnumOrd
 
-@[expose] public section
+public section
 
 open scoped BigOperators
 
@@ -66,7 +66,7 @@ instance : FinEnum Proof_G1_Idx := .ofList [.Pf] (fun x => by cases x <;> simp)
 @[simp] lemma toList_Proof_G1_Idx : FinEnum.toList Proof_G1_Idx = [.Pf] := by rfl
 
 -- No right proof
-def Proof_G2_Idx : Type := Empty
+@[expose] def Proof_G2_Idx : Type := Empty
 
 instance : FinEnum Proof_G2_Idx := inferInstanceAs (FinEnum Empty)
 @[simp] lemma toList_Proof_G2_Idx : FinEnum.toList Proof_G2_Idx = [] := by rfl
@@ -99,7 +99,7 @@ instance : FinEnum SRS_Elements_G2_Idx := .ofList [.α, .β] (fun x => by cases 
 /--
 A description of a Toy SNARK
 -/
-@[reducible] noncomputable def ToySnark
+@[expose, reducible] noncomputable def ToySnark
     /- The finite field parameter of our SNARK -/
     {F : Type} [Field F] [BEq F] [LawfulBEq F] :
     AGMProofSystemInstantiation F :=

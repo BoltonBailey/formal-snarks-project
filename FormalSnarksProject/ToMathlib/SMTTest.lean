@@ -3,7 +3,7 @@ module
 public import Mathlib
 public import Smt
 
-@[expose] public section
+public section
 
 #check Smt.Config
 

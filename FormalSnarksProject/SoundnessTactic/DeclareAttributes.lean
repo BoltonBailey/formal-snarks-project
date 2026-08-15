@@ -3,7 +3,7 @@ module
 
 public import Lean.Meta.Tactic.Simp
 
-@[expose] public section
+public section
 
 open Lean Meta
 

@@ -3,7 +3,7 @@ module
 public import Mathlib.RingTheory.Polynomial.Quotient
 public import Mathlib.Algebra.Polynomial.FieldDivision
 
-@[expose] public section
+public section
 
 -- `Polynomial.modByMonic_eq_zero_iff_quotient_eq_zero` (PR 11116) is now in Mathlib,
 -- so it is no longer defined here.

@@ -7,7 +7,7 @@ public import CompPoly.OrdMultivariate.Operations
 public import CompPoly.OrdMultivariate.Rename
 public import CompPoly.OrdMultivariate.MvPolyEquiv
 
-@[expose] public section
+public section
 
 section
 

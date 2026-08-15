@@ -3,8 +3,8 @@ module
 public import FormalSnarksProject.Models.AGMProofSystemInstantiationTypeI
 public import FormalSnarksProject.ToMathlib.OptionEquivRight
 public import FormalSnarksProject.ToMathlib.FinEnumToList
-public import FormalSnarksProject.SoundnessTactic.SoundnessProver
-public import FormalSnarksProject.SoundnessTactic.ProofMode
+import FormalSnarksProject.SoundnessTactic.SoundnessProver
+import FormalSnarksProject.SoundnessTactic.ProofMode
 public import FormalSnarksProject.ToMathlib.FinEnumOrd
 
 /-!
@@ -31,7 +31,7 @@ Note that the SRS polynomials here have been multiplied through by γδ.
 
 -/
 
-@[expose] public section
+public section
 
 open scoped BigOperators
 
@@ -157,7 +157,7 @@ SRS element can appear in every proof element and on either side of every pairin
 
 Note that the SRS polynomials here have been multiplied through by γδ.
 -/
-@[reducible] noncomputable def Groth16TypeI
+@[expose, reducible] noncomputable def Groth16TypeI
     /- The finite field parameter of our SNARK -/
     {F : Type} [Field F] [BEq F] [LawfulBEq F]
     /- The naturals representing:

@@ -11,7 +11,7 @@ definition and an overview of the verifier's checks.
 
 -/
 
-@[expose] public section
+public section
 
 open scoped BigOperators
 

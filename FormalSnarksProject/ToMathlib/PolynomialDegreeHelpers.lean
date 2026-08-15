@@ -15,7 +15,7 @@ division is exact.
 
 -/
 
-@[expose] public section
+public section
 
 open scoped BigOperators
 

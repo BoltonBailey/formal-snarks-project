@@ -6,8 +6,8 @@ public import Mathlib
 public import FormalSnarksProject.Models.AGMProofSystemInstantiation
 public import FormalSnarksProject.ToMathlib.OptionEquivRight
 public import FormalSnarksProject.ToMathlib.FinEnumToList
-public import FormalSnarksProject.SoundnessTactic.SoundnessProver
-public import FormalSnarksProject.SoundnessTactic.ProofMode
+import FormalSnarksProject.SoundnessTactic.SoundnessProver
+import FormalSnarksProject.SoundnessTactic.ProofMode
 public import FormalSnarksProject.ToMathlib.FinEnumOrd
 
 /-!
@@ -19,7 +19,7 @@ This file contains the definition for the Type III version of Groth16 presented 
 
 -/
 
-@[expose] public section
+public section
 
 open scoped BigOperators
 
@@ -185,7 +185,7 @@ n from the paper = n_var
 l from the paper = n_stmt
 m - l from the paper = n_wit
 -/
-@[reducible] noncomputable def Groth16TypeIII
+@[expose, reducible] noncomputable def Groth16TypeIII
     /- The finite field parameter of our SNARK -/
     {F : Type} [Field F] [BEq F] [LawfulBEq F]
     /- The naturals representing:

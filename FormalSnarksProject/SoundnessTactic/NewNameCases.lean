@@ -11,7 +11,7 @@ Defines a variant of cases' that assigns names automatically.
 
 -/
 
-@[expose] public section
+public section
 
 namespace Mathlib.Tactic
 open Lean Meta Elab Elab.Tactic

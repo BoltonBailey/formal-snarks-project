@@ -10,7 +10,7 @@ public import CompPoly.Univariate.ToPoly.Impl
 public import CompPoly.Univariate.ToPoly.Equiv
 public import CompPoly.Univariate.DivisionCorrectness
 
-@[expose] public section
+public section
 
 open scoped BigOperators
 

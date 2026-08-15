@@ -24,7 +24,7 @@ Completeness requires degree hypotheses making these truncated encodings faithfu
 
 -/
 
-@[expose] public section
+public section
 
 open scoped BigOperators
 

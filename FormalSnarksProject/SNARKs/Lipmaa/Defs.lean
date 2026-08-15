@@ -6,11 +6,11 @@ public import Mathlib.Algebra.Polynomial.Div
 public import FormalSnarksProject.ToMathlib.OptionEquivRight
 public import FormalSnarksProject.ToMathlib.FinEnumToList
 public import Mathlib.Algebra.MvPolynomial.Equiv
-public import FormalSnarksProject.SoundnessTactic.SoundnessProver
-public import FormalSnarksProject.SoundnessTactic.ProofMode
+import FormalSnarksProject.SoundnessTactic.SoundnessProver
+import FormalSnarksProject.SoundnessTactic.ProofMode
 public import FormalSnarksProject.ToMathlib.FinEnumOrd
 
-@[expose] public section
+public section
 
 
 open scoped BigOperators
@@ -157,7 +157,7 @@ variable length. -/
 /--
 TODO
 -/
-@[reducible] noncomputable def Lipmaa
+@[expose, reducible] noncomputable def Lipmaa
     /- The finite field parameter of our SNARK -/
     {F : Type} [Field F] [BEq F] [LawfulBEq F]
     /- The naturals representing:

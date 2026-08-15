@@ -5,8 +5,8 @@ public import Mathlib.Algebra.Polynomial.Div
 public import FormalSnarksProject.ToMathlib.OptionEquivRight
 public import FormalSnarksProject.ToMathlib.FinEnumToList
 public import Mathlib.Algebra.MvPolynomial.Equiv
-public import FormalSnarksProject.SoundnessTactic.SoundnessProver
-public import FormalSnarksProject.SoundnessTactic.ProofMode
+import FormalSnarksProject.SoundnessTactic.SoundnessProver
+import FormalSnarksProject.SoundnessTactic.ProofMode
 public import FormalSnarksProject.ToMathlib.FinEnumOrd
 
 /-!
@@ -23,7 +23,7 @@ pairing. `W_mid` is the one proof element used on both sides; the model's
 
 -/
 
-@[expose] public section
+public section
 
 open scoped BigOperators
 
@@ -274,7 +274,7 @@ A description of the Pinocchio SNARK.
 The toxic-waste samples are `r_v, r_w, α_v, α_w, α_y, β, γ` (with `r_y = r_v * r_w` implicit)
 plus the evaluation point `s` (the `none` sample).
 -/
-@[reducible] noncomputable def Pinocchio
+@[expose, reducible] noncomputable def Pinocchio
     /- The finite field parameter of our SNARK -/
     {F : Type} [Field F] [BEq F] [LawfulBEq F]
     /- The naturals representing:

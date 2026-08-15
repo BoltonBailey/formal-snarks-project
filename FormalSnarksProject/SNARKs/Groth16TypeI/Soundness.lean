@@ -25,7 +25,7 @@ eliminates one junk component. Products that are only forced to be *squares* of 
 
 -/
 
-@[expose] public section
+public section
 
 open scoped BigOperators
 

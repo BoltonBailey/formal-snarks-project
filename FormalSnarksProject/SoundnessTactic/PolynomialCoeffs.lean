@@ -2,9 +2,9 @@
 module
 
 public import Mathlib.Algebra.Polynomial.Basic
-public import Mathlib.Tactic.ComputeDegree
+import Mathlib.Tactic.ComputeDegree
 
-@[expose] public section
+public section
 
 section Tactic
 

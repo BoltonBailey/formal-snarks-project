@@ -1,8 +1,9 @@
 module
 
 public import FormalSnarksProject.SNARKs.Lipmaa.Defs
+import FormalSnarksProject.SoundnessTactic.SoundnessProver  -- `integral_domain_tactic`, used in proofs only
 
-@[expose] public section
+public section
 
 
 open scoped BigOperators

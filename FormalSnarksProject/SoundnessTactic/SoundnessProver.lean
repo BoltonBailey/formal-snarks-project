@@ -5,7 +5,7 @@ public import Lean.Elab.Tactic
 public import Mathlib
 public import FormalSnarksProject.SoundnessTactic.CasesOr
 
-@[expose] public section
+public section
 
 @[simp] lemma eq_zero_of_zero_eq (R : Type u) [Zero R] (r : R) : 0 = r ↔ r = 0 := by
   exact eq_comm

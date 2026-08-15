@@ -11,7 +11,7 @@ and an overview of the verifier's checks (only checks I and V are needed for thi
 
 -/
 
-@[expose] public section
+public section
 
 open scoped BigOperators
 

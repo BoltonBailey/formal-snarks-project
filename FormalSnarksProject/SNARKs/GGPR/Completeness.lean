@@ -19,7 +19,7 @@ all `w`-polynomials degree `< b`, and `a + b ≤ d + n_wit + 1`, then
 
 -/
 
-@[expose] public section
+public section
 
 open scoped BigOperators
 

@@ -13,7 +13,7 @@ is parameterized (e.g. by `List.finRange n_var`). These lemmas provide that expa
 
 -/
 
-@[expose] public section
+public section
 
 namespace FinEnum
 

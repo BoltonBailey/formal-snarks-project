@@ -19,7 +19,7 @@ faithful, which is where the degree hypotheses enter.
 
 -/
 
-@[expose] public section
+public section
 
 open scoped BigOperators
 

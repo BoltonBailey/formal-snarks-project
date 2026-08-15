@@ -37,7 +37,7 @@ Variable names are obtained from the `Repr` of the problem's variable type, sani
 SMT-LIB simple symbols (spaces to underscores, Greek letters spelled out).
 -/
 
-@[expose] public section
+public section
 
 open CPoly CPoly.COrdMvPolynomial
 

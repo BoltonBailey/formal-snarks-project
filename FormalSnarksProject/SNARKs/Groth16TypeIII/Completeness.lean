@@ -20,7 +20,7 @@ statement/witness satisfies the relation) and `u_stmt 0 = X^5`, the pairing chec
 
 -/
 
-@[expose] public section
+public section
 
 open scoped BigOperators
 

@@ -1,6 +1,7 @@
 module
 
 public import FormalSnarksProject.SNARKs.ToySnark.Defs
+import FormalSnarksProject.SoundnessTactic.SoundnessProver  -- `integral_domain_tactic`, used in proofs only
 
 /-!
 
@@ -10,7 +11,7 @@ This file contains the soundness proof for the toy SNARK defined in `Defs.lean`.
 
 -/
 
-@[expose] public section
+public section
 
 open scoped BigOperators
 

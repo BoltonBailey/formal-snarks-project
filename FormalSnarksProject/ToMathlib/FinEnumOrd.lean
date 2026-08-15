@@ -20,7 +20,7 @@ instance : Std.LawfulEqOrd Vars := FinEnum.toOrd.lawfulEqOrd
 ```
 -/
 
-@[expose] public section
+public section
 
 namespace FinEnum
 

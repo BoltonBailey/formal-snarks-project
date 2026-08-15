@@ -5,8 +5,8 @@ public import Mathlib.Algebra.Polynomial.Div
 public import FormalSnarksProject.ToMathlib.OptionEquivRight
 public import FormalSnarksProject.ToMathlib.FinEnumToList
 public import Mathlib.Algebra.MvPolynomial.Equiv
-public import FormalSnarksProject.SoundnessTactic.SoundnessProver
-public import FormalSnarksProject.SoundnessTactic.ProofMode
+import FormalSnarksProject.SoundnessTactic.SoundnessProver
+import FormalSnarksProject.SoundnessTactic.ProofMode
 public import FormalSnarksProject.ToMathlib.FinEnumOrd
 
 /-!
@@ -31,7 +31,7 @@ extractor the statement is false).
 
 -/
 
-@[expose] public section
+public section
 
 open scoped BigOperators
 
@@ -254,7 +254,7 @@ set_option maxHeartbeats 3200000 in
 A description of the GGPR SNARK. GGPR is a Type I SNARK: all SRS elements appear in both
 groups of the pairing.
 -/
-@[reducible] noncomputable def GGPR
+@[expose, reducible] noncomputable def GGPR
     /- The finite field parameter of our SNARK -/
     {F : Type} [Field F] [BEq F] [LawfulBEq F]
     /- The naturals representing:

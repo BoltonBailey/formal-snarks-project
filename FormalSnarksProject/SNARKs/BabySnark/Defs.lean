@@ -6,8 +6,8 @@ public import FormalSnarksProject.ToMathlib.OptionEquivRight
 public import FormalSnarksProject.ToMathlib.FinEnumToList
 public import FormalSnarksProject.ToMathlib.PolynomialDegreeHelpers
 public import Mathlib.Algebra.MvPolynomial.Equiv
-public import FormalSnarksProject.SoundnessTactic.SoundnessProver
-public import FormalSnarksProject.SoundnessTactic.ProofMode
+import FormalSnarksProject.SoundnessTactic.SoundnessProver
+import FormalSnarksProject.SoundnessTactic.ProofMode
 public import FormalSnarksProject.ToMathlib.FinEnumOrd
 
 /-!
@@ -31,7 +31,7 @@ polynomials to have degree `< n_var`.
 
 -/
 
-@[expose] public section
+public section
 
 open scoped BigOperators
 
@@ -140,7 +140,7 @@ instance : FinEnum PairingsII_Idx := .ofList [.bγ, .γβv] (fun x => by cases x
 @[simp] lemma toList_PairingsII_Idx : FinEnum.toList PairingsII_Idx = [.bγ, .γβv] := by rfl
 
 
-@[reducible] noncomputable def BabySNARK
+@[expose, reducible] noncomputable def BabySNARK
     /- The finite field parameter of our SNARK -/
     {F : Type} [Field F] [BEq F] [LawfulBEq F]
     {n_stmt n_wit n_var : ℕ}

@@ -21,7 +21,7 @@ itself is false, e.g. `x = y = z = 1`, `A = 1` satisfies `A·y = z`, but the che
 
 -/
 
-@[expose] public section
+public section
 
 open scoped BigOperators
 

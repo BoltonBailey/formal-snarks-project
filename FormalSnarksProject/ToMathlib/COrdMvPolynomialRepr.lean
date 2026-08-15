@@ -19,7 +19,7 @@ Since the ordered sparse representation stores each monomial as a sorted entry l
 are read directly off `COrdMvMonomial.entryList` — no enumeration of the variable type is needed.
 -/
 
-@[expose] public section
+public section
 
 namespace CPoly.COrdMvPolynomial
 
