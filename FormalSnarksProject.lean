@@ -40,5 +40,4 @@ public import FormalSnarksProject.ToMathlib.OptionEquivRight
 public import FormalSnarksProject.ToMathlib.PolynomialDegreeHelpers
 public import FormalSnarksProject.ToMathlib.PolynomialQuotient
 public import FormalSnarksProject.Transformations.Transformations
--- TODO: depends on the `smt` library, temporarily dropped from lakefile.toml (toolchain reasons).
--- import FormalSnarksProject.ToMathlib.SMTTest
+public import FormalSnarksProject.ToMathlib.SMTTest

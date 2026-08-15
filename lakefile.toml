@@ -9,12 +9,10 @@ relaxedAutoImplicit = false
 weak.linter.mathlibStandardSet = true
 maxSynthPendingDepth = 3
 
-# TODO: smt (lean-smt) temporarily dropped — no v4.30.0-compatible release yet, and it blocks
-# the toolchain bump needed for the CompPoly FinEnum branch below. Restore once it's updated.
-# [[require]]
-# name = "smt"
-# scope = "ufmg-smite"
-# rev = "7d1d8239e78daa5197f9a71948776c4627049f5f"
+[[require]]
+name = "smt"
+scope = "ufmg-smite"
+rev = "21aa44ce022fa37e0e40ff571ddde9b052a81c0c" # main: on v4.33.0, mathlib v4.33.0
 
 [[require]]
 name = "mathlib"
