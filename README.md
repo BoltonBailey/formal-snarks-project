@@ -14,4 +14,4 @@ Here are some next steps that I'd like to accomplish if I have time:
   - [ ] This will require bumping Lean-SMT to a new toolchain. (Update seems like this happened!)
   - [ ] Formulate the Grobner basis problem instances for all of the SNARKs into a standard SMT format for benchmarking purposes.
 - [ ] Introduce different models for Type I and Type III groups (Type II as well?) and duplicate SNARKs to prove sound in each model where soundness holds.
-- [ ] Add VCVio/ArkLib to deps. Express the SNARKs in the AGM model from those libraries.
+- [ ] Add VCVio/ArkLib to deps. Express the SNARKs in the AGM model from those libraries (partial work in `arklib-models`).
