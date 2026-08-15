@@ -15,6 +15,12 @@ import FormalSnarksProject.SoundnessTactic.SoundnessProver
 import FormalSnarksProject.SoundnessTactic.ProofMode
 public import FormalSnarksProject.ToMathlib.FinEnumOrd
 
+/-!
+# The Lipmaa SNARK
+
+Definition of the Lipmaa SNARK construction as an `AGMProofSystemInstantiation`.
+-/
+
 public section
 
 

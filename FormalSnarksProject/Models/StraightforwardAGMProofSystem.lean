@@ -10,11 +10,6 @@ public import FormalSnarksProject.ToMathlib.FinEnumOrd
 public import CompPoly.OrdMultivariate.COrdMvPolynomialEvalLemmas
 public import CompPoly.OrdMultivariate.Operations
 
-@[expose] public section
-
-open CPoly
-open CPoly.COrdMvPolynomial
-
 /-!
 # Straightforward linear PCP SNARK schemes
 
@@ -43,6 +38,11 @@ The straightforward shape, as captured here, is:
 * the proof elements, equality checks, and pairings are arbitrary finite index types;
 * the verifier's pairing coefficients are field elements depending on the statement.
 -/
+
+@[expose] public section
+
+open CPoly
+open CPoly.COrdMvPolynomial
 
 /-- A straightforward linear PCP SNARK scheme over the field `F`. Instantiating it on a piece of
 auxiliary circuit data yields an `AGMProofSystemInstantiation` (see `toAGMProofSystem`). -/

@@ -15,6 +15,13 @@ public import CompPoly.Univariate.ToPoly.Impl
 public import CompPoly.Univariate.ToPoly.Equiv
 public import CompPoly.Univariate.DivisionCorrectness
 
+/-!
+# The `Option` variable embedding
+
+Lemmas about `MvPolynomial.optionEquivRight` and the embedding of univariate polynomials into
+multivariate polynomials over `Option V`, together with their computable (`CompPoly`) counterparts.
+-/
+
 public section
 
 open scoped BigOperators

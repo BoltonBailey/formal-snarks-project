@@ -10,11 +10,6 @@ public import FormalSnarksProject.ToMathlib.OptionEquivRight
 public import FormalSnarksProject.ToMathlib.COrdMvPolynomialRepr
 public import FormalSnarksProject.ToMathlib.FinEnumOrd
 
-@[expose] public section
-
-open CPoly
-open CPoly.COrdMvPolynomial
-
 /-!
 # Symbolic straightforward AGM schemes
 
@@ -73,6 +68,11 @@ The remaining per-SNARK glue — "target value vanishes ⟹ relation holds for t
 witness" — is the analogue of the `suffices`/`modByMonic` step of the manual proofs and stays
 instance-specific.
 -/
+
+@[expose] public section
+
+open CPoly
+open CPoly.COrdMvPolynomial
 
 /-- A straightforward linear PCP SNARK scheme with *symbolic* SRS values: the SRS is described
 over an abstract set of polynomial families, so the scheme (and its soundness ideal-membership

@@ -8,11 +8,6 @@ module
 public import FormalSnarksProject.Models.AGMProofSystemInstantiation
 public import FormalSnarksProject.ToMathlib.ForTransformations
 
-@[expose] public section
-
-
-section
-
 /-!
 This file contains functions for manipulating AGMProofSystemInstantiations.
 These functions can be used to prove the soundness of the AGM SNARK.
@@ -22,6 +17,11 @@ directly (they are a `CommRing` with no zero divisors, see `ToMathlib/ForTransfo
 transporting to mathlib's `MvPolynomial` along `CPoly.COrdMvPolynomial.ordPolyRingEquiv` only where a mathlib-side
 fact is needed (`collapseToxicWaste`).
 -/
+
+@[expose] public section
+
+
+section
 
 open CPoly CPoly.COrdMvPolynomial
 

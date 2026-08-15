@@ -11,15 +11,15 @@ public import CompPoly.OrdMultivariate.Operations
 public import CompPoly.OrdMultivariate.Rename
 public import CompPoly.OrdMultivariate.MvPolyEquiv
 
-public section
-
-section
-
 /-!
 
 This file contains lemmas needed for the transformations file
 
 -/
+
+public section
+
+section
 
 universe u
 
