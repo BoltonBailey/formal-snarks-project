@@ -2,5 +2,6 @@
     "files.readonlyInclude": {
         "**/.elan/**": true,
         "**/.lake/**": true
-    }
+    },
+    "editor.rulers": [100]
 }
