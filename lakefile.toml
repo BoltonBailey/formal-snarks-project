@@ -19,12 +19,12 @@ maxSynthPendingDepth = 3
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"
-rev = "v4.30.0"
+rev = "v4.33.0"
 
 [[require]]
 name = "CompPoly"
 git = "https://github.com/BoltonBailey/CompPoly"
-rev = "7fe5c0debefd00216b40504d9d119c7f01a1fac1" # PR #261: parameterize CMvPolynomial by [FinEnum σ]
+rev = "8f00634637b1d19fbeda316f472d1d30cd7097a2" # branch cordmvpolynomial-sparse-core: COrdMvPolynomial sparse core
 
 [[lean_lib]]
 name = "FormalSnarksProject"

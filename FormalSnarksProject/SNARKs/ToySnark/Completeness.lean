@@ -57,14 +57,14 @@ lemma is_complete
   intros stmt wit hrel
   obtain ⟨h1, h2, h3⟩ := hrel
 
-  -- Bridge helpers: `CPoly.polyRingEquiv` (whose coercion is `CPoly.fromCMvPolynomial`) carries
-  -- the computable `CMvPolynomial` verification equation over to mathlib's `MvPolynomial`.
+  -- Bridge helpers: `CPoly.COrdMvPolynomial.ordPolyRingEquiv` (whose coercion is `CPoly.COrdMvPolynomial.fromCOrdMvPolynomial`) carries
+  -- the computable `COrdMvPolynomial` verification equation over to mathlib's `MvPolynomial`.
   have equivC : ∀ c : F,
-      (CPoly.polyRingEquiv (σ := Option Vars) (R := F)) (CPoly.CMvPolynomial.C c) = C c :=
-    fun c => CPoly.fromCMvPolynomial_C c
+      (CPoly.COrdMvPolynomial.ordPolyRingEquiv (σ := Option Vars) (R := F)) (CPoly.COrdMvPolynomial.C c) = C c :=
+    fun c => CPoly.COrdMvPolynomial.fromCOrdMvPolynomial_C c
   have equivX : ∀ v : Option Vars,
-      (CPoly.polyRingEquiv (σ := Option Vars) (R := F)) (CPoly.CMvPolynomial.X v) = X v :=
-    fun v => CPoly.fromCMvPolynomial_X v
+      (CPoly.COrdMvPolynomial.ordPolyRingEquiv (σ := Option Vars) (R := F)) (CPoly.COrdMvPolynomial.X v) = X v :=
+    fun v => CPoly.COrdMvPolynomial.fromCOrdMvPolynomial_X v
 
   constructor
   · intro check_idx
@@ -73,7 +73,7 @@ lemma is_complete
       toList_SRS_Elements_G1_Idx, toList_SRS_Elements_G2_Idx,
       List.map_cons, List.map_nil, List.sum_cons, List.sum_nil]
     -- Transport the goal to mathlib's `MvPolynomial`
-    apply (CPoly.polyRingEquiv (σ := Option Vars) (R := F)).injective
+    apply (CPoly.COrdMvPolynomial.ordPolyRingEquiv (σ := Option Vars) (R := F)).injective
     simp only [_root_.map_add, _root_.map_mul, _root_.map_neg, _root_.map_one, _root_.map_zero,
       _root_.map_pow, equivC, equivX]
     -- Clean up zero/one coefficients

@@ -1,5 +1,6 @@
 import FormalSnarksProject.Models.SymbolicAGMScheme
 import FormalSnarksProject.SNARKs.BabySnark.Defs
+import FormalSnarksProject.ToMathlib.FinEnumOrd
 
 /-!
 # BabySNARK, symbolically
@@ -39,7 +40,7 @@ per proof element). The target encodes the square span relation `(u_io + ∑ wit
 `Soundness.lean`.
 -/
 
-open CPoly CPoly.CMvPolynomial
+open CPoly CPoly.COrdMvPolynomial
 
 namespace BabySNARK
 
@@ -85,6 +86,10 @@ instance : DecidableEq Var :=
   inferInstanceAs (DecidableEq ((Grp × Proof_Idx × Slot) ⊕ VerifierVar))
 instance : FinEnum Var := inferInstanceAs (FinEnum ((Grp × Proof_Idx × Slot) ⊕ VerifierVar))
 
+instance : Ord Var := FinEnum.toOrd
+instance : Std.TransOrd Var := FinEnum.toOrd.transOrd
+instance : Std.LawfulEqOrd Var := FinEnum.toOrd.lawfulEqOrd
+
 /-- The prover's sum variable for slot `s` of the side-`g` copy of proof element `p`. -/
 def Var.pf (g : Grp) (p : Proof_Idx) (s : Slot) : Var := Sum.inl (g, p, s)
 
@@ -103,11 +108,15 @@ instance : Repr Var := ⟨fun v _ => match v with
 variables. -/
 abbrev SymVars : Type := Vars ⊕ Var
 
+instance : Ord SymVars := FinEnum.toOrd
+instance : Std.TransOrd SymVars := FinEnum.toOrd.transOrd
+instance : Std.LawfulEqOrd SymVars := FinEnum.toOrd.lawfulEqOrd
+
 variable (F : Type) [Field F] [BEq F] [LawfulBEq F]
 
 /-- The symbolic AGM expansion of the side-`g` copy of proof element `p` over the SRS classes:
 `τ-part + γ-slot·γ + γβ-slot·γβ + β·(u_wit-part)`. -/
-def pfPoly (g : Grp) (p : Proof_Idx) : CMvPolynomial SymVars F :=
+def pfPoly (g : Grp) (p : Proof_Idx) : COrdMvPolynomial SymVars F :=
   X (Sum.inr (Var.pf g p .tau))
     + X (Sum.inr (Var.pf g p .gm)) * X (Sum.inl Vars.γ)
     + X (Sum.inr (Var.pf g p .gmb)) * (X (Sum.inl Vars.γ) * X (Sum.inl Vars.β))
@@ -116,26 +125,26 @@ def pfPoly (g : Grp) (p : Proof_Idx) : CMvPolynomial SymVars F :=
 /-- Check I of the verifier (the square span check), mirroring `Defs.lean`:
 `(H + t)·t + 1 − (V₁ + u_io)·(V₂ + u_io)`, with `t` and `u_io` the verifier's (faithful)
 `τ^i`-encodings of the vanishing and statement polynomials. -/
-def checkI : CMvPolynomial SymVars F :=
+def checkI : COrdMvPolynomial SymVars F :=
   (pfPoly F .g1 .H + X (Sum.inr Var.t)) * X (Sum.inr Var.t)
     + 1
     - (pfPoly F .g1 .V + X (Sum.inr Var.u_io)) * (pfPoly F .g2 .V + X (Sum.inr Var.u_io))
 
 /-- Check II of the verifier: `B·γ − γβ·V₂`. -/
-def checkII : CMvPolynomial SymVars F :=
+def checkII : COrdMvPolynomial SymVars F :=
   pfPoly F .g1 .B * X (Sum.inl Vars.γ)
     - (X (Sum.inl Vars.γ) * X (Sum.inl Vars.β)) * pfPoly F .g2 .V
 
 /-- The Type I identification of the two copies of proof element `p`: their AGM expansions
 agree as polynomials. -/
-def identPoly (p : Proof_Idx) : CMvPolynomial SymVars F :=
+def identPoly (p : Proof_Idx) : COrdMvPolynomial SymVars F :=
   pfPoly F .g1 p - pfPoly F .g2 p
 
 /-- The generators of the soundness ideal: the coefficients of the two check polynomials and the
 three identification polynomials with respect to the toxic-waste monomials, each a polynomial in
 the ideal variables. These are the abstract counterparts of the `h1eqnI`, `h2eqnII`, `h3eqnV`
 (and unused siblings) of the manual soundness proof. -/
-def generators : List (CMvPolynomial Var F) :=
+def generators : List (COrdMvPolynomial Var F) :=
   ([checkI F, checkII F, identPoly F .H, identPoly F .V, identPoly F .B]).flatMap
     SymbolicAGMScheme.coeffGenerators
 
@@ -143,7 +152,7 @@ def generators : List (CMvPolynomial Var F) :=
 `(u_io + ∑ wit i · u_wit i)² − 1 = (t + H's τ-part)·t`, with the witness read off `B`'s
 `β·u_wit` slots (matching the extractor of the manual proof) and the quotient from the
 `suffices` step. -/
-def target : CMvPolynomial Var F :=
+def target : COrdMvPolynomial Var F :=
   (X Var.u_io + X (Var.pf .g1 .B .u)) * (X Var.u_io + X (Var.pf .g1 .B .u))
     - 1
     - (X Var.t + X (Var.pf .g1 .H .tau)) * X Var.t

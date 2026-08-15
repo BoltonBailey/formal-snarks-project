@@ -1,5 +1,6 @@
 import FormalSnarksProject.Models.SymbolicAGMScheme
 import FormalSnarksProject.SNARKs.Groth16TypeI.Defs
+import FormalSnarksProject.ToMathlib.FinEnumOrd
 
 /-!
 # Groth16TypeI, symbolically
@@ -38,7 +39,7 @@ Nullstellensatz-style SMT encoding of `SMT/Export.lean` decides exactly radical 
 this is covered.
 -/
 
-open CPoly CPoly.CMvPolynomial
+open CPoly CPoly.COrdMvPolynomial
 
 namespace Groth16TypeI
 
@@ -86,6 +87,10 @@ def Var : Type := (Proof_Idx × Slot) ⊕ StmtVar
 instance : DecidableEq Var := inferInstanceAs (DecidableEq ((Proof_Idx × Slot) ⊕ StmtVar))
 instance : FinEnum Var := inferInstanceAs (FinEnum ((Proof_Idx × Slot) ⊕ StmtVar))
 
+instance : Ord Var := FinEnum.toOrd
+instance : Std.TransOrd Var := FinEnum.toOrd.transOrd
+instance : Std.LawfulEqOrd Var := FinEnum.toOrd.lawfulEqOrd
+
 /-- The prover's sum variable for slot `s` of proof element `p`. -/
 def Var.pf (p : Proof_Idx) (s : Slot) : Var := Sum.inl (p, s)
 
@@ -105,14 +110,18 @@ instance : Repr Var := ⟨fun v _ => match v with
 /-- Variables of the symbolic check polynomial. -/
 abbrev SymVars : Type := Vars ⊕ Var
 
+instance : Ord SymVars := FinEnum.toOrd
+instance : Std.TransOrd SymVars := FinEnum.toOrd.transOrd
+instance : Std.LawfulEqOrd SymVars := FinEnum.toOrd.lawfulEqOrd
+
 variable (F : Type) [Field F] [BEq F] [LawfulBEq F]
 
 /-- Shorthand for a toxic-waste sample inside the symbolic ring. -/
-private def tox (v : Vars) : CMvPolynomial SymVars F := X (Sum.inl v)
+private def tox (v : Vars) : COrdMvPolynomial SymVars F := X (Sum.inl v)
 
 /-- The symbolic AGM expansion of a proof element over the single SRS, transcribing the
 (`γδ`-multiplied) SRS values of `Defs.lean`. -/
-def pfPoly (p : Proof_Idx) : CMvPolynomial SymVars F :=
+def pfPoly (p : Proof_Idx) : COrdMvPolynomial SymVars F :=
   tox F .γ * tox F .δ * tox F .α * X (Sum.inr (Var.pf p .a))
     + tox F .γ * tox F .δ * tox F .β * X (Sum.inr (Var.pf p .b))
     + tox F .γ * tox F .δ * tox F .γ * X (Sum.inr (Var.pf p .c))
@@ -128,7 +137,7 @@ def pfPoly (p : Proof_Idx) : CMvPolynomial SymVars F :=
 
 /-- The symbolic verification-check polynomial, mirroring the verifier of `Defs.lean`:
 `−A·B + (γδα)·(γδβ) + (∑ stmt i · y i)·(γδγ) + C·(γδδ)`. -/
-def symCheckPoly : CMvPolynomial SymVars F :=
+def symCheckPoly : COrdMvPolynomial SymVars F :=
   - (pfPoly F .A * pfPoly F .B)
     + (tox F .γ * tox F .δ * tox F .α) * (tox F .γ * tox F .δ * tox F .β)
     + (tox F .β * tox F .δ * X (Sum.inr Var.S_u)
@@ -139,13 +148,13 @@ def symCheckPoly : CMvPolynomial SymVars F :=
 
 /-- The generators of the soundness ideal: the coefficients of the symbolic check polynomial
 with respect to the toxic-waste monomials. -/
-def generators : List (CMvPolynomial Var F) :=
+def generators : List (COrdMvPolynomial Var F) :=
   SymbolicAGMScheme.coeffGenerators (symCheckPoly F)
 
 /-- The target polynomial: the QAP relation with the witness read off `C`'s `q` slots and the
 quotient off `C`'s `x^i·t` slots, matching the extractor and the `suffices` step of the manual
 soundness proof. -/
-def target : CMvPolynomial Var F :=
+def target : COrdMvPolynomial Var F :=
   (X Var.S_u + X (Var.pf .C .q_u)) * (X Var.S_v + X (Var.pf .C .q_v))
     - (X Var.S_w + X (Var.pf .C .q_w))
     - X (Var.pf .C .xt)

@@ -1,6 +1,6 @@
 import Mathlib
-import CompPoly.Multivariate.CMvPolynomialEvalLemmas
-import CompPoly.Multivariate.Rename
+import CompPoly.OrdMultivariate.COrdMvPolynomialEvalLemmas
+import CompPoly.OrdMultivariate.Rename
 
 
 open scoped BigOperators
@@ -8,7 +8,7 @@ open scoped BigOperators
 section
 
 open CPoly
-open CPoly.CMvPolynomial
+open CPoly.COrdMvPolynomial
 
 
 -- TODO before all this, finalize the terminology for the various levels of instantiation.
@@ -25,10 +25,13 @@ structure AGMProofSystemInstantiation (F : Type) [Field F] where
   /-- The type of statements -/
   Stmt : Type
   /-- The type indexing toxic waste elements sampled.
-  A `FinEnum` instance gives an equivalence `Sample ≃ Fin n`, which is what the computable
-  multivariate polynomials (`CMvPolynomial n F`) require. -/
+  The computable sparse multivariate polynomials (`COrdMvPolynomial Sample F`) require a lawful
+  ordering on the variable type, provided by the `Ord`/`TransOrd`/`LawfulEqOrd` instances. -/
   Sample : Type
   [Sample_FinEnum : FinEnum Sample]
+  [Sample_Ord : Ord Sample]
+  [Sample_TransOrd : Std.TransOrd Sample]
+  [Sample_LawfulEqOrd : Std.LawfulEqOrd Sample]
   /-- The type indexing SRS elements in group I -/
   SRSElements_G1 : Type
   [SRSElements_G1_FinEnum : FinEnum SRSElements_G1]
@@ -37,8 +40,8 @@ structure AGMProofSystemInstantiation (F : Type) [Field F] where
   [SRSElements_G2_FinEnum : FinEnum SRSElements_G2]
 
   /-- The SRS elements themselves, described as polynomials in the samples -/
-  SRSElementValue_G1 : SRSElements_G1 → CMvPolynomial Sample F
-  SRSElementValue_G2 : SRSElements_G2 → CMvPolynomial Sample F
+  SRSElementValue_G1 : SRSElements_G1 → COrdMvPolynomial Sample F
+  SRSElementValue_G2 : SRSElements_G2 → COrdMvPolynomial Sample F
 
   /-- A type indexing proof elements in each group -/
   Proof_G1 : Type
@@ -78,6 +81,9 @@ structure AGMProofSystemInstantiation (F : Type) [Field F] where
 -- `Fintype`, and the `≃ Fin n` equivalences are available from a bare `𝓟`.
 attribute [instance]
   AGMProofSystemInstantiation.Sample_FinEnum
+  AGMProofSystemInstantiation.Sample_Ord
+  AGMProofSystemInstantiation.Sample_TransOrd
+  AGMProofSystemInstantiation.Sample_LawfulEqOrd
   AGMProofSystemInstantiation.SRSElements_G1_FinEnum
   AGMProofSystemInstantiation.SRSElements_G2_FinEnum
   AGMProofSystemInstantiation.Proof_G1_FinEnum
@@ -95,20 +101,20 @@ def Prover (F : Type) [Field F]
 
 def proof_element_G1_as_poly {F : Type} [Field F] [BEq F] [LawfulBEq F]
     (𝓟 : AGMProofSystemInstantiation F) (prover : 𝓟.Prover) (pf_elem : 𝓟.Proof_G1) :
-    CMvPolynomial (𝓟.Sample) F :=
+    COrdMvPolynomial (𝓟.Sample) F :=
   ((FinEnum.toList 𝓟.SRSElements_G1).map fun SRS_elem =>
-          CMvPolynomial.C (prover.fst pf_elem SRS_elem) * (𝓟.SRSElementValue_G1 SRS_elem)).sum
+          COrdMvPolynomial.C (prover.fst pf_elem SRS_elem) * (𝓟.SRSElementValue_G1 SRS_elem)).sum
 
 def proof_element_G2_as_poly {F : Type} [Field F] [BEq F] [LawfulBEq F]
     (𝓟 : AGMProofSystemInstantiation F) (prover : 𝓟.Prover) (pf_elem : 𝓟.Proof_G2) :
-    CMvPolynomial (𝓟.Sample) F :=
+    COrdMvPolynomial (𝓟.Sample) F :=
   ((FinEnum.toList 𝓟.SRSElements_G2).map fun SRS_elem =>
-          CMvPolynomial.C (prover.snd pf_elem SRS_elem) * (𝓟.SRSElementValue_G2 SRS_elem)).sum
+          COrdMvPolynomial.C (prover.snd pf_elem SRS_elem) * (𝓟.SRSElementValue_G2 SRS_elem)).sum
 
-/-- The pairing evaluation, represented as a CMvPolynomial in the samples -/
+/-- The pairing evaluation, represented as a COrdMvPolynomial in the samples -/
 def pairing_poly {F : Type} [Field F] [BEq F] [LawfulBEq F]
     (𝓟 : AGMProofSystemInstantiation F) (prover : 𝓟.Prover) (stmt : 𝓟.Stmt) (check_idx : 𝓟.EqualityChecks) (pairing : 𝓟.Pairings check_idx) :
-    CMvPolynomial 𝓟.Sample F :=
+    COrdMvPolynomial 𝓟.Sample F :=
   (
     ( -- G1 input of pairing
       -- Proof component
@@ -144,11 +150,11 @@ def pairing_poly {F : Type} [Field F] [BEq F] [LawfulBEq F]
   )
 
 /-- The value that the verifier checks to be equal to 0 for a given equality check, as a
-CMvPolynomial in the samples.
+COrdMvPolynomial in the samples.
 -/
 def check_poly {F : Type} [Field F] [BEq F] [LawfulBEq F]
     (𝓟 : AGMProofSystemInstantiation F) (prover : 𝓟.Prover) (stmt : 𝓟.Stmt) (check_idx : 𝓟.EqualityChecks) :
-    CMvPolynomial 𝓟.Sample F :=
+    COrdMvPolynomial 𝓟.Sample F :=
   (
   (FinEnum.toList (𝓟.Pairings check_idx)).map fun pairing =>
     𝓟.pairing_poly prover stmt check_idx pairing
@@ -157,7 +163,7 @@ def check_poly {F : Type} [Field F] [BEq F] [LawfulBEq F]
 /-- The list of all check polynomials, one for each equality check the verifier performs. -/
 def check_polys {F : Type} [Field F] [BEq F] [LawfulBEq F]
     (𝓟 : AGMProofSystemInstantiation F) (prover : 𝓟.Prover) (stmt : 𝓟.Stmt) :
-    List (CMvPolynomial 𝓟.Sample F) :=
+    List (COrdMvPolynomial 𝓟.Sample F) :=
   (FinEnum.toList 𝓟.EqualityChecks).map fun check_idx =>
     𝓟.check_poly prover stmt check_idx
 

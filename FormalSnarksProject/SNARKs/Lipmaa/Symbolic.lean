@@ -1,5 +1,6 @@
 import FormalSnarksProject.Models.SymbolicAGMScheme
 import FormalSnarksProject.SNARKs.Lipmaa.Defs
+import FormalSnarksProject.ToMathlib.FinEnumOrd
 
 /-!
 # Lipmaa, symbolically
@@ -21,7 +22,7 @@ The target polynomial encodes the QAP relation with the witness extracted from p
 
 open scoped BigOperators
 
-open CPoly CPoly.CMvPolynomial
+open CPoly CPoly.COrdMvPolynomial
 open CompPoly
 
 namespace Lipmaa
@@ -207,7 +208,7 @@ relation `(∑ aᵢuᵢ)·(∑ aᵢvᵢ) − ∑ aᵢwᵢ − h·t = 0` with the
 coefficients on the `q` component and the quotient `h·t` read off `C`'s coefficients on the
 `xⁱ·t` column — matching the extractor and the `suffices` step of the manual soundness proof. -/
 def target (F : Type) [Field F] [BEq F] [LawfulBEq F] :
-    CMvPolynomial (SumVar (scheme F)) F :=
+    COrdMvPolynomial (SumVar (scheme F)) F :=
   (X (SumVar.stmtSum PolyFam.u_stmt)
       + X (SumVar.comp_G1 Proof_G1_Idx.C SRSComp_G1.q PolyFam.u_wit))
     * (X (SumVar.stmtSum PolyFam.v_stmt)

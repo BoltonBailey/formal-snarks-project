@@ -1,5 +1,6 @@
 import FormalSnarksProject.Models.SymbolicAGMScheme
 import FormalSnarksProject.SNARKs.Pinocchio.Defs
+import FormalSnarksProject.ToMathlib.FinEnumOrd
 
 /-!
 # Pinocchio, symbolically
@@ -43,7 +44,7 @@ off `Z`'s `EK_β_v_w_y` slots and the quotient `H_1 + H_s` — matching the extr
 identification and the `VK_1` quotient term).
 -/
 
-open CPoly CPoly.CMvPolynomial
+open CPoly CPoly.COrdMvPolynomial
 
 namespace Pinocchio
 
@@ -120,6 +121,10 @@ def Var : Type := (PfElem × Slot) ⊕ VerifierVar
 instance : DecidableEq Var := inferInstanceAs (DecidableEq ((PfElem × Slot) ⊕ VerifierVar))
 instance : FinEnum Var := inferInstanceAs (FinEnum ((PfElem × Slot) ⊕ VerifierVar))
 
+instance : Ord Var := FinEnum.toOrd
+instance : Std.TransOrd Var := FinEnum.toOrd.transOrd
+instance : Std.LawfulEqOrd Var := FinEnum.toOrd.lawfulEqOrd
+
 /-- The prover's sum variable for slot `sl` of proof element `p`. -/
 def Var.pf (p : PfElem) (sl : Slot) : Var := Sum.inl (p, sl)
 
@@ -152,17 +157,21 @@ instance : Repr Var := ⟨fun v _ => match v with
 /-- Variables of the symbolic check polynomials. -/
 abbrev SymVars : Type := Vars ⊕ Var
 
+instance : Ord SymVars := FinEnum.toOrd
+instance : Std.TransOrd SymVars := FinEnum.toOrd.transOrd
+instance : Std.LawfulEqOrd SymVars := FinEnum.toOrd.lawfulEqOrd
+
 variable (F : Type) [Field F] [BEq F] [LawfulBEq F]
 
 /-- Shorthand for a toxic-waste sample inside the symbolic ring. -/
-private def tox (v : Vars) : CMvPolynomial SymVars F := X (Sum.inl v)
+private def tox (v : Vars) : COrdMvPolynomial SymVars F := X (Sum.inl v)
 
 /-- Shorthand for an ideal variable inside the symbolic ring. -/
-private def idl (v : Var) : CMvPolynomial SymVars F := X (Sum.inr v)
+private def idl (v : Var) : COrdMvPolynomial SymVars F := X (Sum.inr v)
 
 /-- The symbolic AGM expansion of a proof element over the SRS, transcribing the SRS values of
 `Defs.lean`. -/
-def pfPoly (p : PfElem) : CMvPolynomial SymVars F :=
+def pfPoly (p : PfElem) : COrdMvPolynomial SymVars F :=
   tox F .r_v * idl F (Var.pf p .v)
     + tox F .r_w * idl F (Var.pf p .w)
     + tox F .r_v * tox F .r_w * idl F (Var.pf p .y)
@@ -189,39 +198,39 @@ def pfPoly (p : PfElem) : CMvPolynomial SymVars F :=
 
 /-- Check I of the verifier: `(V_mid + r_v(v_0 + v_io))·(W_mid^G2 + r_w(w_0 + w_io))
 − (r_v r_w t)·H − (Y_mid + r_v r_w(y_0 + y_io))`. -/
-def checkI : CMvPolynomial SymVars F :=
+def checkI : COrdMvPolynomial SymVars F :=
   (pfPoly F (Sum.inl .V_mid) + tox F .r_v * (idl F Var.v0 + idl F Var.v_io))
       * (pfPoly F (Sum.inr .W_mid) + tox F .r_w * (idl F Var.w0 + idl F Var.w_io))
     - (tox F .r_v * tox F .r_w * idl F Var.t) * pfPoly F (Sum.inr .H)
     - (pfPoly F (Sum.inl .Y_mid) + tox F .r_v * tox F .r_w * (idl F Var.y0 + idl F Var.y_io))
 
 /-- Check II of the verifier: `V_mid' − α_v·V_mid`. -/
-def checkII : CMvPolynomial SymVars F :=
+def checkII : COrdMvPolynomial SymVars F :=
   pfPoly F (Sum.inl .V_mid') - tox F .α_v * pfPoly F (Sum.inl .V_mid)
 
 /-- Check III of the verifier: `W_mid' − α_w·W_mid^G1`. -/
-def checkIII : CMvPolynomial SymVars F :=
+def checkIII : COrdMvPolynomial SymVars F :=
   pfPoly F (Sum.inl .W_mid') - tox F .α_w * pfPoly F (Sum.inl .W_mid)
 
 /-- Check IV of the verifier: `Y_mid' − α_y·Y_mid`. -/
-def checkIV : CMvPolynomial SymVars F :=
+def checkIV : COrdMvPolynomial SymVars F :=
   pfPoly F (Sum.inl .Y_mid') - tox F .α_y * pfPoly F (Sum.inl .Y_mid)
 
 /-- Check V of the verifier: `Z·γ − βγ·(V_mid + W_mid^G1 + Y_mid)`. -/
-def checkV : CMvPolynomial SymVars F :=
+def checkV : COrdMvPolynomial SymVars F :=
   pfPoly F (Sum.inl .Z) * tox F .γ
     - tox F .β * tox F .γ
       * (pfPoly F (Sum.inl .V_mid) + pfPoly F (Sum.inl .W_mid) + pfPoly F (Sum.inl .Y_mid))
 
 /-- The Type I identification of the two copies of `W_mid`: their AGM expansions agree. -/
-def identW : CMvPolynomial SymVars F :=
+def identW : COrdMvPolynomial SymVars F :=
   pfPoly F (Sum.inl .W_mid) - pfPoly F (Sum.inr .W_mid)
 
 /-- The generators of the soundness ideal: the coefficients of the five check polynomials and
 the `W_mid` identification with respect to the toxic-waste monomials, each a polynomial in the
 ideal variables. These are the abstract counterparts of the 13 coefficient equations of the
 manual soundness proof (and their unused siblings). -/
-def generators : List (CMvPolynomial Var F) :=
+def generators : List (COrdMvPolynomial Var F) :=
   ([checkI F, checkII F, checkIII F, checkIV F, checkV F, identW F]).flatMap
     SymbolicAGMScheme.coeffGenerators
 
@@ -229,7 +238,7 @@ def generators : List (CMvPolynomial Var F) :=
 `(v_0 + v_io + V)·(w_0 + w_io + W) − (y_0 + y_io + Y) = h·t` with the witness read off `Z`'s
 `EK_β_v_w_y` slots (matching the extractor of the manual proof) and the quotient `H_1 + H_s`
 from the `suffices` step (including the `VK_1` constant term the discarded proof omitted). -/
-def target : CMvPolynomial Var F :=
+def target : COrdMvPolynomial Var F :=
   (X Var.v0 + X Var.v_io + X (Var.pf (Sum.inl .Z) .βv))
       * (X Var.w0 + X Var.w_io + X (Var.pf (Sum.inl .Z) .βw))
     - (X Var.y0 + X Var.y_io + X (Var.pf (Sum.inl .Z) .βy))

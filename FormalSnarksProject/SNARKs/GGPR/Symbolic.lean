@@ -1,5 +1,6 @@
 import FormalSnarksProject.Models.SymbolicAGMScheme
 import FormalSnarksProject.SNARKs.GGPR.Defs
+import FormalSnarksProject.ToMathlib.FinEnumOrd
 
 /-!
 # GGPR, symbolically
@@ -41,7 +42,7 @@ step of the manual proof in `Soundness.lean` (only checks I and V are needed the
 all five checks' generators for faithfulness).
 -/
 
-open CPoly CPoly.CMvPolynomial
+open CPoly CPoly.COrdMvPolynomial
 
 namespace GGPR
 
@@ -102,6 +103,10 @@ def Var : Type := (PfElem × Slot) ⊕ VerifierVar
 instance : DecidableEq Var := inferInstanceAs (DecidableEq ((PfElem × Slot) ⊕ VerifierVar))
 instance : FinEnum Var := inferInstanceAs (FinEnum ((PfElem × Slot) ⊕ VerifierVar))
 
+instance : Ord Var := FinEnum.toOrd
+instance : Std.TransOrd Var := FinEnum.toOrd.transOrd
+instance : Std.LawfulEqOrd Var := FinEnum.toOrd.lawfulEqOrd
+
 /-- The prover's sum variable for slot `s` of proof element `p`. -/
 def Var.pf (p : PfElem) (s : Slot) : Var := Sum.inl (p, s)
 
@@ -125,17 +130,21 @@ instance : Repr Var := ⟨fun v _ => match v with
 /-- Variables of the symbolic check polynomials. -/
 abbrev SymVars : Type := Vars ⊕ Var
 
+instance : Ord SymVars := FinEnum.toOrd
+instance : Std.TransOrd SymVars := FinEnum.toOrd.transOrd
+instance : Std.LawfulEqOrd SymVars := FinEnum.toOrd.lawfulEqOrd
+
 variable (F : Type) [Field F] [BEq F] [LawfulBEq F]
 
 /-- Shorthand for a toxic-waste sample inside the symbolic ring. -/
-private def tox (v : Vars) : CMvPolynomial SymVars F := X (Sum.inl v)
+private def tox (v : Vars) : COrdMvPolynomial SymVars F := X (Sum.inl v)
 
 /-- Shorthand for an ideal variable inside the symbolic ring. -/
-private def idl (v : Var) : CMvPolynomial SymVars F := X (Sum.inr v)
+private def idl (v : Var) : COrdMvPolynomial SymVars F := X (Sum.inr v)
 
 /-- The symbolic AGM expansion of a proof element over the SRS, transcribing the SRS values of
 `Defs.lean`. -/
-def pfPoly (p : PfElem) : CMvPolynomial SymVars F :=
+def pfPoly (p : PfElem) : COrdMvPolynomial SymVars F :=
   idl F (Var.pf p .s)
     + tox F .α * idl F (Var.pf p .αs)
     + idl F (Var.pf p .v)
@@ -155,32 +164,32 @@ def pfPoly (p : PfElem) : CMvPolynomial SymVars F :=
     + idl F (Var.pf p .vstmt)
 
 /-- Check I of the verifier: `(V_mid + v_0 + v_io)·(W + w_0) − t·H`. -/
-def checkI : CMvPolynomial SymVars F :=
+def checkI : COrdMvPolynomial SymVars F :=
   (pfPoly F (Sum.inl .V_mid) + idl F Var.v0 + idl F Var.v_io)
       * (pfPoly F (Sum.inr .W) + idl F Var.w0)
     - idl F Var.t * pfPoly F (Sum.inr .H)
 
 /-- Check II of the verifier: `V_mid' − α·V_mid`. -/
-def checkII : CMvPolynomial SymVars F :=
+def checkII : COrdMvPolynomial SymVars F :=
   pfPoly F (Sum.inl .V_mid') - tox F .α * pfPoly F (Sum.inl .V_mid)
 
 /-- Check III of the verifier: `W' − α·W`. -/
-def checkIII : CMvPolynomial SymVars F :=
+def checkIII : COrdMvPolynomial SymVars F :=
   pfPoly F (Sum.inl .W') - tox F .α * pfPoly F (Sum.inr .W)
 
 /-- Check IV of the verifier: `H' − α·H`. -/
-def checkIV : CMvPolynomial SymVars F :=
+def checkIV : COrdMvPolynomial SymVars F :=
   pfPoly F (Sum.inl .H') - tox F .α * pfPoly F (Sum.inr .H)
 
 /-- Check V of the verifier: `Y·γ − β_v γ·V_mid − β_w γ·W`. -/
-def checkV : CMvPolynomial SymVars F :=
+def checkV : COrdMvPolynomial SymVars F :=
   pfPoly F (Sum.inl .Y) * tox F .γ
     - tox F .β_v * tox F .γ * pfPoly F (Sum.inl .V_mid)
     - tox F .β_w * tox F .γ * pfPoly F (Sum.inr .W)
 
 /-- The generators of the soundness ideal: the coefficients of the five check polynomials with
 respect to the toxic-waste monomials, each a polynomial in the ideal variables. -/
-def generators : List (CMvPolynomial Var F) :=
+def generators : List (COrdMvPolynomial Var F) :=
   ([checkI F, checkII F, checkIII F, checkIV F, checkV F]).flatMap
     SymbolicAGMScheme.coeffGenerators
 
@@ -189,7 +198,7 @@ def generators : List (CMvPolynomial Var F) :=
 the extractor of the manual proof) and the quotient `h` read off `H`'s full toxic-waste-free
 combination (its `s`-powers, `v_wit`/`w_wit`/`v_stmt` parts, `VK_1` constant, and
 `v_0`/`w_0`/`t`-multiplied scalars — the `suffices` step of the manual proof). -/
-def target : CMvPolynomial Var F :=
+def target : COrdMvPolynomial Var F :=
   (X Var.v0 + X Var.v_io + X (Var.pf (Sum.inl .Y) .βv))
       * (X Var.w0 + X (Var.pf (Sum.inl .Y) .βw))
     - (X (Var.pf (Sum.inr .H) .s)

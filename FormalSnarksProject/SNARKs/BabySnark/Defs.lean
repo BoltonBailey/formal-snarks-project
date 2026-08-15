@@ -6,6 +6,7 @@ import FormalSnarksProject.ToMathlib.PolynomialDegreeHelpers
 import Mathlib.Algebra.MvPolynomial.Equiv
 import FormalSnarksProject.SoundnessTactic.SoundnessProver
 import FormalSnarksProject.SoundnessTactic.ProofMode
+import FormalSnarksProject.ToMathlib.FinEnumOrd
 
 /-!
 
@@ -43,6 +44,10 @@ inductive Vars : Type where
 deriving Repr, BEq, DecidableEq
 
 instance : FinEnum Vars := .ofList [.β, .γ] (fun x => by cases x <;> simp)
+
+instance : Ord Vars := FinEnum.toOrd
+instance : Std.TransOrd Vars := FinEnum.toOrd.transOrd
+instance : Std.LawfulEqOrd Vars := FinEnum.toOrd.lawfulEqOrd
 
 local notation "Vars_β" => some Vars.β
 local notation "Vars_γ" => some Vars.γ
@@ -146,21 +151,21 @@ instance : FinEnum PairingsII_Idx := .ofList [.bγ, .γβv] (fun x => by cases x
     SRSElements_G1 := @SRS_Elements_Idx n_stmt n_wit n_var
     SRSElements_G2 := @SRS_Elements_Idx n_stmt n_wit n_var
     SRSElementValue_G1 := fun SRS_idx => match SRS_idx with
-      | SRS_Elements_Idx.τ_pow i => CPoly.CMvPolynomial.X Vars_τ ^ (i : ℕ)
+      | SRS_Elements_Idx.τ_pow i => CPoly.COrdMvPolynomial.X Vars_τ ^ (i : ℕ)
       -- NOTE: an earlier version of this file gave the `γ` element the value `X Vars_β`, i.e.
       -- the check II pairing e(B, γ) = e(γβ, V) degenerated to e(B, β) = e(γβ, V). With that
       -- SRS, soundness fails for square span programs where some combination of the `u_wit`
       -- polynomials is a nonzero constant.
-      | SRS_Elements_Idx.γ => CPoly.CMvPolynomial.X Vars_γ
-      | SRS_Elements_Idx.γβ => CPoly.CMvPolynomial.X Vars_γ * CPoly.CMvPolynomial.X Vars_β
+      | SRS_Elements_Idx.γ => CPoly.COrdMvPolynomial.X Vars_γ
+      | SRS_Elements_Idx.γβ => CPoly.COrdMvPolynomial.X Vars_γ * CPoly.COrdMvPolynomial.X Vars_β
       | SRS_Elements_Idx.βu i =>
-        CPoly.CMvPolynomial.X Vars_β * to_CMvPolynomial_Option Vars (u_wit i)
+        CPoly.COrdMvPolynomial.X Vars_β * to_COrdMvPolynomial_Option Vars (u_wit i)
     SRSElementValue_G2 := fun SRS_idx => match SRS_idx with
-      | SRS_Elements_Idx.τ_pow i => CPoly.CMvPolynomial.X Vars_τ ^ (i : ℕ)
-      | SRS_Elements_Idx.γ => CPoly.CMvPolynomial.X Vars_γ
-      | SRS_Elements_Idx.γβ => CPoly.CMvPolynomial.X Vars_γ * CPoly.CMvPolynomial.X Vars_β
+      | SRS_Elements_Idx.τ_pow i => CPoly.COrdMvPolynomial.X Vars_τ ^ (i : ℕ)
+      | SRS_Elements_Idx.γ => CPoly.COrdMvPolynomial.X Vars_γ
+      | SRS_Elements_Idx.γβ => CPoly.COrdMvPolynomial.X Vars_γ * CPoly.COrdMvPolynomial.X Vars_β
       | SRS_Elements_Idx.βu i =>
-        CPoly.CMvPolynomial.X Vars_β * to_CMvPolynomial_Option Vars (u_wit i)
+        CPoly.COrdMvPolynomial.X Vars_β * to_COrdMvPolynomial_Option Vars (u_wit i)
     Proof_G1 := Proof_Idx
     Proof_G2 := Proof_Idx
     EqualityChecks := ChecksIdx

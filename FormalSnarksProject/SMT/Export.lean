@@ -1,5 +1,5 @@
 import FormalSnarksProject.Models.StraightforwardAGMProofSystem
-import FormalSnarksProject.ToMathlib.CMvPolynomialRepr
+import FormalSnarksProject.ToMathlib.COrdMvPolynomialRepr
 
 /-!
 # Generic SMT-LIB (`QF_FF`) export of ideal-membership problems
@@ -35,7 +35,7 @@ Variable names are obtained from the `Repr` of the problem's variable type, sani
 SMT-LIB simple symbols (spaces to underscores, Greek letters spelled out).
 -/
 
-open CPoly CPoly.CMvPolynomial
+open CPoly CPoly.COrdMvPolynomial
 
 namespace SMT
 
@@ -60,7 +60,7 @@ def sanitizeChar : Char → String
   | 'δ' => "delta"
   | c => String.singleton c
 
-variable {V : Type} [FinEnum V] [Repr V]
+variable {V : Type} [FinEnum V] [Ord V] [Std.TransOrd V] [Std.LawfulEqOrd V] [Repr V]
 
 /-- The SMT-LIB symbol for a variable, e.g. `comp_G1_C_q_u_wit`, `single_G2_B_delta`. -/
 def smtVarName (v : V) : String :=
@@ -82,12 +82,12 @@ def smtCoeff (n : Int) : String :=
 
 /-- The factors of a monomial as a list of variable symbols, repeated by exponent
 (e.g. `x^2 * y ↦ [x, x, y]`). -/
-def monomialAtoms (m : CMvMonomial V) : List String :=
+def monomialAtoms (m : COrdMvMonomial V) : List String :=
   (FinEnum.toList V).foldr (fun v acc =>
-    (List.replicate (CMvMonomial.degreeOf m v) (smtVarName v)) ++ acc) []
+    (List.replicate (COrdMvMonomial.degreeOf m v) (smtVarName v)) ++ acc) []
 
 /-- Render a single term `c · m` as an SMT-LIB expression of sort `F`. -/
-def smtTerm (m : CMvMonomial V) (c : F) : String :=
+def smtTerm (m : COrdMvMonomial V) (c : F) : String :=
   let n := signedCoeff c
   let factors := monomialAtoms m
   -- Drop a coefficient of `1` when there is at least one variable factor.
@@ -98,8 +98,8 @@ def smtTerm (m : CMvMonomial V) (c : F) : String :=
   | _ => "(ff.mul " ++ String.intercalate " " atoms ++ ")"
 
 /-- Render a whole polynomial as an SMT-LIB expression of sort `F` (a sum of its terms). -/
-def smtPoly (p : CMvPolynomial V F) : String :=
-  match (Lawful.monomials p).map (fun m => smtTerm m (coeff m p)) with
+def smtPoly (p : COrdMvPolynomial V F) : String :=
+  match (OrdLawful.monomials p).map (fun m => smtTerm m (coeff m p)) with
   | [] => "(as ff0 F)"
   | [t] => t
   | terms => "(ff.add " ++ String.intercalate " " terms ++ ")"
@@ -110,7 +110,7 @@ def smtPoly (p : CMvPolynomial V F) : String :=
 def usedVars (prob : AGMProofSystemInstantiation.IdealMembershipProblem V F) : List V :=
   let polys := prob.target :: prob.generators
   (FinEnum.toList V).filter (fun v =>
-    polys.any (fun p => (Lawful.monomials p).any (fun m => CMvMonomial.degreeOf m v ≠ 0)))
+    polys.any (fun p => (OrdLawful.monomials p).any (fun m => COrdMvMonomial.degreeOf m v ≠ 0)))
 
 /-- The full SMT-LIB 2.6 benchmark file. `sourceInfo` goes into `(set-info :source |…|)`;
 `targetComment` describes the target dis-equation. -/
@@ -139,7 +139,7 @@ def smtFile (prob : AGMProofSystemInstantiation.IdealMembershipProblem V F)
 `ZMod 101` computation over BN254 is faithful. -/
 def coeffsInRange (prob : AGMProofSystemInstantiation.IdealMembershipProblem V F) : Bool :=
   let polys := prob.target :: prob.generators
-  polys.all (fun p => (Lawful.monomials p).all (fun m =>
+  polys.all (fun p => (OrdLawful.monomials p).all (fun m =>
     let n := signedCoeff (coeff m p)
     decide (-50 ≤ n) && decide (n ≤ 50)))
 

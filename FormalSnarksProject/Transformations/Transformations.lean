@@ -9,13 +9,13 @@ section
 This file contains functions for manipulating AGMProofSystemInstantiations.
 These functions can be used to prove the soundness of the AGM SNARK.
 
-The SRS values are the computable `CPoly.CMvPolynomial`; the soundness proofs work with them
+The SRS values are the computable `CPoly.COrdMvPolynomial`; the soundness proofs work with them
 directly (they are a `CommRing` with no zero divisors, see `ToMathlib/ForTransformations.lean`),
-transporting to mathlib's `MvPolynomial` along `CPoly.polyRingEquiv` only where a mathlib-side
+transporting to mathlib's `MvPolynomial` along `CPoly.COrdMvPolynomial.ordPolyRingEquiv` only where a mathlib-side
 fact is needed (`collapseToxicWaste`).
 -/
 
-open CPoly CPoly.CMvPolynomial
+open CPoly CPoly.COrdMvPolynomial
 
 variable {F : Type}
 
@@ -68,7 +68,7 @@ lemma changeExponent_soundness {𝓟 : AGMProofSystemInstantiation F} (sample : 
     cases poly_checks_pass with
     | inl poly_checks_pass =>
       exact absurd poly_checks_pass
-        (pow_ne_zero d (CPoly.CMvPolynomial.X_ne_zero sample))
+        (pow_ne_zero d (CPoly.COrdMvPolynomial.X_ne_zero sample))
     | inr poly_checks_pass =>
       exact poly_checks_pass
   · rw [hTypeIII]
@@ -118,6 +118,10 @@ lemma collapseSRSElement_G1_soundness (𝓟 : AGMProofSystemInstantiation F)
   have hcount2 : (FinEnum.toList 𝓟.SRSElements_G1).count twin2 = 1 :=
     List.count_eq_one_of_mem FinEnum.nodup_toList (FinEnum.mem_toList twin2)
   intros stmt agm checks_pass
+  -- Re-type the introduced data at the underlying scheme (definitionally equal), so the
+  -- goals below are type-correct without unfolding `collapseSRSElement_G1` projections.
+  change 𝓟.Stmt at stmt
+  change AGMProofSystemInstantiation.Prover F 𝓟 at agm
   rcases checks_pass with ⟨poly_checks_pass, null⟩
   apply h_sound
   clear h_sound null
@@ -159,10 +163,10 @@ def collapseToxicWaste (𝓟 : AGMProofSystemInstantiation F) (d : ℕ)
       Sample := 𝓟.Sample
       SRSElements_G1 := 𝓟.SRSElements_G1
       SRSElements_G2 := 𝓟.SRSElements_G2
-      SRSElementValue_G1 := fun elem => CMvPolynomial.bind₁
+      SRSElementValue_G1 := fun elem => COrdMvPolynomial.bind₁
                               ((fun x => (if x = sample_removed then X (R := F) sample_target ^ d else X x)))
                               (𝓟.SRSElementValue_G1 elem)
-      SRSElementValue_G2 := fun elem => CMvPolynomial.bind₁
+      SRSElementValue_G2 := fun elem => COrdMvPolynomial.bind₁
                               ((fun x => (if x = sample_removed then X (R := F) sample_target ^ d else X x)))
                               (𝓟.SRSElementValue_G2 elem)
       Proof_G1 := 𝓟.Proof_G1
@@ -182,19 +186,19 @@ lemma collapseToxicWaste_check_poly (𝓟 : AGMProofSystemInstantiation F) (d : 
     ∀ agm stmt check_idx,
       AGMProofSystemInstantiation.check_poly (collapseToxicWaste 𝓟 d sample_removed sample_target) agm stmt check_idx
         =
-      CMvPolynomial.bind₁
+      COrdMvPolynomial.bind₁
         ((fun x => (if x = sample_removed then X sample_target ^ d else X x)))
         (AGMProofSystemInstantiation.check_poly 𝓟 agm stmt check_idx) := by
   intros agm stmt check_idx
   unfold collapseToxicWaste AGMProofSystemInstantiation.check_poly AGMProofSystemInstantiation.pairing_poly AGMProofSystemInstantiation.proof_element_G1_as_poly AGMProofSystemInstantiation.proof_element_G2_as_poly
-  simp only [CPoly.CMvPolynomial.bind₁_eq_eval₂Hom, RingHom.list_map_sum, _root_.map_mul,
-    _root_.map_add, CPoly.CMvPolynomial.eval₂Hom_algebraMap_C]
+  simp only [CPoly.COrdMvPolynomial.bind₁_eq_eval₂Hom, RingHom.list_map_sum, _root_.map_mul,
+    _root_.map_add, CPoly.COrdMvPolynomial.eval₂Hom_algebraMap_C]
 
 lemma collapseToxicWaste_soundness (𝓟 : AGMProofSystemInstantiation F) (d : ℕ) (hd : 0 < d)
     [DecidableEq 𝓟.Sample]
     (sample_removed sample_target : 𝓟.Sample)
     (sample_target_neq_removed : sample_target ≠ sample_removed)
-    (hdegree : ∀ agm stmt check_idx, CMvPolynomial.degreeOf sample_target
+    (hdegree : ∀ agm stmt check_idx, COrdMvPolynomial.degreeOf sample_target
       (AGMProofSystemInstantiation.check_poly 𝓟 agm stmt check_idx) < d)
     (hTypeIII : 𝓟.Identified_Proof_Elems = [])
     (Wit : Type)
@@ -213,22 +217,22 @@ lemma collapseToxicWaste_soundness (𝓟 : AGMProofSystemInstantiation F) (d : �
       at poly_checks_pass
     -- Transport the substituted check equation to mathlib's `MvPolynomial` and conclude with
     -- the (mathlib-side) injectivity of the substitution on low-degree polynomials.
-    have equivZero : (CPoly.polyRingEquiv (σ := 𝓟.Sample) (R := F)) 0 = 0 := map_zero
+    have equivZero : (CPoly.COrdMvPolynomial.ordPolyRingEquiv (σ := 𝓟.Sample) (R := F)) 0 = 0 := map_zero
     have equivX : ∀ v : 𝓟.Sample,
-        (CPoly.polyRingEquiv (σ := 𝓟.Sample) (R := F)) (X v) = MvPolynomial.X v :=
-      fun v => CPoly.fromCMvPolynomial_X v
-    have equivPow : ∀ (q : CMvPolynomial 𝓟.Sample F) (n : ℕ),
-        (CPoly.polyRingEquiv (σ := 𝓟.Sample) (R := F)) (q ^ n)
-          = (CPoly.polyRingEquiv (σ := 𝓟.Sample) (R := F)) q ^ n :=
+        (CPoly.COrdMvPolynomial.ordPolyRingEquiv (σ := 𝓟.Sample) (R := F)) (X v) = MvPolynomial.X v :=
+      fun v => CPoly.COrdMvPolynomial.fromCOrdMvPolynomial_X v
+    have equivPow : ∀ (q : COrdMvPolynomial 𝓟.Sample F) (n : ℕ),
+        (CPoly.COrdMvPolynomial.ordPolyRingEquiv (σ := 𝓟.Sample) (R := F)) (q ^ n)
+          = (CPoly.COrdMvPolynomial.ordPolyRingEquiv (σ := 𝓟.Sample) (R := F)) q ^ n :=
       fun q n => map_pow _ q n
     replace poly_checks_pass :
-        (MvPolynomial.bind₁ (fun x => (CPoly.polyRingEquiv (σ := 𝓟.Sample) (R := F))
+        (MvPolynomial.bind₁ (fun x => (CPoly.COrdMvPolynomial.ordPolyRingEquiv (σ := 𝓟.Sample) (R := F))
             (if x = sample_removed then X sample_target ^ d else X x)))
-          ((CPoly.polyRingEquiv (σ := 𝓟.Sample) (R := F))
+          ((CPoly.COrdMvPolynomial.ordPolyRingEquiv (σ := 𝓟.Sample) (R := F))
             (AGMProofSystemInstantiation.check_poly 𝓟 agm stmt check_idx)) = 0 := by
-      rw [← CPoly.CMvPolynomial.polyRingEquiv_bind₁, poly_checks_pass]
+      rw [← CPoly.COrdMvPolynomial.ordPolyRingEquiv_bind₁, poly_checks_pass]
       exact map_zero
-    have hfun : (fun x => (CPoly.polyRingEquiv (σ := 𝓟.Sample) (R := F))
+    have hfun : (fun x => (CPoly.COrdMvPolynomial.ordPolyRingEquiv (σ := 𝓟.Sample) (R := F))
           (if x = sample_removed then X sample_target ^ d else X x))
         = fun x => if x = sample_removed then MvPolynomial.X (R := F) sample_target ^ d
             else MvPolynomial.X x := by
@@ -237,24 +241,24 @@ lemma collapseToxicWaste_soundness (𝓟 : AGMProofSystemInstantiation F) (d : �
       · rw [if_pos hx, if_pos hx, equivPow, equivX]
       · rw [if_neg hx, if_neg hx, equivX]
     rw [hfun] at poly_checks_pass
-    have hzero : (CPoly.polyRingEquiv (σ := 𝓟.Sample) (R := F))
+    have hzero : (CPoly.COrdMvPolynomial.ordPolyRingEquiv (σ := 𝓟.Sample) (R := F))
         (AGMProofSystemInstantiation.check_poly 𝓟 agm stmt check_idx) = 0 := by
       apply MvPolynomial.bind₁_ite_pow_eq_zero_of (σ := 𝓟.Sample)
-        ((CPoly.polyRingEquiv (σ := 𝓟.Sample) (R := F))
+        ((CPoly.COrdMvPolynomial.ordPolyRingEquiv (σ := 𝓟.Sample) (R := F))
           (AGMProofSystemInstantiation.check_poly 𝓟 agm stmt check_idx))
         d hd sample_removed sample_target
       · exact sample_target_neq_removed
       · exact poly_checks_pass
       · have h := hdegree agm stmt check_idx
-        have hb : CMvPolynomial.degreeOf sample_target
+        have hb : COrdMvPolynomial.degreeOf sample_target
               (AGMProofSystemInstantiation.check_poly 𝓟 agm stmt check_idx)
             = MvPolynomial.degreeOf sample_target
-              ((CPoly.polyRingEquiv (σ := 𝓟.Sample) (R := F))
+              ((CPoly.COrdMvPolynomial.ordPolyRingEquiv (σ := 𝓟.Sample) (R := F))
                 (AGMProofSystemInstantiation.check_poly 𝓟 agm stmt check_idx)) :=
-          congrFun (CPoly.degreeOf_equiv (S := F)) sample_target
+          congrFun CPoly.COrdMvPolynomial.degreeOf_equiv sample_target
         rw [hb] at h
         exact h
-    apply (CPoly.polyRingEquiv (σ := 𝓟.Sample) (R := F)).injective
+    apply (CPoly.COrdMvPolynomial.ordPolyRingEquiv (σ := 𝓟.Sample) (R := F)).injective
     rw [hzero, equivZero]
   · rw [hTypeIII]
     simp

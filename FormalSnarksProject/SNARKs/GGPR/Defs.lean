@@ -5,6 +5,7 @@ import FormalSnarksProject.ToMathlib.FinEnumToList
 import Mathlib.Algebra.MvPolynomial.Equiv
 import FormalSnarksProject.SoundnessTactic.SoundnessProver
 import FormalSnarksProject.SoundnessTactic.ProofMode
+import FormalSnarksProject.ToMathlib.FinEnumOrd
 
 /-!
 
@@ -48,12 +49,16 @@ deriving Repr, BEq, DecidableEq
 instance : FinEnum Vars :=
   .ofList [.α, .β_v, .β_w, .β_y, .γ] (fun x => by cases x <;> simp)
 
-local notation "poly_α" => CPoly.CMvPolynomial.X (some Vars.α)
-local notation "poly_β_v" => CPoly.CMvPolynomial.X (some Vars.β_v)
-local notation "poly_β_w" => CPoly.CMvPolynomial.X (some Vars.β_w)
-local notation "poly_β_y" => CPoly.CMvPolynomial.X (some Vars.β_y)
-local notation "poly_γ" => CPoly.CMvPolynomial.X (some Vars.γ)
-local notation "poly_s" => CPoly.CMvPolynomial.X (none : Option Vars)
+instance : Ord Vars := FinEnum.toOrd
+instance : Std.TransOrd Vars := FinEnum.toOrd.transOrd
+instance : Std.LawfulEqOrd Vars := FinEnum.toOrd.lawfulEqOrd
+
+local notation "poly_α" => CPoly.COrdMvPolynomial.X (some Vars.α)
+local notation "poly_β_v" => CPoly.COrdMvPolynomial.X (some Vars.β_v)
+local notation "poly_β_w" => CPoly.COrdMvPolynomial.X (some Vars.β_w)
+local notation "poly_β_y" => CPoly.COrdMvPolynomial.X (some Vars.β_y)
+local notation "poly_γ" => CPoly.COrdMvPolynomial.X (some Vars.γ)
+local notation "poly_s" => CPoly.COrdMvPolynomial.X (none : Option Vars)
 
 lemma Vars.finsupp_eq_ext (f g : Vars →₀ ℕ) : f = g ↔
     f Vars.α = g Vars.α
@@ -275,39 +280,39 @@ groups of the pairing.
     SRSElementValue_G1 := fun SRS_idx => match SRS_idx with
       | SRS_Elements_Idx.EK_s_pow i => poly_s ^ (i : ℕ)
       | SRS_Elements_Idx.EK_α_s_pow i => poly_α * poly_s ^ (i : ℕ)
-      | SRS_Elements_Idx.EK_v i => to_CMvPolynomial_Option Vars (v_wit i)
-      | SRS_Elements_Idx.EK_w i => to_CMvPolynomial_Option Vars (w_wit i)
-      | SRS_Elements_Idx.EK_α_v i => poly_α * to_CMvPolynomial_Option Vars (v_wit i)
-      | SRS_Elements_Idx.EK_α_w i => poly_α * to_CMvPolynomial_Option Vars (w_wit i)
-      | SRS_Elements_Idx.EK_β_v i => poly_β_v * to_CMvPolynomial_Option Vars (v_wit i)
-      | SRS_Elements_Idx.EK_β_w i => poly_β_w * to_CMvPolynomial_Option Vars (w_wit i)
+      | SRS_Elements_Idx.EK_v i => to_COrdMvPolynomial_Option Vars (v_wit i)
+      | SRS_Elements_Idx.EK_w i => to_COrdMvPolynomial_Option Vars (w_wit i)
+      | SRS_Elements_Idx.EK_α_v i => poly_α * to_COrdMvPolynomial_Option Vars (v_wit i)
+      | SRS_Elements_Idx.EK_α_w i => poly_α * to_COrdMvPolynomial_Option Vars (w_wit i)
+      | SRS_Elements_Idx.EK_β_v i => poly_β_v * to_COrdMvPolynomial_Option Vars (v_wit i)
+      | SRS_Elements_Idx.EK_β_w i => poly_β_w * to_COrdMvPolynomial_Option Vars (w_wit i)
       | SRS_Elements_Idx.VK_1 => 1
       | SRS_Elements_Idx.VK_α => poly_α
       | SRS_Elements_Idx.VK_γ => poly_γ
       | SRS_Elements_Idx.VK_βv_γ => poly_β_v * poly_γ
       | SRS_Elements_Idx.VK_βw_γ => poly_β_w * poly_γ
-      | SRS_Elements_Idx.VK_v_0 => to_CMvPolynomial_Option Vars v_0
-      | SRS_Elements_Idx.VK_w_0 => to_CMvPolynomial_Option Vars w_0
-      | SRS_Elements_Idx.VK_t => to_CMvPolynomial_Option Vars t
-      | SRS_Elements_Idx.VK_v_stmt i => to_CMvPolynomial_Option Vars (v_stmt i)
+      | SRS_Elements_Idx.VK_v_0 => to_COrdMvPolynomial_Option Vars v_0
+      | SRS_Elements_Idx.VK_w_0 => to_COrdMvPolynomial_Option Vars w_0
+      | SRS_Elements_Idx.VK_t => to_COrdMvPolynomial_Option Vars t
+      | SRS_Elements_Idx.VK_v_stmt i => to_COrdMvPolynomial_Option Vars (v_stmt i)
     SRSElementValue_G2 := fun SRS_idx => match SRS_idx with
       | SRS_Elements_Idx.EK_s_pow i => poly_s ^ (i : ℕ)
       | SRS_Elements_Idx.EK_α_s_pow i => poly_α * poly_s ^ (i : ℕ)
-      | SRS_Elements_Idx.EK_v i => to_CMvPolynomial_Option Vars (v_wit i)
-      | SRS_Elements_Idx.EK_w i => to_CMvPolynomial_Option Vars (w_wit i)
-      | SRS_Elements_Idx.EK_α_v i => poly_α * to_CMvPolynomial_Option Vars (v_wit i)
-      | SRS_Elements_Idx.EK_α_w i => poly_α * to_CMvPolynomial_Option Vars (w_wit i)
-      | SRS_Elements_Idx.EK_β_v i => poly_β_v * to_CMvPolynomial_Option Vars (v_wit i)
-      | SRS_Elements_Idx.EK_β_w i => poly_β_w * to_CMvPolynomial_Option Vars (w_wit i)
+      | SRS_Elements_Idx.EK_v i => to_COrdMvPolynomial_Option Vars (v_wit i)
+      | SRS_Elements_Idx.EK_w i => to_COrdMvPolynomial_Option Vars (w_wit i)
+      | SRS_Elements_Idx.EK_α_v i => poly_α * to_COrdMvPolynomial_Option Vars (v_wit i)
+      | SRS_Elements_Idx.EK_α_w i => poly_α * to_COrdMvPolynomial_Option Vars (w_wit i)
+      | SRS_Elements_Idx.EK_β_v i => poly_β_v * to_COrdMvPolynomial_Option Vars (v_wit i)
+      | SRS_Elements_Idx.EK_β_w i => poly_β_w * to_COrdMvPolynomial_Option Vars (w_wit i)
       | SRS_Elements_Idx.VK_1 => 1
       | SRS_Elements_Idx.VK_α => poly_α
       | SRS_Elements_Idx.VK_γ => poly_γ
       | SRS_Elements_Idx.VK_βv_γ => poly_β_v * poly_γ
       | SRS_Elements_Idx.VK_βw_γ => poly_β_w * poly_γ
-      | SRS_Elements_Idx.VK_v_0 => to_CMvPolynomial_Option Vars v_0
-      | SRS_Elements_Idx.VK_w_0 => to_CMvPolynomial_Option Vars w_0
-      | SRS_Elements_Idx.VK_t => to_CMvPolynomial_Option Vars t
-      | SRS_Elements_Idx.VK_v_stmt i => to_CMvPolynomial_Option Vars (v_stmt i)
+      | SRS_Elements_Idx.VK_v_0 => to_COrdMvPolynomial_Option Vars v_0
+      | SRS_Elements_Idx.VK_w_0 => to_COrdMvPolynomial_Option Vars w_0
+      | SRS_Elements_Idx.VK_t => to_COrdMvPolynomial_Option Vars t
+      | SRS_Elements_Idx.VK_v_stmt i => to_COrdMvPolynomial_Option Vars (v_stmt i)
     Proof_G1 := Proof_G1_Idx
     Proof_G2 := Proof_G2_Idx
     EqualityChecks := ChecksIdx

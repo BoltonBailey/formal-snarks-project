@@ -1,5 +1,6 @@
 import FormalSnarksProject.Models.SymbolicAGMScheme
 import FormalSnarksProject.SNARKs.Groth16TypeIII.Defs
+import FormalSnarksProject.ToMathlib.FinEnumOrd
 
 /-!
 # Groth16TypeIII, symbolically
@@ -36,7 +37,7 @@ definition is left untouched.
 
 open scoped BigOperators
 
-open CPoly CPoly.CMvPolynomial
+open CPoly CPoly.COrdMvPolynomial
 open CompPoly
 
 namespace Groth16TypeIII
@@ -131,7 +132,7 @@ def compClass_G2 : SRSComp_G2 → IdxClass
 /-! ### Short `Repr` instances for readable output
 
 These give the index types single-token names (`A`, `q`, `u_wit`, …) so that, together with the
-generic `Repr (SumVar 𝓢)` and `Repr (CMvPolynomial σ R)`, the abstract generators print as e.g.
+generic `Repr (SumVar 𝓢)` and `Repr (COrdMvPolynomial σ R)`, the abstract generators print as e.g.
 `comp_G1 C q u_wit + stmtSum v_stmt` rather than positional `X8^1 * X27^1` or nested `Sum.inr …`.
 The proof-element index types `Proof_G1_Idx`/`Proof_G2_Idx` live in `Defs.lean` (which only derives
 `DecidableEq`); we add their `Repr` here to leave that file untouched. -/
@@ -223,7 +224,7 @@ relation `(∑ aᵢuᵢ)·(∑ aᵢvᵢ) − ∑ aᵢwᵢ − h·t = 0` with the
 coefficients on the `q` component and the quotient `h·t` read off `C`'s coefficients on the
 `xⁱ·t` column — matching the extractor and the `suffices` step of the manual soundness proof. -/
 def target (F : Type) [Field F] [BEq F] [LawfulBEq F] :
-    CMvPolynomial (SumVar (scheme F)) F :=
+    COrdMvPolynomial (SumVar (scheme F)) F :=
   (X (SumVar.stmtSum PolyFam.u_stmt)
       + X (SumVar.comp_G1 Proof_G1_Idx.C SRSComp_G1.q PolyFam.u_wit))
     * (X (SumVar.stmtSum PolyFam.v_stmt)

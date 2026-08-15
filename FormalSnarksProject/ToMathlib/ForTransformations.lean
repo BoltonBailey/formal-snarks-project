@@ -1,9 +1,9 @@
 
 import Mathlib.RingTheory.Polynomial.Basic
 import Mathlib.Algebra.MvPolynomial.Monad
-import CompPoly.Multivariate.Operations
-import CompPoly.Multivariate.Rename
-import CompPoly.Multivariate.MvPolyEquiv
+import CompPoly.OrdMultivariate.Operations
+import CompPoly.OrdMultivariate.Rename
+import CompPoly.OrdMultivariate.MvPolyEquiv
 
 section
 
@@ -222,74 +222,76 @@ lemma RingHom.list_map_sum {A : Type v} {B : Type w} [Semiring A] [Semiring B]
   | cons x xs ih =>
     simp only [List.map_cons, List.sum_cons, map_add, ih]
 
-/-! ### `CMvPolynomial` counterparts, transported along `CPoly.polyRingEquiv`
+/-! ### `COrdMvPolynomial` counterparts, transported along `CPoly.COrdMvPolynomial.ordPolyRingEquiv`
 
-The transformations file manipulates the computable `CMvPolynomial` check polynomials
+The transformations file manipulates the computable `COrdMvPolynomial` check polynomials
 directly; these lemmas transport the needed algebraic facts (no zero divisors, `X ≠ 0`, and
 naturality of `bind₁`) from their mathlib `MvPolynomial` counterparts. -/
 
 section CompPolyBridge
 
 open CPoly
+open CPoly.COrdMvPolynomial
 
-variable {σ τ F : Type} [FinEnum σ] [FinEnum τ] [Field F] [BEq F] [LawfulBEq F]
+variable {σ τ F : Type} [Ord σ] [Std.TransOrd σ] [Std.LawfulEqOrd σ]
+  [Ord τ] [Std.TransOrd τ] [Std.LawfulEqOrd τ] [Field F] [BEq F] [LawfulBEq F]
 
-/-- `CMvPolynomial` over a field has no zero divisors (transported from `MvPolynomial` along
+/-- `COrdMvPolynomial` over a field has no zero divisors (transported from `MvPolynomial` along
 the ring equivalence). -/
-instance : NoZeroDivisors (CMvPolynomial σ F) :=
-  Function.Injective.noZeroDivisors (polyRingEquiv (σ := σ) (R := F))
-    (polyRingEquiv (σ := σ) (R := F)).injective (map_zero _) (map_mul _)
+instance : NoZeroDivisors (COrdMvPolynomial σ F) :=
+  Function.Injective.noZeroDivisors (ordPolyRingEquiv (σ := σ) (R := F))
+    (ordPolyRingEquiv (σ := σ) (R := F)).injective (map_zero _) (map_mul _)
 
-lemma CPoly.CMvPolynomial.X_ne_zero (v : σ) :
-    (CMvPolynomial.X v : CMvPolynomial σ F) ≠ 0 := by
+lemma CPoly.COrdMvPolynomial.X_ne_zero (v : σ) :
+    (COrdMvPolynomial.X v : COrdMvPolynomial σ F) ≠ 0 := by
   intro h
-  have equivX : (polyRingEquiv (σ := σ) (R := F)) (CMvPolynomial.X v) = MvPolynomial.X v :=
-    CPoly.fromCMvPolynomial_X v
-  have equivZero : (polyRingEquiv (σ := σ) (R := F)) 0 = 0 := map_zero
-  have h' := congr_arg (polyRingEquiv (σ := σ) (R := F)) h
+  have equivX : (ordPolyRingEquiv (σ := σ) (R := F)) (COrdMvPolynomial.X v) = MvPolynomial.X v :=
+    CPoly.COrdMvPolynomial.fromCOrdMvPolynomial_X v
+  have equivZero : (ordPolyRingEquiv (σ := σ) (R := F)) 0 = 0 := map_zero
+  have h' := congr_arg (ordPolyRingEquiv (σ := σ) (R := F)) h
   rw [equivX, equivZero] at h'
   exact MvPolynomial.X_ne_zero v h'
 
-/-- `CMvPolynomial.bind₁` as an application of the bundled `eval₂Hom` ring homomorphism, so
+/-- `COrdMvPolynomial.bind₁` as an application of the bundled `eval₂Hom` ring homomorphism, so
 that `map_*` lemmas apply to it. -/
-lemma CPoly.CMvPolynomial.bind₁_eq_eval₂Hom
-    (f : σ → CMvPolynomial τ F) (p : CMvPolynomial σ F) :
-    CMvPolynomial.bind₁ f p
-      = CMvPolynomial.eval₂Hom (algebraMap F (CMvPolynomial τ F)) f p := by
-  rw [CMvPolynomial.bind₁_eq_aeval]
+lemma CPoly.COrdMvPolynomial.bind₁_eq_eval₂Hom
+    (f : σ → COrdMvPolynomial τ F) (p : COrdMvPolynomial σ F) :
+    COrdMvPolynomial.bind₁ f p
+      = COrdMvPolynomial.eval₂Hom (algebraMap F (COrdMvPolynomial τ F)) f p := by
+  rw [COrdMvPolynomial.bind₁_eq_aeval]
   rfl
 
 /-- The substitution homomorphism fixes constants. -/
-lemma CPoly.CMvPolynomial.eval₂Hom_algebraMap_C
-    (f : σ → CMvPolynomial τ F) (c : F) :
-    CMvPolynomial.eval₂Hom (algebraMap F (CMvPolynomial τ F)) f (CMvPolynomial.C c)
-      = CMvPolynomial.C c := by
-  rw [CMvPolynomial.eval₂Hom_apply, ← CMvPolynomial.aeval_eq_eval₂, CMvPolynomial.aeval_C]
+lemma CPoly.COrdMvPolynomial.eval₂Hom_algebraMap_C
+    (f : σ → COrdMvPolynomial τ F) (c : F) :
+    COrdMvPolynomial.eval₂Hom (algebraMap F (COrdMvPolynomial τ F)) f (COrdMvPolynomial.C c)
+      = COrdMvPolynomial.C c := by
+  rw [COrdMvPolynomial.eval₂Hom_apply, ← COrdMvPolynomial.aeval_eq_eval₂, COrdMvPolynomial.aeval_C]
   rfl
 
-/-- Naturality of substitution: the computable `CMvPolynomial.bind₁` corresponds to mathlib's
+/-- Naturality of substitution: the computable `COrdMvPolynomial.bind₁` corresponds to mathlib's
 `MvPolynomial.bind₁` across the ring equivalence. -/
-lemma CPoly.CMvPolynomial.polyRingEquiv_bind₁
-    (f : σ → CMvPolynomial τ F) (p : CMvPolynomial σ F) :
-    (polyRingEquiv (σ := τ) (R := F)) (CMvPolynomial.bind₁ f p)
-      = MvPolynomial.bind₁ (fun i => (polyRingEquiv (σ := τ) (R := F)) (f i))
-          ((polyRingEquiv (σ := σ) (R := F)) p) := by
-  calc (polyRingEquiv (σ := τ) (R := F)) (CMvPolynomial.bind₁ f p)
-      = ((polyRingEquiv (σ := τ) (R := F)) : CMvPolynomial τ F →+* MvPolynomial τ F)
-          (MvPolynomial.eval₂ (algebraMap F (CMvPolynomial τ F)) f (fromCMvPolynomial p)) := by
-        rw [CMvPolynomial.bind₁_eq_aeval, CMvPolynomial.aeval_eq_eval₂, eval₂_equiv]
+lemma CPoly.COrdMvPolynomial.ordPolyRingEquiv_bind₁
+    (f : σ → COrdMvPolynomial τ F) (p : COrdMvPolynomial σ F) :
+    (ordPolyRingEquiv (σ := τ) (R := F)) (COrdMvPolynomial.bind₁ f p)
+      = MvPolynomial.bind₁ (fun i => (ordPolyRingEquiv (σ := τ) (R := F)) (f i))
+          ((ordPolyRingEquiv (σ := σ) (R := F)) p) := by
+  calc (ordPolyRingEquiv (σ := τ) (R := F)) (COrdMvPolynomial.bind₁ f p)
+      = ((ordPolyRingEquiv (σ := τ) (R := F)) : COrdMvPolynomial τ F →+* MvPolynomial τ F)
+          (MvPolynomial.eval₂ (algebraMap F (COrdMvPolynomial τ F)) f (fromCOrdMvPolynomial p)) := by
+        rw [COrdMvPolynomial.bind₁_eq_aeval, COrdMvPolynomial.aeval_eq_eval₂, eval₂_equiv]
         rfl
     _ = MvPolynomial.eval₂
-          (((polyRingEquiv (σ := τ) (R := F)) : CMvPolynomial τ F →+* MvPolynomial τ F).comp
-            (algebraMap F (CMvPolynomial τ F)))
-          (fun i => (polyRingEquiv (σ := τ) (R := F)) (f i))
-          (fromCMvPolynomial p) :=
+          (((ordPolyRingEquiv (σ := τ) (R := F)) : COrdMvPolynomial τ F →+* MvPolynomial τ F).comp
+            (algebraMap F (COrdMvPolynomial τ F)))
+          (fun i => (ordPolyRingEquiv (σ := τ) (R := F)) (f i))
+          (fromCOrdMvPolynomial p) :=
         MvPolynomial.eval₂_comp_left _ _ _ _
-    _ = MvPolynomial.bind₁ (fun i => (polyRingEquiv (σ := τ) (R := F)) (f i))
-          ((polyRingEquiv (σ := σ) (R := F)) p) := by
+    _ = MvPolynomial.bind₁ (fun i => (ordPolyRingEquiv (σ := τ) (R := F)) (f i))
+          ((ordPolyRingEquiv (σ := σ) (R := F)) p) := by
         rw [MvPolynomial.bind₁, MvPolynomial.aeval_def, MvPolynomial.algebraMap_eq]
         congr 1
-        exact RingHom.ext fun c => CPoly.fromCMvPolynomial_C c
+        exact RingHom.ext fun c => CPoly.COrdMvPolynomial.fromCOrdMvPolynomial_C c
 
 end CompPolyBridge
 

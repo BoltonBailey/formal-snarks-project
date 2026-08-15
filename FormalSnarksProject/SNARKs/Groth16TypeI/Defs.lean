@@ -3,6 +3,7 @@ import FormalSnarksProject.ToMathlib.OptionEquivRight
 import FormalSnarksProject.ToMathlib.FinEnumToList
 import FormalSnarksProject.SoundnessTactic.SoundnessProver
 import FormalSnarksProject.SoundnessTactic.ProofMode
+import FormalSnarksProject.ToMathlib.FinEnumOrd
 
 /-!
 
@@ -45,6 +46,10 @@ inductive Vars : Type where
 deriving Repr, BEq, DecidableEq
 
 instance : FinEnum Vars := .ofList [.α, .β, .γ, .δ] (fun x => by cases x <;> simp)
+
+instance : Ord Vars := FinEnum.toOrd
+instance : Std.TransOrd Vars := FinEnum.toOrd.transOrd
+instance : Std.LawfulEqOrd Vars := FinEnum.toOrd.lawfulEqOrd
 
 local notation "Vars_α" => some Vars.α
 local notation "Vars_β" => some Vars.β
@@ -171,24 +176,24 @@ Note that the SRS polynomials here have been multiplied through by γδ.
     Sample := Option Vars
     SRSElements := @SRS_Elements_Idx n_stmt n_wit n_var
     SRSElementValue := fun SRS_idx => match SRS_idx with
-      | SRS_Elements_Idx.α => CPoly.CMvPolynomial.X Vars_γ * CPoly.CMvPolynomial.X Vars_δ * CPoly.CMvPolynomial.X Vars_α
-      | SRS_Elements_Idx.β => CPoly.CMvPolynomial.X Vars_γ * CPoly.CMvPolynomial.X Vars_δ * CPoly.CMvPolynomial.X Vars_β
-      | SRS_Elements_Idx.γ => CPoly.CMvPolynomial.X Vars_γ * CPoly.CMvPolynomial.X Vars_δ * CPoly.CMvPolynomial.X Vars_γ
-      | SRS_Elements_Idx.δ => CPoly.CMvPolynomial.X Vars_γ * CPoly.CMvPolynomial.X Vars_δ * CPoly.CMvPolynomial.X Vars_δ
-      | SRS_Elements_Idx.x_pow i => CPoly.CMvPolynomial.X Vars_γ * CPoly.CMvPolynomial.X Vars_δ * CPoly.CMvPolynomial.X Vars_x ^ (i : ℕ)
-      | SRS_Elements_Idx.x_pow_times_t i => CPoly.CMvPolynomial.X Vars_γ
-                                                  * CPoly.CMvPolynomial.X Vars_x ^ (i : ℕ)
-                                                  * to_CMvPolynomial_Option Vars t
-      | SRS_Elements_Idx.y i => ((CPoly.CMvPolynomial.X Vars_β * CPoly.CMvPolynomial.X Vars_δ) * ( (to_CMvPolynomial_Option Vars (u_stmt i))))
+      | SRS_Elements_Idx.α => CPoly.COrdMvPolynomial.X Vars_γ * CPoly.COrdMvPolynomial.X Vars_δ * CPoly.COrdMvPolynomial.X Vars_α
+      | SRS_Elements_Idx.β => CPoly.COrdMvPolynomial.X Vars_γ * CPoly.COrdMvPolynomial.X Vars_δ * CPoly.COrdMvPolynomial.X Vars_β
+      | SRS_Elements_Idx.γ => CPoly.COrdMvPolynomial.X Vars_γ * CPoly.COrdMvPolynomial.X Vars_δ * CPoly.COrdMvPolynomial.X Vars_γ
+      | SRS_Elements_Idx.δ => CPoly.COrdMvPolynomial.X Vars_γ * CPoly.COrdMvPolynomial.X Vars_δ * CPoly.COrdMvPolynomial.X Vars_δ
+      | SRS_Elements_Idx.x_pow i => CPoly.COrdMvPolynomial.X Vars_γ * CPoly.COrdMvPolynomial.X Vars_δ * CPoly.COrdMvPolynomial.X Vars_x ^ (i : ℕ)
+      | SRS_Elements_Idx.x_pow_times_t i => CPoly.COrdMvPolynomial.X Vars_γ
+                                                  * CPoly.COrdMvPolynomial.X Vars_x ^ (i : ℕ)
+                                                  * to_COrdMvPolynomial_Option Vars t
+      | SRS_Elements_Idx.y i => ((CPoly.COrdMvPolynomial.X Vars_β * CPoly.COrdMvPolynomial.X Vars_δ) * ( (to_COrdMvPolynomial_Option Vars (u_stmt i))))
                                       +
-                                      (CPoly.CMvPolynomial.X Vars_α * CPoly.CMvPolynomial.X Vars_δ) * (to_CMvPolynomial_Option Vars (v_stmt i))
+                                      (CPoly.COrdMvPolynomial.X Vars_α * CPoly.COrdMvPolynomial.X Vars_δ) * (to_COrdMvPolynomial_Option Vars (v_stmt i))
                                       +
-                                      CPoly.CMvPolynomial.X Vars_δ * (to_CMvPolynomial_Option Vars (w_stmt i))
-      | SRS_Elements_Idx.q i => (CPoly.CMvPolynomial.X Vars_β * CPoly.CMvPolynomial.X Vars_γ) * ( to_CMvPolynomial_Option Vars (u_wit i))
+                                      CPoly.COrdMvPolynomial.X Vars_δ * (to_COrdMvPolynomial_Option Vars (w_stmt i))
+      | SRS_Elements_Idx.q i => (CPoly.COrdMvPolynomial.X Vars_β * CPoly.COrdMvPolynomial.X Vars_γ) * ( to_COrdMvPolynomial_Option Vars (u_wit i))
                                       +
-                                      (CPoly.CMvPolynomial.X Vars_α * CPoly.CMvPolynomial.X Vars_γ) * (to_CMvPolynomial_Option Vars (v_wit i))
+                                      (CPoly.COrdMvPolynomial.X Vars_α * CPoly.COrdMvPolynomial.X Vars_γ) * (to_COrdMvPolynomial_Option Vars (v_wit i))
                                       +
-                                      CPoly.CMvPolynomial.X Vars_γ * to_CMvPolynomial_Option Vars (w_wit i)
+                                      CPoly.COrdMvPolynomial.X Vars_γ * to_COrdMvPolynomial_Option Vars (w_wit i)
       -- Note that the polynomials here have been multiplied through by γδ
     Proof := Proof_Idx
     EqualityChecks := Unit

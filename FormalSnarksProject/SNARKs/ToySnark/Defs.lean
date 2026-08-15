@@ -4,6 +4,7 @@ import Mathlib.Algebra.Polynomial.Div
 import FormalSnarksProject.ToMathlib.OptionEquivRight
 import Mathlib.Algebra.MvPolynomial.Equiv
 import FormalSnarksProject.SoundnessTactic.SoundnessProver
+import FormalSnarksProject.ToMathlib.FinEnumOrd
 
 open scoped BigOperators
 
@@ -20,6 +21,10 @@ inductive Vars : Type where
 deriving Repr, BEq, DecidableEq
 
 instance : FinEnum Vars := .ofList [.α, .β] (fun x => by cases x <;> simp)
+
+instance : Ord Vars := FinEnum.toOrd
+instance : Std.TransOrd Vars := FinEnum.toOrd.transOrd
+instance : Std.LawfulEqOrd Vars := FinEnum.toOrd.lawfulEqOrd
 
 inductive StmtEntries : Type where
   | x : StmtEntries
@@ -100,11 +105,11 @@ A description of a Toy SNARK
     SRSElements_G1 := SRS_Elements_G1_Idx
     SRSElements_G2 := SRS_Elements_G2_Idx
     SRSElementValue_G1 := fun SRS_idx => match SRS_idx with
-      | SRS_Elements_G1_Idx.α => CPoly.CMvPolynomial.X Vars_α
-      | SRS_Elements_G1_Idx.β => CPoly.CMvPolynomial.X Vars_β
+      | SRS_Elements_G1_Idx.α => CPoly.COrdMvPolynomial.X Vars_α
+      | SRS_Elements_G1_Idx.β => CPoly.COrdMvPolynomial.X Vars_β
     SRSElementValue_G2 := fun SRS_idx => match SRS_idx with
-      | SRS_Elements_G2_Idx.α => CPoly.CMvPolynomial.X Vars_α
-      | SRS_Elements_G2_Idx.β => CPoly.CMvPolynomial.X Vars_β
+      | SRS_Elements_G2_Idx.α => CPoly.COrdMvPolynomial.X Vars_α
+      | SRS_Elements_G2_Idx.β => CPoly.COrdMvPolynomial.X Vars_β
     Proof_G1 := Proof_G1_Idx
     Proof_G2 := Proof_G2_Idx
     EqualityChecks := Unit

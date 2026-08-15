@@ -121,21 +121,21 @@ lemma soundness
 
   -- Step 1: Obtain the coefficient equations of the mv_polynomials
   --
-  -- Bridge helpers: `CPoly.polyRingEquiv` (whose coercion is `CPoly.fromCMvPolynomial`) carries
-  -- the computable `CMvPolynomial` verification equations over to mathlib's `MvPolynomial`.
+  -- Bridge helpers: `CPoly.COrdMvPolynomial.ordPolyRingEquiv` (whose coercion is `CPoly.COrdMvPolynomial.fromCOrdMvPolynomial`) carries
+  -- the computable `COrdMvPolynomial` verification equations over to mathlib's `MvPolynomial`.
   have equivC : ∀ c : F,
-      (CPoly.polyRingEquiv (σ := Option Vars) (R := F)) (CPoly.CMvPolynomial.C c) = C c :=
-    fun c => CPoly.fromCMvPolynomial_C c
+      (CPoly.COrdMvPolynomial.ordPolyRingEquiv (σ := Option Vars) (R := F)) (CPoly.COrdMvPolynomial.C c) = C c :=
+    fun c => CPoly.COrdMvPolynomial.fromCOrdMvPolynomial_C c
   have equivX : ∀ v : Option Vars,
-      (CPoly.polyRingEquiv (σ := Option Vars) (R := F)) (CPoly.CMvPolynomial.X v) = X v :=
-    fun v => CPoly.fromCMvPolynomial_X v
+      (CPoly.COrdMvPolynomial.ordPolyRingEquiv (σ := Option Vars) (R := F)) (CPoly.COrdMvPolynomial.X v) = X v :=
+    fun v => CPoly.COrdMvPolynomial.fromCOrdMvPolynomial_X v
   have equivOpt : ∀ p : CompPoly.CPolynomial F,
-      (CPoly.polyRingEquiv (σ := Option Vars) (R := F)) (to_CMvPolynomial_Option Vars p) =
+      (CPoly.COrdMvPolynomial.ordPolyRingEquiv (σ := Option Vars) (R := F)) (to_COrdMvPolynomial_Option Vars p) =
         to_MvPolynomial_Option Vars p.toPoly :=
-    fun p => fromCMvPolynomial_to_CMvPolynomial_Option p
+    fun p => fromCOrdMvPolynomial_to_COrdMvPolynomial_Option p
 
   -- Expand the `FinEnum` index enumerations into their concrete defining lists (still in the
-  -- computable `CMvPolynomial` world), splitting the sums along the way.
+  -- computable `COrdMvPolynomial` world), splitting the sums along the way.
   simp only [toList_PairingsI_Idx, toList_PairingsII_Idx, toList_PairingsIII_Idx,
     toList_PairingsIV_Idx, toList_PairingsV_Idx, toList_Proof_G1_Idx, toList_Proof_G2_Idx,
     toList_SRS_Elements_Idx,
@@ -143,12 +143,12 @@ lemma soundness
     List.sum_append_add_monoid, List.sum_cons, List.sum_nil] at eqnI eqnII eqnIII eqnIV eqnV eqnVI
 
   -- Transport the verification equations to mathlib's `MvPolynomial`
-  replace eqnI := congr_arg (CPoly.polyRingEquiv (σ := Option Vars) (R := F)) eqnI
-  replace eqnII := congr_arg (CPoly.polyRingEquiv (σ := Option Vars) (R := F)) eqnII
-  replace eqnIII := congr_arg (CPoly.polyRingEquiv (σ := Option Vars) (R := F)) eqnIII
-  replace eqnIV := congr_arg (CPoly.polyRingEquiv (σ := Option Vars) (R := F)) eqnIV
-  replace eqnV := congr_arg (CPoly.polyRingEquiv (σ := Option Vars) (R := F)) eqnV
-  replace eqnVI := congr_arg (CPoly.polyRingEquiv (σ := Option Vars) (R := F)) eqnVI
+  replace eqnI := congr_arg (CPoly.COrdMvPolynomial.ordPolyRingEquiv (σ := Option Vars) (R := F)) eqnI
+  replace eqnII := congr_arg (CPoly.COrdMvPolynomial.ordPolyRingEquiv (σ := Option Vars) (R := F)) eqnII
+  replace eqnIII := congr_arg (CPoly.COrdMvPolynomial.ordPolyRingEquiv (σ := Option Vars) (R := F)) eqnIII
+  replace eqnIV := congr_arg (CPoly.COrdMvPolynomial.ordPolyRingEquiv (σ := Option Vars) (R := F)) eqnIV
+  replace eqnV := congr_arg (CPoly.COrdMvPolynomial.ordPolyRingEquiv (σ := Option Vars) (R := F)) eqnV
+  replace eqnVI := congr_arg (CPoly.COrdMvPolynomial.ordPolyRingEquiv (σ := Option Vars) (R := F)) eqnVI
   simp only [map_add, map_mul, map_neg, map_one, map_zero, map_pow, map_list_sum,
     List.map_map, Function.comp_def, equivC, equivX,
     equivOpt] at eqnI eqnII eqnIII eqnIV eqnV eqnVI

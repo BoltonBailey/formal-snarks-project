@@ -1,5 +1,6 @@
 import FormalSnarksProject.Models.SymbolicAGMScheme
 import FormalSnarksProject.SNARKs.ToySnark.Defs
+import FormalSnarksProject.ToMathlib.FinEnumOrd
 
 /-!
 # ToySnark, symbolically
@@ -35,7 +36,7 @@ Correspondence with the manual proof in `Soundness.lean`:
 (the disjunction is encoded as a product: over a field, a product is zero iff a factor is).
 -/
 
-open CPoly CPoly.CMvPolynomial
+open CPoly CPoly.COrdMvPolynomial
 
 namespace ToySnark
 
@@ -54,6 +55,10 @@ deriving DecidableEq
 
 instance : FinEnum Var := .ofList [.Pf_α, .Pf_β, .x, .y, .z] (fun v => by cases v <;> simp)
 
+instance : Ord Var := FinEnum.toOrd
+instance : Std.TransOrd Var := FinEnum.toOrd.transOrd
+instance : Std.LawfulEqOrd Var := FinEnum.toOrd.lawfulEqOrd
+
 instance : Repr Var := ⟨fun v _ => match v with
   | .Pf_α => "Pf_α" | .Pf_β => "Pf_β" | .x => "x" | .y => "y" | .z => "z"⟩
 
@@ -61,12 +66,16 @@ instance : Repr Var := ⟨fun v _ => match v with
 variables. -/
 abbrev SymVars : Type := Vars ⊕ Var
 
+instance : Ord SymVars := FinEnum.toOrd
+instance : Std.TransOrd SymVars := FinEnum.toOrd.transOrd
+instance : Std.LawfulEqOrd SymVars := FinEnum.toOrd.lawfulEqOrd
+
 variable (F : Type) [Field F] [BEq F] [LawfulBEq F]
 
 /-- The symbolic verification-check polynomial, mirroring the verifier of `Defs.lean` exactly:
 the `lhs` pairing is `e(Pf, x·[α] + y·[β])` with `Pf = Pf_α·α + Pf_β·β` its AGM expansion, the
 `rhs` pairing is `e(z·[α], −[β])`. -/
-def symCheckPoly : CMvPolynomial (SymVars) F :=
+def symCheckPoly : COrdMvPolynomial (SymVars) F :=
   (X (Sum.inr Var.Pf_α) * X (Sum.inl Vars.α) + X (Sum.inr Var.Pf_β) * X (Sum.inl Vars.β))
       * (X (Sum.inr Var.x) * X (Sum.inl Vars.α) + X (Sum.inr Var.y) * X (Sum.inl Vars.β))
     + (X (Sum.inr Var.z) * X (Sum.inl Vars.α)) * (- X (Sum.inl Vars.β))
@@ -75,14 +84,14 @@ def symCheckPoly : CMvPolynomial (SymVars) F :=
 respect to the toxic-waste monomials (`α²`, `αβ`, `β²`), each a polynomial in the ideal
 variables. These are the abstract counterparts of the `h20`, `h11`, `h02` equations of the manual
 soundness proof. -/
-def generators : List (CMvPolynomial Var F) :=
+def generators : List (COrdMvPolynomial Var F) :=
   SymbolicAGMScheme.coeffGenerators (symCheckPoly F)
 
 /-- The target polynomial of the soundness problem: the relation
 `A·y = z ∨ B·x = z` of `Soundness.lean`, with the witness `(A, B)` read off the prover's
 coefficients `(Pf_α, Pf_β)` (matching the extractor of the manual proof) and the disjunction
 encoded as a product (zero iff one of the factors is, over a field). -/
-def target : CMvPolynomial Var F :=
+def target : COrdMvPolynomial Var F :=
   (X Var.Pf_α * X Var.y - X Var.z) * (X Var.Pf_β * X Var.x - X Var.z)
 
 /-- **The abstract soundness problem of ToySnark**: a polynomial ideal-membership problem over

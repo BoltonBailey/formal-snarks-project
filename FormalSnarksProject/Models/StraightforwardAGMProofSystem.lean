@@ -1,9 +1,10 @@
 import FormalSnarksProject.Models.AGMProofSystemInstantiation
-import CompPoly.Multivariate.CMvPolynomialEvalLemmas
-import CompPoly.Multivariate.Operations
+import FormalSnarksProject.ToMathlib.FinEnumOrd
+import CompPoly.OrdMultivariate.COrdMvPolynomialEvalLemmas
+import CompPoly.OrdMultivariate.Operations
 
 open CPoly
-open CPoly.CMvPolynomial
+open CPoly.COrdMvPolynomial
 
 /-!
 # Straightforward linear PCP SNARK schemes
@@ -27,7 +28,7 @@ The straightforward shape, as captured here, is:
 * the SRS element index of each group is split into a fixed family of *components*
   (`SRSComponents_G*`), each component being a `Fin`-indexed family whose length is a function of the
   instance — so the index is `Σ c : SRSComponents_G*, Fin (SRSElements_G*_Lengths c aux)`;
-* each SRS element is a multivariate polynomial over the samples (`CMvPolynomial (Option Vars) F`),
+* each SRS element is a multivariate polynomial over the samples (`COrdMvPolynomial (Option Vars) F`),
   in practice a sum of products of toxic-waste monomials with circuit polynomials cast into the
   sample ring;
 * the proof elements, equality checks, and pairings are arbitrary finite index types;
@@ -43,6 +44,9 @@ structure StraightforwardAGMProofSystem (F : Type) [Field F] [BEq F] [LawfulBEq 
   extra `none` introduced by `Option Vars`. -/
   Vars : Type
   [Vars_FinEnum : FinEnum Vars]
+  [Vars_Ord : Ord Vars]
+  [Vars_TransOrd : Std.TransOrd Vars]
+  [Vars_LawfulEqOrd : Std.LawfulEqOrd Vars]
   /-- Bound on the degree to which each bounded sample appears in the SRS. -/
   degreeBound : Vars → ℕ
   /-- The statement size (number of public field elements), read off the circuit data. -/
@@ -61,10 +65,10 @@ structure StraightforwardAGMProofSystem (F : Type) [Field F] [BEq F] [LawfulBEq 
   /-- The value of the `j`th element of the `c` `G1` SRS component, as a multivariable polynomial in
   the samples `Option Vars`. -/
   SRSElementValue_G1 : (aux : Aux) → (c : SRSComponents_G1) →
-    Fin (SRSElements_G1_Lengths c aux) → CMvPolynomial (Option Vars) F
+    Fin (SRSElements_G1_Lengths c aux) → COrdMvPolynomial (Option Vars) F
   /-- Similarly for `G2`. -/
   SRSElementValue_G2 : (aux : Aux) → (c : SRSComponents_G2) →
-    Fin (SRSElements_G2_Lengths c aux) → CMvPolynomial (Option Vars) F
+    Fin (SRSElements_G2_Lengths c aux) → COrdMvPolynomial (Option Vars) F
 
   /-- A type indexing proof elements in the left group. -/
   Proof_G1 : Type
@@ -98,6 +102,9 @@ namespace StraightforwardAGMProofSystem
 
 attribute [instance]
   StraightforwardAGMProofSystem.Vars_FinEnum
+  StraightforwardAGMProofSystem.Vars_Ord
+  StraightforwardAGMProofSystem.Vars_TransOrd
+  StraightforwardAGMProofSystem.Vars_LawfulEqOrd
   StraightforwardAGMProofSystem.SRSComponents_G1_FinEnum
   StraightforwardAGMProofSystem.SRSComponents_G2_FinEnum
   StraightforwardAGMProofSystem.Proof_G1_FinEnum
@@ -199,9 +206,27 @@ instance instFinEnumSymVars (𝓟 : AGMProofSystemInstantiation F) (StmtIdx : Ty
     FinEnum (𝓟.SymVars StmtIdx) :=
   inferInstanceAs (FinEnum (𝓟.Sample ⊕ 𝓟.IdealVars StmtIdx))
 
+/-! The computable polynomials over the (sum-typed) symbolic variable spaces need a lawful
+ordering on the variable type; core provides no `Ord` for sum types, so pull one back from the
+`FinEnum` enumeration. -/
+
+instance instOrdIdealVars (𝓟 : AGMProofSystemInstantiation F) (StmtIdx : Type)
+    [FinEnum StmtIdx] : Ord (𝓟.IdealVars StmtIdx) := FinEnum.toOrd
+instance instTransOrdIdealVars (𝓟 : AGMProofSystemInstantiation F) (StmtIdx : Type)
+    [FinEnum StmtIdx] : Std.TransOrd (𝓟.IdealVars StmtIdx) := FinEnum.toOrd.transOrd
+instance instLawfulEqOrdIdealVars (𝓟 : AGMProofSystemInstantiation F) (StmtIdx : Type)
+    [FinEnum StmtIdx] : Std.LawfulEqOrd (𝓟.IdealVars StmtIdx) := FinEnum.toOrd.lawfulEqOrd
+
+instance instOrdSymVars (𝓟 : AGMProofSystemInstantiation F) (StmtIdx : Type)
+    [FinEnum StmtIdx] : Ord (𝓟.SymVars StmtIdx) := FinEnum.toOrd
+instance instTransOrdSymVars (𝓟 : AGMProofSystemInstantiation F) (StmtIdx : Type)
+    [FinEnum StmtIdx] : Std.TransOrd (𝓟.SymVars StmtIdx) := FinEnum.toOrd.transOrd
+instance instLawfulEqOrdSymVars (𝓟 : AGMProofSystemInstantiation F) (StmtIdx : Type)
+    [FinEnum StmtIdx] : Std.LawfulEqOrd (𝓟.SymVars StmtIdx) := FinEnum.toOrd.lawfulEqOrd
+
 /-- Embed an SRS polynomial (over the samples) into the symbolic ring. -/
 noncomputable def symEmbed (𝓟 : AGMProofSystemInstantiation F) (StmtIdx : Type) [FinEnum StmtIdx]
-    (p : CMvPolynomial 𝓟.Sample F) : CMvPolynomial (𝓟.SymVars StmtIdx) F :=
+    (p : COrdMvPolynomial 𝓟.Sample F) : COrdMvPolynomial (𝓟.SymVars StmtIdx) F :=
   rename Sum.inl p
 
 /-- A verifier coefficient `g : (StmtIdx → F) → F`, rendered symbolically as a polynomial in the
@@ -210,22 +235,22 @@ straightforward schemes (their coefficients are constants or single statement en
 reconstruction is `g 0 + ∑ᵢ (g eᵢ - g 0) · Xᵢ`. -/
 noncomputable def symStmtCoeff (𝓟 : AGMProofSystemInstantiation F) (StmtIdx : Type)
     [FinEnum StmtIdx] [DecidableEq StmtIdx] (g : (StmtIdx → F) → F) :
-    CMvPolynomial (𝓟.SymVars StmtIdx) F :=
-  CMvPolynomial.C (g (fun _ => 0))
+    COrdMvPolynomial (𝓟.SymVars StmtIdx) F :=
+  COrdMvPolynomial.C (g (fun _ => 0))
     + ((FinEnum.toList StmtIdx).map fun i =>
-        CMvPolynomial.C (g (fun j => if j = i then 1 else 0) - g (fun _ => 0))
+        COrdMvPolynomial.C (g (fun j => if j = i then 1 else 0) - g (fun _ => 0))
           * X (Sum.inr (Sum.inr i))).sum
 
 /-- The symbolic `G1` proof element: the prover's coefficient on each SRS element is a fresh
 indeterminate. -/
 noncomputable def sym_proof_element_G1 (𝓟 : AGMProofSystemInstantiation F) (StmtIdx : Type)
-    [FinEnum StmtIdx] (pf : 𝓟.Proof_G1) : CMvPolynomial (𝓟.SymVars StmtIdx) F :=
+    [FinEnum StmtIdx] (pf : 𝓟.Proof_G1) : COrdMvPolynomial (𝓟.SymVars StmtIdx) F :=
   ((FinEnum.toList 𝓟.SRSElements_G1).map fun srs =>
     X (Sum.inr (Sum.inl (Sum.inl (pf, srs)))) * 𝓟.symEmbed StmtIdx (𝓟.SRSElementValue_G1 srs)).sum
 
 /-- The symbolic `G2` proof element. -/
 noncomputable def sym_proof_element_G2 (𝓟 : AGMProofSystemInstantiation F) (StmtIdx : Type)
-    [FinEnum StmtIdx] (pf : 𝓟.Proof_G2) : CMvPolynomial (𝓟.SymVars StmtIdx) F :=
+    [FinEnum StmtIdx] (pf : 𝓟.Proof_G2) : COrdMvPolynomial (𝓟.SymVars StmtIdx) F :=
   ((FinEnum.toList 𝓟.SRSElements_G2).map fun srs =>
     X (Sum.inr (Sum.inl (Sum.inr (pf, srs)))) * 𝓟.symEmbed StmtIdx (𝓟.SRSElementValue_G2 srs)).sum
 
@@ -235,7 +260,7 @@ via `symStmtCoeff`. `toStmt` recovers the proof system's statement type from a v
 entries (the identity for the straightforward schemes, whose statement is already `StmtIdx → F`). -/
 noncomputable def sym_pairing_poly (𝓟 : AGMProofSystemInstantiation F) (StmtIdx : Type)
     [FinEnum StmtIdx] [DecidableEq StmtIdx] (toStmt : (StmtIdx → F) → 𝓟.Stmt)
-    (k : 𝓟.EqualityChecks) (pairing : 𝓟.Pairings k) : CMvPolynomial (𝓟.SymVars StmtIdx) F :=
+    (k : 𝓟.EqualityChecks) (pairing : 𝓟.Pairings k) : COrdMvPolynomial (𝓟.SymVars StmtIdx) F :=
   (((FinEnum.toList 𝓟.Proof_G1).map fun pf =>
         𝓟.symStmtCoeff StmtIdx (fun s => 𝓟.verificationPairingProof_G1 (toStmt s) k pairing pf)
           * 𝓟.sym_proof_element_G1 StmtIdx pf).sum
@@ -253,7 +278,7 @@ noncomputable def sym_pairing_poly (𝓟 : AGMProofSystemInstantiation F) (StmtI
 samples and the ideal indeterminates whose vanishing (over random samples) is the verifier check. -/
 noncomputable def sym_check_poly (𝓟 : AGMProofSystemInstantiation F) (StmtIdx : Type)
     [FinEnum StmtIdx] [DecidableEq StmtIdx] (toStmt : (StmtIdx → F) → 𝓟.Stmt)
-    (k : 𝓟.EqualityChecks) : CMvPolynomial (𝓟.SymVars StmtIdx) F :=
+    (k : 𝓟.EqualityChecks) : COrdMvPolynomial (𝓟.SymVars StmtIdx) F :=
   ((FinEnum.toList (𝓟.Pairings k)).map fun pairing =>
     𝓟.sym_pairing_poly StmtIdx toStmt k pairing).sum
 
@@ -271,31 +296,31 @@ passes (over random samples) iff all of these vanish, so they generate the ideal
 decides soundness. -/
 noncomputable def verificationGenerators (𝓟 : AGMProofSystemInstantiation F) (StmtIdx : Type)
     [FinEnum StmtIdx] [DecidableEq StmtIdx] (toStmt : (StmtIdx → F) → 𝓟.Stmt)
-    (k : 𝓟.EqualityChecks) : List (CMvPolynomial (𝓟.IdealVars StmtIdx) F) :=
+    (k : 𝓟.EqualityChecks) : List (COrdMvPolynomial (𝓟.IdealVars StmtIdx) F) :=
   let p := 𝓟.sym_check_poly StmtIdx toStmt k
-  -- `CMvPolynomial.support` yields the monomials as `Finsupp`s; split each into its toxic-waste and
+  -- `COrdMvPolynomial.support` yields the monomials as `Finsupp`s; split each into its toxic-waste and
   -- ideal-indeterminate parts, then group by the toxic-waste part.
-  let terms : List ((𝓟.Sample →₀ ℕ) × CMvPolynomial (𝓟.IdealVars StmtIdx) F) :=
+  let terms : List ((𝓟.Sample →₀ ℕ) × COrdMvPolynomial (𝓟.IdealVars StmtIdx) F) :=
     p.support.toList.map fun m =>
       let split := Finsupp.sumFinsuppAddEquivProdFinsupp m
       (split.1,
-        CMvPolynomial.monomial (CMvMonomial.ofFinsupp split.2) (p.coeff (CMvMonomial.ofFinsupp m)))
+        COrdMvPolynomial.monomial (COrdMvMonomial.ofFinsupp split.2) (p.coeff (COrdMvMonomial.ofFinsupp m)))
   (terms.foldl (fun acc t => groupAdd acc t.1 t.2) []).map (·.2)
 
 /-- A polynomial ideal-membership problem over the variable type `V`: it holds iff `target` lies in
 the ideal generated by `generators`. (For the soundness reduction, `V` is `𝓟.IdealVars StmtIdx`.) -/
-structure IdealMembershipProblem (V : Type) [FinEnum V]
-    (R : Type) [Field R] [BEq R] [LawfulBEq R] where
+structure IdealMembershipProblem (V : Type) [FinEnum V] [Ord V] [Std.TransOrd V]
+    [Std.LawfulEqOrd V] (R : Type) [Field R] [BEq R] [LawfulBEq R] where
   /-- The generators of the soundness ideal (the toxic-waste coefficients of the verifier checks). -/
-  generators : List (CMvPolynomial V R)
+  generators : List (COrdMvPolynomial V R)
   /-- The polynomial encoding the relation, whose membership in the ideal is to be decided. -/
-  target : CMvPolynomial V R
+  target : COrdMvPolynomial V R
 
 /-- Assemble the soundness ideal-membership problem: the generators collected over every equality
 check (statement treated symbolically), paired with the supplied relation `target`. -/
 noncomputable def soundnessIdealProblem (𝓟 : AGMProofSystemInstantiation F) (StmtIdx : Type)
     [FinEnum StmtIdx] [DecidableEq StmtIdx] [FinEnum 𝓟.EqualityChecks]
-    (toStmt : (StmtIdx → F) → 𝓟.Stmt) (target : CMvPolynomial (𝓟.IdealVars StmtIdx) F) :
+    (toStmt : (StmtIdx → F) → 𝓟.Stmt) (target : COrdMvPolynomial (𝓟.IdealVars StmtIdx) F) :
     IdealMembershipProblem (𝓟.IdealVars StmtIdx) F where
   generators :=
     (FinEnum.toList 𝓟.EqualityChecks).flatMap (𝓟.verificationGenerators StmtIdx toStmt)

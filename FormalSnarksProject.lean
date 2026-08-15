@@ -31,7 +31,7 @@ import FormalSnarksProject.SNARKs.ToySnark.Completeness
 import FormalSnarksProject.SNARKs.ToySnark.Defs
 import FormalSnarksProject.SNARKs.ToySnark.Soundness
 import FormalSnarksProject.SNARKs.ToySnark.Symbolic
-import FormalSnarksProject.ToMathlib.CMvPolynomialRepr
+import FormalSnarksProject.ToMathlib.COrdMvPolynomialRepr
 import FormalSnarksProject.ToMathlib.FinEnumToList
 import FormalSnarksProject.ToMathlib.ForTransformations
 import FormalSnarksProject.ToMathlib.OptionEquivRight

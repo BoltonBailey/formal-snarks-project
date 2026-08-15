@@ -32,7 +32,7 @@ termination is nevertheless enforced by fuel, since none of this needs to be pro
 final certificate check is trusted, and that is verified.
 -/
 
-open CPoly CPoly.CMvPolynomial
+open CPoly CPoly.COrdMvPolynomial
 
 namespace AGMProofSystemInstantiation
 
@@ -52,12 +52,13 @@ ring). -/
 def certValue {R : Type} [CommRing R] (cofactors generators : List R) : R :=
   ((cofactors.zip generators).map fun cg => cg.1 * cg.2).sum
 
-variable {V : Type} [FinEnum V] {F : Type} [Field F] [BEq F] [LawfulBEq F]
+variable {V : Type} [FinEnum V] [Ord V] [Std.TransOrd V] [Std.LawfulEqOrd V]
+  {F : Type} [Field F] [BEq F] [LawfulBEq F]
 
 /-- **The certificate check**: does `target ^ k = ∑ᵢ cofactorᵢ · generatorᵢ` hold? This is a
 computable `Bool`; `target_mem_radical_of_certifies` is its soundness. -/
 def certifies (prob : IdealMembershipProblem V F) (k : ℕ)
-    (cofactors : List (CMvPolynomial V F)) : Bool :=
+    (cofactors : List (COrdMvPolynomial V F)) : Bool :=
   decide (prob.target ^ k = certValue cofactors prob.generators)
 
 /-- A `certValue` linear combination lies in the ideal spanned by the generators. -/
@@ -78,7 +79,7 @@ lemma certValue_mem_span {R : Type} [CommRing R] :
 radical of the generator ideal — the exact hypothesis of
 `SymbolicAGMScheme.evalSums_target_eq_zero`. -/
 theorem target_mem_radical_of_certifies (prob : IdealMembershipProblem V F) (k : ℕ)
-    (cofactors : List (CMvPolynomial V F)) (h : prob.certifies k cofactors = true) :
+    (cofactors : List (COrdMvPolynomial V F)) (h : prob.certifies k cofactors = true) :
     prob.target ∈ (Ideal.span {g | g ∈ prob.generators}).radical := by
   rw [certifies, decide_eq_true_eq] at h
   rw [Ideal.mem_radical_iff]
@@ -92,68 +93,84 @@ reduction of `target ^ k` composes into a certificate over the original generato
 `certifies` then re-checks. Nothing in this section is part of the trusted base. -/
 
 /-- The total degree of a monomial. -/
-def totalDegree (m : CMvMonomial V) : ℕ :=
-  (List.finRange (FinEnum.card V)).foldl (fun a j => a + m.get j) 0
+def totalDegree (m : COrdMvMonomial V) : ℕ :=
+  m.totalDegree
+
+/-- Graded-reverse-lexicographic tiebreak on (reversed, i.e. descending-variable) entry lists:
+at the largest variable where the exponents differ, the monomial with the *smaller* exponent is
+the larger one. Canonical entry lists carry no zero exponents, so a variable present in only one
+list is a differing variable with the other exponent `0`. -/
+def grevlexTiebreak : List (V × ℕ) → List (V × ℕ) → Ordering
+  | [], [] => .eq
+  | _ :: _, [] => .lt
+  | [], _ :: _ => .gt
+  | (v₁, e₁) :: t₁, (v₂, e₂) :: t₂ =>
+    match compare v₁ v₂ with
+    | .lt => .gt -- largest differing variable is `v₂`, where `m₁` has exponent `0 < e₂`
+    | .gt => .lt
+    | .eq =>
+      match compare e₂ e₁ with
+      | .eq => grevlexTiebreak t₁ t₂
+      | o => o
+  termination_by l₁ l₂ => l₁.length + l₂.length
 
 /-- Graded reverse lexicographic comparison of monomials — the standard order for Gröbner
 basis computations (it tends to produce far smaller bases than the lexicographic order the
 underlying tree map is keyed by). -/
-def monomialCompare (m₁ m₂ : CMvMonomial V) : Ordering :=
+def monomialCompare (m₁ m₂ : COrdMvMonomial V) : Ordering :=
   match compare (totalDegree m₁) (totalDegree m₂) with
   | .eq =>
-    -- Same degree: the monomial with the *smaller* exponent at the *last* differing
-    -- variable is the larger one.
-    (List.finRange (FinEnum.card V)).reverse.foldl
-      (fun acc j => match acc with
-        | .eq => compare (m₂.get j) (m₁.get j)
-        | o => o)
-      .eq
+    -- Same degree: entry lists are sorted ascending by variable, so walk them reversed.
+    grevlexTiebreak m₁.entryList.reverse m₂.entryList.reverse
   | o => o
 
 /-- The largest monomial of `p` in the grevlex order, or `none` for the zero polynomial. -/
-def leadingMonomial (p : CMvPolynomial V F) : Option (CMvMonomial V) :=
-  (Lawful.monomials p).foldl
+def leadingMonomial (p : COrdMvPolynomial V F) : Option (COrdMvMonomial V) :=
+  (OrdLawful.monomials p).foldl
     (fun acc m => match acc with
       | none => some m
       | some m' => if monomialCompare m' m = Ordering.lt then some m else some m')
     none
 
 /-- Does the monomial `mg` divide the monomial `m` (componentwise `≤` on exponents)? -/
-def monomialDivides (mg m : CMvMonomial V) : Bool :=
-  (List.finRange (FinEnum.card V)).all fun j => decide (mg.get j ≤ m.get j)
+def monomialDivides (mg m : COrdMvMonomial V) : Bool :=
+  COrdMvMonomial.divides mg m
 
 /-- The quotient monomial `m / mg` (componentwise exponent subtraction; meaningful when
 `monomialDivides mg m`). -/
-def monomialQuot (m mg : CMvMonomial V) : CMvMonomial V :=
-  Vector.ofFn fun j => m.get j - mg.get j
+def monomialQuot (m mg : COrdMvMonomial V) : COrdMvMonomial V :=
+  m / mg
 
-/-- The least common multiple of two monomials (componentwise `max` on exponents). -/
-def monomialLcm (m₁ m₂ : CMvMonomial V) : CMvMonomial V :=
-  Vector.ofFn fun j => max (m₁.get j) (m₂.get j)
+/-- The least common multiple of two monomials (componentwise `max` on exponents):
+`e₁ + max (e₂ - e₁) 0 = max e₁ e₂`, using that monomial `/` truncates at zero. -/
+def monomialLcm (m₁ m₂ : COrdMvMonomial V) : COrdMvMonomial V :=
+  m₁ + m₂ / m₁
 
 /-- Are two monomials coprime (no variable occurs in both)? Buchberger's first criterion:
-the S-polynomial of two basis elements with coprime leading monomials reduces to zero. -/
-def monomialCoprime (m₁ m₂ : CMvMonomial V) : Bool :=
-  (List.finRange (FinEnum.card V)).all fun j => decide (min (m₁.get j) (m₂.get j) = 0)
+the S-polynomial of two basis elements with coprime leading monomials reduces to zero.
+Canonical entry lists carry no zero exponents, so it suffices that no variable of `m₁` occurs
+in `m₂`. -/
+def monomialCoprime (m₁ m₂ : COrdMvMonomial V) : Bool :=
+  m₁.entryList.all fun ve => decide (m₂.degreeOf ve.1 = 0)
 
 /-- An element of the working basis: a *monic* polynomial, its leading monomial, and its
 expression as a linear combination of the original generators (`poly = ∑ᵢ cofᵢ · genᵢ`). -/
-structure BasisElem (V F : Type) [FinEnum V] [Zero F] where
-  poly : CMvPolynomial V F
-  lm : CMvMonomial V
-  cof : List (CMvPolynomial V F)
+structure BasisElem (V F : Type) [Ord V] [Std.TransOrd V] [Zero F] where
+  poly : COrdMvPolynomial V F
+  lm : COrdMvMonomial V
+  cof : List (COrdMvPolynomial V F)
 
 /-- `a + q • b`, componentwise on cofactor vectors. -/
-def cofAxpy (q : CMvPolynomial V F) (a b : List (CMvPolynomial V F)) :
-    List (CMvPolynomial V F) :=
+def cofAxpy (q : COrdMvPolynomial V F) (a b : List (COrdMvPolynomial V F)) :
+    List (COrdMvPolynomial V F) :=
   List.zipWith (fun x y => x + q * y) a b
 
 /-- Fuelled normal form of `p` modulo the basis, tracking cofactors: returns `(r, cof)` with
 (when everything is in range of the fuel) `p = r + ∑ᵢ cofᵢ · genᵢ` and no monomial of `r`
 divisible by a basis leading monomial. `cof₀` is the starting accumulator. -/
 def normalForm (basis : Array (BasisElem V F)) :
-    ℕ → CMvPolynomial V F → List (CMvPolynomial V F) →
-      CMvPolynomial V F × List (CMvPolynomial V F)
+    ℕ → COrdMvPolynomial V F → List (COrdMvPolynomial V F) →
+      COrdMvPolynomial V F × List (COrdMvPolynomial V F)
   | 0, p, cof => (p, cof)
   | fuel + 1, p, cof =>
     match leadingMonomial p with
@@ -162,22 +179,22 @@ def normalForm (basis : Array (BasisElem V F)) :
       match basis.findSome? (fun b => if monomialDivides b.lm m then some b else none) with
       | some b =>
         -- Basis elements are monic, so the quotient coefficient is just `p`'s coefficient.
-        let q : CMvPolynomial V F := CMvPolynomial.monomial (monomialQuot m b.lm) (coeff m p)
+        let q : COrdMvPolynomial V F := COrdMvPolynomial.monomial (monomialQuot m b.lm) (coeff m p)
         normalForm basis fuel (p - q * b.poly) (cofAxpy q cof b.cof)
       | none =>
         -- The leading term is irreducible: set it aside and continue below it.
-        let lt : CMvPolynomial V F := CMvPolynomial.monomial m (coeff m p)
+        let lt : COrdMvPolynomial V F := COrdMvPolynomial.monomial m (coeff m p)
         let (r, cof') := normalForm basis fuel (p - lt) cof
         (r + lt, cof')
 
 /-- Make a polynomial (paired with its cofactor vector) monic, and expose its leading
 monomial; `none` for the zero polynomial. -/
-def monicize (p : CMvPolynomial V F) (cof : List (CMvPolynomial V F)) :
+def monicize (p : COrdMvPolynomial V F) (cof : List (COrdMvPolynomial V F)) :
     Option (BasisElem V F) :=
   match leadingMonomial p with
   | none => none
   | some m =>
-    let c : CMvPolynomial V F := CMvPolynomial.C (coeff m p)⁻¹
+    let c : COrdMvPolynomial V F := COrdMvPolynomial.C (coeff m p)⁻¹
     some ⟨c * p, m, cof.map (c * ·)⟩
 
 /-- The pair queue entries for the S-polynomials of a new basis element against the existing
@@ -202,8 +219,8 @@ def buchberger : ℕ → Array (BasisElem V F) → List (ℕ × ℕ × ℕ) → 
     match basis[best.2.1]?, basis[best.2.2]? with
     | some bi, some bj =>
       let γ := monomialLcm bi.lm bj.lm
-      let qi : CMvPolynomial V F := CMvPolynomial.monomial (monomialQuot γ bi.lm) 1
-      let qj : CMvPolynomial V F := CMvPolynomial.monomial (monomialQuot γ bj.lm) 1
+      let qi : COrdMvPolynomial V F := COrdMvPolynomial.monomial (monomialQuot γ bi.lm) 1
+      let qj : COrdMvPolynomial V F := COrdMvPolynomial.monomial (monomialQuot γ bj.lm) 1
       let s := qi * bi.poly - qj * bj.poly
       let scof := cofAxpy (-qj) (cofAxpy qi (List.replicate bi.cof.length 0) bi.cof) bj.cof
       let (r, used) := normalForm basis fuel s (List.replicate bi.cof.length 0)
@@ -216,7 +233,7 @@ def buchberger : ℕ → Array (BasisElem V F) → List (ℕ × ℕ × ℕ) → 
 
 /-- The initial basis: the original generators, made monic, each carrying its unit cofactor
 vector (scaled by the same normalization). -/
-def initialBasis (generators : List (CMvPolynomial V F)) : Array (BasisElem V F) :=
+def initialBasis (generators : List (COrdMvPolynomial V F)) : Array (BasisElem V F) :=
   let n := generators.length
   (generators.zipIdx.filterMap fun gi =>
     monicize gi.1 ((List.range n).map fun i => if i = gi.2 then 1 else 0)).toArray
@@ -225,14 +242,14 @@ def initialBasis (generators : List (CMvPolynomial V F)) : Array (BasisElem V F)
 then try to reduce `target ^ k` to zero for `k = 1, …, maxPow`, composing the tracked
 cofactors into a certificate over the original generators. -/
 def findCertificate (prob : IdealMembershipProblem V F) (fuel maxPow : ℕ) :
-    Option (ℕ × List (CMvPolynomial V F)) :=
+    Option (ℕ × List (COrdMvPolynomial V F)) :=
   let basis₀ := initialBasis prob.generators
   let pairs := (List.range basis₀.size).flatMap fun j =>
     match basis₀[j]? with
     | none => []
     | some bj => newPairs (basis₀.take j) bj j
   let basis := buchberger fuel basis₀ pairs
-  let zeros : List (CMvPolynomial V F) := List.replicate prob.generators.length 0
+  let zeros : List (COrdMvPolynomial V F) := List.replicate prob.generators.length 0
   (List.range maxPow).findSome? fun k =>
     let (r, cof) := normalForm basis fuel (prob.target ^ (k + 1)) zeros
     if (leadingMonomial r).isNone then some (k + 1, cof) else none
@@ -271,7 +288,7 @@ variable {F : Type} [Field F] [BEq F] [LawfulBEq F]
 scheme's soundness problem, then (modulo the generic `ChecksImplyGenerators` bridge) the target
 polynomial vanishes for every instance, statement and verifying AGM prover. -/
 theorem evalSums_target_eq_zero_of_decideMembership (𝓢 : SymbolicAGMScheme F)
-    (target : CMvPolynomial (SumVar 𝓢) F) (fuel maxPow : ℕ)
+    (target : COrdMvPolynomial (SumVar 𝓢) F) (fuel maxPow : ℕ)
     (hdecide : (𝓢.soundnessProblem target).decideMembership fuel maxPow = true)
     (hbridge : 𝓢.ChecksImplyGenerators)
     (inst : 𝓢.Instantiation)

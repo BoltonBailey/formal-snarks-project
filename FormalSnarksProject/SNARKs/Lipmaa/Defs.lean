@@ -6,6 +6,7 @@ import FormalSnarksProject.ToMathlib.FinEnumToList
 import Mathlib.Algebra.MvPolynomial.Equiv
 import FormalSnarksProject.SoundnessTactic.SoundnessProver
 import FormalSnarksProject.SoundnessTactic.ProofMode
+import FormalSnarksProject.ToMathlib.FinEnumOrd
 
 
 open scoped BigOperators
@@ -13,7 +14,7 @@ open scoped BigOperators
 section Lipmaa
 
 open Option AGMProofSystemInstantiation
-open CPoly CPoly.CMvPolynomial
+open CPoly CPoly.COrdMvPolynomial
 open CompPoly
 
 namespace Lipmaa
@@ -23,6 +24,10 @@ inductive Vars : Type where
 deriving Repr, BEq, DecidableEq
 
 instance : FinEnum Vars := .ofList [.y] (fun x => by cases x <;> simp)
+
+instance : Ord Vars := FinEnum.toOrd
+instance : Std.TransOrd Vars := FinEnum.toOrd.transOrd
+instance : Std.LawfulEqOrd Vars := FinEnum.toOrd.lawfulEqOrd
 
 local notation "Vars_y" => some Vars.y
 local notation "Vars_x" => none
@@ -179,17 +184,17 @@ TODO
       | SRS_Elements_G1_Idx.x_pow i => (X Vars_y ^ 5) * (X Vars_y ^ 1) * X Vars_x ^ (i : ℕ)
       | SRS_Elements_G1_Idx.x_pow_times_t i => (X Vars_y ^ 5)
                                                   * X Vars_x ^ (i : ℕ)
-                                                  * to_CMvPolynomial_Option Vars t
-      | SRS_Elements_G1_Idx.y i => (((X Vars_y ^ 25) * (X Vars_y ^ 1)) * ( (to_CMvPolynomial_Option Vars (u_stmt i))))
+                                                  * to_COrdMvPolynomial_Option Vars t
+      | SRS_Elements_G1_Idx.y i => (((X Vars_y ^ 25) * (X Vars_y ^ 1)) * ( (to_COrdMvPolynomial_Option Vars (u_stmt i))))
                                       +
-                                      ((X Vars_y ^ 75) * (X Vars_y ^ 1)) * (to_CMvPolynomial_Option Vars (v_stmt i))
+                                      ((X Vars_y ^ 75) * (X Vars_y ^ 1)) * (to_COrdMvPolynomial_Option Vars (v_stmt i))
                                       +
-                                      (X Vars_y ^ 1) * (to_CMvPolynomial_Option Vars (w_stmt i))
-      | SRS_Elements_G1_Idx.q i => ((X Vars_y ^ 25) * (X Vars_y ^ 5)) * ( to_CMvPolynomial_Option Vars (u_wit i))
+                                      (X Vars_y ^ 1) * (to_COrdMvPolynomial_Option Vars (w_stmt i))
+      | SRS_Elements_G1_Idx.q i => ((X Vars_y ^ 25) * (X Vars_y ^ 5)) * ( to_COrdMvPolynomial_Option Vars (u_wit i))
                                       +
-                                      ((X Vars_y ^ 75) * (X Vars_y ^ 5)) * (to_CMvPolynomial_Option Vars (v_wit i))
+                                      ((X Vars_y ^ 75) * (X Vars_y ^ 5)) * (to_COrdMvPolynomial_Option Vars (v_wit i))
                                       +
-                                      (X Vars_y ^ 5) * to_CMvPolynomial_Option Vars (w_wit i)
+                                      (X Vars_y ^ 5) * to_COrdMvPolynomial_Option Vars (w_wit i)
       -- Note that the polynomials here have been multiplied through by γδ
     SRSElementValue_G2 := fun SRS_idx => match SRS_idx with
       | SRS_Elements_G2_Idx.β => (X Vars_y ^ 5) * (X Vars_y ^ 1) * (X Vars_y ^ 25)

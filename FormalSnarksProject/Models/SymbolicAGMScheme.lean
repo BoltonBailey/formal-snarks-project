@@ -1,9 +1,10 @@
 import FormalSnarksProject.Models.StraightforwardAGMProofSystem
 import FormalSnarksProject.ToMathlib.OptionEquivRight
-import FormalSnarksProject.ToMathlib.CMvPolynomialRepr
+import FormalSnarksProject.ToMathlib.COrdMvPolynomialRepr
+import FormalSnarksProject.ToMathlib.FinEnumOrd
 
 open CPoly
-open CPoly.CMvPolynomial
+open CPoly.COrdMvPolynomial
 
 /-!
 # Symbolic straightforward AGM schemes
@@ -38,7 +39,7 @@ each proof element by `(c, f)` produces exactly the `sum_foo_bar` variables.
 * `SymbolicAGMScheme` — the scheme datatype. SRS elements are split into *singles* (one element,
   fully known toxic-waste value, e.g. `[α]₁ = γδα`) and *components* (`Fin`-indexed at
   instantiation time, symbolic value `SRSComponentValue : Components → PolyFams →
-  CMvPolynomial Vars F`). Index-size compatibility between components and families is tracked by
+  COrdMvPolynomial Vars F`). Index-size compatibility between components and families is tracked by
   a type `IdxClass` of named size classes (statement size, witness size, …); the statement is a
   vector indexed by the distinguished `stmtClass`.
 * `SumVar` — the abstract `sum_foo_bar` variables.
@@ -72,6 +73,9 @@ structure SymbolicAGMScheme (F : Type) [Field F] [BEq F] [LawfulBEq F] where
   polynomial families live) is the extra `none` of `Option Vars` at instantiation time. -/
   Vars : Type
   [Vars_FinEnum : FinEnum Vars]
+  [Vars_Ord : Ord Vars]
+  [Vars_TransOrd : Std.TransOrd Vars]
+  [Vars_LawfulEqOrd : Std.LawfulEqOrd Vars]
   /-- Named size classes for the `Fin`-indexed data (statement size, witness size, number of
   gates, …). Instantiation assigns each class a length. -/
   IdxClass : Type
@@ -92,8 +96,8 @@ structure SymbolicAGMScheme (F : Type) [Field F] [BEq F] [LawfulBEq F] where
   SRSSingles_G2 : Type
   [SRSSingles_G2_FinEnum : FinEnum SRSSingles_G2]
   /-- The value of a singleton SRS element: a known polynomial in the toxic-waste samples. -/
-  SRSSingleValue_G1 : SRSSingles_G1 → CMvPolynomial Vars F
-  SRSSingleValue_G2 : SRSSingles_G2 → CMvPolynomial Vars F
+  SRSSingleValue_G1 : SRSSingles_G1 → COrdMvPolynomial Vars F
+  SRSSingleValue_G2 : SRSSingles_G2 → COrdMvPolynomial Vars F
 
   /-- `Fin`-indexed SRS components in `G1` (e.g. the `[uᵢ(x)β + vᵢ(x)α + wᵢ(x)]₁` column). -/
   SRSComponents_G1 : Type
@@ -106,8 +110,8 @@ structure SymbolicAGMScheme (F : Type) [Field F] [BEq F] [LawfulBEq F] where
   /-- The symbolic value of a component: the `i`th element of component `c` is
   `∑ f, (SRSComponentValue_G1 c f) · (f i)`. Entries for families whose size class differs from
   the component's are ignored at instantiation (keep them `0`). -/
-  SRSComponentValue_G1 : SRSComponents_G1 → PolyFams → CMvPolynomial Vars F
-  SRSComponentValue_G2 : SRSComponents_G2 → PolyFams → CMvPolynomial Vars F
+  SRSComponentValue_G1 : SRSComponents_G1 → PolyFams → COrdMvPolynomial Vars F
+  SRSComponentValue_G2 : SRSComponents_G2 → PolyFams → COrdMvPolynomial Vars F
 
   /-- A type indexing proof elements in each group. -/
   Proof_G1 : Type
@@ -138,6 +142,9 @@ namespace SymbolicAGMScheme
 
 attribute [instance]
   SymbolicAGMScheme.Vars_FinEnum
+  SymbolicAGMScheme.Vars_Ord
+  SymbolicAGMScheme.Vars_TransOrd
+  SymbolicAGMScheme.Vars_LawfulEqOrd
   SymbolicAGMScheme.IdxClass_DecEq
   SymbolicAGMScheme.PolyFams_FinEnum
   SymbolicAGMScheme.SRSSingles_G1_FinEnum
@@ -241,17 +248,34 @@ abbrev SymVars (𝓢 : SymbolicAGMScheme F) : Type := 𝓢.Vars ⊕ SumVar 𝓢
 instance instFinEnumSymVars (𝓢 : SymbolicAGMScheme F) : FinEnum 𝓢.SymVars :=
   inferInstanceAs (FinEnum (𝓢.Vars ⊕ SumVar 𝓢))
 
+/-! The computable polynomials over `SumVar`/`SymVars` need a lawful ordering on the variable
+type. Core provides no `Ord` for sum types, so pull one back from the `FinEnum` enumeration.
+Keyed at `SumVar` and at `SymVars` (which unfolds to the sum), these are the unique `Ord`
+instances on the symbolic variable types. -/
+
+instance instOrdSumVar (𝓢 : SymbolicAGMScheme F) : Ord (SumVar 𝓢) := FinEnum.toOrd
+instance instTransOrdSumVar (𝓢 : SymbolicAGMScheme F) : Std.TransOrd (SumVar 𝓢) :=
+  FinEnum.toOrd.transOrd
+instance instLawfulEqOrdSumVar (𝓢 : SymbolicAGMScheme F) : Std.LawfulEqOrd (SumVar 𝓢) :=
+  FinEnum.toOrd.lawfulEqOrd
+
+instance instOrdSymVars (𝓢 : SymbolicAGMScheme F) : Ord 𝓢.SymVars := FinEnum.toOrd
+instance instTransOrdSymVars (𝓢 : SymbolicAGMScheme F) : Std.TransOrd 𝓢.SymVars :=
+  FinEnum.toOrd.transOrd
+instance instLawfulEqOrdSymVars (𝓢 : SymbolicAGMScheme F) : Std.LawfulEqOrd 𝓢.SymVars :=
+  FinEnum.toOrd.lawfulEqOrd
+
 /-! ### The symbolic check polynomial and the soundness generators -/
 
 variable (𝓢 : SymbolicAGMScheme F)
 
 /-- Embed a toxic-waste polynomial into the symbolic ring. -/
-def symEmbed (p : CMvPolynomial 𝓢.Vars F) : CMvPolynomial 𝓢.SymVars F :=
+def symEmbed (p : COrdMvPolynomial 𝓢.Vars F) : COrdMvPolynomial 𝓢.SymVars F :=
   rename Sum.inl p
 
 /-- The symbolic expansion of a `G1` proof element: the AGM linear combination over the SRS,
 grouped by (component, family) so that each group is a single sum variable. -/
-def symProof_G1 (p : 𝓢.Proof_G1) : CMvPolynomial 𝓢.SymVars F :=
+def symProof_G1 (p : 𝓢.Proof_G1) : COrdMvPolynomial 𝓢.SymVars F :=
   ((FinEnum.toList 𝓢.SRSSingles_G1).map fun s =>
       X (Sum.inr (SumVar.single_G1 p s)) * 𝓢.symEmbed (𝓢.SRSSingleValue_G1 s)).sum
     + ((FinEnum.toList 𝓢.SRSComponents_G1).map fun c =>
@@ -261,7 +285,7 @@ def symProof_G1 (p : 𝓢.Proof_G1) : CMvPolynomial 𝓢.SymVars F :=
           else 0).sum).sum
 
 /-- The symbolic expansion of a `G2` proof element. -/
-def symProof_G2 (p : 𝓢.Proof_G2) : CMvPolynomial 𝓢.SymVars F :=
+def symProof_G2 (p : 𝓢.Proof_G2) : COrdMvPolynomial 𝓢.SymVars F :=
   ((FinEnum.toList 𝓢.SRSSingles_G2).map fun s =>
       X (Sum.inr (SumVar.single_G2 p s)) * 𝓢.symEmbed (𝓢.SRSSingleValue_G2 s)).sum
     + ((FinEnum.toList 𝓢.SRSComponents_G2).map fun c =>
@@ -274,7 +298,7 @@ def symProof_G2 (p : 𝓢.Proof_G2) : CMvPolynomial 𝓢.SymVars F :=
 with their constant coefficients, plus the statement-weighted components, grouped by family into
 `stmtSum` variables. -/
 def symVerifierInput_G1 (k : 𝓢.EqualityChecks) (pairing : 𝓢.Pairings k) :
-    CMvPolynomial 𝓢.SymVars F :=
+    COrdMvPolynomial 𝓢.SymVars F :=
   ((FinEnum.toList 𝓢.SRSSingles_G1).map fun s =>
       C (𝓢.verifCoeffSingle_G1 k pairing s) * 𝓢.symEmbed (𝓢.SRSSingleValue_G1 s)).sum
     + ((FinEnum.toList 𝓢.SRSComponents_G1).map fun c =>
@@ -290,7 +314,7 @@ def symVerifierInput_G1 (k : 𝓢.EqualityChecks) (pairing : 𝓢.Pairings k) :
 
 /-- The verifier's (non-proof) `G2` contribution to a pairing input. -/
 def symVerifierInput_G2 (k : 𝓢.EqualityChecks) (pairing : 𝓢.Pairings k) :
-    CMvPolynomial 𝓢.SymVars F :=
+    COrdMvPolynomial 𝓢.SymVars F :=
   ((FinEnum.toList 𝓢.SRSSingles_G2).map fun s =>
       C (𝓢.verifCoeffSingle_G2 k pairing s) * 𝓢.symEmbed (𝓢.SRSSingleValue_G2 s)).sum
     + ((FinEnum.toList 𝓢.SRSComponents_G2).map fun c =>
@@ -306,7 +330,7 @@ def symVerifierInput_G2 (k : 𝓢.EqualityChecks) (pairing : 𝓢.Pairings k) :
 
 /-- The symbolic value of one pairing of one equality check. -/
 def symPairingPoly (k : 𝓢.EqualityChecks) (pairing : 𝓢.Pairings k) :
-    CMvPolynomial 𝓢.SymVars F :=
+    COrdMvPolynomial 𝓢.SymVars F :=
   (((FinEnum.toList 𝓢.Proof_G1).map fun p =>
         C (𝓢.verifCoeffProof_G1 k pairing p) * 𝓢.symProof_G1 p).sum
       + 𝓢.symVerifierInput_G1 k pairing)
@@ -316,16 +340,19 @@ def symPairingPoly (k : 𝓢.EqualityChecks) (pairing : 𝓢.Pairings k) :
 
 /-- The symbolic check polynomial of one equality check: a polynomial over the toxic-waste
 samples and the sum variables whose vanishing (as a polynomial in the samples) is the check. -/
-def symCheckPoly (k : 𝓢.EqualityChecks) : CMvPolynomial 𝓢.SymVars F :=
+def symCheckPoly (k : 𝓢.EqualityChecks) : COrdMvPolynomial 𝓢.SymVars F :=
   ((FinEnum.toList (𝓢.Pairings k)).map fun pairing => 𝓢.symPairingPoly k pairing).sum
 
 /-- Split a monomial over a sum of variable types into its two halves. The computable
-(`CMvMonomial`-level) counterpart of `Finsupp.sumFinsuppAddEquivProdFinsupp`, so that the
+(`COrdMvMonomial`-level) counterpart of `Finsupp.sumFinsuppAddEquivProdFinsupp`, so that the
 generator extraction — and hence the whole abstract soundness problem — is `#eval`-able. -/
-def splitSumMonomial {σ τ : Type} [FinEnum σ] [FinEnum τ] (m : CMvMonomial (σ ⊕ τ)) :
-    CMvMonomial σ × CMvMonomial τ :=
-  (Vector.ofFn fun k => m.degreeOf (Sum.inl (FinEnum.equiv.symm k)),
-    Vector.ofFn fun k => m.degreeOf (Sum.inr (FinEnum.equiv.symm k)))
+def splitSumMonomial {σ τ : Type} [Ord σ] [Std.TransOrd σ] [Ord τ] [Std.TransOrd τ]
+    [Ord (σ ⊕ τ)] (m : COrdMvMonomial (σ ⊕ τ)) :
+    COrdMvMonomial σ × COrdMvMonomial τ :=
+  (COrdMvMonomial.ofList (m.entryList.filterMap fun ve =>
+      match ve with | (Sum.inl v, e) => some (v, e) | (Sum.inr _, _) => none),
+    COrdMvMonomial.ofList (m.entryList.filterMap fun ve =>
+      match ve with | (Sum.inr v, e) => some (v, e) | (Sum.inl _, _) => none))
 
 open AGMProofSystemInstantiation in
 /-- The coefficients of a polynomial over a sum `σ ⊕ τ` of variable types with respect to the
@@ -333,15 +360,17 @@ monomials in the `σ`-variables, each a polynomial in the `τ`-variables. For a 
 polynomial (`σ` the toxic-waste samples, `τ` the abstract sum variables) these are the
 generators of the soundness ideal. Split each monomial into its two halves, then group by the
 `σ`-part (as in `AGMProofSystemInstantiation.verificationGenerators`, but staying at the
-computable `CMvMonomial` level rather than passing through `Finsupp`). Also used directly by the
+computable `COrdMvMonomial` level rather than passing through `Finsupp`). Also used directly by the
 SNARKs that do not fit `SymbolicAGMScheme` (`ToySnark`, `BabySnark`, …), on their hand-built
 symbolic check polynomials. -/
-def coeffGenerators {σ τ : Type} [FinEnum σ] [FinEnum τ]
-    (p : CMvPolynomial (σ ⊕ τ) F) : List (CMvPolynomial τ F) :=
-  let terms : List (CMvMonomial σ × CMvPolynomial τ F) :=
-    (Lawful.monomials p).map fun m =>
+def coeffGenerators {σ τ : Type} [Ord σ] [Std.TransOrd σ] [Std.LawfulEqOrd σ]
+    [Ord τ] [Std.TransOrd τ] [Std.LawfulEqOrd τ]
+    [Ord (σ ⊕ τ)] [Std.TransOrd (σ ⊕ τ)] [Std.LawfulEqOrd (σ ⊕ τ)]
+    (p : COrdMvPolynomial (σ ⊕ τ) F) : List (COrdMvPolynomial τ F) :=
+  let terms : List (COrdMvMonomial σ × COrdMvPolynomial τ F) :=
+    (OrdLawful.monomials p).map fun m =>
       let split := splitSumMonomial m
-      (split.1, CMvPolynomial.monomial split.2 (p.coeff m))
+      (split.1, COrdMvPolynomial.monomial split.2 (p.coeff m))
   (terms.foldl (fun acc t => groupAdd acc t.1 t.2) []).map (·.2)
 
 /-- The generators of the soundness ideal contributed by one equality check: the coefficients of
@@ -349,17 +378,17 @@ the symbolic check polynomial with respect to the toxic-waste monomials, each a 
 sum variables. These are the abstract counterparts of the `h0012`, …, `h1122` equations of the
 manual proofs. -/
 def checkGenerators (k : 𝓢.EqualityChecks) :
-    List (CMvPolynomial (SumVar 𝓢) F) :=
+    List (COrdMvPolynomial (SumVar 𝓢) F) :=
   coeffGenerators (𝓢.symCheckPoly k)
 
 /-- All generators of the soundness ideal, collected over the equality checks. -/
-def soundnessGenerators : List (CMvPolynomial (SumVar 𝓢) F) :=
+def soundnessGenerators : List (COrdMvPolynomial (SumVar 𝓢) F) :=
   (FinEnum.toList 𝓢.EqualityChecks).flatMap 𝓢.checkGenerators
 
 /-- The abstract soundness problem of the scheme: is the designer-supplied `target` (encoding
 relation + extractor over the sum variables) a member of (the radical of) the ideal generated by
 `soundnessGenerators`? This is the closed, circuit-independent object to hand to a solver. -/
-def soundnessProblem (target : CMvPolynomial (SumVar 𝓢) F) :
+def soundnessProblem (target : COrdMvPolynomial (SumVar 𝓢) F) :
     AGMProofSystemInstantiation.IdealMembershipProblem (SumVar 𝓢) F where
   generators := 𝓢.soundnessGenerators
   target := target
@@ -390,7 +419,7 @@ structure Instantiation (𝓢 : SymbolicAGMScheme F) where
       ((FinEnum.toList 𝓢.PolyFams).map fun f =>
         if h : 𝓢.famClass f = 𝓢.compClass_G1 c then
           rename some (𝓢.SRSComponentValue_G1 c f)
-            * to_CMvPolynomial_Option 𝓢.Vars
+            * to_COrdMvPolynomial_Option 𝓢.Vars
                 (inst.famPolys f (Fin.cast (congrArg inst.classLen h).symm i))
         else 0).sum
   SRSElementValue_G2 := fun srs => match srs with
@@ -399,7 +428,7 @@ structure Instantiation (𝓢 : SymbolicAGMScheme F) where
       ((FinEnum.toList 𝓢.PolyFams).map fun f =>
         if h : 𝓢.famClass f = 𝓢.compClass_G2 c then
           rename some (𝓢.SRSComponentValue_G2 c f)
-            * to_CMvPolynomial_Option 𝓢.Vars
+            * to_COrdMvPolynomial_Option 𝓢.Vars
                 (inst.famPolys f (Fin.cast (congrArg inst.classLen h).symm i))
         else 0).sum
   Proof_G1 := 𝓢.Proof_G1
@@ -458,11 +487,11 @@ noncomputable def sumValue (inst : 𝓢.Instantiation)
     else 0
 
 /-- Evaluation of an abstract polynomial over the sum variables at their actual values, as a ring
-homomorphism (through `CPoly.polyRingEquiv` and `MvPolynomial.aeval`). -/
+homomorphism (through `CPoly.COrdMvPolynomial.ordPolyRingEquiv` and `MvPolynomial.aeval`). -/
 noncomputable def evalSumsHom (vals : SumVar 𝓢 → Polynomial F) :
-    CMvPolynomial (SumVar 𝓢) F →+* Polynomial F :=
+    COrdMvPolynomial (SumVar 𝓢) F →+* Polynomial F :=
   (MvPolynomial.aeval (R := F) vals).toRingHom.comp
-    (CPoly.polyRingEquiv (σ := SumVar 𝓢) (R := F)).toRingHom
+    (CPoly.COrdMvPolynomial.ordPolyRingEquiv (σ := SumVar 𝓢) (R := F)).toRingHom
 
 /-! ### The soundness reduction -/
 
@@ -513,7 +542,7 @@ then for every instance, statement and verifying AGM prover the target polynomia
 zero at the actual sum values. The per-SNARK step from this to the relation (e.g. Groth16's
 `modByMonic` argument) remains instance-specific. -/
 theorem evalSums_target_eq_zero
-    (target : CMvPolynomial (SumVar 𝓢) F)
+    (target : COrdMvPolynomial (SumVar 𝓢) F)
     (hbridge : 𝓢.ChecksImplyGenerators)
     (hmem : target ∈ (Ideal.span {g | g ∈ 𝓢.soundnessGenerators}).radical)
     (inst : 𝓢.Instantiation)
