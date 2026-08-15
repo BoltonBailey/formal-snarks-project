@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Bolton Bailey. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Bolton Bailey
+-/
 module
 
 meta import FormalSnarksProject.SNARKs.Groth16TypeIII.Symbolic

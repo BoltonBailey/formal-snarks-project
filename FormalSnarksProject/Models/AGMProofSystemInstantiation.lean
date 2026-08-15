@@ -1,8 +1,20 @@
+/-
+Copyright (c) 2024 Bolton Bailey. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Bolton Bailey
+-/
 module
 
 public import Mathlib
 public import CompPoly.OrdMultivariate.COrdMvPolynomialEvalLemmas
 public import CompPoly.OrdMultivariate.Rename
+
+/-!
+# The Algebraic Group Model
+
+Defines `AGMProofSystemInstantiation`, the model of pairing-based SNARKs in the
+algebraic group model in which the soundness and completeness statements are phrased.
+-/
 
 @[expose] public section
 

@@ -1,8 +1,18 @@
-
+/-
+Copyright (c) 2024 Bolton Bailey. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Bolton Bailey
+-/
 module
 
 public import Mathlib.Algebra.Polynomial.Basic
 import Mathlib.Tactic.ComputeDegree
+
+/-!
+# Polynomial coefficient tactic (draft)
+
+A draft tactic that determines the nonzero coefficients of a polynomial equation.
+-/
 
 public section
 

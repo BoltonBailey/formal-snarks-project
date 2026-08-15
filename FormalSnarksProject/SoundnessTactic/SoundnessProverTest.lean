@@ -1,7 +1,17 @@
-
+/-
+Copyright (c) 2024 Bolton Bailey. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Bolton Bailey
+-/
 module
 
 import FormalSnarksProject.SoundnessTactic.SoundnessProver
+
+/-!
+# Soundness prover tests
+
+Test cases for the `integral_domain_tactic` on small systems of equations.
+-/
 
 section test
 

@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2024 Bolton Bailey. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Bolton Bailey
+-/
 module
 
 public import FormalSnarksProject.Models.AGMProofSystemInstantiation
@@ -41,3 +46,9 @@ public import FormalSnarksProject.ToMathlib.PolynomialDegreeHelpers
 public import FormalSnarksProject.ToMathlib.PolynomialQuotient
 public import FormalSnarksProject.Transformations.Transformations
 public import FormalSnarksProject.ToMathlib.SMTTest
+
+/-!
+# FormalSnarksProject
+
+Root module of the library: imports every module of the project.
+-/

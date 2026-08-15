@@ -1,7 +1,16 @@
+/-
+Copyright (c) 2024 Bolton Bailey. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Bolton Bailey
+-/
 module
 
 public import FormalSnarksProject.SNARKs.Lipmaa.Defs
 import FormalSnarksProject.SoundnessTactic.SoundnessProver  -- `integral_domain_tactic`, used in proofs only
+
+/-!
+# Soundness of the Lipmaa SNARK
+-/
 
 public section
 

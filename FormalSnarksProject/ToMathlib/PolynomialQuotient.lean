@@ -1,7 +1,18 @@
+/-
+Copyright (c) 2024 Bolton Bailey. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Bolton Bailey
+-/
 module
 
 public import Mathlib.RingTheory.Polynomial.Quotient
 public import Mathlib.Algebra.Polynomial.FieldDivision
+
+/-!
+# Polynomial quotient helpers
+
+Auxiliary lemmas about ring homomorphisms applied to sums of polynomials.
+-/
 
 public section
 

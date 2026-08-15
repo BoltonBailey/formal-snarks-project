@@ -1,7 +1,17 @@
-
+/-
+Copyright (c) 2024 Bolton Bailey. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Bolton Bailey
+-/
 module
 
 public import Lean.Meta.Tactic.Simp
+
+/-!
+# Soundness tactic attributes
+
+Declares the `integral_domain_simp` simp-set attribute used by the soundness tactic.
+-/
 
 public section
 

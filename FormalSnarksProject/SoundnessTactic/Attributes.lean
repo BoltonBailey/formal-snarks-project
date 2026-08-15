@@ -1,9 +1,20 @@
-
+/-
+Copyright (c) 2021 Bolton Bailey. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Bolton Bailey
+-/
 module
 
 public import Mathlib.Algebra.MvPolynomial.Basic
 public import Mathlib.Algebra.Polynomial.Eval
 public import FormalSnarksProject.SoundnessTactic.DeclareAttributes
+
+/-!
+# Legacy attribute lemmas
+
+Mostly commented-out legacy lemmas and attribute declarations from the Lean 3 version
+of the soundness tactic.
+-/
 
 public section
 -- import .general_lemmas.mv_X_mul

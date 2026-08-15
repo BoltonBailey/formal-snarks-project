@@ -1,9 +1,20 @@
-
+/-
+Copyright (c) 2024 Bolton Bailey. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Bolton Bailey
+-/
 module
 
 public import Lean.Elab.Tactic
 public import Mathlib
 public import FormalSnarksProject.SoundnessTactic.CasesOr
+
+/-!
+# Soundness prover
+
+Simp lemmas and the `integral_domain_tactic` used to discharge the case analyses in
+SNARK soundness proofs.
+-/
 
 public section
 

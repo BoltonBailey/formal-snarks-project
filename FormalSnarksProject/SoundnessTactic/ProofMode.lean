@@ -1,6 +1,18 @@
+/-
+Copyright (c) 2024 Bolton Bailey. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Bolton Bailey
+-/
 module
 
 public meta import Lean
+
+/-!
+# Proof mode
+
+A proof-state management tactic (due to Mario Carneiro) for fast recompilation of
+long soundness proofs.
+-/
 
 public meta section
 open Lean

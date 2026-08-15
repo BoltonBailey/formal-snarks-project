@@ -1,8 +1,20 @@
+/-
+Copyright (c) 2024 Bolton Bailey. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Bolton Bailey
+-/
 module
 
 public import Mathlib
 public import CompPoly.OrdMultivariate.COrdMvPolynomialEvalLemmas
 public import CompPoly.OrdMultivariate.Rename
+
+/-!
+# The Algebraic Group Model, Type I
+
+Defines `AGMProofSystemInstantiationTypeI`, a variant of `AGMProofSystemInstantiation`
+for Type I (symmetric) pairings.
+-/
 
 @[expose] public section
 

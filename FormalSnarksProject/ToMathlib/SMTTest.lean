@@ -1,7 +1,18 @@
+/-
+Copyright (c) 2026 Bolton Bailey. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Bolton Bailey
+-/
 module
 
 public import Mathlib
 public import Smt
+
+/-!
+# SMT tactic test
+
+Smoke tests for the `smt` tactic from the lean-smt library.
+-/
 
 public section
 
@@ -12,8 +23,8 @@ example [Nonempty U] {f : U → U → U} {a b c d : U}
   (h4 : (¬ p3) ∨ (¬ (f a c = f b d))) : False := by
   smt [h0, h1, h2, h3, h4]
 
-lemma foo [Field F] (a b x y z : F)
-    (h1 : a * x = 0) (h2 : a * y + b * x = z) (_h4 : b * y = 0) : (b * x - z) * (a * y - z) = 0 := by
+lemma foo [Field F] (a b x y z : F) (h1 : a * x = 0) (h2 : a * y + b * x = z)
+    (_h4 : b * y = 0) : (b * x - z) * (a * y - z) = 0 := by
   -- smt (showQuery := true) [h1, h2, h4]
   -- smt [h1, h2, h4]
   grobner
